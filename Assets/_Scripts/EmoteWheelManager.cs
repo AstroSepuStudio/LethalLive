@@ -299,7 +299,7 @@ public class EmoteWheelManager : NetworkBehaviour
         }
     }
 
-    void LocalCancelEmote()
+    public void LocalCancelEmote()
     {
         if (currentLoopEmote == null) return;
 

@@ -22,6 +22,7 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float movSpeed = 5f;
     [SerializeField] float rotationSpeed = 10f;
     [SerializeField] float animTransitionSpeed = 1f;
+    [SerializeField] float speedMultiplier = 1f;
 
     [Header("Crouching")]
     [SerializeField] float crouchHeight = 1f;
@@ -55,7 +56,7 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] bool _isGrounded;
     [SerializeField] bool _tryJump;
     [SerializeField] bool _isSprinting = false;
-    [SerializeField] bool _isCrouching = false;
+    public bool IsCrouching { get; private set; } = false;
     [SerializeField] bool _wantsToCrouch = false;
     [SerializeField] bool _wantsToSprint = false;
     [SerializeField] bool _wantsToUncrouch = false;
@@ -149,7 +150,7 @@ public class PlayerMovement : NetworkBehaviour
     [Command]
     void CmdStartSprint()
     {
-        if (_isCrouching)
+        if (IsCrouching)
         {                
             if (IsSomethingAbove())
             {
@@ -170,7 +171,7 @@ public class PlayerMovement : NetworkBehaviour
     [Command]
     void CmdStopSprint()
     {
-        if (_isCrouching && IsSomethingAbove())
+        if (IsCrouching && IsSomethingAbove())
         {
             _wantsToSprint = false;
             return;
@@ -238,7 +239,7 @@ public class PlayerMovement : NetworkBehaviour
 
     void StartCrouch()
     {
-        _isCrouching = true;
+        IsCrouching = true;
         pData.Character_Controller.height = crouchHeight;
         pData.Character_Controller.center = crouchCenter;
         pData.CameraTarget.localPosition = new Vector3(0, crouchHeight - 0.1f, 0);
@@ -246,7 +247,7 @@ public class PlayerMovement : NetworkBehaviour
 
     void StopCrouch()
     {
-        _isCrouching = false;
+        IsCrouching = false;
         pData.Character_Controller.height = normalHeight;
         pData.Character_Controller.center = normalCenter;
         pData.CameraTarget.localPosition = new Vector3(0, normalHeight - 0.1f, 0);
@@ -256,6 +257,7 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!isServer) return;
+        if (pData.Ragdoll_Manager.IsKnocked) return;
 
         UpdateMoveSpeed();
 
@@ -301,20 +303,21 @@ public class PlayerMovement : NetworkBehaviour
         camRight.Normalize();
 
         Vector3 move = (camForward * movementInput.y + camRight * movementInput.x).normalized;
-        if (!Mathf.Approximately(move.magnitude, 0))
+        if (!Mathf.Approximately(move.magnitude, 0) && !pData._IsPlayerAimLocked)
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             pData.EmoteManager.PlayerMoves();
         }
-        move *= movSpeed;
+        float multiplier = speedMultiplier < 0 ? 0 : speedMultiplier;
+        move *= movSpeed * multiplier * (pData.Player_Stats.speed / 100f);
 
         velocity.x = move.x;
         velocity.z = move.z;
         pData.Character_Controller.Move(velocity * Time.deltaTime);
 
         float speed = new Vector2(velocity.x, velocity.z).magnitude;
-        if (_isCrouching)
+        if (IsCrouching)
         {
             standCrouchBlend = Mathf.MoveTowards(pData.CharacterAnimator.GetFloat("StandCrouch"), 1, Time.deltaTime * animTransitionSpeed);
             float targetBlend = Mathf.Approximately(speed, 0f) ? 0f : speed;
@@ -330,7 +333,7 @@ public class PlayerMovement : NetworkBehaviour
 
     void UpdateMoveSpeed()
     {
-        if (_isCrouching)
+        if (IsCrouching)
             movSpeed = crouchSpeed;
         else if (_isSprinting)
             movSpeed = sprintSpeed;
@@ -338,12 +341,17 @@ public class PlayerMovement : NetworkBehaviour
             movSpeed = walkSpeed;
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
 
         Gizmos.DrawWireSphere(feet.transform.position, groundRadius);
         Gizmos.DrawWireSphere(pData.Head.transform.position, groundRadius);
         Gizmos.DrawLine(feet.position + Vector3.down * groundRadius, feet.position + Vector3.down * groundRadius + Vector3.down * raycastLenght);
+    }
+
+    public void ChangeSpeedMultiplier(float delta)
+    {
+        speedMultiplier += delta;
     }
 }

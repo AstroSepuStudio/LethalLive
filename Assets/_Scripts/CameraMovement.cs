@@ -1,4 +1,6 @@
 using Mirror;
+using System;
+using System.Collections;
 using UnityEngine;
 
 public class CameraMovement : NetworkBehaviour
@@ -68,12 +70,13 @@ public class CameraMovement : NetworkBehaviour
         Quaternion targetRotation = Quaternion.Euler(vertical, horizontal, 0f);
         pData.CameraPivot.rotation = targetRotation;
 
-        Vector3 dir = (pData.PlayerCamera.transform.position - pData.CameraPivot.position).normalized;
-        pData.PlayerCamera.transform.position = pData.CameraPivot.position + dir * distanceToTarget;
+        //Vector3 dir = (pData.PlayerCamera.transform.position - pData.CameraPivot.position).normalized;
+        Vector3 back = -pData.CameraPivot.forward;
+        pData.PlayerCamera.transform.position = pData.CameraPivot.position + back * distanceToTarget;
         
-        if (Physics.Linecast(pData.CameraPivot.position, pData.PlayerCamera.transform.position + dir * 0.12f, out RaycastHit hit, pData.IgnorePlayer))
+        if (Physics.Linecast(pData.CameraPivot.position, pData.PlayerCamera.transform.position + back * 0.12f, out RaycastHit hit, pData.IgnorePlayer))
         {
-            Vector3 safePos = pData.CameraPivot.position + dir * (hit.distance - 0.12f);
+            Vector3 safePos = pData.CameraPivot.position + back * (hit.distance - 0.12f);
             pData.PlayerCamera.transform.position = safePos;
         }
 
@@ -83,11 +86,17 @@ public class CameraMovement : NetworkBehaviour
         {
             float blend = Mathf.MoveTowards(pData.ModelMaterial.GetFloat("_Tweak_transparency"), -1, Time.deltaTime * 6f);
             pData.ModelMaterial.SetFloat("_Tweak_transparency", blend);
+
+            if (Mathf.Approximately(blend, -1))
+            {
+                pData.ModelRenderer.enabled = false;
+            }
         }
         else
         {
             float blend = Mathf.MoveTowards(pData.ModelMaterial.GetFloat("_Tweak_transparency"), 0, Time.deltaTime * 6f);
             pData.ModelMaterial.SetFloat("_Tweak_transparency", blend);
+            pData.ModelRenderer.enabled = true;
         }
 
         CmdSetCameraData(horizontal, vertical, distanceToTarget);
@@ -124,5 +133,41 @@ public class CameraMovement : NetworkBehaviour
     public void ResumeCamera()
     {
         _stop = false;
+    }
+
+    public void ForcePlayerToAim()
+    {
+        StartCoroutine(SmoothAimRotation());
+    }
+
+    private IEnumerator SmoothAimRotation()
+    {
+        Vector3 camForward = pData.CameraPivot.forward;
+        camForward.y = 0f;
+        camForward.Normalize();
+
+        Vector3 startForward = pData.transform.forward;
+        Quaternion startRotation = Quaternion.LookRotation(startForward);
+        Quaternion targetRotation = Quaternion.LookRotation(camForward);
+
+        pData._IsPlayerAimLocked = true;
+
+        float duration = 0.1f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            pData.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            yield return null;
+        }
+
+        pData.transform.rotation = targetRotation;
+    }
+
+    public void StopForcePlayerToAim()
+    {
+        pData._IsPlayerAimLocked = false;
     }
 }
