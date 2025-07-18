@@ -1,11 +1,14 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class RiggingManager : MonoBehaviour
 {
-    [SerializeField] PlayerData pData;
+    [SerializeField] SkinData skinData;
     [SerializeField] float maxAngle = 80;
     [SerializeField] float transitionSpeed = 5f;
+    [SerializeField] Rig FollowCameraTargetRig;
+    [SerializeField] Rig FollowCameraRig;
 
     Coroutine camRigTransition;
     Coroutine camTargetRigTransition;
@@ -22,8 +25,10 @@ public class RiggingManager : MonoBehaviour
 
     void OnTick()
     {
-        bool isCameraInFront = IsInFront(pData.PlayerCamera.transform);
-        bool isCameraTargetInFront = IsInFront(pData.LookCameraTarget);
+        if (skinData.pData.Skin_Data != skinData) return;
+
+        bool isCameraInFront = IsInFront(skinData.pData.PlayerCamera.transform);
+        bool isCameraTargetInFront = IsInFront(skinData.pData.LookCameraTarget);
 
         if (isCameraInFront)
         {
@@ -62,25 +67,25 @@ public class RiggingManager : MonoBehaviour
 
     IEnumerator CamTransition(float targetWeight)
     {
-        while (!Mathf.Approximately(pData.FollowCameraRig.weight, targetWeight))
+        while (!Mathf.Approximately(FollowCameraRig.weight, targetWeight))
         {
-            pData.FollowCameraRig.weight = Mathf.MoveTowards(pData.FollowCameraRig.weight, targetWeight, Time.deltaTime * transitionSpeed);
+            FollowCameraRig.weight = Mathf.MoveTowards(FollowCameraRig.weight, targetWeight, Time.deltaTime * transitionSpeed);
             yield return null;
         }
 
-        pData.FollowCameraRig.weight = targetWeight;
+        FollowCameraRig.weight = targetWeight;
         camRigTransition = null;
     }
 
     IEnumerator CamTargetTransition(float targetWeight)
     {
-        while (!Mathf.Approximately(pData.FollowCameraTargetRig.weight, targetWeight))
+        while (!Mathf.Approximately(FollowCameraTargetRig.weight, targetWeight))
         {
-            pData.FollowCameraTargetRig.weight = Mathf.MoveTowards(pData.FollowCameraTargetRig.weight, targetWeight, Time.deltaTime * transitionSpeed);
+            FollowCameraTargetRig.weight = Mathf.MoveTowards(FollowCameraTargetRig.weight, targetWeight, Time.deltaTime * transitionSpeed);
             yield return null;
         }
 
-        pData.FollowCameraTargetRig.weight = targetWeight;
+        FollowCameraTargetRig.weight = targetWeight;
         camTargetRigTransition = null;
     }
 }

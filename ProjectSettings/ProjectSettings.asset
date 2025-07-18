@@ -908,7 +908,13 @@ PlayerSettings:
   XboxOneOverrideIdentityName: 
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
-  cloudServicesEnabled: {}
+  cloudServicesEnabled:
+    Build: 0
+    Game Performance: 0
+    Legacy Analytics: 0
+    Purchasing: 0
+    UDP: 0
+    Unity Ads: 0
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 
@@ -930,10 +936,10 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 45dfa61d-cf1a-4cc0-ba1e-b86e0b2440b8
+  cloudProjectId: 8df6097d-4f74-4714-ad3b-889c77b35d9d
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Lethal Live
+  projectName: LethalLive
   organizationId: unity_27a7236466863a499605
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0

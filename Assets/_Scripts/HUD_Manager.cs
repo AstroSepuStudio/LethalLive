@@ -1,9 +1,12 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HUD_Manager : MonoBehaviour
 {
+    public static List<GameObject> OpenWindows = new();
+
     [SerializeField] PlayerData pData;
 
     [SerializeField] TextMeshProUGUI healthValueTxt;
@@ -14,6 +17,11 @@ public class HUD_Manager : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI knockValueTxt;
     [SerializeField] Image knockMeter;
+
+    private void Awake()
+    {
+        OpenWindows.Clear();
+    }
 
     public void UpdateHUD()
     {

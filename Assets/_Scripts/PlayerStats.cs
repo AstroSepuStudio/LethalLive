@@ -62,9 +62,9 @@ public class PlayerStats : NetworkBehaviour
         {
             currentKnock = Mathf.Clamp(currentKnock - Time.deltaTime * knockRecoveryRate, 0, maxKnock);
 
-            if (currentKnock <= ragdollRecoveryValue && pData.Ragdoll_Manager.IsKnocked)
+            if (currentKnock <= ragdollRecoveryValue && pData.Skin_Data.Ragdoll_Manager.IsKnocked)
             {
-                pData.Ragdoll_Manager.DisableRagdoll();
+                pData.Skin_Data.Ragdoll_Manager.DisableRagdoll();
             }
         }
     }
@@ -114,14 +114,17 @@ public class PlayerStats : NetworkBehaviour
     #region Knock
 
     [Server]
-    public void ModifyKnock(float amount)
+    public void ModifyKnock(float amount, Vector3 momentum)
     {
         knockRecoveryTimer = 0;
         currentKnock = Mathf.Clamp(currentKnock + amount, 0f, maxKnock);
         if (currentKnock >= maxKnock)
         {
-            OnKnocked();
+            OnKnocked(momentum);
+            return;
         }
+
+        pData.Player_Movement.AddMomentum(momentum);
     }
 
     void OnKnockChanged(float oldVal, float newVal)
@@ -130,10 +133,10 @@ public class PlayerStats : NetworkBehaviour
     }
 
     [Server]
-    void OnKnocked()
+    void OnKnocked(Vector3 momentum)
     {
         Debug.Log($"{gameObject.name} was knocked!");
-        pData.Ragdoll_Manager.EnableRagdoll();
+        pData.Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
     }
 
     #endregion

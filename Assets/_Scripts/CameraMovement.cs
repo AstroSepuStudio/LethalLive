@@ -1,12 +1,13 @@
-using Mirror;
-using System;
 using System.Collections;
 using UnityEngine;
 
-public class CameraMovement : NetworkBehaviour
+public class CameraMovement : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] PlayerData pData;
+    [SerializeField] Transform lookTarget;
+    [SerializeField] Camera pCamera;
+    [SerializeField] AudioListener audioListener;
 
     [Header("Settings")]
     [SerializeField] float sensitivity = 9f;
@@ -23,21 +24,11 @@ public class CameraMovement : NetworkBehaviour
     float vertical;
     bool _stop;
 
-    public struct CameraData
-    {
-        public float horiz;
-        public float vert;
-        public float distance;
-    }
-
-    [SyncVar(hook = nameof(OnCameraDataChanged))]
-    CameraData syncedCameraData;
-
     private void Start()
     {
         pData.CameraPivot.SetParent(null);
 
-        if (!isLocalPlayer)
+        if (!pData.isLocalPlayer)
         {
             pData.PlayerAudio.enabled = false;
             pData.PlayerCamera.enabled = false;
@@ -54,7 +45,7 @@ public class CameraMovement : NetworkBehaviour
             ref velocity,
             smoothTime);
 
-        if (!isLocalPlayer || _stop) return;
+        if (!pData.isLocalPlayer || _stop) return;
 
         float scrollInput = pData.Player_Input.actions["Zoom"].ReadValue<float>();
         distanceToTarget = Mathf.Clamp(distanceToTarget - scrollInput * zoomSensitivity * Time.deltaTime, minZoom, maxZoom);
@@ -84,45 +75,25 @@ public class CameraMovement : NetworkBehaviour
             Vector3.Distance(pData.PlayerCamera.transform.position, pData.Head.position) <= 0.5f ||
             Vector3.Distance(pData.PlayerCamera.transform.position, pData.transform.position) <= 0.5f)
         {
-            float blend = Mathf.MoveTowards(pData.ModelMaterial.GetFloat("_Tweak_transparency"), -1, Time.deltaTime * 6f);
-            pData.ModelMaterial.SetFloat("_Tweak_transparency", blend);
+            float blend = Mathf.MoveTowards(pData.Skin_Data.SkinMaterial.GetFloat("_Tweak_transparency"), -1, Time.deltaTime * 6f);
+            pData.Skin_Data.SkinMaterial.SetFloat("_Tweak_transparency", blend);
 
             if (Mathf.Approximately(blend, -1))
             {
-                pData.ModelRenderer.enabled = false;
+                pData.Skin_Data.SkinRenderer.enabled = false;
             }
         }
         else
         {
-            float blend = Mathf.MoveTowards(pData.ModelMaterial.GetFloat("_Tweak_transparency"), 0, Time.deltaTime * 6f);
-            pData.ModelMaterial.SetFloat("_Tweak_transparency", blend);
-            pData.ModelRenderer.enabled = true;
+            if (pData.Skin_Data.SkinMaterial != null)
+            {
+                float blend = Mathf.MoveTowards(pData.Skin_Data.SkinMaterial.GetFloat("_Tweak_transparency"), 0, Time.deltaTime * 6f);
+                pData.Skin_Data.SkinMaterial.SetFloat("_Tweak_transparency", blend);
+                pData.Skin_Data.SkinRenderer.enabled = true;
+            }
         }
 
-        CmdSetCameraData(horizontal, vertical, distanceToTarget);
-    }
-
-    [Command]
-    void CmdSetCameraData(float h, float v, float dist)
-    {
-        syncedCameraData = new CameraData { horiz = h, vert = v, distance = dist };
-    }
-
-    void OnCameraDataChanged(CameraData oldData, CameraData newData)
-    {
-        if (isLocalPlayer) return;
-
-        Quaternion targetRotation = Quaternion.Euler(newData.vert, newData.horiz, 0f);
-        pData.CameraPivot.rotation = targetRotation;
-
-        Vector3 dir = (pData.PlayerCamera.transform.position - pData.CameraPivot.position).normalized;
-        pData.PlayerCamera.transform.position = pData.CameraPivot.position + dir * newData.distance;
-
-        if (Physics.Linecast(pData.CameraPivot.position, pData.PlayerCamera.transform.position + dir * 0.5f, out RaycastHit hit, pData.IgnorePlayer))
-        {
-            Vector3 safePos = pData.CameraPivot.position + dir * (hit.distance - 0.5f);
-            pData.PlayerCamera.transform.position = safePos;
-        }
+        pData.CmdSetCameraData(horizontal, vertical, distanceToTarget);
     }
 
     public void PauseCamera()

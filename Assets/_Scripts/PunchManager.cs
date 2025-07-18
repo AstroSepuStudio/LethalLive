@@ -5,15 +5,14 @@ using UnityEngine;
 public class PunchManager : NetworkBehaviour
 {
     [SerializeField] PlayerData pData;
-    [SerializeField] float attackCooldown = 1.0f;
-    [SerializeField] float punchRadius = 1f;
+    [SerializeField] AttackStat punchStats;
 
     private bool isPunching = false;
-    WaitForSeconds cooldown;
+    WaitForSeconds punchCooldown;
 
     private void Start()
     {
-        cooldown = new (attackCooldown);
+        punchCooldown = new (punchStats.AttackCooldown);
     }
 
     public void OnPunchInput()
@@ -33,13 +32,13 @@ public class PunchManager : NetworkBehaviour
     [ClientRpc]
     void RpcPlayAttackAnimation()
     {
-        if (pData.CharacterAnimator != null)
+        if (pData.Skin_Data.CharacterAnimator != null)
         {
             pData.EmoteManager.LocalCancelEmote();
             if (pData.Player_Movement.IsCrouching)
-                pData.CharacterAnimator.SetTrigger("AttackCrouch");
+                pData.Skin_Data.CharacterAnimator.SetTrigger("AttackCrouch");
             else
-                pData.CharacterAnimator.SetTrigger("Attack");
+                pData.Skin_Data.CharacterAnimator.SetTrigger("Attack");
 
             StartCoroutine(PunchCooldown());
         }
@@ -50,7 +49,7 @@ public class PunchManager : NetworkBehaviour
         isPunching = true;
         pData.Camera_Movement.ForcePlayerToAim();
 
-        yield return cooldown;
+        yield return punchCooldown;
 
         isPunching = false;
         pData.Camera_Movement.StopForcePlayerToAim();
@@ -66,24 +65,31 @@ public class PunchManager : NetworkBehaviour
     [Command]
     void CmdTryHit()
     {
-        Collider[] hitPlayers = Physics.OverlapSphere(pData.RightHand.position, punchRadius, pData.PlayerMask);
-
+        Collider[] hitPlayers = Physics.OverlapSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius, pData.PlayerMask);
         foreach (Collider col in hitPlayers)
         {
-            if (col.TryGetComponent(out PlayerStats targetStats) && col.gameObject != gameObject)
+            for (int i = 0; i < GameManager.Instance.Players.Count; i++)
             {
-                targetStats.ModifyKnock(Random.Range(10, 20) * (pData.Player_Stats.strenght / 100f));
-                //Debug.Log($"[SERVER] {pData.PlayerName} hit {col.name}");
+                if (GameManager.Instance.Players[i].gameObject == pData.gameObject) continue;
+                if (GameManager.Instance.Players[i].gameObject != col.gameObject) continue;
+
+                float multiplier = Random.Range(1f, 2f);
+                Vector3 dir = GameManager.Instance.Players[i].transform.position - pData.transform.position;
+
+                float knockAmount = punchStats.AttackKnock * multiplier * (pData.Player_Stats.strenght / 100f);
+                Vector3 momentum = multiplier * punchStats.AttackForce * dir.normalized;
+
+                GameManager.Instance.Players[i].Player_Stats.ModifyKnock(knockAmount, momentum);
             }
         }
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (pData.RightHand != null)
+        if (pData.Skin_Data != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(pData.RightHand.position, punchRadius);
+            Gizmos.DrawWireSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius);
         }
     }
 }

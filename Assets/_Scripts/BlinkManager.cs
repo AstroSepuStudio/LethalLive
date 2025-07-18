@@ -26,7 +26,8 @@ public class BlinkManager : MonoBehaviour
 
         if (timer <= 0)
         {
-            pData.CharacterAnimator.SetTrigger("Blink");
+            if (pData.Skin_Data.CharacterAnimator != null)
+                pData.Skin_Data.CharacterAnimator.SetTrigger("Blink");
             timer = Random.Range(minTime, maxTime);
         }
     }

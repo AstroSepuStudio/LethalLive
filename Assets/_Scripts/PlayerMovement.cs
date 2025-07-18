@@ -23,6 +23,8 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float rotationSpeed = 10f;
     [SerializeField] float animTransitionSpeed = 1f;
     [SerializeField] float speedMultiplier = 1f;
+    [SerializeField] float friction = 3f;
+    Vector3 externalMomentum = Vector3.zero;
 
     [Header("Crouching")]
     [SerializeField] float crouchHeight = 1f;
@@ -85,20 +87,20 @@ public class PlayerMovement : NetworkBehaviour
     #region Synvars
     void OnStandMovBlendChanged(float oldValue, float newValue)
     {
-        if (pData.CharacterAnimator != null)
-            pData.CharacterAnimator.SetFloat("StandMov", newValue);
+        if (pData.Skin_Data.CharacterAnimator != null)
+            pData.Skin_Data.CharacterAnimator.SetFloat("StandMov", newValue);
     }
 
     void OnCrouchMovBlendChanged(float oldValue, float newValue)
     {
-        if (pData.CharacterAnimator != null)
-            pData.CharacterAnimator.SetFloat("CrouchMov", newValue);
+        if (pData.Skin_Data.CharacterAnimator != null)
+            pData.Skin_Data.CharacterAnimator.SetFloat("CrouchMov", newValue);
     }
 
     void OnStandCrouchChanged(float oldValue, float newValue)
     {
-        if (pData.CharacterAnimator != null)
-            pData.CharacterAnimator.SetFloat("StandCrouch", newValue);
+        if (pData.Skin_Data.CharacterAnimator != null)
+            pData.Skin_Data.CharacterAnimator.SetFloat("StandCrouch", newValue);
     }
     #endregion
 
@@ -257,7 +259,7 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!isServer) return;
-        if (pData.Ragdoll_Manager.IsKnocked) return;
+        if (pData.Skin_Data.Ragdoll_Manager.IsKnocked || pData.CameraPivot == null) return;
 
         UpdateMoveSpeed();
 
@@ -312,20 +314,23 @@ public class PlayerMovement : NetworkBehaviour
         float multiplier = speedMultiplier < 0 ? 0 : speedMultiplier;
         move *= movSpeed * multiplier * (pData.Player_Stats.speed / 100f);
 
-        velocity.x = move.x;
-        velocity.z = move.z;
+        velocity.x = move.x + externalMomentum.x;
+        velocity.z = move.z + externalMomentum.z;
         pData.Character_Controller.Move(velocity * Time.deltaTime);
 
+        externalMomentum = Vector3.Lerp(externalMomentum, Vector3.zero, Time.deltaTime * friction);
+
         float speed = new Vector2(velocity.x, velocity.z).magnitude;
+        if (pData.Skin_Data.CharacterAnimator == null) return;
         if (IsCrouching)
         {
-            standCrouchBlend = Mathf.MoveTowards(pData.CharacterAnimator.GetFloat("StandCrouch"), 1, Time.deltaTime * animTransitionSpeed);
+            standCrouchBlend = Mathf.MoveTowards(pData.Skin_Data.CharacterAnimator.GetFloat("StandCrouch"), 1, Time.deltaTime * animTransitionSpeed);
             float targetBlend = Mathf.Approximately(speed, 0f) ? 0f : speed;
             crouchMovBlend = Mathf.MoveTowards(crouchMovBlend, targetBlend, Time.deltaTime * animTransitionSpeed);
         }
         else
         {
-            standCrouchBlend = Mathf.MoveTowards(pData.CharacterAnimator.GetFloat("StandCrouch"), 0, Time.deltaTime * animTransitionSpeed);
+            standCrouchBlend = Mathf.MoveTowards(pData.Skin_Data.CharacterAnimator.GetFloat("StandCrouch"), 0, Time.deltaTime * animTransitionSpeed);
             float targetBlend = Mathf.Approximately(speed, 0f) ? 0f : speed;
             standMovBlend = Mathf.MoveTowards(standMovBlend, targetBlend, Time.deltaTime * animTransitionSpeed);
         }
@@ -353,5 +358,17 @@ public class PlayerMovement : NetworkBehaviour
     public void ChangeSpeedMultiplier(float delta)
     {
         speedMultiplier += delta;
+    }
+
+    public void AddMomentum(Vector3 force)
+    {
+        externalMomentum += force;
+    }
+
+    public Vector3 KillMomentum()
+    {
+        Vector3 momentum = externalMomentum;
+        externalMomentum = Vector3.zero;
+        return momentum;
     }
 }

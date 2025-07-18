@@ -55,6 +55,9 @@ public class EmoteWheelManager : NetworkBehaviour
 
     void OpenWheel()
     {
+        if (HUD_Manager.OpenWindows.Count > 0) return;
+        HUD_Manager.OpenWindows.Add(wheelObj);
+
         pData.Camera_Movement.PauseCamera();
         wheelObj.SetActive(true);
 
@@ -73,6 +76,9 @@ public class EmoteWheelManager : NetworkBehaviour
 
     void CloseWheel()
     {
+        if (HUD_Manager.OpenWindows.Contains(wheelObj))
+            HUD_Manager.OpenWindows.Remove(wheelObj);
+
         pData.Camera_Movement.ResumeCamera();
 
         if (activeRotateCoroutine != null)
@@ -217,7 +223,7 @@ public class EmoteWheelManager : NetworkBehaviour
         if (currentLoopEmote == null) return;
         if (currentLoopEmote.dynamic) return;
 
-        pData.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
+        pData.Skin_Data.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
         currentLoopEmote = null;
     }
 
@@ -252,7 +258,7 @@ public class EmoteWheelManager : NetworkBehaviour
 
         if (currentLoopEmote != null)
         {
-            pData.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
+            pData.Skin_Data.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
 
             if (currentLoopEmote == currentEmotes[index])
             {
@@ -266,11 +272,11 @@ public class EmoteWheelManager : NetworkBehaviour
         if (currentEmotes[index].loop)
         {
             currentLoopEmote = currentEmotes[index];
-            pData.CharacterAnimator.SetBool(trigger, true);
+            pData.Skin_Data.CharacterAnimator.SetBool(trigger, true);
         }
         else
         {
-            pData.CharacterAnimator.SetTrigger(trigger);
+            pData.Skin_Data.CharacterAnimator.SetTrigger(trigger);
         }
 
         _playedEmote = true;
@@ -303,7 +309,7 @@ public class EmoteWheelManager : NetworkBehaviour
     {
         if (currentLoopEmote == null) return;
 
-        pData.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
+        pData.Skin_Data.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
     }
     #endregion
 }
