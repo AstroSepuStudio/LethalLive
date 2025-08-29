@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1976320c8433c7b4ba26890fb2382bee, type: 3}
+  m_Name: _Level0
+  m_EditorClassIdentifier: 
+  startingRoom: {fileID: 11400000, guid: 855e6d159c0f14944be5dca2fb867aaa, type: 2}
+  spawnableRooms:
+  - {fileID: 11400000, guid: 21421b535844a01479c45506a9d63be6, type: 2}
+  - {fileID: 11400000, guid: cea8b4f4b6af8cc44a47b56b75e07737, type: 2}
+  - {fileID: 11400000, guid: cc8bb3da76d675e41810e1b49db2b3f0, type: 2}
+  - {fileID: 11400000, guid: 94f3039cd41f46a4f8c9cf3fd826d473, type: 2}
+  - {fileID: 11400000, guid: f5957ed9759bb974f843ec526e786df4, type: 2}
+  - {fileID: 11400000, guid: 93706b41937c0d7419152d5a714f6418, type: 2}
+  - {fileID: 11400000, guid: 7a0cb0ce971a8e24eaf1c91ab9da0f07, type: 2}
+  - {fileID: 11400000, guid: ac3170f1e202d3e4bbadb65af23d1846, type: 2}
+  - {fileID: 11400000, guid: 051e6465e2c528f4ab64a2c50d98e096, type: 2}
+  - {fileID: 11400000, guid: b49e30fbb5f9cb745b662de9b31ac9d4, type: 2}
+  - {fileID: 11400000, guid: f874495820cf9d94ab14a81a5e09bc28, type: 2}
+  - {fileID: 11400000, guid: fe73784eb4120b94595c0379fe7772cd, type: 2}
+  deadEndRooms: []
+  spawnableItems: []
+  MinItems: 3
+  MaxItems: 12

@@ -51697,12 +51697,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   theme: {fileID: 11400000, guid: 580f57a2680f48c45877e251dc3e0e8d, type: 2}
-  gameSeed: Default231
+  gameSeed: Default
   seed: 0
   gridSize: {x: 24, y: 6, z: 24}
   cellSize: 5
   maxRooms: 30
-  maxDepth: 30
+  maxDepth: 5
   pInput: {fileID: 1410324982}
   stepGenerationMode: 0
 --- !u!114 &1410324982
@@ -75265,7 +75265,7 @@ GameObject:
   - component: {fileID: 2049159510}
   - component: {fileID: 2049159509}
   m_Layer: 0
-  m_Name: Floor (1)
+  m_Name: Ceiling
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

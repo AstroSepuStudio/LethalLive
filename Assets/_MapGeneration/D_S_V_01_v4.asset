@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11ae83abdf0d5fc43ae5fd4ab81ace06, type: 3}
+  m_Name: D_S_V_01_v4
+  m_EditorClassIdentifier: 
+  Prefab: {fileID: 6859338258297046723, guid: 780908ea42655e7418e9484ae4b30659, type: 3}
+  biome: 0
+  Footprint:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: -1, z: 0}
+  Ports:
+  - localCell: {x: 0, y: -1, z: 0}
+    face: 0
+    type: 0
+  - localCell: {x: 0, y: -1, z: 0}
+    face: 1
+    type: 0
+  - localCell: {x: 0, y: 0, z: 0}
+    face: 3
+    type: 0
+  - localCell: {x: 0, y: 0, z: 0}
+    face: 2
+    type: 0

@@ -1,18 +1,16 @@
-{Size}_{Type}_{Number}
+{Biome}_{Size}_{Type}_{Number}_{Version}
 Small_ClosedDownstairs_01
 S_CD_01
 
-Sizes {
-  Small (1,1,1), 
-  Medium (<= (2, 2, 2)), 
-  Large (<= (3, 3, 3)), 
-  Massive (<= (4, 4, 4)), 
-  Colossal (>= (5, 5, 5))
+Sizes (Flat size x,z) {
+  Small (1,1), 
+  Medium ~(2, 2),
+  Large ~(3, 3), 
+  Massive ~(4, 4), 
+  Colossal ~(5, 5)
 }
 
 Type {
-  Flat (No vertical), 
-  Vertical (Port for up and down), 
-  Downstairs (Port for down),
-  Upstairs (Port for up)
+  - (No vertical), 
+  Vertical (Has verticality)
 }

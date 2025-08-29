@@ -6761,9 +6761,12 @@ MonoBehaviour:
   Camera_Movement: {fileID: 2194033392233059217}
   PlayerCamera: {fileID: 7491167253461489895}
   PlayerAudio: {fileID: 1100936527748018697}
-  Index: 0
   SteamID:
     m_SteamID: 0
+  PlayerName: 
+  AvatarData: 
+  Index: 0
+  Ping: 0
   Team: 0
   PlayerCanvas: {fileID: 7353167371214788922}
 --- !u!114 &-7009135778534889599
@@ -6798,7 +6801,7 @@ MonoBehaviour:
   speedMultiplier: 1
   friction: 3
   staminaConsuption_Sprint: 10
-  staminaConsuption_Jump: 20
+  staminaConsuption_Jump: 10
   crouchHeight: 1
   crouchCenter: {x: 0, y: 0.5, z: 0}
   normalHeight: 2

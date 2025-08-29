@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static RoomDataSO;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -36,6 +37,7 @@ public class MapGenerator : MonoBehaviour
         public Direction face;
         public Vector3Int localCell;
         public int depth;
+        public PortType type;
     }
 
     private class PlacedRoom
@@ -44,6 +46,7 @@ public class MapGenerator : MonoBehaviour
         public RoomDataSO data;
         public Vector3Int anchor;
         public int depth;
+        public Biome biome;
     }
 
     private class Cell
@@ -68,7 +71,7 @@ public class MapGenerator : MonoBehaviour
         if (stepGenerationMode)
         {
             pInput.enabled = true;
-            StartStepGeneration();
+            //StartStepGeneration();
         }
         else
         {
@@ -80,93 +83,94 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    #region Step Generation
-    private List<OpenPort> stepFrontier;
-    private bool generationStarted = false;
+    //#region Step Generation
+    //private List<OpenPort> stepFrontier;
+    //private bool generationStarted = false;
 
-    public void StartStepGeneration()
-    {
-        placed.Clear();
-        spawned.Clear();
-        nextRoomId = 1;
+    //public void StartStepGeneration()
+    //{
+    //    placed.Clear();
+    //    spawned.Clear();
+    //    nextRoomId = 1;
 
-        grid = new Cell[gridSize.x, gridSize.y, gridSize.z];
-        for (int x = 0; x < gridSize.x; x++)
-            for (int y = 0; y < gridSize.y; y++)
-                for (int z = 0; z < gridSize.z; z++)
-                    grid[x, y, z] = new Cell();
+    //    grid = new Cell[gridSize.x, gridSize.y, gridSize.z];
+    //    for (int x = 0; x < gridSize.x; x++)
+    //        for (int y = 0; y < gridSize.y; y++)
+    //            for (int z = 0; z < gridSize.z; z++)
+    //                grid[x, y, z] = new Cell();
 
-        var center = new Vector3Int(
-            gridSize.x / 2,
-            Mathf.Clamp(gridSize.y / 2, 0, gridSize.y - 1),
-            gridSize.z / 2
-        );
+    //    var center = new Vector3Int(
+    //        gridSize.x / 2,
+    //        Mathf.Clamp(gridSize.y / 2, 0, gridSize.y - 1),
+    //        gridSize.z / 2
+    //    );
 
-        var start = Place(theme.startingRoom, center, 0);
-        stepFrontier = BuildOpenPorts(start);
+    //    var start = Place(theme.startingRoom, center, 0);
+    //    stepFrontier = BuildOpenPorts(start);
 
-        generationStarted = true;
-    }
+    //    generationStarted = true;
+    //}
 
-    public bool StepGeneration()
-    {
-        if (!generationStarted || stepFrontier.Count == 0 || placed.Count >= maxRooms)
-            return false;
+    //public bool StepGeneration()
+    //{
+    //    if (!generationStarted || stepFrontier.Count == 0 || placed.Count >= maxRooms)
+    //        return false;
 
-        int idx = rng.Next(stepFrontier.Count);
-        var open = stepFrontier[idx];
-        stepFrontier.RemoveAt(idx);
+    //    int idx = rng.Next(stepFrontier.Count);
+    //    var open = stepFrontier[idx];
+    //    stepFrontier.RemoveAt(idx);
 
-        if (open.depth >= maxDepth)
-            return true;
+    //    if (open.depth >= maxDepth)
+    //        return true;
 
-        var candidates = theme.spawnableRooms;
-        Shuffle(candidates);
+    //    var neighborRoom = placed.Find(r => r.id == open.roomId);
+    //    var candidates = GetWeightedCandidates(theme.spawnableRooms, neighborRoom.biome);
+    //    //Shuffle(candidates);
 
-        foreach (var cand in candidates)
-        {
-            if (cand == null) continue;
+    //    foreach (var cand in candidates)
+    //    {
+    //        if (cand == null) continue;
 
-            for (int p = 0; p < cand.Ports.Length; p++)
-            {
-                var port = cand.Ports[p];
-                if (port.face != DirectionUtils.OppositeDirection(open.face)) continue;
+    //        for (int p = 0; p < cand.Ports.Length; p++)
+    //        {
+    //            var port = cand.Ports[p];
+    //            if (port.face != DirectionUtils.OppositeDirection(open.face)) continue;
 
-                var anchor = open.worldCell - port.localCell;
-                if (!FootprintFits(cand, anchor)) continue;
+    //            var anchor = open.worldCell - port.localCell;
+    //            if (!FootprintFits(cand, anchor)) continue;
 
-                var pr = Place(cand, anchor, open.depth + 1);
-                if (pr == null) continue;
+    //            var pr = Place(cand, anchor, open.depth + 1);
+    //            if (pr == null) continue;
 
-                var newPorts = BuildOpenPorts(pr);
-                for (int i = newPorts.Count - 1; i >= 0; i--)
-                {
-                    var np = newPorts[i];
-                    if (np.worldCell == open.worldCell && np.face == DirectionUtils.OppositeDirection(open.face))
-                    {
-                        newPorts.RemoveAt(i);
-                        break;
-                    }
-                }
+    //            var newPorts = BuildOpenPorts(pr);
+    //            for (int i = newPorts.Count - 1; i >= 0; i--)
+    //            {
+    //                var np = newPorts[i];
+    //                if (np.worldCell == open.worldCell && np.face == DirectionUtils.OppositeDirection(open.face))
+    //                {
+    //                    newPorts.RemoveAt(i);
+    //                    break;
+    //                }
+    //            }
 
-                stepFrontier.AddRange(newPorts);
-                return true;
-            }
-        }
+    //            stepFrontier.AddRange(newPorts);
+    //            return true;
+    //        }
+    //    }
 
-        return true;
-    }
+    //    return true;
+    //}
 
-    public void DoStepGeneration(InputAction.CallbackContext context)
-    {
-        if (!context.started) return;
+    //public void DoStepGeneration(InputAction.CallbackContext context)
+    //{
+    //    if (!context.started) return;
 
-        if (StepGeneration())
-            InstantiateRooms();
-        else
-            ResolveDoors();
-    }
-    #endregion
+    //    if (StepGeneration())
+    //        InstantiateRooms();
+    //    else
+    //        ResolveDoors();
+    //}
+    //#endregion
 
     private void Generate()
     {
@@ -186,11 +190,11 @@ public class MapGenerator : MonoBehaviour
             int idx = rng.Next(frontier.Count); 
             var open = frontier[idx]; frontier.RemoveAt(idx); 
 
-            if (open.depth >= maxDepth) continue; 
+            if (open.depth >= maxDepth) continue;
 
-            var candidates = theme.spawnableRooms; 
-            Shuffle(candidates); 
-            
+            var neighborRoom = placed.Find(r => r.id == open.roomId);
+            var candidates = GetWeightedCandidates(theme.spawnableRooms, neighborRoom.biome);
+
             bool placedAny = false; 
 
             for (int c = 0; c < candidates.Length; c++) 
@@ -201,6 +205,8 @@ public class MapGenerator : MonoBehaviour
                 for (int p = 0; p < cand.Ports.Length; p++) 
                 { 
                     var port = cand.Ports[p];
+
+                    if (port.type != open.type) continue;
                     if (port.face != DirectionUtils.OppositeDirection(open.face)) continue; 
 
                     var anchor = open.worldCell + DirectionUtils.DirectionVector(open.face) - port.localCell; 
@@ -238,7 +244,8 @@ public class MapGenerator : MonoBehaviour
             id = nextRoomId++,
             data = data,
             anchor = anchor,
-            depth = depth
+            depth = depth,
+            biome = data.biome
         };
         placed.Add(placedRoom);
 
@@ -268,7 +275,8 @@ public class MapGenerator : MonoBehaviour
                 worldCell = worldCell,
                 face = port.face,
                 localCell = port.localCell,
-                depth = pr.depth
+                depth = pr.depth,
+                type = port.type
             });
         }
         return list;
@@ -276,8 +284,8 @@ public class MapGenerator : MonoBehaviour
 
     #region Fit / bounds / RNG
     private bool InBounds(Vector3Int p) =>
-    p.x >= 0 && p.y >= 0 && p.z >= 0 &&
-    p.x < gridSize.x && p.y < gridSize.y && p.z < gridSize.z;
+        p.x >= 0 && p.y >= 0 && p.z >= 0 &&
+        p.x < gridSize.x && p.y < gridSize.y && p.z < gridSize.z;
 
     private bool FootprintFits(RoomDataSO data, Vector3Int anchor)
     {
@@ -313,6 +321,27 @@ public class MapGenerator : MonoBehaviour
             (list[i], list[j]) = (list[j], list[i]);
         }
     }
+
+    private RoomDataSO[] GetWeightedCandidates(RoomDataSO[] candidates, Biome neighborBiome)
+    {
+        List<RoomDataSO> weighted = new();
+        foreach (var cand in candidates)
+        {
+            if (cand == null) continue;
+
+            weighted.Add(cand);
+
+            if (cand.biome == neighborBiome)
+            {
+                weighted.Add(cand);
+                weighted.Add(cand);
+            }
+        }
+
+        Shuffle(weighted);
+        return weighted.ToArray();
+    }
+
     #endregion
 
     #region Instantiate + door pass
@@ -350,7 +379,9 @@ public class MapGenerator : MonoBehaviour
                         var neighborLocal = nb - nOcc.anchor;
                         foreach (var np in nOcc.data.Ports)
                         {
-                            if (np.localCell == neighborLocal && np.face == DirectionUtils.OppositeDirection(port.face))
+                            if (np.type == port.type &&
+                                np.localCell == neighborLocal &&
+                                np.face == DirectionUtils.OppositeDirection(port.face))
                             {
                                 open = true;
                                 break;
