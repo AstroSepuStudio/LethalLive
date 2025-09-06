@@ -1,43 +1,20 @@
 using Mirror;
 using UnityEngine;
 
-public class PlayerStats : NetworkBehaviour
+public class PlayerStats : EntityStats
 {
     [SerializeField] PlayerData pData;
 
     [SerializeField] float staminaRecoveryDelay;
     [SerializeField] float staminaRecoveryRate;
 
-    [SerializeField] float knockRecoveryDelay;
-    [SerializeField] float knockRecoveryRate;
-    [SerializeField] float ragdollRecoveryValue;
-
     float staminaRecoveryTimer;
-    float knockRecoveryTimer;
-
-    [SyncVar]
-    public float maxHP = 100f;
-
-    [SyncVar(hook = nameof(OnHPChanged))] 
-    public float currentHP;
 
     [SyncVar]
     public float maxStamina = 100f;
 
     [SyncVar(hook = nameof(OnStaminaChanged))] 
     public float currentStamina;
-
-    [SyncVar]
-    public float maxKnock = 100f;
-
-    [SyncVar(hook = nameof(OnKnockChanged))] 
-    public float currentKnock;
-
-    [SyncVar]
-    public float strenght = 100f;
-
-    [SyncVar]
-    public float speed = 100f;
 
     public override void OnStartServer()
     {
@@ -46,7 +23,7 @@ public class PlayerStats : NetworkBehaviour
         currentKnock = 0f;
     }
 
-    private void Update()
+    protected override void Update()
     {
         if (!isServer) return;
 
@@ -69,10 +46,29 @@ public class PlayerStats : NetworkBehaviour
         }
     }
 
+    [Server]
+    public void ReceiveAttack(PlayerData source, AttackStat stats)
+    {
+        if (source.Team == pData.Team)
+        {
+            if (LobbyManager.Instace.LobbySettings.TeamKnock)
+                ModifyKnock(source, stats);
+
+            if (LobbyManager.Instace.LobbySettings.TeamDamage)
+                ModifyHP(-stats.AttackDamage);
+        }
+        else
+        {
+            ModifyHP(-stats.AttackDamage);
+            ModifyKnock(source, stats);
+        }
+    }
+
     #region HP
 
     [Server]
-    public void ModifyHP(float amount)
+
+    public override void ModifyHP(float amount)
     {
         currentHP = Mathf.Clamp(currentHP + amount, 0f, maxHP);
         if (currentHP <= 0)
@@ -81,13 +77,13 @@ public class PlayerStats : NetworkBehaviour
         }
     }
 
-    void OnHPChanged(float oldVal, float newVal)
+    protected override void OnHPChanged(float oldVal, float newVal)
     {
         pData.HUDmanager.UpdateHUD();
     }
 
     [Server]
-    void OnDeath()
+    protected override void OnDeath()
     {
         Debug.Log($"{gameObject.name} died.");
         // Add ragdoll, respawn, disable movement, etc.
@@ -113,8 +109,20 @@ public class PlayerStats : NetworkBehaviour
 
     #region Knock
 
+    [Server]    
+    public void ModifyKnock(PlayerData source, AttackStat stat)
+    {
+        float multiplier = Random.Range(1f, 2f);
+        Vector3 dir = pData.transform.position - source.transform.position;
+
+        float knockAmount = stat.AttackKnock * multiplier * (source.Player_Stats.strenght / 100f);
+        Vector3 momentum = multiplier * stat.AttackForce * dir.normalized;
+
+        ModifyKnock(knockAmount, momentum);
+    }
+
     [Server]
-    public void ModifyKnock(float amount, Vector3 momentum)
+    public override void ModifyKnock(float amount, Vector3 momentum)
     {
         knockRecoveryTimer = 0;
         currentKnock = Mathf.Clamp(currentKnock + amount, 0f, maxKnock);
@@ -127,13 +135,13 @@ public class PlayerStats : NetworkBehaviour
         pData.Player_Movement.AddMomentum(momentum);
     }
 
-    void OnKnockChanged(float oldVal, float newVal)
+    protected override void OnKnockChanged(float oldVal, float newVal)
     {
         pData.HUDmanager.UpdateHUD();
     }
 
     [Server]
-    void OnKnocked(Vector3 momentum)
+    protected override void OnKnocked(Vector3 momentum)
     {
         Debug.Log($"{gameObject.name} was knocked!");
         pData.Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);

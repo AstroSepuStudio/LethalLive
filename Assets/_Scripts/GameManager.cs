@@ -1,5 +1,6 @@
 using Mirror;
 using Steamworks;
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -9,13 +10,18 @@ public class GameManager : NetworkBehaviour
     public static GameManager Instance { get; private set; }
     [SerializeField] ItemSO[] itemsData;
     [SerializeField] LobbyManagerScreen lobbyManagerScreen;
-
+    [SerializeField] MapGenerator mapGenerator;
+    [SerializeField] GameObject teleporter;
     [SerializeField] List<PlayerData> players = new ();
-    public IReadOnlyList<PlayerData> Players => players;
 
+    public IReadOnlyList<PlayerData> Players => players;
     public readonly SyncList<uint> syncedItemIds = new();
 
+    [HideInInspector] 
     public PlayerData LocalPlayer;
+
+    [SyncVar]
+    public int mapSeed;
 
     public struct LobbyMemberData
     {
@@ -42,11 +48,11 @@ public class GameManager : NetworkBehaviour
     {
         if (isServer)
         {
-            SpawnItem(transform.position);
-            SpawnItem(transform.position + transform.forward);
-            SpawnItem(transform.position - transform.forward);
-            SpawnItem(transform.position + transform.right);
-            SpawnItem(transform.position - transform.right);
+            SpawnItem(0, transform.position);
+            SpawnItem(1, transform.position + transform.forward);
+            SpawnItem(0, transform.position - transform.forward);
+            SpawnItem(1, transform.position + transform.right);
+            SpawnItem(0, transform.position - transform.right);
         }
     }
 
@@ -73,9 +79,9 @@ public class GameManager : NetworkBehaviour
     }
 
     [Server]
-    void SpawnItem(Vector3 position)
+    void SpawnItem(int index, Vector3 position)
     {
-        GameObject itemGO = Instantiate(itemsData[0].itemPrefab, position, Quaternion.identity);
+        GameObject itemGO = Instantiate(itemsData[index].itemPrefab, position, Quaternion.identity);
         NetworkServer.Spawn(itemGO);
 
         uint netId = itemGO.GetComponent<NetworkIdentity>().netId;
@@ -130,5 +136,23 @@ public class GameManager : NetworkBehaviour
     public void CmdRequestTeamChange(int playerIndex, PlayerTeam team)
     {
         players[playerIndex].Team = team;
+    }
+
+    [Server]
+    public void StartGame()
+    {
+        Debug.Log("Sending generation action");
+
+        mapSeed = UnityEngine.Random.Range(-1000000, 1000000);
+
+        RpcGenerateMap();
+    }
+
+    [ClientRpc]
+    void RpcGenerateMap()
+    {
+        Debug.Log("Generating map");
+
+        mapGenerator.StartGeneration(mapSeed);
     }
 }

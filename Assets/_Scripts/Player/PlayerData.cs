@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using Mirror;
 using Steamworks;
 using System.Collections;
+using System.Security.Principal;
 
 public enum PlayerTeam { Hololive, Gamers, HoloX, English };
 
@@ -14,8 +15,6 @@ public class PlayerData : NetworkBehaviour
     public PunchManager Punch_Manager;
     public PlayerStats Player_Stats;
     public ItemInventory PlayerInventory;
-    public InteractonDetection Item_PickUp;
-    public PlayerInputHandler InputHandler;
     public bool _LockPlayer = false;
     public HUD_Manager HUDManager;
     public AudioSource Quiet_AS;
@@ -203,13 +202,13 @@ public class PlayerData : NetworkBehaviour
 
     public void OnClientPrimary(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer || !context.started || HUDmanager.OpenedWindow) return;
+        if (!isLocalPlayer || HUDmanager.OpenedWindow) return;
 
         if (PlayerInventory.HasPrimaryAction)
         {
-            PlayerInventory.PrimaryInput();
+            PlayerInventory.PrimaryInput(context);
         }
-        else if (!PlayerInventory.HasTwoHandedEquipped)
+        else if (!PlayerInventory.HasTwoHandedEquipped && context.started)
         {
             Punch_Manager.OnPunchInput();
         }
@@ -217,11 +216,11 @@ public class PlayerData : NetworkBehaviour
 
     public void OnClientSecondary(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer || !context.started || HUDmanager.OpenedWindow) return;
+        if (!isLocalPlayer || HUDmanager.OpenedWindow) return;
 
         if (PlayerInventory.HasSecondaryAction)
         {
-            PlayerInventory.SecondaryInput();
+            PlayerInventory.SecondaryInput(context);
         }
     }
 }

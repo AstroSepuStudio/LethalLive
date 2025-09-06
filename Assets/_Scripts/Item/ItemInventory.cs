@@ -23,6 +23,7 @@ public class ItemInventory : NetworkBehaviour
     public bool HasPrimaryAction => equippedItem != null && equippedItem.ItemData.hasPrimaryAction;
     public bool HasSecondaryAction => equippedItem != null && equippedItem.ItemData.hasSecondaryAction;
     public bool HasTwoHandedEquipped => equippedItem != null && equippedItem.ItemData.isTwoHanded;
+    public bool IsItemInUse => equippedItem != null && equippedItem.InUse;
 
     private void Start()
     {
@@ -41,9 +42,29 @@ public class ItemInventory : NetworkBehaviour
     }
 
     #region Input
-    public void PrimaryInput() => CmdUsePrimary();
+    public void PrimaryInput(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            CmdUsePrimary();
+        }
+        else if (context.canceled)
+        {
+            CmdCancelPrimary();
+        }
+    }
 
-    public void SecondaryInput() => CmdUseSecondary();
+    public void SecondaryInput(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            CmdUseSecondary();
+        }
+        else if (context.canceled)
+        {
+            CmdCancelSecondary();
+        }
+    }
 
     public void OnClientDrop(InputAction.CallbackContext context)
     {
@@ -82,10 +103,10 @@ public class ItemInventory : NetworkBehaviour
     #endregion
 
     [Server]
-    public void AddItem(ItemBase item)
+    public bool AddItem(ItemBase item)
     {
-        if (item == null) return;
-        if (IsFull()) return;
+        if (item == null) return false;
+        if (IsFull()) return false;
 
         int index = selectedSlotIndex;
         if (inventorySlots[index] != null)
@@ -102,12 +123,20 @@ public class ItemInventory : NetworkBehaviour
         inventorySlots[index] = item;
         item.OnPickUp();
         hotbarSlots[index].SetItem(item);
+
+        if (equippedItem != null && equippedItem.InUse)
+        {
+            RpcAddItem(item.ID, index, false);
+            return true;
+        }
+
         LocalSelectSlot(index);
-        RpcAddItem(item.ID, index);
+        RpcAddItem(item.ID, index, true);
+        return true;
     }
 
     [ClientRpc]
-    void RpcAddItem(uint itemID, int slotIndex)
+    void RpcAddItem(uint itemID, int slotIndex, bool select)
     {
         NetworkClient.spawned.TryGetValue(itemID, out NetworkIdentity identity);
 
@@ -115,13 +144,15 @@ public class ItemInventory : NetworkBehaviour
         inventorySlots[slotIndex] = identity.gameObject.GetComponent<ItemBase>();
         inventorySlots[slotIndex].OnPickUp();
         hotbarSlots[slotIndex].SetItem(inventorySlots[slotIndex]);
-        LocalSelectSlot(slotIndex);
+
+        if (select)
+            LocalSelectSlot(slotIndex);
     }
 
     [Command]
     void CmdSelectSlot(int index)
     {
-        if (HasTwoHandedEquipped) return;
+        if (HasTwoHandedEquipped || IsItemInUse) return;
 
         LocalSelectSlot(index);
         RpcSelectSlot(index);
@@ -152,30 +183,38 @@ public class ItemInventory : NetworkBehaviour
         if (item == null)
         {
             equippedItem = null;
+            pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 0);
             return;
         }
 
         equippedItem = item;
         item.OnEquip(this);
 
-        item.transform.SetParent(pData.Skin_Data.RightHand);
+        item.transform.SetParent(pData.Skin_Data.GrabPoint);
         item.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         StartCoroutine(DisplayItemName(item.ItemData.itemName));
 
         if (item.ItemData.isTwoHanded)
         {
-            pData.Skin_Data.Rigging_Manager.EnableTwoHandedRig();
+            pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", true);
         }
         else
         {
-            pData.Skin_Data.Rigging_Manager.DisableTwoHandedRig();
+            switch (item.ItemData.itemName.ToLower())
+            {
+                case "crowbar": pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", true); break;
+
+                default: pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", true); break;
+            }
         }
+
+        pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 1);
     }
 
     [Command]
     void CmdDropItem()
     {
-        if (equippedItem == null) return;
+        if (equippedItem == null || IsItemInUse) return;
 
         LocalDropItem();
         RpcDropItem();
@@ -186,7 +225,7 @@ public class ItemInventory : NetworkBehaviour
 
     void LocalDropItem()
     {
-        if (equippedItem == null) return;
+        if (equippedItem == null || IsItemInUse) return;
 
         for (int i = 0; i < inventorySlots.Length; i++)
         {
@@ -199,19 +238,33 @@ public class ItemInventory : NetworkBehaviour
 
         if (equippedItem.ItemData.isTwoHanded)
         {
-            pData.Skin_Data.Rigging_Manager.DisableTwoHandedRig();
+            pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", false);
         }
+        else
+        {
+            switch (equippedItem.ItemData.itemName.ToLower())
+            {
+                case "crowbar": pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", false); break;
+
+                default: pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", false); break;
+            }
+        }
+
+        pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 0);
 
         equippedItem.OnDrop(this);
         equippedItem = null;
-
-        // Unlock selection if was two-handed
     }
 
     [Command]
     void CmdUsePrimary()
     {
-        if (equippedItem == null) return;
+        if (equippedItem == null || IsItemInUse || pData._LockPlayer) return;
+        if (equippedItem.primaryAtkStats.OnCooldown) return;
+
+        if (equippedItem.primaryAtkStats.AttackCooldown > 0)
+            StartCoroutine(equippedItem.primaryAtkStats.CountdownCooldown());
+
         equippedItem.PrimaryAction();
         RpcUsePrimary();
     }
@@ -220,15 +273,44 @@ public class ItemInventory : NetworkBehaviour
     void RpcUsePrimary() => equippedItem.PrimaryAction();
 
     [Command]
-    void CmdUseSecondary()
+    void CmdCancelPrimary()
     {
         if (equippedItem == null) return;
-        equippedItem?.SecondaryAction();
+
+        equippedItem.CancelPrimaryAction();
+        RpcCancelPrimary();
+    }
+
+    [ClientRpc]
+    void RpcCancelPrimary() => equippedItem.CancelPrimaryAction();
+
+    [Command]
+    void CmdUseSecondary()
+    {
+        if (equippedItem == null || IsItemInUse || pData._LockPlayer) return;
+        if (equippedItem.secondaryAtkStats.OnCooldown) return;
+
+        if (equippedItem.secondaryAtkStats.AttackCooldown > 0)
+            StartCoroutine(equippedItem.secondaryAtkStats.CountdownCooldown());
+
+        equippedItem.SecondaryAction();
         RpcUseSecondary();
     }
 
     [ClientRpc]
     void RpcUseSecondary() => equippedItem.SecondaryAction();
+
+    [Command]
+    void CmdCancelSecondary()
+    {
+        if (equippedItem == null) return;
+
+        equippedItem.CancelPrimaryAction();
+        RpcCancelDecondary();
+    }
+
+    [ClientRpc]
+    void RpcCancelDecondary() => equippedItem.CancelPrimaryAction();
 
     IEnumerator DisplayItemName(string name)
     {
@@ -253,5 +335,25 @@ public class ItemInventory : NetworkBehaviour
             timer -= Time.deltaTime;
             yield return null;
         }
+    }
+
+    public void PrimaryItemAnimationTrigger()
+    {
+        equippedItem.PrimaryAnimationTrigger();
+    }
+
+    public void PrimaryItemAnimationFinishes()
+    {
+        equippedItem.PrimaryAnimationFinish();
+    }
+
+    public void SecondaryItemAnimationTrigger()
+    {
+        equippedItem.SecondaryAnimationTrigger();
+    }
+
+    public void SecondaryItemAnimationFinishes()
+    {
+        equippedItem.SecondaryAnimationFinish();
     }
 }

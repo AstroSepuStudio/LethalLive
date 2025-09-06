@@ -1,14 +1,13 @@
 using Mirror;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ItemBase : InteractableObject
 {
     public ItemSO ItemData;
     [SerializeField] NetworkIdentity identity;
-    [SerializeField] CharacterController controller;
-    [SerializeField] GravityController gravity;
+    [SerializeField] Rigidbody rb;
+    [SerializeField] Collider coll;
 
     [SerializeField] TextMeshProUGUI itemNameTxt;
     [SerializeField] TextMeshProUGUI itemPriceTxt;
@@ -21,6 +20,14 @@ public class ItemBase : InteractableObject
     [SyncVar]
     public int ItemValue;
 
+    public PlayerData pData { get; private set; }
+
+    public AttackStat primaryAtkStats;
+    public AttackStat secondaryAtkStats;
+
+    [SyncVar]
+    public bool InUse = false;
+
     protected override void Start()
     {
         base.Start();
@@ -31,39 +38,48 @@ public class ItemBase : InteractableObject
         }
     }
 
-    public virtual void PrimaryAction() { }
-    public virtual void SecondaryAction() { }
-
+    [Server]
     public override void OnInteract(PlayerData sourceData)
     {
-        sourceData.PlayerInventory.AddItem(this);
+        if (sourceData.PlayerInventory.AddItem(this))
+        {
+            pData = sourceData;
+            RpcGetPlayerData(sourceData.netId);
+        }
+    }
+
+    [ClientRpc]
+    private void RpcGetPlayerData(uint playerID)
+    {
+        NetworkClient.spawned.TryGetValue(playerID, out NetworkIdentity identity);
+
+        if (identity == null) return;
+        pData = identity.GetComponent<PlayerData>();
     }
 
     public virtual void OnPickUp()
     {
-        controller.enabled = false;
-        gravity.enabled = false;
+        rb.isKinematic = true;
+        coll.enabled = false;
         DisableCanvas();
     }
 
     public virtual void OnEquip(ItemInventory handler)
     {
-        controller.enabled = false; 
         gameObject.SetActive(true);
     }
 
     public virtual void OnUnequip(ItemInventory handler)
     {
-        controller.enabled = false; 
         gameObject.SetActive(false);
     }
 
     public virtual void OnDrop(ItemInventory handler)
     {
         gameObject.SetActive(true);
+        coll.enabled = true;
         transform.SetParent(null);
-        controller.enabled = true;
-        gravity.enabled = true;
+        rb.isKinematic = false;
     }
 
     public override void EnableCanvas()
@@ -73,4 +89,13 @@ public class ItemBase : InteractableObject
         itemNameTxt.SetText(ItemData.itemName);
         itemPriceTxt.SetText(ItemValue.ToString());
     }
+
+    public virtual void PrimaryAction() { }
+    public virtual void SecondaryAction() { }
+    public virtual void CancelPrimaryAction() { }
+    public virtual void CancelSecondaryAction() { }
+    public virtual void PrimaryAnimationTrigger() { }
+    public virtual void PrimaryAnimationFinish() { }
+    public virtual void SecondaryAnimationTrigger() { }
+    public virtual void SecondaryAnimationFinish() { }
 }

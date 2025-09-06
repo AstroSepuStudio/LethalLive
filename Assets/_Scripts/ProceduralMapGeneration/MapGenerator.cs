@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static RoomDataSO;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -22,6 +21,7 @@ public class MapGenerator : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] PlayerInput pInput;
+    [SerializeField] bool generateOnStart = false;
     [SerializeField] bool stepGenerationMode = false;
 
     private System.Random rng;
@@ -37,7 +37,7 @@ public class MapGenerator : MonoBehaviour
         public Direction face;
         public Vector3Int localCell;
         public int depth;
-        public PortType type;
+        public RoomDataSO.PortType type;
     }
 
     private class PlacedRoom
@@ -57,8 +57,6 @@ public class MapGenerator : MonoBehaviour
 
     private void Awake()
     {
-        seed = StableHash(gameSeed);
-        rng = new System.Random(seed);
         grid = new Cell[gridSize.x, gridSize.y, gridSize.z];
         for (int x = 0; x < gridSize.x; x++)
             for (int y = 0; y < gridSize.y; y++)
@@ -68,6 +66,16 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
+        if (generateOnStart)
+            StartGeneration(StableHash(gameSeed));
+    }
+
+    public void StartGeneration(int setSeed = -1)
+    {
+        seed = setSeed;
+
+        rng = new System.Random(seed);
+
         if (stepGenerationMode)
         {
             pInput.enabled = true;

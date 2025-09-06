@@ -10,12 +10,9 @@ public class RiggingManager : MonoBehaviour
     [SerializeField] RigBuilder rigBuilder;
     [SerializeField] Rig FollowCameraTargetRig;
     [SerializeField] Rig FollowCameraRig;
-    [SerializeField] Rig TwoHandedItemRig;
 
     Coroutine camRigTransition;
     Coroutine camTargetRigTransition;
-    Coroutine twoHandedRigTransition;
-    float twoHandedBlend;
 
     private void Start()
     {
@@ -92,36 +89,5 @@ public class RiggingManager : MonoBehaviour
 
         FollowCameraTargetRig.weight = targetWeight;
         camTargetRigTransition = null;
-    }
-
-    public void EnableTwoHandedRig()
-    {
-        if (twoHandedRigTransition != null)
-            StopCoroutine(twoHandedRigTransition);
-
-        twoHandedRigTransition = StartCoroutine(SmoothBlendTwoHandedRig(1));
-    }
-
-    public void DisableTwoHandedRig()
-    {
-        if (twoHandedRigTransition != null)
-            StopCoroutine(twoHandedRigTransition);
-
-        twoHandedRigTransition = StartCoroutine(SmoothBlendTwoHandedRig(0));
-    }
-
-    IEnumerator SmoothBlendTwoHandedRig(float target)
-    {
-        target = Mathf.Clamp01(target);
-
-        while (!Mathf.Approximately(twoHandedBlend, target))
-        {
-            twoHandedBlend = Mathf.MoveTowards(twoHandedBlend, target, Time.deltaTime * transitionSpeed);
-            TwoHandedItemRig.weight = twoHandedBlend;
-            yield return null;
-        }
-
-        twoHandedBlend = target;
-        TwoHandedItemRig.weight = twoHandedBlend;
     }
 }

@@ -5362,10 +5362,10 @@ RectTransform:
   - {fileID: 455379288}
   m_Father: {fileID: 94245038}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 310, y: -198.75}
+  m_SizeDelta: {x: 600, y: 112.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &197715766
 MonoBehaviour:
@@ -8690,7 +8690,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 341943009}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2134294514}
+        m_TargetAssemblyTypeName: LobbyManagerScreen, Assembly-CSharp
+        m_MethodName: StartGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &341943009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9703,6 +9715,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1410324980}
   - {fileID: 1387233359}
   - {fileID: 1730614855}
   - {fileID: 1919113838}
@@ -20700,7 +20713,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &679349878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20764,6 +20777,7 @@ MonoBehaviour:
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 3160449891824070426, guid: a85f73f78113ffa43a0ff044ef461da6, type: 3}
+  - {fileID: 9084241017591515198, guid: ccddd1138090f6e4299cd606d046929c, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
     bufferLimit: 32
@@ -22641,7 +22655,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &713686469
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22690,6 +22704,7 @@ MonoBehaviour:
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 3160449891824070426, guid: a85f73f78113ffa43a0ff044ef461da6, type: 3}
+  - {fileID: 9084241017591515198, guid: ccddd1138090f6e4299cd606d046929c, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
     bufferLimit: 32
@@ -26481,10 +26496,10 @@ RectTransform:
   - {fileID: 1717942701}
   m_Father: {fileID: 94245038}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 310, y: -463.75}
+  m_SizeDelta: {x: 600, y: 112.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &838086920
 MonoBehaviour:
@@ -49433,10 +49448,10 @@ RectTransform:
   - {fileID: 538903126}
   m_Father: {fileID: 94245038}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 310, y: -66.25}
+  m_SizeDelta: {x: 600, y: 112.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1336304352
 MonoBehaviour:
@@ -50086,10 +50101,10 @@ RectTransform:
   - {fileID: 1874368641}
   m_Father: {fileID: 94245038}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 310, y: -331.25}
+  m_SizeDelta: {x: 600, y: 112.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1346892332
 MonoBehaviour:
@@ -51677,12 +51692,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1410324979}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1585093472}
+  m_Father: {fileID: 382441220}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1410324981
 MonoBehaviour:
@@ -51704,6 +51719,7 @@ MonoBehaviour:
   maxRooms: 30
   maxDepth: 5
   pInput: {fileID: 1410324982}
+  generateOnStart: 0
   stepGenerationMode: 0
 --- !u!114 &1410324982
 MonoBehaviour:
@@ -56768,7 +56784,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 382441220}
-  - {fileID: 1410324980}
   - {fileID: 416734587}
   - {fileID: 1686793180}
   - {fileID: 1656892191}
@@ -61532,9 +61547,13 @@ MonoBehaviour:
   syncInterval: 0
   itemsData:
   - {fileID: 11400000, guid: d6015b7736f8f8c49b4af775dd7ff787, type: 2}
+  - {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
   lobbyManagerScreen: {fileID: 2134294514}
+  mapGenerator: {fileID: 1410324981}
+  teleporter: {fileID: 0}
   players: []
   LocalPlayer: {fileID: 0}
+  mapSeed: 0
 --- !u!4 &1730614855
 Transform:
   m_ObjectHideFlags: 0
@@ -62202,7 +62221,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1751716341
 Transform:
   m_ObjectHideFlags: 0

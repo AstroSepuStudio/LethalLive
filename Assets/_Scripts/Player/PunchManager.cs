@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ public class PunchManager : NetworkBehaviour
 
     private bool isPunching = false;
     WaitForSeconds punchCooldown;
+    int debuffIndex;
 
     private void Start()
     {
@@ -25,11 +27,21 @@ public class PunchManager : NetworkBehaviour
     [Command]
     void CmdRequestPunch()
     {
+        if (isPunching || pData._LockPlayer) return;
+
+        if (debuffIndex != -1)
+            RemoveDebuff();
+
+        debuffIndex = pData.Player_Movement.AddSpeedModifier(0.5f);
+
+        LocalPlayAttackAnimation();
         RpcPlayAttackAnimation();
     }
 
     [ClientRpc]
-    void RpcPlayAttackAnimation()
+    void RpcPlayAttackAnimation() => LocalPlayAttackAnimation();
+
+    void LocalPlayAttackAnimation()
     {
         if (pData.Skin_Data.CharacterAnimator != null)
         {
@@ -39,6 +51,7 @@ public class PunchManager : NetworkBehaviour
             else
                 pData.Skin_Data.CharacterAnimator.SetTrigger("Attack");
 
+            pData.Skin_Data.CharacterAnimator.SetLayerWeight(3, 1);
             StartCoroutine(PunchCooldown());
         }
     }
@@ -56,13 +69,28 @@ public class PunchManager : NetworkBehaviour
 
     public void PunchDetection()
     {
-        if (!isLocalPlayer) return;
+        if (!isServer) return;
 
-        CmdTryHit();
+        CheckForHit();
     }
 
-    [Command]
-    void CmdTryHit()
+    public void PunchFinished()
+    {
+        if (!isServer) return;
+
+        RemoveDebuff();
+        pData.Skin_Data.CharacterAnimator.SetLayerWeight(3, 0);
+    }
+
+    [Server]
+    void RemoveDebuff()
+    {
+        pData.Player_Movement.RemoveSpeedModifier(debuffIndex);
+        debuffIndex = -1;
+    }
+
+    [Server]
+    void CheckForHit()
     {
         Debug.Log("Checking for punch");
         Collider[] hitPlayers = Physics.OverlapSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius, pData.PlayerMask);
@@ -79,11 +107,12 @@ public class PunchManager : NetworkBehaviour
                 {
                     if (!LobbyManager.Instace.LobbySettings.TeamKnock)
                     {
+                        Debug.Log("Team Knock is disabled!");
                         return;
                     }
                 }
 
-                float multiplier = Random.Range(1f, 2f);
+                float multiplier = UnityEngine.Random.Range(1f, 2f);
                 Vector3 dir = GameManager.Instance.Players[i].transform.position - pData.transform.position;
 
                 float knockAmount = punchStats.AttackKnock * multiplier * (pData.Player_Stats.strenght / 100f);

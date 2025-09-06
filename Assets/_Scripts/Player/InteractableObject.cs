@@ -37,6 +37,7 @@ public class InteractableObject : NetworkBehaviour
         higlightImg.sprite = lowlightedSprite;
     }
 
+    [Server]
     public virtual void OnInteract(PlayerData sourceData)
     {
         OnInteractEvent?.Invoke(sourceData);

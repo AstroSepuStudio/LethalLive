@@ -5,10 +5,10 @@ using UnityEngine;
 public class LobbySettings : NetworkBehaviour
 {
     [Header("Lobby Settings")]
-    [SyncVar] private ELobbyType lobby_Type;
-    [SyncVar] private int mapSize;
-    [SyncVar] private bool teamDamage;
-    [SyncVar] private bool teamKnock;
+    [SyncVar] private ELobbyType lobby_Type = ELobbyType.k_ELobbyTypeFriendsOnly;
+    [SyncVar] private int mapSize = 30;
+    [SyncVar] private bool teamDamage = false;
+    [SyncVar] private bool teamKnock = true;
 
     public ELobbyType Lobby_Type => lobby_Type;
     public int MapSize => mapSize;

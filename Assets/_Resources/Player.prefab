@@ -5716,11 +5716,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pData: {fileID: 5726922814949680812}
   CharacterAnimator: {fileID: 387767815161941067}
-  SkinMaterial: {fileID: 0}
-  SkinRenderer: {fileID: 6007695695483886537}
   RightHand: {fileID: 5216161164139671104}
+  GrabPoint: {fileID: 7222030535817635003}
+  SkinRenderer: {fileID: 6007695695483886537}
+  SkinMaterial: {fileID: 0}
   Ragdoll_Manager: {fileID: 5740955926224549588}
   Rigging_Manager: {fileID: 3340913352574449899}
+  chestT: {fileID: 1555226154012326885}
+  breathShrinkers:
+  - {fileID: 2773975170406621495}
+  - {fileID: 5478811505132730450}
+  - {fileID: 8995085478590769585}
+  - {fileID: 8386352856925407702}
+  chestTS: {x: 1.05, y: 1.05, z: 1.05}
+  breathShrTS: {x: 0.95, y: 0.95, z: 0.95}
+  breathSpd: 0.8
+  blinkBSIndex: 0
+  blkMinTime: 0.4
+  blkMaxTime: 10
+  blkStopDelay: 0.3
 --- !u!1 &425151589229854552
 GameObject:
   m_ObjectHideFlags: 0
@@ -5928,6 +5942,7 @@ Transform:
   m_Children:
   - {fileID: 194798515940627181}
   - {fileID: 5789621286318848097}
+  - {fileID: 7289870288711376836}
   m_Father: {fileID: 6591756092694248832}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &598039299469559444
@@ -6044,7 +6059,6 @@ MonoBehaviour:
   rigBuilder: {fileID: 0}
   FollowCameraTargetRig: {fileID: 1452504634059647705}
   FollowCameraRig: {fileID: 4634449201918127536}
-  TwoHandedItemRig: {fileID: 2472494586009641582}
 --- !u!114 &2628474058886618073
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6271,6 +6285,7 @@ GameObject:
   - component: {fileID: 3130351792361390793}
   - component: {fileID: 858769467701975222}
   - component: {fileID: 1042807307259932311}
+  - component: {fileID: 1381176049468118383}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -6824,7 +6839,6 @@ MonoBehaviour:
   sprintVolMult: 1
   timer: 0
   footstepIndex: 0
-  res: []
   groundedTime: 0
   jumpTime: 0
   _isGrounded: 0
@@ -6834,6 +6848,7 @@ MonoBehaviour:
   _wantsToCrouch: 0
   _wantsToSprint: 0
   _wantsToUncrouch: 0
+  res: []
 --- !u!114 &3477193561676349907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6852,11 +6867,11 @@ MonoBehaviour:
   syncInterval: 0
   pData: {fileID: 5726922814949680812}
   punchStats:
-    AttackRadius: 0.3
-    AttackKnock: 10
-    AttackForce: 4
-    AttackDamage: 0
-    AttackCooldown: 1
+    <AttackRadius>k__BackingField: 0.3
+    <AttackKnock>k__BackingField: 10
+    <AttackForce>k__BackingField: 3
+    <AttackDamage>k__BackingField: 0
+    <AttackCooldown>k__BackingField: 1
 --- !u!114 &3130351792361390793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6873,20 +6888,20 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  pData: {fileID: 5726922814949680812}
-  staminaRecoveryDelay: 2
-  staminaRecoveryRate: 15
   knockRecoveryDelay: 5
   knockRecoveryRate: 20
   ragdollRecoveryValue: 50
   maxHP: 100
   currentHP: 0
-  maxStamina: 100
-  currentStamina: 0
   maxKnock: 100
   currentKnock: 0
   strenght: 100
   speed: 100
+  pData: {fileID: 5726922814949680812}
+  staminaRecoveryDelay: 0.5
+  staminaRecoveryRate: 15
+  maxStamina: 100
+  currentStamina: 0
 --- !u!114 &858769467701975222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6937,6 +6952,33 @@ MonoBehaviour:
   interactLayer:
     serializedVersion: 2
     m_Bits: 512
+--- !u!54 &1381176049468118383
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723889319432024688}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &794669959467138394
 GameObject:
   m_ObjectHideFlags: 0
@@ -7000,10 +7042,10 @@ RectTransform:
   - {fileID: 4792748515695320234}
   m_Father: {fileID: 6227196008544358616}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 620, y: -75}
-  m_SizeDelta: {x: 150.00003, y: 150}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4336538314633936214
 MonoBehaviour:
@@ -8007,10 +8049,10 @@ RectTransform:
   - {fileID: 5235069010868400709}
   m_Father: {fileID: 6227196008544358616}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 100.000015, y: -75}
-  m_SizeDelta: {x: 150.00003, y: 150}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &7226267909098909596
 MonoBehaviour:
@@ -9490,10 +9532,10 @@ RectTransform:
   - {fileID: 4341914724802477868}
   m_Father: {fileID: 6227196008544358616}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 273.33334, y: -75}
-  m_SizeDelta: {x: 150.00003, y: 150}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8647163149018796662
 MonoBehaviour:
@@ -17080,7 +17122,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &7298159882866053679
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17415,7 +17457,6 @@ MonoBehaviour:
   rigBuilder: {fileID: 0}
   FollowCameraTargetRig: {fileID: 8284711092107841444}
   FollowCameraRig: {fileID: 8809524061636370432}
-  TwoHandedItemRig: {fileID: 3854901455636316273}
 --- !u!114 &5740955926224549588
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17897,6 +17938,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 390672050036575363}
+  - {fileID: 7222030535817635003}
   - {fileID: 4576199550814248252}
   m_Father: {fileID: 3562176446656552251}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -19274,7 +19316,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2248745817357506283}
-  - component: {fileID: 6509520873338204845}
   m_Layer: 6
   m_Name: Model
   m_TagString: Untagged
@@ -19300,21 +19341,6 @@ Transform:
   - {fileID: 6292753775542309726}
   m_Father: {fileID: 3983308246007833474}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6509520873338204845
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4304304414694062524}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2a7ecfb61c1afe4198dbcb3b0e96616, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pData: {fileID: 5726922814949680812}
-  minTime: 0.3
-  maxTime: 10
 --- !u!1 &4305296294479617730
 GameObject:
   m_ObjectHideFlags: 0
@@ -19385,11 +19411,11 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   explosionStat:
-    AttackRadius: 2
-    AttackKnock: 300
-    AttackForce: 30
-    AttackDamage: 100
-    AttackCooldown: 600
+    <AttackRadius>k__BackingField: 0
+    <AttackKnock>k__BackingField: 0
+    <AttackForce>k__BackingField: 0
+    <AttackDamage>k__BackingField: 0
+    <AttackCooldown>k__BackingField: 0
   explosionParticles:
   - {fileID: 6149968615087054525}
   - {fileID: 6784692493753068162}
@@ -19527,10 +19553,10 @@ RectTransform:
   - {fileID: 6754149259999092345}
   m_Father: {fileID: 6227196008544358616}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 446.6667, y: -75}
-  m_SizeDelta: {x: 150.00003, y: 150}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &818976333996855784
 MonoBehaviour:
@@ -20434,6 +20460,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3573505510449193553}
+  - {fileID: 340793200071468385}
   - {fileID: 6988137242947884328}
   m_Father: {fileID: 32236559221650101}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -20516,7 +20543,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &91708827015942390
 RectTransform:
   m_ObjectHideFlags: 0
@@ -24138,11 +24165,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pData: {fileID: 5726922814949680812}
   CharacterAnimator: {fileID: 3883719051608371498}
-  SkinMaterial: {fileID: 0}
-  SkinRenderer: {fileID: 9081004902914118949}
   RightHand: {fileID: 4671540735015642137}
+  GrabPoint: {fileID: 340793200071468385}
+  SkinRenderer: {fileID: 9081004902914118949}
+  SkinMaterial: {fileID: 0}
   Ragdoll_Manager: {fileID: 2628474058886618073}
   Rigging_Manager: {fileID: 8346551982977705393}
+  chestT: {fileID: 8104888232209500220}
+  breathShrinkers:
+  - {fileID: 8201666577501915587}
+  - {fileID: 4576754257155614159}
+  - {fileID: 5654790955304129843}
+  chestTS: {x: 1.05, y: 1.05, z: 1.05}
+  breathShrTS: {x: 0.95, y: 0.95, z: 0.95}
+  breathSpd: 0.8
+  blinkBSIndex: 0
+  blkMinTime: 0.4
+  blkMaxTime: 10
+  blkStopDelay: 0.3
 --- !u!1 &6641723167237012212
 GameObject:
   m_ObjectHideFlags: 0
@@ -25445,7 +25485,6 @@ MonoBehaviour:
   rigBuilder: {fileID: 3431411341643309887}
   FollowCameraTargetRig: {fileID: 7349252396361790117}
   FollowCameraRig: {fileID: 739442394655280085}
-  TwoHandedItemRig: {fileID: 1736159117784272838}
 --- !u!114 &6101962407517795444
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26976,6 +27015,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Weight: 0
   m_Effectors: []
+--- !u!1 &7860999099779308460
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7289870288711376836}
+  m_Layer: 0
+  m_Name: G_Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7289870288711376836
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7860999099779308460}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.00000004656613, y: -0.22938104, z: -0.0000001322478, w: 0.97333676}
+  m_LocalPosition: {x: 0.000149, y: 0.0009, z: 0.000103}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1154314334397765063}
+  m_LocalEulerAnglesHint: {x: 0, y: -26.521, z: 0}
 --- !u!1 &7904290253170970567
 GameObject:
   m_ObjectHideFlags: 0
@@ -27785,6 +27855,37 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!1 &8173507908719600768
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 340793200071468385}
+  m_Layer: 0
+  m_Name: G_Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &340793200071468385
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8173507908719600768}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.00000002328306, y: -0.21225296, z: 0.00000011839437, w: 0.9772148}
+  m_LocalPosition: {x: 0.000214, y: 0.001319, z: 0.000148}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4671540735015642137}
+  m_LocalEulerAnglesHint: {x: 0, y: -24.509, z: 0}
 --- !u!1 &8191250645563599418
 GameObject:
   m_ObjectHideFlags: 0
@@ -28933,6 +29034,37 @@ RectTransform:
   m_AnchoredPosition: {x: 185, y: -100}
   m_SizeDelta: {x: 150, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &8666588617738821115
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7222030535817635003}
+  m_Layer: 0
+  m_Name: G_Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7222030535817635003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8666588617738821115}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.00000009313226, y: -0.22283798, z: -0.00000008568168, w: 0.97485554}
+  m_LocalPosition: {x: 0.00016, y: 0.001063, z: 0.000121}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5216161164139671104}
+  m_LocalEulerAnglesHint: {x: 0, y: -25.752, z: 0}
 --- !u!1 &8677434292472036103
 GameObject:
   m_ObjectHideFlags: 0
@@ -29842,11 +29974,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pData: {fileID: 5726922814949680812}
   CharacterAnimator: {fileID: 6137086544213189909}
-  SkinMaterial: {fileID: 0}
-  SkinRenderer: {fileID: 7280080076347238745}
   RightHand: {fileID: 1154314334397765063}
+  GrabPoint: {fileID: 7289870288711376836}
+  SkinRenderer: {fileID: 7280080076347238745}
+  SkinMaterial: {fileID: 0}
   Ragdoll_Manager: {fileID: 6101962407517795444}
   Rigging_Manager: {fileID: 839271914329419114}
+  chestT: {fileID: 990836109195657858}
+  breathShrinkers:
+  - {fileID: 257440620107191460}
+  - {fileID: 1955020221115000118}
+  - {fileID: 8216728126181563554}
+  - {fileID: 7664232548825543185}
+  chestTS: {x: 1.05, y: 1.05, z: 1.05}
+  breathShrTS: {x: 0.95, y: 0.95, z: 0.95}
+  breathSpd: 0.8
+  blinkBSIndex: 8
+  blkMinTime: 0.4
+  blkMaxTime: 10
+  blkStopDelay: 1
 --- !u!1001 &253047719440434933
 PrefabInstance:
   m_ObjectHideFlags: 0

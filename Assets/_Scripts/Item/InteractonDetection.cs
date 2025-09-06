@@ -17,11 +17,15 @@ public class InteractonDetection : NetworkBehaviour
 
     private void Start()
     {
+        if (!isLocalPlayer) return;
+
         GameTick.OnTick += OnTick;
     }
 
     private void OnDestroy()
     {
+        if (!isLocalPlayer) return;
+
         GameTick.OnTick -= OnTick;
     }
 

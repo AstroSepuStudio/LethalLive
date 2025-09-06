@@ -146,4 +146,12 @@ public class LobbyManagerScreen : UIManager
 
         LobbyManager.Instace.LobbySettings.SetTeamKnock(value);
     }
+
+    public void StartGame()
+    {
+        if (!identity.isServer) return;
+        Debug.Log("Requesting map generation");
+
+        GameManager.Instance.StartGame();
+    }
 }

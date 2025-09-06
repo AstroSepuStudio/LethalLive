@@ -1,4 +1,5 @@
 using Mirror;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,6 +27,8 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float friction = 3f;
     [SerializeField] float staminaConsuption_Sprint = 10f;
     [SerializeField] float staminaConsuption_Jump = 20f;
+    Dictionary<int, float> speedModifiers = new();
+    int nextModifierId = 0;
     Vector3 externalMomentum = Vector3.zero;
 
     [Header("Crouching")]
@@ -46,23 +49,6 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float timer;
     [SerializeField] int footstepIndex = 0;
 
-    Vector2 movementInput;
-    Vector3 velocity;
-    [SerializeField] Collider[] res;
-    bool IsGrounded()
-    {
-        res = Physics.OverlapSphere(feet.position, groundRadius);
-        for (int i = 0; i < res.Length; i++)
-        {
-            if (res[i] != pData.PlayerCollider) return true;
-        }
-        if (Physics.Raycast(feet.position + Vector3.down * groundRadius, Vector3.down, raycastLenght, pData.PlayerMask)) return true;
-
-        return false;
-    }
-    bool IsSomethingAbove() => Physics.CheckSphere(pData.Head.position, groundRadius, pData.IgnorePlayer);
-
-    // --- FLAGS --- //
     [Header("Flags")]
     [SerializeField] float groundedTime;
     [SerializeField] float jumpTime;
@@ -82,6 +68,23 @@ public class PlayerMovement : NetworkBehaviour
     float crouchMovBlend;
     [SyncVar(hook = nameof(OnStandCrouchChanged))]
     float standCrouchBlend;
+
+    [SerializeField] Collider[] res;
+    Vector2 movementInput;
+    Vector3 velocity;
+    bool IsGrounded()
+    {
+        res = Physics.OverlapSphere(feet.position, groundRadius);
+        for (int i = 0; i < res.Length; i++)
+        {
+            if (res[i] != pData.PlayerCollider) return true;
+        }
+        if (Physics.Raycast(feet.position + Vector3.down * groundRadius, Vector3.down, raycastLenght, pData.PlayerMask)) return true;
+
+        return false;
+    }
+    bool IsSomethingAbove() => Physics.CheckSphere(pData.Head.position, groundRadius, pData.IgnorePlayer);
+
 
     private void Start()
     {
@@ -283,6 +286,31 @@ public class PlayerMovement : NetworkBehaviour
     }
     #endregion
 
+    #region Debuff/Buff
+    public int AddSpeedModifier(float multiplier)
+    {
+        int id = nextModifierId++;
+        speedModifiers[id] = multiplier;
+        RecalculateSpeedMultiplier();
+        return id;
+    }
+
+    public void RemoveSpeedModifier(int id)
+    {
+        if (speedModifiers.Remove(id))
+            RecalculateSpeedMultiplier();
+    }
+
+    private void RecalculateSpeedMultiplier()
+    {
+        float final = 1f;
+        foreach (var mod in speedModifiers.Values)
+            final *= mod;
+
+        speedMultiplier = Mathf.Max(0f, final);
+    }
+    #endregion
+
     void Update()
     {
         if (!isServer) return;
@@ -347,8 +375,8 @@ public class PlayerMovement : NetworkBehaviour
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             pData.EmoteManager.PlayerMoves();
         }
-        float multiplier = speedMultiplier < 0 ? 0 : speedMultiplier;
-        move *= movSpeed * multiplier * (pData.Player_Stats.speed / 100f);
+
+        move *= movSpeed * speedMultiplier * (pData.Player_Stats.speed / 100f);
 
         velocity.x = move.x + externalMomentum.x;
         velocity.z = move.z + externalMomentum.z;
@@ -404,11 +432,6 @@ public class PlayerMovement : NetworkBehaviour
         Gizmos.DrawWireSphere(feet.transform.position, groundRadius);
         Gizmos.DrawWireSphere(pData.Head.transform.position, groundRadius);
         Gizmos.DrawLine(feet.position + Vector3.down * groundRadius, feet.position + Vector3.down * groundRadius + Vector3.down * raycastLenght);
-    }
-
-    public void ChangeSpeedMultiplier(float delta)
-    {
-        speedMultiplier += delta;
     }
 
     public void AddMomentum(Vector3 force)
