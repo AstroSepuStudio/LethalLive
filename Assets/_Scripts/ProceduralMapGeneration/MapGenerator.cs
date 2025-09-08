@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,6 +25,8 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] PlayerInput pInput;
     [SerializeField] bool generateOnStart = false;
     [SerializeField] bool stepGenerationMode = false;
+    [SerializeField] GameObject seedDisplayCanvas;
+    [SerializeField] TextMeshProUGUI seedDisplayTxt;
 
     private System.Random rng;
     private Cell[,,] grid;
@@ -55,15 +59,6 @@ public class MapGenerator : MonoBehaviour
         public Vector3Int local;
     }
 
-    private void Awake()
-    {
-        grid = new Cell[gridSize.x, gridSize.y, gridSize.z];
-        for (int x = 0; x < gridSize.x; x++)
-            for (int y = 0; y < gridSize.y; y++)
-                for (int z = 0; z < gridSize.z; z++)
-                    grid[x, y, z] = new Cell();
-    }
-
     private void Start()
     {
         if (generateOnStart)
@@ -72,9 +67,17 @@ public class MapGenerator : MonoBehaviour
 
     public void StartGeneration(int setSeed = -1)
     {
-        seed = setSeed;
+        int size = LobbySettings.Instance.MapSize;
+        grid = new Cell[gridSize.x * size, gridSize.y * size, gridSize.z * size];
+        for (int x = 0; x < gridSize.x; x++)
+            for (int y = 0; y < gridSize.y; y++)
+                for (int z = 0; z < gridSize.z; z++)
+                    grid[x, y, z] = new Cell();
 
+        seed = setSeed;
         rng = new System.Random(seed);
+
+        StartCoroutine(DisplaySeed(setSeed, 5f));
 
         if (stepGenerationMode)
         {
@@ -184,7 +187,10 @@ public class MapGenerator : MonoBehaviour
     {
         if (theme == null || theme.startingRoom == null) { Debug.LogError("Theme or startingRoom is missing."); return; }
         var center = new Vector3Int(gridSize.x / 2, Mathf.Clamp(gridSize.y / 2, 0, gridSize.y - 1), gridSize.z / 2); 
-        var start = Place(theme.startingRoom, center, depth: 0); 
+        var start = Place(theme.startingRoom, center, depth: 0);
+
+        if (GameManager.Instance.isServer)
+            GameManager.Instance.startRoomPos = center * cellSize;
 
         if (start == null) 
         { 
@@ -193,12 +199,12 @@ public class MapGenerator : MonoBehaviour
         }
 
         var frontier = BuildOpenPorts(start); 
-        while (frontier.Count > 0 && placed.Count < maxRooms) 
+        while (frontier.Count > 0 && placed.Count < maxRooms * LobbySettings.Instance.MapSize) 
         { 
             int idx = rng.Next(frontier.Count); 
             var open = frontier[idx]; frontier.RemoveAt(idx); 
 
-            if (open.depth >= maxDepth) continue;
+            if (open.depth >= maxDepth * LobbySettings.Instance.MapSize) continue;
 
             var neighborRoom = placed.Find(r => r.id == open.roomId);
             var candidates = GetWeightedCandidates(theme.spawnableRooms, neighborRoom.biome);
@@ -403,4 +409,14 @@ public class MapGenerator : MonoBehaviour
         }
     }
     #endregion
+
+    IEnumerator DisplaySeed(int seed, float duration)
+    {
+        seedDisplayCanvas.SetActive(true);
+        seedDisplayTxt.SetText($"Seed: {seed}");
+
+        yield return new WaitForSeconds(duration);
+
+        seedDisplayCanvas.SetActive(false);
+    }
 }

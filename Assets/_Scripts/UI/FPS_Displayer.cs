@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -6,6 +7,19 @@ public class FPS_Displayer : MonoBehaviour
     [SerializeField] TextMeshProUGUI fpsDisplay;
     [SerializeField] bool lockFPS;
     [SerializeField] int targetFPS;
+
+    List<float> fpsPtick;
+
+    float GetAverage()
+    {
+        float av = 0;
+        foreach (var fps in fpsPtick)
+        {
+            av += fps;
+        }
+
+        return av / fpsPtick.Count;
+    }
 
     private void Start()
     {
@@ -25,6 +39,10 @@ public class FPS_Displayer : MonoBehaviour
 
     private void OnTick()
     {
-        fpsDisplay.SetText($"FPS: {Mathf.Round(1/Time.deltaTime)}");
+        float fps = 1 / Time.deltaTime;
+        fpsPtick.Add(fps);
+
+        fpsDisplay.SetText($"{Mathf.Round(fps)} FPS \n" +
+            $"{GetAverage()} Av.");
     }
 }

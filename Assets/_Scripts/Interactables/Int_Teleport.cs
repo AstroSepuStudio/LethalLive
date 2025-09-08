@@ -1,16 +1,20 @@
 using UnityEngine;
 
-public class Int_Teleport : MonoBehaviour
+public class Int_Teleport : InteractableObject
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] Transform targetPosition;
+
+    public void SetTeleportPos(Vector3 pos)
     {
-        
+        targetPosition.position = pos;
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void OnInteract(PlayerData sourceData)
     {
-        
+        sourceData.Character_Controller.enabled = false;
+        sourceData.Character_Controller.transform.position = targetPosition.position;
+        sourceData.Character_Controller.enabled = true;
+
+        DisableCanvas();
     }
 }

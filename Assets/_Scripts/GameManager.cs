@@ -11,7 +11,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] ItemSO[] itemsData;
     [SerializeField] LobbyManagerScreen lobbyManagerScreen;
     [SerializeField] MapGenerator mapGenerator;
-    [SerializeField] GameObject teleporter;
+    [SerializeField] Int_Teleport teleporter;
     [SerializeField] List<PlayerData> players = new ();
 
     public IReadOnlyList<PlayerData> Players => players;
@@ -22,6 +22,9 @@ public class GameManager : NetworkBehaviour
 
     [SyncVar]
     public int mapSeed;
+
+    [SyncVar]
+    public Vector3 startRoomPos;
 
     public struct LobbyMemberData
     {
@@ -145,14 +148,16 @@ public class GameManager : NetworkBehaviour
 
         mapSeed = UnityEngine.Random.Range(-1000000, 1000000);
 
-        RpcGenerateMap();
+        RpcGenerateMap(mapSeed);
     }
 
     [ClientRpc]
-    void RpcGenerateMap()
+    void RpcGenerateMap(int seed)
     {
         Debug.Log("Generating map");
 
-        mapGenerator.StartGeneration(mapSeed);
+        mapGenerator.StartGeneration(seed);
+        teleporter.SetTeleportPos(startRoomPos);
+        teleporter.gameObject.SetActive(true);
     }
 }

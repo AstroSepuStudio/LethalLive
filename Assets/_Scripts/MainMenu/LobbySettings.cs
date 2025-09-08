@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class LobbySettings : NetworkBehaviour
 {
+    public static LobbySettings Instance;
+
     [Header("Lobby Settings")]
     [SyncVar] private ELobbyType lobby_Type = ELobbyType.k_ELobbyTypeFriendsOnly;
-    [SyncVar] private int mapSize = 30;
+    [SyncVar] private int mapSize = 10;
     [SyncVar] private bool teamDamage = false;
     [SyncVar] private bool teamKnock = true;
 
@@ -14,6 +16,11 @@ public class LobbySettings : NetworkBehaviour
     public int MapSize => mapSize;
     public bool TeamDamage => teamDamage;
     public bool TeamKnock => teamKnock;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     [Server]
     public void SetLobbyType(ELobbyType lobbyType)
