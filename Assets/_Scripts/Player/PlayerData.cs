@@ -48,9 +48,16 @@ public class PlayerData : NetworkBehaviour
     public string PlayerName;
     public byte[] AvatarData;
 
-    [SyncVar(hook = nameof(OnCameraHorizChanged))] float syncedHoriz;
-    [SyncVar(hook = nameof(OnCameraVertChanged))] float syncedVert;
-    [SyncVar(hook = nameof(OnCameraDistanceChanged))] float syncedDistance;
+    [SyncVar(hook = nameof(OnCameraPivotChanged))] 
+    float syncedHoriz;
+    [SyncVar(hook = nameof(OnCameraPivotChanged))] 
+    float syncedVert;
+    [SyncVar(hook = nameof(OnCameraPivotChanged))] 
+    float syncedDistance;
+    [SyncVar(hook = nameof(OnCameraPivotChanged))]
+    float syncedHorizOffset = 0.3f;
+    [SyncVar(hook = nameof(OnCameraPivotChanged))]
+    float syncedVertOffset = 1.4f;
 
     [SyncVar]
     public int Index = -1;
@@ -114,7 +121,6 @@ public class PlayerData : NetworkBehaviour
 
         if (avatar_id == -1) yield break;
 
-        Debug.Log("avatar id got: " + avatar_id);
         byte[] avatarData = null;
 
         uint width = 0, height = 0;
@@ -134,8 +140,6 @@ public class PlayerData : NetworkBehaviour
             yield break;
         }
 
-        Debug.Log($"Got image size: {width}x{height}");
-
         byte[] image = new byte[width * height * 4];
         success = false;
         timer = 0f;
@@ -149,8 +153,6 @@ public class PlayerData : NetworkBehaviour
 
         if (success)
         {
-            Debug.Log("Got image RGBA data");
-
             Texture2D avatar = new Texture2D((int)width, (int)height, TextureFormat.RGBA32, false, true);
             avatar.LoadRawTextureData(image);
             avatar.Apply();
@@ -162,7 +164,6 @@ public class PlayerData : NetworkBehaviour
         CmdSendSteamInfo(SteamUser.GetSteamID(), name, avatarData);
     }
 
-
     [Command]
     private void CmdSendSteamInfo(CSteamID steamID, string name, byte[] avatarData)
     {
@@ -172,20 +173,22 @@ public class PlayerData : NetworkBehaviour
     }
 
     [Command]
-    public void CmdSetCameraData(float h, float v, float dist)
+    public void CmdSetCameraData(float h, float v, float dist, float hO, float vO)
     {
         syncedHoriz = h;
         syncedVert = v;
         syncedDistance = dist;
+        syncedHorizOffset = hO;
+        syncedVertOffset = vO;
     }
 
-    void OnCameraHorizChanged(float _, float h) => ApplyCameraRotation();
-    void OnCameraVertChanged(float _, float v) => ApplyCameraRotation();
-    void OnCameraDistanceChanged(float _, float d) => ApplyCameraRotation();
+    void OnCameraPivotChanged(float _, float __) => ApplyCameraRotation();
 
     void ApplyCameraRotation()
     {
         if (isLocalPlayer) return;
+
+        CameraTarget.localPosition = new(syncedHorizOffset, syncedVertOffset, 0f);
 
         Quaternion targetRotation = Quaternion.Euler(syncedVert, syncedHoriz, 0f);
         CameraPivot.rotation = targetRotation;

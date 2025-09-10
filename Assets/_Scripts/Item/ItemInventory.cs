@@ -1,5 +1,4 @@
 using Mirror;
-using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -74,32 +73,30 @@ public class ItemInventory : NetworkBehaviour
         CmdDropItem();
     }
 
-    public void SelectSlot_00(InputAction.CallbackContext context)
+    public void SelectNextSlot(InputAction.CallbackContext context)
     {
         if (!context.started) return;
 
-        CmdSelectSlot(0);
+        CmdSelectNextSlot();
     }
 
-    public void SelectSlot_01(InputAction.CallbackContext context)
+    public void SelectSlot(InputAction.CallbackContext context, int index)
     {
         if (!context.started) return;
 
-        CmdSelectSlot(1);
+        CmdSelectSlot(index);
     }
 
-    public void SelectSlot_02(InputAction.CallbackContext context)
-    {
-        if (!context.started) return;
-
-        CmdSelectSlot(2);
-    }
-    public void SelectSlot_03(InputAction.CallbackContext context)
-    {
-        if (!context.started) return;
-
-        CmdSelectSlot(3);
-    }
+    public void SelectSlot_00(InputAction.CallbackContext context) => SelectSlot(context, 0);
+    public void SelectSlot_01(InputAction.CallbackContext context) => SelectSlot(context, 1);
+    public void SelectSlot_02(InputAction.CallbackContext context) => SelectSlot(context, 2);
+    public void SelectSlot_03(InputAction.CallbackContext context) => SelectSlot(context, 3);
+    public void SelectSlot_04(InputAction.CallbackContext context) => SelectSlot(context, 4);
+    public void SelectSlot_05(InputAction.CallbackContext context) => SelectSlot(context, 5);
+    public void SelectSlot_06(InputAction.CallbackContext context) => SelectSlot(context, 6);
+    public void SelectSlot_07(InputAction.CallbackContext context) => SelectSlot(context, 7);
+    public void SelectSlot_08(InputAction.CallbackContext context) => SelectSlot(context, 8);
+    public void SelectSlot_09(InputAction.CallbackContext context) => SelectSlot(context, 9);
     #endregion
 
     [Server]
@@ -150,11 +147,38 @@ public class ItemInventory : NetworkBehaviour
     }
 
     [Command]
-    void CmdSelectSlot(int index)
+    void CmdSelectNextSlot()
     {
         if (HasTwoHandedEquipped || IsItemInUse) return;
 
-        LocalSelectSlot(index);
+        int startIndex = selectedSlotIndex;
+        int nextIndex = (selectedSlotIndex + 1) % inventorySlots.Length;
+
+        while (nextIndex != startIndex)
+        {
+            if (inventorySlots[nextIndex] != null)
+            {
+                //selectedSlotIndex = nextIndex;
+                RpcSelectSlot(nextIndex);
+                return;
+            }
+
+            nextIndex = (nextIndex + 1) % inventorySlots.Length;
+        }
+
+        nextIndex = (selectedSlotIndex + 1) % inventorySlots.Length;
+
+        //LocalSelectSlot(selectedSlotIndex);
+        RpcSelectSlot(nextIndex);
+    }
+
+    [Command]
+    void CmdSelectSlot(int index)
+    {
+        if (HasTwoHandedEquipped || IsItemInUse) return;
+        if (index >= inventorySlots.Length) return;
+
+        //LocalSelectSlot(index);
         RpcSelectSlot(index);
     }
 
@@ -183,6 +207,10 @@ public class ItemInventory : NetworkBehaviour
         if (item == null)
         {
             equippedItem = null;
+            pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", false);
+            pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", false);
+            pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", false);
+
             pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 0);
             return;
         }
@@ -196,15 +224,23 @@ public class ItemInventory : NetworkBehaviour
 
         if (item.ItemData.isTwoHanded)
         {
+            pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", false);
+            pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", false);
             pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", true);
         }
         else
         {
             switch (item.ItemData.itemName.ToLower())
             {
-                case "crowbar": pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", true); break;
+                case "crowbar":
+                    pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", false);
+                    pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", false);
+                    pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", true); break;
 
-                default: pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", true); break;
+                default:
+                    pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", false);
+                    pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", false);
+                    pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", true); break;
             }
         }
 
@@ -216,7 +252,7 @@ public class ItemInventory : NetworkBehaviour
     {
         if (equippedItem == null || IsItemInUse) return;
 
-        LocalDropItem();
+        //LocalDropItem();
         RpcDropItem();
     }
 

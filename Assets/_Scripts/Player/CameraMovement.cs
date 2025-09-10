@@ -18,6 +18,7 @@ public class CameraMovement : MonoBehaviour
     [SerializeField] float minZoom = 1f;
     [SerializeField] float maxZoom = 6f;
     [SerializeField] float smoothTime = 0.2f;
+    [SerializeField] float offsetSpeed = 5f;
 
     Vector3 velocity = Vector3.zero;
     float distanceToTarget = 4f;
@@ -43,6 +44,11 @@ public class CameraMovement : MonoBehaviour
             smoothTime);
 
         if (!pData.isLocalPlayer || _stop || pData.HUDManager.OpenedWindow) return;
+
+        Vector2 camOffset = pData.Player_Input.actions["AdjustCam"].ReadValue<Vector2>();
+        float xOffset = Mathf.Clamp(pData.CameraTarget.localPosition.x + camOffset.x * Time.deltaTime * offsetSpeed, -0.6f, 0.6f);
+        float yOffset = Mathf.Clamp(pData.CameraTarget.localPosition.y + camOffset.y * Time.deltaTime * offsetSpeed, 0.8f, 1.6f);
+        pData.CameraTarget.localPosition = new (xOffset, yOffset, 0f);
 
         float scrollInput = pData.Player_Input.actions["Zoom"].ReadValue<float>();
         distanceToTarget = Mathf.Clamp(distanceToTarget - scrollInput * zoomSensitivity * Time.deltaTime, minZoom, maxZoom);
@@ -78,8 +84,8 @@ public class CameraMovement : MonoBehaviour
             if (Mathf.Approximately(blend, -1))
             {
                 pData.Skin_Data.SkinRenderer.enabled = false;
-                if (!_ignoreCrosshair)
-                    crosshair.SetActive(true);
+                //if (!_ignoreCrosshair)
+                //    crosshair.SetActive(true);
             }
         }
         else
@@ -89,11 +95,11 @@ public class CameraMovement : MonoBehaviour
                 float blend = Mathf.MoveTowards(pData.Skin_Data.SkinMaterial.GetFloat("_Tweak_transparency"), 0, Time.deltaTime * 6f);
                 pData.Skin_Data.SkinMaterial.SetFloat("_Tweak_transparency", blend);
                 pData.Skin_Data.SkinRenderer.enabled = true;
-                crosshair.SetActive(false);
+                //crosshair.SetActive(false);
             }
         }
 
-        pData.CmdSetCameraData(horizontal, vertical, distanceToTarget);
+        pData.CmdSetCameraData(horizontal, vertical, distanceToTarget, pData.CameraTarget.localPosition.x, pData.CameraTarget.localPosition.y);
     }
 
     public void PauseCamera()

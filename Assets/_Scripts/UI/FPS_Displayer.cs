@@ -8,7 +8,7 @@ public class FPS_Displayer : MonoBehaviour
     [SerializeField] bool lockFPS;
     [SerializeField] int targetFPS;
 
-    List<float> fpsPtick;
+    List<float> fpsPtick = new();
 
     float GetAverage()
     {
