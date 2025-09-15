@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class EmoteWheelPiece : MonoBehaviour
 {
-    [SerializeField] Image icon;
+    [SerializeField] TextMeshProUGUI emoteName;
     public CanvasGroup canvasGroup;
     public RectTransform pivot;
 
@@ -12,12 +12,12 @@ public class EmoteWheelPiece : MonoBehaviour
     {
         if (emote == null)
         {
-            icon.sprite = null;
+            emoteName.text = "";
             pivot.gameObject.SetActive(false);
             return;
         }
 
         pivot.gameObject.SetActive(true);
-        icon.sprite = emote.icon;
+        emoteName.text = emote.emoteName;
     }
 }
