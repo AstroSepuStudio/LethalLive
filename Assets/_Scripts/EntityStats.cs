@@ -53,6 +53,19 @@ public class EntityStats : NetworkBehaviour
     #region HP
 
     [Server]
+    public virtual void ReceiveAttack(EntityStats src, AttackStat attack)
+    {
+        ModifyHP(-attack.AttackDamage);
+
+        float multiplier = Random.Range(1f, 2f);
+        Vector3 dir = transform.position - src.transform.position;
+
+        float knockAmount = attack.AttackKnock * multiplier * (src.strenght / 100f);
+        Vector3 momentum = multiplier * attack.AttackForce * dir.normalized;
+        ModifyKnock(-knockAmount, momentum);
+    }
+
+    [Server]
     public virtual void ModifyHP(float amount)
     {
         currentHP = Mathf.Clamp(currentHP + amount, 0f, maxHP);

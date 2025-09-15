@@ -7,6 +7,7 @@ public class PunchManager : NetworkBehaviour
 {
     [SerializeField] PlayerData pData;
     [SerializeField] AttackStat punchStats;
+    [SerializeField] LayerMask entityLayer;
 
     private bool isPunching = false;
     WaitForSeconds punchCooldown;
@@ -93,32 +94,18 @@ public class PunchManager : NetworkBehaviour
     void CheckForHit()
     {
         Debug.Log("Checking for punch");
-        Collider[] hitPlayers = Physics.OverlapSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius, pData.PlayerMask);
-        foreach (Collider col in hitPlayers)
+        Collider[] hitEntities = Physics.OverlapSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius, entityLayer);
+        foreach (Collider col in hitEntities)
         {
-            for (int i = 0; i < GameManager.Instance.Players.Count; i++)
+            if (!col.TryGetComponent(out EntityStats entity)) return;
+
+            if (entity is PlayerStats playerStats)
             {
-                // Valid target
-                if (GameManager.Instance.Players[i].gameObject == pData.gameObject ||
-                    GameManager.Instance.Players[i].gameObject != col.gameObject) continue;
-
-                // Team check
-                if (GameManager.Instance.Players[i].Team == pData.Team)
-                {
-                    if (!LobbyManager.Instace.LobbySettings.TeamKnock)
-                    {
-                        Debug.Log("Team Knock is disabled!");
-                        return;
-                    }
-                }
-
-                float multiplier = UnityEngine.Random.Range(1f, 2f);
-                Vector3 dir = GameManager.Instance.Players[i].transform.position - pData.transform.position;
-
-                float knockAmount = punchStats.AttackKnock * multiplier * (pData.Player_Stats.strenght / 100f);
-                Vector3 momentum = multiplier * punchStats.AttackForce * dir.normalized;
-
-                GameManager.Instance.Players[i].Player_Stats.ModifyKnock(knockAmount, momentum);
+                playerStats.ReceiveAttack(pData, punchStats);
+            }
+            else
+            {
+                entity.ReceiveAttack(pData.Player_Stats, punchStats);
             }
         }
     }

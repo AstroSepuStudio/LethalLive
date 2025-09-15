@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4958102593810014000}
   - component: {fileID: 5678628326748306589}
   - component: {fileID: 3517630597603384283}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -263,6 +263,7 @@ MonoBehaviour:
     <AttackForce>k__BackingField: 0
     <AttackDamage>k__BackingField: 0
     <AttackCooldown>k__BackingField: 0
+  InUse: 0
   hurtBox: {fileID: 5678628326748306589}
 --- !u!54 &2342669760519003277
 Rigidbody:

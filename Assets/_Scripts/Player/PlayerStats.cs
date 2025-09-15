@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerStats : EntityStats
 {
-    [SerializeField] PlayerData pData;
+    public PlayerData pData;
 
     [SerializeField] float staminaRecoveryDelay;
     [SerializeField] float staminaRecoveryRate;

@@ -8311,7 +8311,7 @@ MonoBehaviour:
   PlayerCollider: {fileID: 1800826492830073625}
   IgnorePlayer:
     serializedVersion: 2
-    m_Bits: 695
+    m_Bits: 691
   PlayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -8421,8 +8421,11 @@ MonoBehaviour:
     <AttackRadius>k__BackingField: 0.3
     <AttackKnock>k__BackingField: 10
     <AttackForce>k__BackingField: 3
-    <AttackDamage>k__BackingField: 0
+    <AttackDamage>k__BackingField: 3
     <AttackCooldown>k__BackingField: 1
+  entityLayer:
+    serializedVersion: 2
+    m_Bits: 1088
 --- !u!114 &3130351792361390793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20942,7 +20945,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 247
+    m_Bits: 1783
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

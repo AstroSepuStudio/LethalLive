@@ -18,6 +18,7 @@ public class ItemHurtbox : NetworkBehaviour
 
     public void EnableHitbox()
     {
+        hitEntities.Clear();
         hitbox.enabled = true;
     }
 
@@ -31,8 +32,10 @@ public class ItemHurtbox : NetworkBehaviour
     {
         if (!isServer) return;
 
+        if (other.gameObject == item.pData.gameObject) return;
+
         if (hitEntities.Contains(other.gameObject)) return;
-        
+
         if (other.TryGetComponent(out EntityStats stats))
         {
             if (stats is PlayerStats pStats)
@@ -41,7 +44,7 @@ public class ItemHurtbox : NetworkBehaviour
             }
             else
             {
-                //stats.ReceiveAttack(pData, item.primaryAtkStats);
+                stats.ReceiveAttack(item.pData.Player_Stats, item.primaryAtkStats);
             }
 
             hitEntities.Add(other.gameObject);

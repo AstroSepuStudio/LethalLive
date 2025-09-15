@@ -1,25 +1,44 @@
+using Mirror;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[Serializable]
+public struct LootPosition
+{
+    public Transform position;
+    public Vector3 maxOffset;
+    public float chance;
+}
+
+[Serializable]
+public struct FurniturePosition
+{
+    public Transform position;
+    public Vector3 maxOffset;
+    public float maxRotation;
+    public float chance;
+}
+
 public class MapGenerator : MonoBehaviour
 {
     [Header("Content")]
-    [SerializeField] private ThemeDataSO theme;
+    [SerializeField] ThemeDataSO theme;
 
     [Header("Seed")]
-    [SerializeField] private string gameSeed = "Default";
-    [SerializeField] private int seed;
+    [SerializeField] string gameSeed = "Default";
+    [SerializeField] int seed;
 
     [Header("Grid")]
-    [SerializeField] private Vector3Int gridSize = new (24, 6, 24);
-    [SerializeField] private int cellSize = 6;
+    [SerializeField] Vector3Int gridSize = new (24, 6, 24);
+    [SerializeField] int cellSize = 6;
 
     [Header("Limits")]
-    [SerializeField] private int maxRooms = 30;
-    [SerializeField] private int maxDepth = 30;
+    [SerializeField] int maxRooms = 30;
+    [SerializeField] int maxDepth = 30;
 
     [Header("Debug")]
     [SerializeField] PlayerInput pInput;
@@ -28,11 +47,15 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] GameObject seedDisplayCanvas;
     [SerializeField] TextMeshProUGUI seedDisplayTxt;
 
-    private System.Random rng;
-    private Cell[,,] grid;
-    private readonly List<PlacedRoom> placed = new();
-    private readonly Dictionary<int, RoomData> spawned = new();
-    private int nextRoomId = 1;
+    System.Random rng;
+    Cell[,,] grid;
+    readonly List<PlacedRoom> placed = new();
+    readonly Dictionary<int, RoomData> spawned = new();
+    int nextRoomId = 1;
+    bool _generated;
+
+    readonly List<LootPosition> lootPositions = new();
+    readonly List<FurniturePosition> furniturePositions = new();
 
     private struct OpenPort
     {
@@ -67,11 +90,16 @@ public class MapGenerator : MonoBehaviour
 
     public void StartGeneration(int setSeed = -1)
     {
+        if (_generated) return;
+        _generated = true;
+
         int size = LobbySettings.Instance.MapSize;
+        Debug.Log(size);
         grid = new Cell[gridSize.x * size, gridSize.y * size, gridSize.z * size];
-        for (int x = 0; x < gridSize.x; x++)
-            for (int y = 0; y < gridSize.y; y++)
-                for (int z = 0; z < gridSize.z; z++)
+        
+        for (int x = 0; x < gridSize.x * size; x++)
+            for (int y = 0; y < gridSize.y * size; y++)
+                for (int z = 0; z < gridSize.z * size; z++)
                     grid[x, y, z] = new Cell();
 
         seed = setSeed;
@@ -358,7 +386,7 @@ public class MapGenerator : MonoBehaviour
 
     #endregion
 
-    #region Instantiate + door pass
+    #region Instantiate
     private void InstantiateRooms()
     {
         foreach (var pr in placed)
@@ -366,9 +394,71 @@ public class MapGenerator : MonoBehaviour
             var world = Vector3.Scale((Vector3)pr.anchor, new Vector3(cellSize, cellSize, cellSize));
             var go = Instantiate(pr.data.Prefab, world, Quaternion.identity, transform);
             go.name = $"Room {pr.id} (depth {pr.depth})";
-            var rd = go.GetComponent<RoomData>();
-            if (rd == null) Debug.LogWarning($"Prefab {pr.data.Prefab.name} lacks RoomData component.");
+            if (!go.TryGetComponent<RoomData>(out var rd)) 
+                Debug.LogWarning($"Prefab {pr.data.Prefab.name} lacks RoomData component.");
+
             spawned[pr.id] = rd;
+
+            furniturePositions.AddRange(rd.furnitureSpawnPositions);
+            lootPositions.AddRange(rd.itemSpawnPositions);
+        }
+
+        if (GameManager.Instance != null)
+        {
+            if (GameManager.Instance.LocalPlayer.isServer)
+                SpawnFurniture();
+        }
+    }
+
+    [Server]
+    public void SpawnFurniture()
+    {
+        Debug.Log("Spawn Furniture");
+        if (theme.furniturePrefabs.Length <= 0) return;
+
+        foreach (var pos in furniturePositions)
+        {
+            float rand = UnityEngine.Random.Range(0, 100f);
+            if (rand > pos.chance) continue;
+
+            int furnIndex = UnityEngine.Random.Range(0, theme.furniturePrefabs.Length);
+
+            Quaternion rot = pos.position.rotation * Quaternion.Euler(0f, UnityEngine.Random.Range(-pos.maxRotation, pos.maxRotation), 0f);
+            Vector3 offset = new (UnityEngine.Random.Range(-pos.maxOffset.x, pos.maxOffset.x), 
+                UnityEngine.Random.Range(-pos.maxOffset.y, pos.maxOffset.y),
+                UnityEngine.Random.Range(-pos.maxOffset.z, pos.maxOffset.z));
+
+            GameObject furnObj = Instantiate(theme.furniturePrefabs[furnIndex], pos.position.position + offset, rot);
+            NetworkServer.Spawn(furnObj);
+
+            furnObj.transform.Rotate(Vector3.up * UnityEngine.Random.Range(-pos.maxRotation, pos.maxRotation));
+
+            FurnitureEntity furnEnt = furnObj.GetComponent<FurnitureEntity>();
+            lootPositions.AddRange(furnEnt.lootPositions);
+        }
+
+        SpawnLoot();
+    }
+
+    [Server]
+    public void SpawnLoot()
+    {
+        Debug.Log("Spawn Items");
+        if (theme.spawnableItems.Length <= 0) return;
+
+        foreach(var pos in lootPositions)
+        {
+            float rand = UnityEngine.Random.Range(0, 100f);
+            if (rand > pos.chance) continue;
+
+            Vector3 offset = new(UnityEngine.Random.Range(-pos.maxOffset.x, pos.maxOffset.x),
+                UnityEngine.Random.Range(-pos.maxOffset.y, pos.maxOffset.y),
+                UnityEngine.Random.Range(-pos.maxOffset.z, pos.maxOffset.z));
+
+            int itemIndex = UnityEngine.Random.Range(0, theme.spawnableItems.Length);
+
+            GameObject itemObj = Instantiate(theme.spawnableItems[itemIndex].itemPrefab, pos.position.position + offset, pos.position.rotation);
+            NetworkServer.Spawn(itemObj);
         }
     }
 

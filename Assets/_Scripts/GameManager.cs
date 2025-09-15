@@ -15,7 +15,6 @@ public class GameManager : NetworkBehaviour
     [SerializeField] List<PlayerData> players = new ();
 
     public IReadOnlyList<PlayerData> Players => players;
-    public readonly SyncList<uint> syncedItemIds = new();
 
     [HideInInspector] 
     public PlayerData LocalPlayer;
@@ -47,17 +46,17 @@ public class GameManager : NetworkBehaviour
         //DontDestroyOnLoad(gameObject);
     }
 
-    private void Start()
-    {
-        if (isServer)
-        {
-            SpawnItem(0, transform.position);
-            SpawnItem(1, transform.position + transform.forward);
-            SpawnItem(0, transform.position - transform.forward);
-            SpawnItem(1, transform.position + transform.right);
-            SpawnItem(0, transform.position - transform.right);
-        }
-    }
+    //private void Start()
+    //{
+    //    if (isServer)
+    //    {
+    //        SpawnItem(0, transform.position);
+    //        SpawnItem(1, transform.position + transform.forward);
+    //        SpawnItem(0, transform.position - transform.forward);
+    //        SpawnItem(1, transform.position + transform.right);
+    //        SpawnItem(0, transform.position - transform.right);
+    //    }
+    //}
 
     [Server]
     public void RegisterPlayer(PlayerData player)
@@ -86,9 +85,6 @@ public class GameManager : NetworkBehaviour
     {
         GameObject itemGO = Instantiate(itemsData[index].itemPrefab, position, Quaternion.identity);
         NetworkServer.Spawn(itemGO);
-
-        uint netId = itemGO.GetComponent<NetworkIdentity>().netId;
-        syncedItemIds.Add(netId);
     }
 
     [Command(requiresAuthority = false)]
