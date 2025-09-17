@@ -65,6 +65,14 @@ public class AudioManager : MonoBehaviour
         sfxSource.PlayOneShot(sfx.clip, finalVolume);
     }
 
+    public void PlayOneShotAndDestroy(Vector3 position, AudioSFX sfx)
+    {
+        float typeVolume = GetTypeVolume(sfx.audioType);
+        float finalVolume = UserSettings.GlobalVolume * typeVolume * sfx.clipVolume;
+
+        AudioSource.PlayClipAtPoint(sfx.clip, position, finalVolume);
+    }
+
     public void PlayOneShot(AudioSource source, AudioSFX sfx)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);

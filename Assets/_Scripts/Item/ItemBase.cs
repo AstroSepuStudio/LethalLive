@@ -5,9 +5,9 @@ using UnityEngine;
 public class ItemBase : InteractableObject
 {
     public ItemSO ItemData;
-    [SerializeField] NetworkIdentity identity;
-    [SerializeField] Rigidbody rb;
-    [SerializeField] Collider coll;
+    [SerializeField] protected NetworkIdentity identity;
+    [SerializeField] protected Rigidbody rb;
+    [SerializeField] protected Collider coll;
 
     [SerializeField] TextMeshProUGUI itemNameTxt;
     [SerializeField] TextMeshProUGUI itemPriceTxt;
@@ -32,10 +32,8 @@ public class ItemBase : InteractableObject
     {
         base.Start();
 
-        if (isServer)
-        {
+        if (isServer && ItemData.isSellable)
             ItemValue = Random.Range(ItemData.minValue, ItemData.maxValue);
-        }
     }
 
     [Server]
@@ -49,7 +47,7 @@ public class ItemBase : InteractableObject
     }
 
     [ClientRpc]
-    private void RpcGetPlayerData(uint playerID)
+    protected void RpcGetPlayerData(uint playerID)
     {
         NetworkClient.spawned.TryGetValue(playerID, out NetworkIdentity identity);
 
@@ -87,7 +85,9 @@ public class ItemBase : InteractableObject
         base.EnableCanvas();
 
         itemNameTxt.SetText(ItemData.itemName);
-        itemPriceTxt.SetText(ItemValue.ToString());
+
+        if (ItemData.isSellable && itemPriceTxt != null)
+            itemPriceTxt.SetText($"${ItemValue}");
     }
 
     public virtual void PrimaryAction() { }

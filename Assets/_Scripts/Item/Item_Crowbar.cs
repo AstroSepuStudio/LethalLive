@@ -10,9 +10,10 @@ public class Item_Crowbar : ItemBase
             InUse = true;
 
         pData.Skin_Data.CharacterAnimator.SetTrigger("Atk_Crowbar");
-        pData.Skin_Data.CharacterAnimator.SetLayerWeight(3, 1);
+        pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 1);
 
         hurtBox.EnableHitbox();
+        pData.Camera_Movement.ForcePlayerToAim();
     }
 
     public override void PrimaryAnimationFinish()
@@ -20,8 +21,9 @@ public class Item_Crowbar : ItemBase
         if (isServer)
             InUse = false;
 
-        pData.Skin_Data.CharacterAnimator.SetLayerWeight(3, 0);
+        pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 0);
 
         hurtBox.DisableHitbox();
+        pData.Camera_Movement.StopForcePlayerToAim();
     }
 }

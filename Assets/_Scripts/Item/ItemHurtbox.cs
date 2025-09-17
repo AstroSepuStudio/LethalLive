@@ -8,7 +8,13 @@ public class ItemHurtbox : NetworkBehaviour
     [SerializeField] Collider hitbox;
     [SerializeField] ItemBase item;
 
+    [Header("Audio")]
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioSFX[] hitSFX;
+
     List<GameObject> hitEntities = new();
+
+    float lastHitTime;
 
     private void Start()
     {
@@ -28,6 +34,12 @@ public class ItemHurtbox : NetworkBehaviour
         hitEntities.Clear();
     }
 
+    [ClientRpc]
+    void RpcPlayHitSFX(int index)
+    {
+        AudioManager.Instance.PlayOneShot(audioSource, hitSFX[index]);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (!isServer) return;
@@ -35,6 +47,9 @@ public class ItemHurtbox : NetworkBehaviour
         if (other.gameObject == item.pData.gameObject) return;
 
         if (hitEntities.Contains(other.gameObject)) return;
+
+        if ((Time.time - lastHitTime) > 0.5f)
+            RpcPlayHitSFX(Random.Range(0, hitSFX.Length));
 
         if (other.TryGetComponent(out EntityStats stats))
         {

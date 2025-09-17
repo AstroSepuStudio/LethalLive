@@ -102,6 +102,7 @@ public class ItemInventory : NetworkBehaviour
     [Server]
     public bool AddItem(ItemBase item)
     {
+        if (pData._LockPlayer) return false;
         if (item == null) return false;
         if (IsFull()) return false;
 
@@ -117,9 +118,9 @@ public class ItemInventory : NetworkBehaviour
             }
         }
 
-        inventorySlots[index] = item;
-        item.OnPickUp();
-        hotbarSlots[index].SetItem(item);
+        //inventorySlots[index] = item;
+        //item.OnPickUp();
+        //hotbarSlots[index].SetItem(item);
 
         if (equippedItem != null && equippedItem.InUse)
         {
@@ -127,7 +128,7 @@ public class ItemInventory : NetworkBehaviour
             return true;
         }
 
-        LocalSelectSlot(index);
+        //LocalSelectSlot(index);
         RpcAddItem(item.ID, index, true);
         return true;
     }
@@ -149,6 +150,7 @@ public class ItemInventory : NetworkBehaviour
     [Command]
     void CmdSelectNextSlot()
     {
+        if (pData._LockPlayer) return;
         if (HasTwoHandedEquipped || IsItemInUse) return;
 
         int startIndex = selectedSlotIndex;
@@ -175,6 +177,7 @@ public class ItemInventory : NetworkBehaviour
     [Command]
     void CmdSelectSlot(int index)
     {
+        if (pData._LockPlayer) return;
         if (HasTwoHandedEquipped || IsItemInUse) return;
         if (index >= inventorySlots.Length) return;
 
@@ -219,7 +222,7 @@ public class ItemInventory : NetworkBehaviour
         item.OnEquip(this);
 
         item.transform.SetParent(pData.Skin_Data.GrabPoint);
-        item.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        item.transform.SetLocalPositionAndRotation(item.ItemData.gOffset, Quaternion.Euler(item.ItemData.gRotation));
         StartCoroutine(DisplayItemName(item.ItemData.itemName));
 
         if (item.ItemData.isTwoHanded)
@@ -247,9 +250,17 @@ public class ItemInventory : NetworkBehaviour
         pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 1);
     }
 
+    public void RemoveCurrentItem()
+    {
+        if (equippedItem == null) return;
+
+        LocalDropItem(false);
+    }
+
     [Command]
     void CmdDropItem()
     {
+        if (pData._LockPlayer) return;
         if (equippedItem == null || IsItemInUse) return;
 
         //LocalDropItem();
@@ -259,10 +270,8 @@ public class ItemInventory : NetworkBehaviour
     [ClientRpc]
     void RpcDropItem() => LocalDropItem();
 
-    void LocalDropItem()
+    void LocalDropItem(bool drop = true)
     {
-        if (equippedItem == null || IsItemInUse) return;
-
         for (int i = 0; i < inventorySlots.Length; i++)
         {
             if (inventorySlots[i] != equippedItem) continue;
@@ -288,7 +297,7 @@ public class ItemInventory : NetworkBehaviour
 
         pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 0);
 
-        equippedItem.OnDrop(this);
+        if (drop) equippedItem.OnDrop(this);
         equippedItem = null;
     }
 
@@ -373,23 +382,27 @@ public class ItemInventory : NetworkBehaviour
         }
     }
 
-    public void PrimaryItemAnimationTrigger()
-    {
-        equippedItem.PrimaryAnimationTrigger();
-    }
+    [Server]
+    public void PrimaryItemAnimationTrigger() => RpcPrimaryItemAnimationTrigger();
 
-    public void PrimaryItemAnimationFinishes()
-    {
-        equippedItem.PrimaryAnimationFinish();
-    }
+    [ClientRpc]
+    void RpcPrimaryItemAnimationTrigger() => equippedItem.PrimaryAnimationTrigger();
 
-    public void SecondaryItemAnimationTrigger()
-    {
-        equippedItem.SecondaryAnimationTrigger();
-    }
+    [Server]
+    public void PrimaryItemAnimationFinishes() => RpcPrimaryItemAnimationFinishes();
 
-    public void SecondaryItemAnimationFinishes()
-    {
-        equippedItem.SecondaryAnimationFinish();
-    }
+    [ClientRpc]
+    public void RpcPrimaryItemAnimationFinishes() => equippedItem.PrimaryAnimationFinish();
+
+    [Server]
+    public void SecondaryItemAnimationTrigger() => RpcSecondaryItemAnimationTrigger();
+
+    [ClientRpc]
+    public void RpcSecondaryItemAnimationTrigger() => equippedItem.SecondaryAnimationTrigger();
+
+    [Server]
+    public void SecondaryItemAnimationFinishes() => RpcSecondaryItemAnimationFinishes();
+
+    [ClientRpc]
+    public void RpcSecondaryItemAnimationFinishes() => equippedItem.SecondaryAnimationFinish();
 }

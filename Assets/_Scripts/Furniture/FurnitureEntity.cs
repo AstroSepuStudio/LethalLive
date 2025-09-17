@@ -1,17 +1,21 @@
-using System;
+using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FurnitureEntity : EntityStats
 {
     [SerializeField] Rigidbody rb;
+    [SerializeField] AudioSFX[] strongHitSFX;
 
     public List<LootPosition> lootPositions;
 
     [SerializeField] ItemDropThreshold[] dropThresholds;
     [SerializeField] ItemDrop[] lootTable;
 
-    [Serializable]
+    [SerializeField] float minDistance = 1f;
+    [SerializeField] float maxDistance = 2f;
+
+    [System.Serializable]
     struct ItemDrop
     {
         public ItemSO Item;
@@ -20,7 +24,7 @@ public class FurnitureEntity : EntityStats
         public int maxQuantity;
     }
 
-    [Serializable]
+    [System.Serializable]
     struct ItemDropThreshold
     {
         public ItemDrop Item_Drop;
@@ -43,18 +47,11 @@ public class FurnitureEntity : EntityStats
         {
             if (dropThresholds[i].dropped) continue;
 
-            float rand = UnityEngine.Random.Range(0f, 100f);
-            if (rand > dropThresholds[i].Item_Drop.dropChance)
-                continue;
-
             float hpThreshold = maxHP * (dropThresholds[i].dropThreshold / 100);
             if (currentHP <= hpThreshold)
             {
-                int quantity = UnityEngine.Random.Range(dropThresholds[i].Item_Drop.minQuantity, dropThresholds[i].Item_Drop.maxQuantity);
-
-                // TODO: Drop Item
-                Debug.Log($"Dropping {quantity} '{dropThresholds[i].Item_Drop.Item.itemName}'");
-                dropThresholds[i].dropped = true;
+                if (TryDropItem(dropThresholds[i].Item_Drop))
+                    dropThresholds[i].dropped = true;
             }
         }
 
@@ -62,20 +59,80 @@ public class FurnitureEntity : EntityStats
         {
             OnDeath();
         }
+        else if (amount >= 10f)
+        {
+            RequestPlaySFX(3);
+        }
+        else
+        {
+            RequestPlaySFX(0);
+        }
     }
 
     protected override void OnDeath()
     {
+        RequestPlaySFX(2);
+
         foreach (var item in lootTable)
         {
-            float rand = UnityEngine.Random.Range(0f, 100f);
-            if (rand > item.dropChance)
-                continue;
-
-            int quantity = UnityEngine.Random.Range(item.minQuantity, item.maxQuantity);
-
-            // TODO: Drop Item
-            Debug.Log($"Dropping {quantity} '{item.Item.itemName}'");
+            TryDropItem(item);
         }
+
+        NetworkServer.Destroy(gameObject);
+    }
+
+    [Server]
+    bool TryDropItem(ItemDrop ItemDrop)
+    {
+        float rand = Random.Range(0f, 100f);
+        if (rand > ItemDrop.dropChance)
+            return false;
+
+        int quantity = Random.Range(ItemDrop.minQuantity, ItemDrop.maxQuantity);
+
+        for (int q = 0; q < quantity; q++)
+        {
+            Vector2 randomCircle = Random.insideUnitCircle.normalized;
+            float distance = Random.Range(minDistance, maxDistance);
+            Vector3 offset = new Vector3(randomCircle.x, 1f, randomCircle.y) * distance;
+            Vector3 pos = transform.position + offset;
+            GameObject spawned = Instantiate(ItemDrop.Item.itemPrefab, pos, Quaternion.identity);
+            NetworkServer.Spawn(spawned);
+
+            Vector3 dir = (pos - transform.position).normalized;
+            if (spawned.TryGetComponent(out Rigidbody rb))
+                rb.AddForce(dir * Random.Range(0.2f, 1f), ForceMode.Impulse);
+        }
+
+        return true;
+    }
+
+    protected override void RequestPlaySFX(int index)
+    {
+        int sfxIndex = 0;
+        if (index == 0 && takeDamageSFX.Length > 0)
+            sfxIndex = Random.Range(0, takeDamageSFX.Length);
+        else if (index == 1 && knockedSFX.Length > 0)
+            sfxIndex = Random.Range(0, knockedSFX.Length);
+        else if (index == 2 && diedSFX.Length > 0)
+            sfxIndex = Random.Range(0, diedSFX.Length);
+        else if (index == 3 && strongHitSFX.Length > 0)
+            sfxIndex = Random.Range(0, strongHitSFX.Length);
+
+        RpcPlaySFX(index, sfxIndex);
+    }
+
+    protected override void RpcPlaySFX(int index, int sfxIndex)
+    {
+        if (audioSource == null) return;
+
+        if (index == 0 && takeDamageSFX.Length > 0)
+            AudioManager.Instance.PlayOneShot(audioSource, takeDamageSFX[sfxIndex]);
+        else if (index == 1 && knockedSFX.Length > 0)
+            AudioManager.Instance.PlayOneShot(audioSource, knockedSFX[sfxIndex]);
+        else if (index == 2 && diedSFX.Length > 0)
+            AudioManager.Instance.PlayOneShotAndDestroy(transform.position, diedSFX[sfxIndex]);
+        else if (index == 3 && strongHitSFX.Length > 0)
+            AudioManager.Instance.PlayOneShot(audioSource, strongHitSFX[sfxIndex]);
     }
 }

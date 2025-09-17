@@ -7,10 +7,11 @@ public class InteractableObject : NetworkBehaviour
 {
     [SerializeField] Canvas itemCanvas;
     [SerializeField] Image higlightImg;
-    [SerializeField] Sprite highlightedSprite;
-    [SerializeField] Sprite lowlightedSprite;
+    [SerializeField] protected Sprite highlightedSprite;
+    [SerializeField] protected Sprite lowlightedSprite;
 
-    [SerializeField] UnityEvent<PlayerData> OnInteractEvent;
+    [SerializeField] protected UnityEvent<PlayerData> OnInteractEvent;
+    [SerializeField] protected UnityEvent<PlayerData> OnStopInteractEvent;
 
     protected virtual void Start()
     {
@@ -37,9 +38,13 @@ public class InteractableObject : NetworkBehaviour
         higlightImg.sprite = lowlightedSprite;
     }
 
-    [Server]
     public virtual void OnInteract(PlayerData sourceData)
     {
         OnInteractEvent?.Invoke(sourceData);
+    }
+
+    public virtual void OnStopInteract(PlayerData sourceData)
+    {
+        OnStopInteractEvent?.Invoke(sourceData);
     }
 }

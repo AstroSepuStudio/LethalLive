@@ -15,6 +15,8 @@ public class InteractonDetection : NetworkBehaviour
     private InteractableObject nearestItem;
     List<InteractableObject> nearbyItems = new();
 
+    private InteractableObject currentInteractable;
+
     private void Start()
     {
         if (!isLocalPlayer) return;
@@ -32,6 +34,16 @@ public class InteractonDetection : NetworkBehaviour
     void OnTick()
     {
         if (!isLocalPlayer) return;
+
+        if (currentInteractable != null)
+        {
+            foreach (var item in nearbyItems)
+            {
+                if (item == currentInteractable) item.SelectClosest();
+                else item.DeselectClosest();
+            }
+            return;
+        }
 
         Transform cam = pData.PlayerCamera.transform;
         if (Physics.Raycast(cam.position, cam.forward, out RaycastHit rayHit, raycastDistance, pData.IgnorePlayer))
@@ -80,6 +92,8 @@ public class InteractonDetection : NetworkBehaviour
         for (int i = nearbyItems.Count - 1; i >= 0; i--)
         {
             InteractableObject item = nearbyItems[i];
+            if (item == null) continue;
+
             if (!detectedItems.Contains(item))
             {
                 item.DisableCanvas();
@@ -89,6 +103,8 @@ public class InteractonDetection : NetworkBehaviour
 
         foreach (var item in nearbyItems)
         {
+            if (item == null) continue;
+
             if (item == closestItem)
                 item.SelectClosest();
             else
@@ -98,14 +114,19 @@ public class InteractonDetection : NetworkBehaviour
 
     public void OnPlayerInteract(InputAction.CallbackContext context)
     {
-        if (!context.started || !isLocalPlayer || pData._LockPlayer) return;
+        if (!isLocalPlayer) return;
 
-        CmdRequestInteracttion();
+        if (context.started && !pData._LockPlayer)
+            CmdRequestInteraction();
+        else if (context.canceled)
+            CmdRequestStopInteraction();
     }
 
     [Command]
-    void CmdRequestInteracttion()
+    void CmdRequestInteraction()
     {
+        if (currentInteractable != null) return;
+
         Transform cam = pData.PlayerCamera.transform;
         if (Physics.Linecast(cam.position, cam.forward * raycastDistance + cam.position, out RaycastHit rayHit, pData.IgnorePlayer))
         {
@@ -132,10 +153,41 @@ public class InteractonDetection : NetworkBehaviour
         if (closest != null)
         {
             closest.OnInteract(pData);
+            currentInteractable = closest;
+
+            TargetSetCurrentInteractable(connectionToClient, closest.netIdentity);
         }
     }
 
-    private void OnDrawGizmos()
+    [TargetRpc]
+    void TargetSetCurrentInteractable(NetworkConnection targetConn, NetworkIdentity obj)
+    {
+        if (obj != null && obj.TryGetComponent(out InteractableObject interactable))
+        {
+            currentInteractable = interactable;
+        }
+    }
+
+    [Command]
+    void CmdRequestStopInteraction()
+    {
+        if (currentInteractable != null)
+        {
+            //Debug.Log($"Stop interaction {currentInteractable.gameObject.name}");
+            currentInteractable.OnStopInteract(pData);
+            currentInteractable = null;
+
+            TargetClearCurrentInteractable(connectionToClient);
+        }
+    }
+
+    [TargetRpc]
+    void TargetClearCurrentInteractable(NetworkConnection targetConn)
+    {
+        currentInteractable = null;
+    }
+
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, detectRadius);

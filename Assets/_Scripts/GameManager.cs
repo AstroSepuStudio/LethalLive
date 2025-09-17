@@ -1,8 +1,6 @@
 using Mirror;
 using Steamworks;
-using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : NetworkBehaviour
@@ -13,6 +11,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] MapGenerator mapGenerator;
     [SerializeField] Int_Teleport teleporter;
     [SerializeField] List<PlayerData> players = new ();
+    [SerializeField] Item_HomewardBeacon homewardBeacon;
 
     public IReadOnlyList<PlayerData> Players => players;
 
@@ -24,6 +23,12 @@ public class GameManager : NetworkBehaviour
 
     [SyncVar]
     public Vector3 startRoomPos;
+
+    [SyncVar]
+    public bool gameStarted;
+
+    [SyncVar]
+    public float totalBalance;
 
     public struct LobbyMemberData
     {
@@ -142,7 +147,8 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log("Sending generation action");
 
-        mapSeed = UnityEngine.Random.Range(-1000000, 1000000);
+        mapSeed = Random.Range(-1000000, 1000000);
+        gameStarted = true;
 
         RpcGenerateMap(mapSeed);
     }
@@ -153,7 +159,14 @@ public class GameManager : NetworkBehaviour
         Debug.Log("Generating map");
 
         mapGenerator.StartGeneration(seed);
-        teleporter.SetTeleportPos(startRoomPos);
-        teleporter.gameObject.SetActive(true);
+
+        if (isServer)
+        {
+            homewardBeacon.SetPosition(startRoomPos);
+            teleporter.SetParent(homewardBeacon.transform);
+        }
+
+        //teleporter.SetTeleportPos(startRoomPos);
+        //teleporter.gameObject.SetActive(true);
     }
 }

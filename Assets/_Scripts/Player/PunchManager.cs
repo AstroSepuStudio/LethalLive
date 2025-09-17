@@ -35,7 +35,7 @@ public class PunchManager : NetworkBehaviour
 
         debuffIndex = pData.Player_Movement.AddSpeedModifier(0.5f);
 
-        LocalPlayAttackAnimation();
+        //LocalPlayAttackAnimation();
         RpcPlayAttackAnimation();
     }
 
@@ -52,7 +52,7 @@ public class PunchManager : NetworkBehaviour
             else
                 pData.Skin_Data.CharacterAnimator.SetTrigger("Attack");
 
-            pData.Skin_Data.CharacterAnimator.SetLayerWeight(3, 1);
+            pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 1);
             StartCoroutine(PunchCooldown());
         }
     }
@@ -68,20 +68,19 @@ public class PunchManager : NetworkBehaviour
         pData.Camera_Movement.StopForcePlayerToAim();
     }
 
-    public void PunchDetection()
-    {
-        if (!isServer) return;
+    [Server]
+    public void PunchDetection() => CheckForHit();
 
-        CheckForHit();
-    }
-
+    [Server]
     public void PunchFinished()
     {
-        if (!isServer) return;
-
         RemoveDebuff();
-        pData.Skin_Data.CharacterAnimator.SetLayerWeight(3, 0);
+        //pData.Skin_Data.CharacterAnimator.SetLayerWeight(3, 0);
+        RpcSetAnimatorLayerWeight(2, 0);
     }
+
+    [ClientRpc]
+    void RpcSetAnimatorLayerWeight(int layerIndex, float weight) => pData.Skin_Data.CharacterAnimator.SetLayerWeight(layerIndex, weight);
 
     [Server]
     void RemoveDebuff()

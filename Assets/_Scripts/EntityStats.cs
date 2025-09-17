@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class EntityStats : NetworkBehaviour
 {
+    [SerializeField] protected AudioSource audioSource;
+    [SerializeField] protected AudioSFX[] takeDamageSFX;
+    [SerializeField] protected AudioSFX[] knockedSFX;
+    [SerializeField] protected AudioSFX[] diedSFX;
+
     [SerializeField] protected float knockRecoveryDelay;
     [SerializeField] protected float knockRecoveryRate;
     [SerializeField] protected float ragdollRecoveryValue;
@@ -55,6 +60,8 @@ public class EntityStats : NetworkBehaviour
     [Server]
     public virtual void ReceiveAttack(EntityStats src, AttackStat attack)
     {
+        RequestPlaySFX(0);
+
         ModifyHP(-attack.AttackDamage);
 
         float multiplier = Random.Range(1f, 2f);
@@ -63,6 +70,34 @@ public class EntityStats : NetworkBehaviour
         float knockAmount = attack.AttackKnock * multiplier * (src.strenght / 100f);
         Vector3 momentum = multiplier * attack.AttackForce * dir.normalized;
         ModifyKnock(-knockAmount, momentum);
+    }
+
+    /// <summary> 0=Take Damage , 1=Knocked Out , 2=Died </summary>
+    [Server]
+    protected virtual void RequestPlaySFX(int index)
+    {
+        int sfxIndex = 0;
+        if (index == 0 && takeDamageSFX.Length > 0)
+            sfxIndex = Random.Range(0, takeDamageSFX.Length);
+        else if (index == 1 && knockedSFX.Length > 0)
+            sfxIndex = Random.Range(0, knockedSFX.Length);
+        else if (index == 2 && diedSFX.Length > 0)
+            sfxIndex = Random.Range(0, diedSFX.Length);
+
+        RpcPlaySFX(index, sfxIndex);
+    }
+
+    [ClientRpc]
+    protected virtual void RpcPlaySFX(int index, int sfxIndex)
+    {
+        if (audioSource == null) return;
+
+        if (index == 0 && takeDamageSFX.Length > 0)
+            AudioManager.Instance.PlayOneShot(audioSource, takeDamageSFX[sfxIndex]);
+        else if (index == 1 && knockedSFX.Length > 0)
+            AudioManager.Instance.PlayOneShot(audioSource, knockedSFX[sfxIndex]);
+        else if (index == 2 && diedSFX.Length > 0)
+            AudioManager.Instance.PlayOneShotAndDestroy(transform.position, diedSFX[sfxIndex]);
     }
 
     [Server]
@@ -82,6 +117,8 @@ public class EntityStats : NetworkBehaviour
     [Server]
     protected virtual void OnDeath()
     {
+        RequestPlaySFX(2);
+
         Debug.Log($"{gameObject.name} died.");
         // Add ragdoll, respawn, disable movement, etc.
     }
@@ -112,6 +149,8 @@ public class EntityStats : NetworkBehaviour
     [Server]
     protected virtual void OnKnocked(Vector3 momentum)
     {
+        RequestPlaySFX(1);
+
         Debug.Log($"{gameObject.name} was knocked!");
         //pData.Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
     }

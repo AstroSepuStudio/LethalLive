@@ -122,7 +122,7 @@ public class PlayerMovement : NetworkBehaviour
     #region Input Methods
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer || pData._LockPlayer) return;
+        if (!isLocalPlayer) return;
 
         Vector2 input = context.ReadValue<Vector2>();
         CmdSendMovementInput(input);
@@ -130,7 +130,7 @@ public class PlayerMovement : NetworkBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer || pData._LockPlayer) return;
+        if (!isLocalPlayer) return;
         if (context.canceled) return;
 
         CmdSendJumpInput();
@@ -138,7 +138,7 @@ public class PlayerMovement : NetworkBehaviour
 
     public void OnStartSprint(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer || pData._LockPlayer) return;
+        if (!isLocalPlayer) return;
 
         if (context.started)
             CmdStartSprint();
@@ -148,10 +148,10 @@ public class PlayerMovement : NetworkBehaviour
 
     public void OnStartCrouch(InputAction.CallbackContext context)
     {
-        if (!isLocalPlayer || pData._LockPlayer) return;
+        if (!isLocalPlayer) return;
 
         if (context.started)
-            CmdStartCrouch();
+            CmdStartCrouchAction();
         else if (context.canceled)
             CmdStopCrouch();
     }
@@ -162,11 +162,17 @@ public class PlayerMovement : NetworkBehaviour
     void CmdSendMovementInput(Vector2 input) => movementInput = input;
 
     [Command]
-    void CmdSendJumpInput() => jumpTime = 0.2f;
+    void CmdSendJumpInput()
+    {
+        if (pData._LockPlayer) return;
 
+        jumpTime = 0.2f;
+    }
     [Command]
     void CmdStartSprint()
     {
+        if (pData._LockPlayer) return;
+
         if (IsCrouching)
         {                
             if (IsSomethingAbove())
@@ -208,7 +214,7 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     [Command]
-    void CmdStartCrouch() => ServerStartCrouch();
+    void CmdStartCrouchAction() => ServerStartCrouch();
 
     [Command]
     void CmdStopCrouch() => ServerStopCrouch();
@@ -314,7 +320,7 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!isServer) return;
-        if (pData.Skin_Data.Ragdoll_Manager.IsKnocked || pData.CameraPivot == null) return;
+        if (pData.Skin_Data.Ragdoll_Manager.IsKnocked || pData.CameraPivot == null || pData._LockPlayer) return;
         if (_isSprinting && Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
         {
             CmdStopSprint();
