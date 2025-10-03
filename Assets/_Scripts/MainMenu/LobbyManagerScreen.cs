@@ -150,7 +150,6 @@ public class LobbyManagerScreen : UIManager
     public void StartGame()
     {
         if (!identity.isServer) return;
-        Debug.Log("Requesting map generation");
 
         GameManager.Instance.StartGame();
     }

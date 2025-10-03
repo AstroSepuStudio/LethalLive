@@ -7713,7 +7713,7 @@ GameObject:
   - component: {fileID: 1381176049468118383}
   m_Layer: 6
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8442,6 +8442,10 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  audioSource: {fileID: 0}
+  takeDamageSFX: []
+  knockedSFX: []
+  diedSFX: []
   knockRecoveryDelay: 5
   knockRecoveryRate: 20
   ragdollRecoveryValue: 50

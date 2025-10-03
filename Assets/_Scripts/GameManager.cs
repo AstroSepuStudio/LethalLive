@@ -71,7 +71,6 @@ public class GameManager : NetworkBehaviour
             player.Index = players.Count;
             player.Team = PlayerTeam.Hololive;
             players.Add(player);
-            Debug.Log($"Player registered: {player.netIdentity.connectionToClient.connectionId}");
         }
     }
 
@@ -81,7 +80,6 @@ public class GameManager : NetworkBehaviour
         if (players.Contains(player))
         {
             players.Remove(player);
-            Debug.Log($"Player unregistered: {player.netIdentity.connectionToClient.connectionId}");
         }
     }
 
@@ -145,8 +143,6 @@ public class GameManager : NetworkBehaviour
     [Server]
     public void StartGame()
     {
-        Debug.Log("Sending generation action");
-
         mapSeed = Random.Range(-1000000, 1000000);
         gameStarted = true;
 
@@ -156,8 +152,6 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     void RpcGenerateMap(int seed)
     {
-        Debug.Log("Generating map");
-
         mapGenerator.StartGeneration(seed);
 
         if (isServer)

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -25,15 +26,23 @@ public struct FurniturePosition
 
 public class MapGenerator : MonoBehaviour
 {
+    public static MapGenerator Instance;
+
     [Header("Content")]
     [SerializeField] ThemeDataSO theme;
+    [SerializeField] GameObject entitySpawnerPref;
+    [SerializeField] Transform roomsParent;
+    [SerializeField] Transform furnitureParent;
+    [SerializeField] Transform itemsParent;
+
+    [SerializeField] NavMeshSurface surface;
 
     [Header("Seed")]
     [SerializeField] string gameSeed = "Default";
     [SerializeField] int seed;
 
     [Header("Grid")]
-    [SerializeField] Vector3Int gridSize = new (24, 6, 24);
+    [SerializeField] Vector3Int gridSize = new(24, 6, 24);
     [SerializeField] int cellSize = 6;
 
     [Header("Limits")]
@@ -56,6 +65,7 @@ public class MapGenerator : MonoBehaviour
 
     readonly List<LootPosition> lootPositions = new();
     readonly List<FurniturePosition> furniturePositions = new();
+    readonly List<Transform> entitySpawnerPositions = new();
 
     private struct OpenPort
     {
@@ -82,6 +92,11 @@ public class MapGenerator : MonoBehaviour
         public Vector3Int local;
     }
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
         if (generateOnStart)
@@ -94,7 +109,7 @@ public class MapGenerator : MonoBehaviour
         _generated = true;
 
         int size = LobbySettings.Instance.MapSize;
-        Debug.Log(size);
+        
         grid = new Cell[gridSize.x * size, gridSize.y * size, gridSize.z * size];
         
         for (int x = 0; x < gridSize.x * size; x++)
@@ -121,95 +136,6 @@ public class MapGenerator : MonoBehaviour
             ResolveDoors();
         }
     }
-
-    //#region Step Generation
-    //private List<OpenPort> stepFrontier;
-    //private bool generationStarted = false;
-
-    //public void StartStepGeneration()
-    //{
-    //    placed.Clear();
-    //    spawned.Clear();
-    //    nextRoomId = 1;
-
-    //    grid = new Cell[gridSize.x, gridSize.y, gridSize.z];
-    //    for (int x = 0; x < gridSize.x; x++)
-    //        for (int y = 0; y < gridSize.y; y++)
-    //            for (int z = 0; z < gridSize.z; z++)
-    //                grid[x, y, z] = new Cell();
-
-    //    var center = new Vector3Int(
-    //        gridSize.x / 2,
-    //        Mathf.Clamp(gridSize.y / 2, 0, gridSize.y - 1),
-    //        gridSize.z / 2
-    //    );
-
-    //    var start = Place(theme.startingRoom, center, 0);
-    //    stepFrontier = BuildOpenPorts(start);
-
-    //    generationStarted = true;
-    //}
-
-    //public bool StepGeneration()
-    //{
-    //    if (!generationStarted || stepFrontier.Count == 0 || placed.Count >= maxRooms)
-    //        return false;
-
-    //    int idx = rng.Next(stepFrontier.Count);
-    //    var open = stepFrontier[idx];
-    //    stepFrontier.RemoveAt(idx);
-
-    //    if (open.depth >= maxDepth)
-    //        return true;
-
-    //    var neighborRoom = placed.Find(r => r.id == open.roomId);
-    //    var candidates = GetWeightedCandidates(theme.spawnableRooms, neighborRoom.biome);
-    //    //Shuffle(candidates);
-
-    //    foreach (var cand in candidates)
-    //    {
-    //        if (cand == null) continue;
-
-    //        for (int p = 0; p < cand.Ports.Length; p++)
-    //        {
-    //            var port = cand.Ports[p];
-    //            if (port.face != DirectionUtils.OppositeDirection(open.face)) continue;
-
-    //            var anchor = open.worldCell - port.localCell;
-    //            if (!FootprintFits(cand, anchor)) continue;
-
-    //            var pr = Place(cand, anchor, open.depth + 1);
-    //            if (pr == null) continue;
-
-    //            var newPorts = BuildOpenPorts(pr);
-    //            for (int i = newPorts.Count - 1; i >= 0; i--)
-    //            {
-    //                var np = newPorts[i];
-    //                if (np.worldCell == open.worldCell && np.face == DirectionUtils.OppositeDirection(open.face))
-    //                {
-    //                    newPorts.RemoveAt(i);
-    //                    break;
-    //                }
-    //            }
-
-    //            stepFrontier.AddRange(newPorts);
-    //            return true;
-    //        }
-    //    }
-
-    //    return true;
-    //}
-
-    //public void DoStepGeneration(InputAction.CallbackContext context)
-    //{
-    //    if (!context.started) return;
-
-    //    if (StepGeneration())
-    //        InstantiateRooms();
-    //    else
-    //        ResolveDoors();
-    //}
-    //#endregion
 
     private void Generate()
     {
@@ -392,7 +318,7 @@ public class MapGenerator : MonoBehaviour
         foreach (var pr in placed)
         {
             var world = Vector3.Scale((Vector3)pr.anchor, new Vector3(cellSize, cellSize, cellSize));
-            var go = Instantiate(pr.data.Prefab, world, Quaternion.identity, transform);
+            var go = Instantiate(pr.data.Prefab, world, Quaternion.identity, roomsParent);
             go.name = $"Room {pr.id} (depth {pr.depth})";
             if (!go.TryGetComponent<RoomData>(out var rd)) 
                 Debug.LogWarning($"Prefab {pr.data.Prefab.name} lacks RoomData component.");
@@ -401,19 +327,25 @@ public class MapGenerator : MonoBehaviour
 
             furniturePositions.AddRange(rd.furnitureSpawnPositions);
             lootPositions.AddRange(rd.itemSpawnPositions);
+            entitySpawnerPositions.AddRange(rd.entitySpawnerPositions);
         }
 
         if (GameManager.Instance != null)
         {
             if (GameManager.Instance.LocalPlayer.isServer)
+            {
                 SpawnFurniture();
+                SpawnLoot();
+                SetEntitySpawners();
+            }
         }
+
+        StartCoroutine(GenerateNavMeshSurface());
     }
 
     [Server]
     public void SpawnFurniture()
     {
-        Debug.Log("Spawn Furniture");
         if (theme.furniturePrefabs.Length <= 0) return;
 
         foreach (var pos in furniturePositions)
@@ -428,7 +360,7 @@ public class MapGenerator : MonoBehaviour
                 UnityEngine.Random.Range(-pos.maxOffset.y, pos.maxOffset.y),
                 UnityEngine.Random.Range(-pos.maxOffset.z, pos.maxOffset.z));
 
-            GameObject furnObj = Instantiate(theme.furniturePrefabs[furnIndex], pos.position.position + offset, rot);
+            GameObject furnObj = Instantiate(theme.furniturePrefabs[furnIndex], pos.position.position + offset, rot, furnitureParent);
             NetworkServer.Spawn(furnObj);
 
             furnObj.transform.Rotate(Vector3.up * UnityEngine.Random.Range(-pos.maxRotation, pos.maxRotation));
@@ -436,14 +368,11 @@ public class MapGenerator : MonoBehaviour
             FurnitureEntity furnEnt = furnObj.GetComponent<FurnitureEntity>();
             lootPositions.AddRange(furnEnt.lootPositions);
         }
-
-        SpawnLoot();
     }
 
     [Server]
     public void SpawnLoot()
     {
-        Debug.Log("Spawn Items");
         if (theme.spawnableItems.Length <= 0) return;
 
         foreach(var pos in lootPositions)
@@ -457,9 +386,32 @@ public class MapGenerator : MonoBehaviour
 
             int itemIndex = UnityEngine.Random.Range(0, theme.spawnableItems.Length);
 
-            GameObject itemObj = Instantiate(theme.spawnableItems[itemIndex].itemPrefab, pos.position.position + offset, pos.position.rotation);
+            GameObject itemObj = Instantiate(theme.spawnableItems[itemIndex].itemPrefab, pos.position.position + offset, pos.position.rotation, itemsParent);
             NetworkServer.Spawn(itemObj);
         }
+    }
+
+    [Server]
+    public void SetEntitySpawners()
+    {
+        if (entitySpawnerPositions == null || entitySpawnerPositions.Count == 0) return;
+
+        int quantity = UnityEngine.Random.Range(4, entitySpawnerPositions.Count);
+        List<Transform> positions = new(entitySpawnerPositions);
+        List<Transform> spawnedPos = new();
+
+        for (int i = 0; i < quantity; i++)
+        {
+            int pos = UnityEngine.Random.Range(0, positions.Count);
+
+            GameObject spawner = Instantiate(entitySpawnerPref, positions[pos].position, positions[pos].rotation,transform);
+            NetworkServer.Spawn(spawner);
+
+            spawnedPos.Add(positions[pos]);
+            positions.RemoveAt(pos);
+        }
+
+        EntitySpawnerManager.Instance.SetSpawnerPositions(spawnedPos);
     }
 
     private void ResolveDoors()
@@ -498,7 +450,25 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
+
+    IEnumerator GenerateNavMeshSurface()
+    {
+        yield return null;
+
+        surface.BuildNavMesh();
+    }
     #endregion
+
+    public bool GeneratedDungeon 
+    { 
+        get
+        {
+            if (spawned == null || placed == null) return false;
+            if (spawned.Count <= 0 || placed.Count <= 0) return false;
+
+            return true;
+        }
+    }
 
     IEnumerator DisplaySeed(int seed, float duration)
     {
@@ -508,5 +478,16 @@ public class MapGenerator : MonoBehaviour
         yield return new WaitForSeconds(duration);
 
         seedDisplayCanvas.SetActive(false);
+    }
+
+    public Vector3 GetRandomPosition(float maxOffset = 4f)
+    {
+        int index = UnityEngine.Random.Range(0, spawned.Count);
+        var world = Vector3.Scale((Vector3)placed[index].anchor, new Vector3(cellSize, cellSize, cellSize));
+
+        world.x += UnityEngine.Random.Range(-maxOffset, maxOffset);
+        world.z += UnityEngine.Random.Range(-maxOffset, maxOffset);
+
+        return world;
     }
 }

@@ -16,6 +16,7 @@ public class RoomData : MonoBehaviour
     [SerializeField] private WallPortKey[] ports = Array.Empty<WallPortKey>();
     public List<LootPosition> itemSpawnPositions;
     public List<FurniturePosition> furnitureSpawnPositions;
+    public List<Transform> entitySpawnerPositions;
 
     public void SetPort(Vector3Int localCell, Direction face, bool open)
     {
