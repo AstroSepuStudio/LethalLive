@@ -23,6 +23,18 @@ public class SellPoint : NetworkBehaviour
 
         for (int i = itemsInside.Count - 1; i >= 0; i--)
         {
+            if (itemsInside[i].pData != null)
+            {
+                if (itemsInside[i].pData.Team == PlayerTeam.Hololive)
+                    GameManager.Instance.teamHololiveBalance += itemsInside[i].ItemValue;
+                else if (itemsInside[i].pData.Team == PlayerTeam.Gamers)
+                    GameManager.Instance.teamHololiveGamers += itemsInside[i].ItemValue;
+                else if (itemsInside[i].pData.Team == PlayerTeam.HoloX)
+                    GameManager.Instance.teamHoloXBalance += itemsInside[i].ItemValue;
+                else if (itemsInside[i].pData.Team == PlayerTeam.English)
+                    GameManager.Instance.teamEnglishBalance += itemsInside[i].ItemValue;
+            }
+
             NetworkServer.Destroy(itemsInside[i].gameObject);
         }
         

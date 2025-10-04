@@ -1,6 +1,8 @@
 using Mirror;
 using Steamworks;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : NetworkBehaviour
@@ -12,6 +14,17 @@ public class GameManager : NetworkBehaviour
     [SerializeField] Int_Teleport teleporter;
     [SerializeField] List<PlayerData> players = new ();
     [SerializeField] Item_HomewardBeacon homewardBeacon;
+
+    [Header("Day Settings")]
+    [SerializeField] float dayDuration = 900;
+    [SerializeField] int startingQuotaMin = 900;
+    [SerializeField] int startingQuotaMax = 1100;
+    [SerializeField] int linearIncreaseMin = 400;
+    [SerializeField] int linearIncreaseMax = 700;
+    [SerializeField] float exponentialRate = 1.15f;
+    [SerializeField] float exponentialFactor = 0.3f;
+
+    private readonly Dictionary<int, int> cachedQuotas = new ();
 
     public IReadOnlyList<PlayerData> Players => players;
 
@@ -25,10 +38,31 @@ public class GameManager : NetworkBehaviour
     public Vector3 startRoomPos;
 
     [SyncVar]
-    public bool gameStarted;
+    public bool dayStarted = false;
 
     [SyncVar]
-    public float totalBalance;
+    public bool gameStarted = false;
+
+    [SyncVar]
+    public float totalBalance = 0;
+
+    [SyncVar]
+    public float teamHololiveBalance = 0;
+    [SyncVar]
+    public float teamHololiveGamers = 0;
+    [SyncVar]
+    public float teamHoloXBalance = 0;
+    [SyncVar]
+    public float teamEnglishBalance = 0;
+
+    [SyncVar]
+    public int currentDay = 1;
+
+    [SyncVar]
+    public float targetQuota;
+
+    [SyncVar]
+    public float currentDayTime;
 
     public struct LobbyMemberData
     {
@@ -48,20 +82,7 @@ public class GameManager : NetworkBehaviour
         }
 
         Instance = this;
-        //DontDestroyOnLoad(gameObject);
     }
-
-    //private void Start()
-    //{
-    //    if (isServer)
-    //    {
-    //        SpawnItem(0, transform.position);
-    //        SpawnItem(1, transform.position + transform.forward);
-    //        SpawnItem(0, transform.position - transform.forward);
-    //        SpawnItem(1, transform.position + transform.right);
-    //        SpawnItem(0, transform.position - transform.right);
-    //    }
-    //}
 
     [Server]
     public void RegisterPlayer(PlayerData player)
@@ -81,13 +102,6 @@ public class GameManager : NetworkBehaviour
         {
             players.Remove(player);
         }
-    }
-
-    [Server]
-    void SpawnItem(int index, Vector3 position)
-    {
-        GameObject itemGO = Instantiate(itemsData[index].itemPrefab, position, Quaternion.identity);
-        NetworkServer.Spawn(itemGO);
     }
 
     [Command(requiresAuthority = false)]
@@ -143,10 +157,72 @@ public class GameManager : NetworkBehaviour
     [Server]
     public void StartGame()
     {
-        mapSeed = Random.Range(-1000000, 1000000);
+        SteamMatchmaking.SetLobbyType(LobbyManager.Instace.CurrentLobbyID, ELobbyType.k_ELobbyTypePrivate);
         gameStarted = true;
 
-        RpcGenerateMap(mapSeed);
+        StartCoroutine(GameCoroutine());
+        StartCoroutine(lobbyManagerScreen.SwitchScreenState());
+    }
+
+    public void StartDay()
+    {
+        if (!gameStarted || !isServer) return;
+
+        if (dayStarted)
+        {
+            FinishDay();
+        }
+        else
+        {
+            mapSeed = Random.Range(-1000000, 1000000);
+            dayStarted = true;
+
+            targetQuota = GetQuota(currentDay);
+
+            RpcGenerateMap(mapSeed);
+        }
+    }
+
+    public int GetQuota(int round)
+    {
+        if (round < 1) round = 1;
+
+        if (cachedQuotas.TryGetValue(round, out int quota))
+            return quota;
+
+        int linearPart = (round - 1) * Random.Range(linearIncreaseMin, linearIncreaseMax);
+        float startingQuota = Random.Range(startingQuotaMin, startingQuotaMax);
+        float exponentialPart = startingQuota * Mathf.Pow(exponentialRate, round - 1) * exponentialFactor;
+
+        return Mathf.RoundToInt(startingQuota + linearPart + exponentialPart);
+    }
+
+    [Server]
+    IEnumerator GameCoroutine()
+    {
+        currentDayTime = -1;
+
+        while (!dayStarted)
+        {
+            yield return null;
+        }
+
+        currentDayTime = 0;
+        while (currentDayTime < dayDuration)
+        {
+            currentDayTime += Time.deltaTime;
+            yield return null;
+        }
+
+        FinishDay();
+    }
+
+    [Server]
+    public void FinishDay()
+    {
+        dayStarted = false;
+        currentDay++;
+        RpcClearMap();
     }
 
     [ClientRpc]
@@ -159,8 +235,11 @@ public class GameManager : NetworkBehaviour
             homewardBeacon.SetPosition(startRoomPos);
             teleporter.SetParent(homewardBeacon.transform);
         }
+    }
 
-        //teleporter.SetTeleportPos(startRoomPos);
-        //teleporter.gameObject.SetActive(true);
+    [ClientRpc]
+    void RpcClearMap()
+    {
+        mapGenerator.ClearMap();
     }
 }

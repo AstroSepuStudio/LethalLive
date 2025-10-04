@@ -409,6 +409,8 @@ public class MapGenerator : MonoBehaviour
 
             spawnedPos.Add(positions[pos]);
             positions.RemoveAt(pos);
+
+            entitySpawnerPositions[i] = spawner.transform;
         }
 
         EntitySpawnerManager.Instance.SetSpawnerPositions(spawnedPos);
@@ -489,5 +491,42 @@ public class MapGenerator : MonoBehaviour
         world.z += UnityEngine.Random.Range(-maxOffset, maxOffset);
 
         return world;
+    }
+
+    public void ClearMap()
+    {
+        DestroyChildren(roomsParent);
+        DestroyChildren(furnitureParent);
+        DestroyChildren(itemsParent);
+
+        for (int i = entitySpawnerPositions.Count - 1; i >= 0; i--)
+        {
+            Destroy(entitySpawnerPositions[i].gameObject);
+        }
+
+        placed.Clear();
+        spawned.Clear();
+        lootPositions.Clear();
+        furniturePositions.Clear();
+        entitySpawnerPositions.Clear();
+
+        grid = null;
+        nextRoomId = 1;
+        _generated = false;
+        rng = null;
+
+        if (surface != null)
+            surface.RemoveData();
+    }
+
+    private void DestroyChildren(Transform parent)
+    {
+        if (parent == null) return;
+
+        for (int i = parent.childCount - 1; i >= 0; i--)
+        {
+            var child = parent.GetChild(i).gameObject;
+            Destroy(child);
+        }
     }
 }

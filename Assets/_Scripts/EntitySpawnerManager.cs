@@ -52,7 +52,7 @@ public class EntitySpawnerManager : NetworkBehaviour
     [Server]
     void OnSecond()
     {
-        if (!GameManager.Instance.gameStarted) return;
+        if (!GameManager.Instance.dayStarted) return;
 
         if (aliveEntities.Count >= maxEntities) return;
 

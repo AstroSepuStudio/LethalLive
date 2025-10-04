@@ -12,6 +12,8 @@ public class ItemSO : ScriptableObject
     public int maxValue = 100;
     public bool hasPrimaryAction = false;
     public bool hasSecondaryAction = false;
+    public bool pickable = true;
+    public bool droppable = true;
 
     public Vector3 gOffset;
     public Vector3 gRotation;

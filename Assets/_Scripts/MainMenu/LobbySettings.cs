@@ -11,11 +11,14 @@ public class LobbySettings : NetworkBehaviour
     [SyncVar] private int mapSize = 10;
     [SyncVar] private bool teamDamage = false;
     [SyncVar] private bool teamKnock = true;
+    [SyncVar] private int maxDays = 3;
 
     public ELobbyType Lobby_Type => lobby_Type;
     public int MapSize => mapSize;
     public bool TeamDamage => teamDamage;
     public bool TeamKnock => teamKnock;
+
+    public int MaxDays => maxDays;
 
     private void Awake()
     {
@@ -26,6 +29,7 @@ public class LobbySettings : NetworkBehaviour
     public void SetLobbyType(ELobbyType lobbyType)
     {
         lobby_Type = lobbyType;
+        SteamMatchmaking.SetLobbyType(LobbyManager.Instace.CurrentLobbyID, lobbyType);
     }
 
     [Server]

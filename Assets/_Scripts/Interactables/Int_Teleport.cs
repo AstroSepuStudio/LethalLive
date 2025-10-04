@@ -27,7 +27,7 @@ public class Int_Teleport : InteractableObject
     // [Server]
     public override void OnInteract(PlayerData sourceData)
     {
-        if (requireGameStarted && !GameManager.Instance.gameStarted) return;
+        if (requireGameStarted && !GameManager.Instance.dayStarted) return;
 
         sourceData.Character_Controller.enabled = false;
 

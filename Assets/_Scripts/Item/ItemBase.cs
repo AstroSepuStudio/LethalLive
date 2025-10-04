@@ -39,6 +39,8 @@ public class ItemBase : InteractableObject
     [Server]
     public override void OnInteract(PlayerData sourceData)
     {
+        if (!ItemData.pickable) return;
+
         if (sourceData.PlayerInventory.AddItem(this))
         {
             pData = sourceData;

@@ -281,6 +281,8 @@ public class ItemInventory : NetworkBehaviour
             break;
         }
 
+        if (!equippedItem.ItemData.droppable) return;
+
         if (equippedItem.ItemData.isTwoHanded)
         {
             pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", false);

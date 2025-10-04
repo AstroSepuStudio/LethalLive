@@ -13,6 +13,11 @@ public class LightLOD : MonoBehaviour
         GameTick.OnSecond += OnSecond;
     }
 
+    private void OnDestroy()
+    {
+        GameTick.OnSecond -= OnSecond;
+    }
+
     void OnSecond()
     {
         if (GameManager.Instance.LocalPlayer == null) return;
