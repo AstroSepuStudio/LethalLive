@@ -40,25 +40,25 @@ public class Item_HomewardBeacon : ItemBase
         if (_placed)
             placedCanvas.SetActive(true);
         else
-            base.EnableCanvas();
+            canvas.EnableCanvas();
     }
 
     public override void DisableCanvas()
     {
         placedCanvas.SetActive(false);
-        base.DisableCanvas();
+        canvas.DisableCanvas();
     }
 
     public override void SelectClosest()
     {
-        base.SelectClosest();
-        higlightImgPlaced.sprite = highlightedSprite;
+        canvas.SelectClosest();
+        higlightImgPlaced.sprite = canvas.highlightedSprite;
     }
 
     public override void DeselectClosest()
     {
-        base.DeselectClosest();
-        higlightImgPlaced.sprite = lowlightedSprite;
+        canvas.DeselectClosest();
+        higlightImgPlaced.sprite = canvas.lowlightedSprite;
     }
 
     public override void OnInteract(PlayerData sourceData)

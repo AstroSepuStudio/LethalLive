@@ -100,13 +100,15 @@ public class MapGenerator : MonoBehaviour
     private void Start()
     {
         if (generateOnStart)
-            StartGeneration(StableHash(gameSeed));
+            StartGeneration(StableHash(gameSeed), 0);
     }
 
-    public void StartGeneration(int setSeed = -1)
+    public void StartGeneration(int setSeed, int themeIndex)
     {
         if (_generated) return;
         _generated = true;
+
+        theme = GameManager.Instance.ThemeDatas[themeIndex];
 
         int size = LobbySettings.Instance.MapSize;
         

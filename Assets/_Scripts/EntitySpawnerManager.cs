@@ -1,4 +1,5 @@
 using Mirror;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,19 +7,16 @@ public class EntitySpawnerManager : NetworkBehaviour
 {
     public static EntitySpawnerManager Instance;
 
-    [SerializeField] GameObject[] entityPrefabs;
-
     [SerializeField] float spawnDelay = 20f;
     [SerializeField] float spawnChance = 0.1f;
     [SerializeField] float spawnCooldown = 10f;
     [SerializeField] int maxEntities = 10;
 
-    List<EntityStats> aliveEntities = new();
-    List<EntityStats> deadEntities = new();
+    readonly List<EntityStats> aliveEntities = new();
+    readonly List<EntityStats> deadEntities = new();
 
     Transform[] spawnerPositions;
-    float spawnTimer;
-    bool spawning = false;
+    Coroutine enemySpawningCoroutine;
 
     private void Awake()
     {
@@ -34,13 +32,29 @@ public class EntitySpawnerManager : NetworkBehaviour
     private void Start()
     {
         if (isServer)
-            GameTick.OnSecond += OnSecond;
+        {
+            GameManager.Instance.OnDayStarted.AddListener(OnDayStarted);
+            GameManager.Instance.OnDayEnded.AddListener(OnDayEnded);
+        }
     }
 
     private void OnDestroy()
     {
         if (isServer)
-            GameTick.OnSecond -= OnSecond;
+        {
+            GameManager.Instance.OnDayStarted.RemoveListener(OnDayStarted);
+            GameManager.Instance.OnDayEnded.RemoveListener(OnDayEnded);
+        }
+    }
+
+    private void OnDayEnded()
+    {
+        StopCoroutine(enemySpawningCoroutine);
+    }
+
+    private void OnDayStarted()
+    {
+        enemySpawningCoroutine = StartCoroutine(EnemySpawning());
     }
 
     [Server]
@@ -50,31 +64,72 @@ public class EntitySpawnerManager : NetworkBehaviour
     }
 
     [Server]
-    void OnSecond()
+    IEnumerator EnemySpawning()
     {
-        if (!GameManager.Instance.dayStarted) return;
+        float timer = 0f;
+        while (timer < spawnDelay)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
 
-        if (aliveEntities.Count >= maxEntities) return;
+        timer = 0f;
+        float cooldownTimer = 0f;
+        while (true)
+        {
+            while (cooldownTimer > 0)
+            {
+                cooldownTimer -= Time.deltaTime;
+                yield return null;
+            }
 
-        spawnTimer += 1f;
+            if (timer >= 5f)
+            {
+                float rand = Random.Range(0f, 100f);
+                if (rand <= spawnChance)
+                {
+                    if (TrySpawnEnemy())
+                        cooldownTimer = spawnCooldown;
+                }
 
-        if (!spawning & spawnTimer < spawnDelay) return;
-        spawning = true;
+                timer = 0f;
+            }
+            
+            timer += Time.deltaTime;
+            yield return null;
+        }
+    }
 
-        if (spawnTimer < spawnCooldown) return;
+    [Server]
+    bool TrySpawnEnemy()
+    {
+        ThemeDataSO.EntitySpawn[] entitySpawn = GameManager.Instance.ThemeDatas[GameManager.Instance.selectedTheme].entitySpawns;
 
-        spawnTimer = 0f;
-        float rand = Random.Range(0f, 100f);
-        if (rand > spawnChance) return;
+        float totalWeight = 0f;
+        foreach (var spawn in entitySpawn)
+        {
+            totalWeight += spawn.spawnWeight;
+        }
 
-        int entityIndex = Random.Range(0, entityPrefabs.Length);
-        int positionIndex = Random.Range(0, spawnerPositions.Length);
-        Transform position = spawnerPositions[positionIndex];
-        GameObject entityObj = Instantiate(entityPrefabs[entityIndex], position.position + position.forward, position.rotation);
-        NetworkServer.Spawn(entityObj);
+        float roll = Random.Range(0f, totalWeight);
+        float cumulative = 0f;
+        foreach (var spawn in entitySpawn)
+        {
+            cumulative += spawn.spawnWeight;
+            if (roll <= cumulative)
+            {
+                int positionIndex = Random.Range(0, spawnerPositions.Length);
+                Transform position = spawnerPositions[positionIndex];
+                GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation);
+                NetworkServer.Spawn(entityObj);
 
-        EntityStats stats = entityObj.GetComponentInChildren<EntityStats>();
-        aliveEntities.Add(stats);
+                EntityStats stats = entityObj.GetComponentInChildren<EntityStats>();
+                aliveEntities.Add(stats);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [Server]

@@ -28,10 +28,8 @@ public class ItemBase : InteractableObject
     [SyncVar]
     public bool InUse = false;
 
-    protected override void Start()
+    protected virtual void Start()
     {
-        base.Start();
-
         if (isServer && ItemData.isSellable)
             ItemValue = Random.Range(ItemData.minValue, ItemData.maxValue);
     }
@@ -61,7 +59,7 @@ public class ItemBase : InteractableObject
     {
         rb.isKinematic = true;
         coll.enabled = false;
-        DisableCanvas();
+        canvas.DisableCanvas();
     }
 
     public virtual void OnEquip(ItemInventory handler)
@@ -84,8 +82,8 @@ public class ItemBase : InteractableObject
 
     public override void EnableCanvas()
     {
-        base.EnableCanvas();
-
+        canvas.EnableCanvas();
+    
         itemNameTxt.SetText(ItemData.itemName);
 
         if (ItemData.isSellable && itemPriceTxt != null)

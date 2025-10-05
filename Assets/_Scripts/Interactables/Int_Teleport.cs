@@ -25,7 +25,7 @@ public class Int_Teleport : InteractableObject
         targetPosition.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
     // [Server]
-    public override void OnInteract(PlayerData sourceData)
+    public void Teleport(PlayerData sourceData)
     {
         if (requireGameStarted && !GameManager.Instance.dayStarted) return;
 
@@ -38,12 +38,13 @@ public class Int_Teleport : InteractableObject
 
         sourceData.Character_Controller.enabled = true;
 
-        DisableCanvas();
+        canvas.DisableCanvas();
 
         AudioManager.Instance.PlayMusic(musicSFX);
 
         OnInteractEvent?.Invoke(sourceData);
     }
+
 
     private void OnDrawGizmos()
     {

@@ -9,7 +9,7 @@ public class CameraMovement : MonoBehaviour
     [SerializeField] Camera pCamera;
     [SerializeField] AudioListener audioListener;
     [SerializeField] GameObject crosshair;
-    [SerializeField] bool _ignoreCrosshair = false;
+    //[SerializeField] bool _ignoreCrosshair = false;
 
     [Header("Settings")]
     [SerializeField] float minVertical = -80f;

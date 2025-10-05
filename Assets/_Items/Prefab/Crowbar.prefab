@@ -64,6 +64,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -85,6 +87,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -337,14 +340,15 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  itemCanvas: {fileID: 4029711328923440555}
-  higlightImg: {fileID: 5615921184634685959}
-  highlightedSprite: {fileID: 21300000, guid: 8553b869561346e40bc35315b635c6ed, type: 3}
-  lowlightedSprite: {fileID: 21300000, guid: 5497fd61a7a9b654cbbe53a91f49683b, type: 3}
+  holdTime: 2
+  canvas: {fileID: 578609524373151835}
   OnInteractEvent:
     m_PersistentCalls:
       m_Calls: []
   OnStopInteractEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHoldInteractEvent:
     m_PersistentCalls:
       m_Calls: []
   ItemData: {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
@@ -376,10 +380,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9084241017591515198}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -516,22 +520,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
---- !u!223 &4029711328923440555 stripped
-Canvas:
-  m_CorrespondingSourceObject: {fileID: 7964254604653562517, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-  m_PrefabInstance: {fileID: 6443206616131854142}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5615921184634685959 stripped
+--- !u!114 &578609524373151835 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1478619764556404025, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5867482282043326309, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
   m_PrefabInstance: {fileID: 6443206616131854142}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 3b4d2d9f95bdb53429b19525d766a5b8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractableCanvas
 --- !u!114 &6880008698537713054 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 436969226428498592, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
@@ -543,8 +542,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &7299442600008818990 stripped
-RectTransform:
+--- !u!4 &7299442600008818990 stripped
+Transform:
   m_CorrespondingSourceObject: {fileID: 4334162796013780496, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
   m_PrefabInstance: {fileID: 6443206616131854142}
   m_PrefabAsset: {fileID: 0}

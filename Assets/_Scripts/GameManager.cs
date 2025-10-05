@@ -2,8 +2,8 @@ using Mirror;
 using Steamworks;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GameManager : NetworkBehaviour
 {
@@ -13,7 +13,9 @@ public class GameManager : NetworkBehaviour
     [SerializeField] MapGenerator mapGenerator;
     [SerializeField] Int_Teleport teleporter;
     [SerializeField] List<PlayerData> players = new ();
-    [SerializeField] Item_HomewardBeacon homewardBeacon;
+    [SerializeField] Int_HomewardBeacon homewardBeacon;
+
+    [field: SerializeField] public ThemeDataSO[] ThemeDatas { get; private set; }
 
     [Header("Day Settings")]
     [SerializeField] float dayDuration = 900;
@@ -27,9 +29,14 @@ public class GameManager : NetworkBehaviour
     private readonly Dictionary<int, int> cachedQuotas = new ();
 
     public IReadOnlyList<PlayerData> Players => players;
+    public UnityEvent OnDayStarted = new();
+    public UnityEvent OnDayEnded = new();
 
     [HideInInspector] 
     public PlayerData LocalPlayer;
+
+    [SyncVar]
+    public int selectedTheme = 0;
 
     [SyncVar]
     public int mapSeed;
@@ -179,8 +186,10 @@ public class GameManager : NetworkBehaviour
 
             targetQuota = GetQuota(currentDay);
 
-            RpcGenerateMap(mapSeed);
+            RpcGenerateMap(mapSeed, selectedTheme);
         }
+
+        OnDayStarted?.Invoke();
     }
 
     public int GetQuota(int round)
@@ -220,19 +229,21 @@ public class GameManager : NetworkBehaviour
     [Server]
     public void FinishDay()
     {
+        OnDayEnded?.Invoke();
+
         dayStarted = false;
         currentDay++;
         RpcClearMap();
     }
 
     [ClientRpc]
-    void RpcGenerateMap(int seed)
+    void RpcGenerateMap(int seed, int theme)
     {
-        mapGenerator.StartGeneration(seed);
+        mapGenerator.StartGeneration(seed, theme);
 
         if (isServer)
         {
-            homewardBeacon.SetPosition(startRoomPos);
+            homewardBeacon.transform.position = startRoomPos;
             teleporter.SetParent(homewardBeacon.transform);
         }
     }

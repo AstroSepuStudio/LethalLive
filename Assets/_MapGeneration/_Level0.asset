@@ -21,5 +21,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d6015b7736f8f8c49b4af775dd7ff787, type: 2}
   furniturePrefabs:
   - {fileID: 1515907428897238213, guid: 35d66bb3f1d1d834a8a447eee868a8b9, type: 3}
+  entitySpawns:
+  - entityPrefab: {fileID: 284735472298521281, guid: 915dc52131c4b7f4db4cda7c84aec2f3, type: 3}
+    spawnWeight: 10
+    minSpawnCount: 1
+    maxSpawnCount: 2
   MinItems: 3
   MaxItems: 12
