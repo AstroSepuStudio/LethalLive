@@ -7,16 +7,15 @@ public class SkinManager : NetworkBehaviour
     [SerializeField] PlayerData pData;
     [SerializeField] SkinData[] skinsData;
     [SerializeField] GameObject skinSelectionWindow;
+    [SerializeField] bool work = false;
 
     [SyncVar(hook = nameof(OnSkinIndexChanged))]
     int skinIndex = 0;
     bool _opened = false;
 
-    //[SerializeField] SkinSO[] skins;
-    //GameObject currentModel;
-
     public void SkinInput(InputAction.CallbackContext context)
     {
+        if (!work) return;
         if (!pData.isLocalPlayer) return;
 
         if (_opened)
@@ -51,6 +50,12 @@ public class SkinManager : NetworkBehaviour
     [Command]
     void CmdRequestSkinChange(int index)
     {
+        if (index >= skinsData.Length || index < 0)
+        {
+            Debug.LogWarning("Given skin index is invalid");
+            return;
+        }
+
         skinIndex = index;
     }
 

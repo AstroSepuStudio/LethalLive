@@ -83,6 +83,11 @@ public class EntitySpawnerManager : NetworkBehaviour
                 yield return null;
             }
 
+            while (aliveEntities.Count >= maxEntities)
+            {
+                yield return null;
+            }
+
             if (timer >= 5f)
             {
                 float rand = Random.Range(0f, 100f);
@@ -103,6 +108,18 @@ public class EntitySpawnerManager : NetworkBehaviour
     [Server]
     bool TrySpawnEnemy()
     {
+        if (spawnerPositions == null)
+        {
+            Debug.LogWarning("Spawner positions array is null");
+            return false;
+        }
+
+        if (spawnerPositions.Length <= 0)
+        {
+            Debug.LogWarning("Spawner positions array is empty");
+            return false;
+        }
+
         ThemeDataSO.EntitySpawn[] entitySpawn = GameManager.Instance.ThemeDatas[GameManager.Instance.selectedTheme].entitySpawns;
 
         float totalWeight = 0f;

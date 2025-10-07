@@ -396,17 +396,28 @@ public class MapGenerator : MonoBehaviour
     [Server]
     public void SetEntitySpawners()
     {
-        if (entitySpawnerPositions == null || entitySpawnerPositions.Count == 0) return;
+        if (entitySpawnerPositions == null || entitySpawnerPositions.Count <= 0) return;
 
         int quantity = UnityEngine.Random.Range(4, entitySpawnerPositions.Count);
         List<Transform> positions = new(entitySpawnerPositions);
         List<Transform> spawnedPos = new();
 
+        if (positions == null || positions.Count <= 0)
+        {
+            Debug.LogWarning("No entity spawner position found");
+            return;
+        }
+
         for (int i = 0; i < quantity; i++)
         {
             int pos = UnityEngine.Random.Range(0, positions.Count);
+            if (pos >= positions.Count)
+            {
+                Debug.LogWarning("Random index is invalid");
+                continue;
+            }
 
-            GameObject spawner = Instantiate(entitySpawnerPref, positions[pos].position, positions[pos].rotation,transform);
+            GameObject spawner = Instantiate(entitySpawnerPref, positions[pos].position, positions[pos].rotation, transform);
             NetworkServer.Spawn(spawner);
 
             spawnedPos.Add(positions[pos]);

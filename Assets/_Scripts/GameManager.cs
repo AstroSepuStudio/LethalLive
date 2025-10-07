@@ -253,4 +253,18 @@ public class GameManager : NetworkBehaviour
     {
         mapGenerator.ClearMap();
     }
+
+    public void RequestTheme(int index) => CmdSetThemeIndex(index);
+
+    [Command(requiresAuthority = false)]
+    void CmdSetThemeIndex(int index)
+    {
+        if (index >= ThemeDatas.Length || index < 0)
+        {
+            Debug.LogWarning("Given theme index is invalid");
+            return;
+        }
+
+        selectedTheme = index;
+    }
 }

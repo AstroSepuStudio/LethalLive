@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class LobbyManagerScreen : UIManager
@@ -43,6 +44,8 @@ public class LobbyManagerScreen : UIManager
     public Color holoXTeamColor = Color.magenta;
     public Color hololiveEnglishTeamColor = Color.blue;
 
+    bool open = false;
+
     [Serializable]
     struct TeamBalancePair
     {
@@ -55,18 +58,39 @@ public class LobbyManagerScreen : UIManager
         base.Start();
 
         GameTick.OnSecond += OnSecond;
+
+        pregameWindow.SetActive(true);
+        gameWindow.SetActive(false);
+
+        if (GameManager.Instance.isLocalPlayer)
+        {
+            GameManager.Instance.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
+        }
     }
 
     private void OnDestroy()
     {
         GameTick.OnSecond -= OnSecond;
+
+        if (GameManager.Instance.isLocalPlayer)
+        {
+            GameManager.Instance.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
+        }
+    }
+
+    void OnEscapePressed(InputAction.CallbackContext context)
+    {
+        if (open)
+            CloseLobbyManagerScreen();
     }
 
     public void OnInteract(PlayerData playerData) => GameManager.Instance.CmdRequestOpenLMS(playerData.Index);
 
     public void OpenLobbyManagerScreen(int index)
     {
-        if (GameManager.Instance.LocalPlayer.Index != index) return;
+        if (GameManager.Instance.LocalPlayer.Index != index || open) return;
+
+        open = true;
 
         povCamera.gameObject.SetActive(true);
         GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
@@ -247,7 +271,7 @@ public class LobbyManagerScreen : UIManager
         float duration = UnityEngine.Random.Range(1f, 3f);
         while (timer <= duration)
         {
-            loadingThing.Rotate(loadingThing.forward, loadThingRotSpd * Time.deltaTime);
+            loadingThing.localRotation = Quaternion.Euler(0, 0, loadingThing.localRotation.eulerAngles.z - loadThingRotSpd * Time.deltaTime);
 
             timer += Time.deltaTime;
             yield return null;
@@ -255,5 +279,15 @@ public class LobbyManagerScreen : UIManager
 
         loadingWindow.SetActive(false);
         gameWindow.SetActive(true);
+    }
+
+    public void RequestSkinChange(int index)
+    {
+        GameManager.Instance.LocalPlayer.Skin_Manager.SetSkinIndex(index);
+    }
+
+    public void RequestThemeSelection(int index)
+    {
+        GameManager.Instance.RequestTheme(index);
     }
 }

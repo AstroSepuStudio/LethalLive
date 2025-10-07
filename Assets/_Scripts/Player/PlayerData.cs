@@ -15,6 +15,7 @@ public class PlayerData : NetworkBehaviour
     public PunchManager Punch_Manager;
     public PlayerStats Player_Stats;
     public ItemInventory PlayerInventory;
+    public SkinManager Skin_Manager;
     public bool _LockPlayer = false;
     public HUD_Manager HUDManager;
     public AudioSource Quiet_AS;

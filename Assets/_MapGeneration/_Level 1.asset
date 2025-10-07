@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1976320c8433c7b4ba26890fb2382bee, type: 3}
+  m_Name: _Level 1
+  m_EditorClassIdentifier: 
+  startingRoom: {fileID: 11400000, guid: 74a8d1cf0b6ce7a4d856fa8094da36ce, type: 2}
+  spawnableRooms:
+  - {fileID: 11400000, guid: 757ebc56406bd074db367e05b2787e96, type: 2}
+  deadEndRooms: []
+  spawnableItems:
+  - {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
+  - {fileID: 11400000, guid: d6015b7736f8f8c49b4af775dd7ff787, type: 2}
+  furniturePrefabs:
+  - {fileID: 1515907428897238213, guid: 35d66bb3f1d1d834a8a447eee868a8b9, type: 3}
+  entitySpawns:
+  - entityPrefab: {fileID: 284735472298521281, guid: 915dc52131c4b7f4db4cda7c84aec2f3, type: 3}
+    spawnWeight: 10
+    minSpawnCount: 1
+    maxSpawnCount: 2
+  MinItems: 3
+  MaxItems: 12
