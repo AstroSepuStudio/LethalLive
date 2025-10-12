@@ -10,7 +10,6 @@ public class Int_HomewardBeacon : InteractableObject
         sourceData.Character_Controller.enabled = true;
 
         DisableCanvas();
-
-        AudioManager.Instance.StopMusic();
+        GameManager.Instance.OnReturnOffice(sourceData);
     }
 }

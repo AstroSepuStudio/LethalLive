@@ -14,6 +14,15 @@ public class AttackStat
 
     float timer;
 
+    public AttackStat(AttackStat stat, float attackDamage)
+    {
+        AttackRadius = stat.AttackRadius;
+        AttackKnock = stat.AttackKnock;
+        AttackForce = stat.AttackForce;
+        AttackDamage = attackDamage;
+        AttackCooldown = stat.AttackCooldown;
+    }
+
     public IEnumerator CountdownCooldown()
     {
         OnCooldown = true;

@@ -2,12 +2,13 @@ using Mirror;
 using Steamworks;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class LobbyManagerScreen : UIManager
+public class LobbyManagerScreen : UIManagerNetwork
 {
     public Sprite defaultIcon;
 
@@ -23,6 +24,7 @@ public class LobbyManagerScreen : UIManager
 
     [SerializeField] TextMeshProUGUI dayText;
     [SerializeField] TextMeshProUGUI timeText;
+    [SerializeField] TextMeshProUGUI levelText;
     [SerializeField] GameObject deadlineObj;
     [SerializeField] TeamBalancePair hololiveTeamBalance;
     [SerializeField] TeamBalancePair gamersTeamBalance;
@@ -44,7 +46,10 @@ public class LobbyManagerScreen : UIManager
     public Color holoXTeamColor = Color.magenta;
     public Color hololiveEnglishTeamColor = Color.blue;
 
-    bool open = false;
+    [SyncVar] int playerOnLMS = -1;
+    [SyncVar] bool open = false;
+
+    PlayerData currentPlayer;
 
     [Serializable]
     struct TeamBalancePair
@@ -62,8 +67,9 @@ public class LobbyManagerScreen : UIManager
         pregameWindow.SetActive(true);
         gameWindow.SetActive(false);
 
-        if (GameManager.Instance.isLocalPlayer)
+        if (isLocalPlayer)
         {
+            Debug.Log("Suscribing escape event");
             GameManager.Instance.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
         }
     }
@@ -72,39 +78,77 @@ public class LobbyManagerScreen : UIManager
     {
         GameTick.OnSecond -= OnSecond;
 
-        if (GameManager.Instance.isLocalPlayer)
+        if (isLocalPlayer)
         {
             GameManager.Instance.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
         }
     }
 
-    void OnEscapePressed(InputAction.CallbackContext context)
+    public void OnEscapePressed(InputAction.CallbackContext context)
     {
-        if (open)
-            CloseLobbyManagerScreen();
+        if (!context.started) return;
+
+        CloseLMS();
     }
 
-    public void OnInteract(PlayerData playerData) => GameManager.Instance.CmdRequestOpenLMS(playerData.Index);
-
-    public void OpenLobbyManagerScreen(int index)
+    public void CloseLMS()
     {
-        if (GameManager.Instance.LocalPlayer.Index != index || open) return;
+        Debug.Log("Try close lms");
+        if (isLocalPlayer &&!open) return;
+
+        Debug.Log("Requesting close lms");
+        CmdCloseLMS(GameManager.Instance.LocalPlayer.Index);
+    }
+
+    public void OnInteract(PlayerData playerData)
+    {
+        if (open) return;
 
         open = true;
+        playerOnLMS = playerData.Index;
+        playerData._LockPlayer = true;
+        currentPlayer = playerData;
+
+        RpcOpenLMS(playerData.Index);
+    }
+
+    [ClientRpc]
+    void RpcOpenLMS(int index)
+    {
+        if (GameManager.Instance.LocalPlayer.Index != index) return;
 
         povCamera.gameObject.SetActive(true);
         GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
-        GameManager.Instance.LocalPlayer._LockPlayer = true;
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
-    public void CloseLobbyManagerScreen()
+    [Command(requiresAuthority = false)]
+    void CmdCloseLMS(int index)
     {
+        Debug.Log("close lms request received");
+        if (!open || index != playerOnLMS) return;
+
+        Debug.Log("sending lms closing rpc");
+        currentPlayer._LockPlayer = false;
+        currentPlayer = null;
+
+        open = false;
+        playerOnLMS = -1;
+
+        RpcCloseLMS(index);
+    }
+
+    [ClientRpc]
+    public void RpcCloseLMS(int index)
+    {
+        Debug.Log("received close lms rpc");
+        if (GameManager.Instance.LocalPlayer.Index != index) return;
+
+        Debug.Log("closing lms");
         GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(true);
         povCamera.gameObject.SetActive(false);
-        GameManager.Instance.LocalPlayer._LockPlayer = false;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -114,15 +158,32 @@ public class LobbyManagerScreen : UIManager
     {
         if (!NetworkClient.isConnected) return;
 
-        if (identity.isLocalPlayer)
-            GameManager.Instance.CmdSetPlayerPing(GameManager.Instance.LocalPlayer.Index, (int)(NetworkTime.rtt * 1000));
+        //if (identity.isLocalPlayer)
+        //    GameManager.Instance.CmdSetPlayerPing(GameManager.Instance.LocalPlayer.Index, (int)(NetworkTime.rtt * 1000));
 
         if (!identity.isServer) return;
 
-        GameManager.Instance.RequestScreenRefresh();
+        List<GameManager.LobbyMemberData> members = new();
+
+        foreach (var player in GameManager.Instance.Players)
+        {
+            members.Add(new GameManager.LobbyMemberData
+            {
+                SteamID = player.SteamID,
+                Name = player.PlayerName,
+                AvatarData = player.AvatarData,
+                Team = player.Team,
+                Ping = player.Ping
+            });
+        }
+
+        RpcRefreshScreen(members.ToArray(), GameManager.Instance.ThemeDatas[GameManager.Instance.selectedTheme].levelName);
     }
 
-    public void RefreshScreen(GameManager.LobbyMemberData[] members)
+    [ClientRpc]
+    void RpcRefreshScreen(GameManager.LobbyMemberData[] members, string themeName) => RefreshScreen(members, themeName);
+
+    public void RefreshScreen(GameManager.LobbyMemberData[] members, string themeName)
     {
         int lobbyIndex = LobbyManager.Instace.LobbySettings.Lobby_Type switch
         {
@@ -202,6 +263,8 @@ public class LobbyManagerScreen : UIManager
         else englishTeamBalance.teamText.gameObject.SetActive(false);
 
         totalBalanceText.SetText($"${GameManager.Instance.totalBalance}");
+
+        levelText.SetText(themeName);
     }
 
     public void RequestTeamSwap(int index)
@@ -262,13 +325,19 @@ public class LobbyManagerScreen : UIManager
         GameManager.Instance.StartDay();
     }
 
-    public IEnumerator SwitchScreenState()
+    [ClientRpc]
+    public void RpcSwitchScreenState()
+    {
+        float duration = UnityEngine.Random.Range(1f, 3f);
+        StartCoroutine(SwitchCoroutine(duration));
+    }
+
+    IEnumerator SwitchCoroutine(float duration)
     {
         pregameWindow.SetActive(false);
         loadingWindow.SetActive(true);
 
         float timer = 0;
-        float duration = UnityEngine.Random.Range(1f, 3f);
         while (timer <= duration)
         {
             loadingThing.localRotation = Quaternion.Euler(0, 0, loadingThing.localRotation.eulerAngles.z - loadThingRotSpd * Time.deltaTime);

@@ -7717,6 +7717,7 @@ GameObject:
   - component: {fileID: 858769467701975222}
   - component: {fileID: 1042807307259932311}
   - component: {fileID: 1381176049468118383}
+  - component: {fileID: 7336853628982519476}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -8305,11 +8306,11 @@ MonoBehaviour:
   syncInterval: 0
   Player_Input: {fileID: 2520668280935161701}
   Player_Movement: {fileID: -7009135778534889599}
+  Spectator_Movement: {fileID: 7336853628982519476}
   Punch_Manager: {fileID: 3477193561676349907}
   Player_Stats: {fileID: 3130351792361390793}
   PlayerInventory: {fileID: 858769467701975222}
   Skin_Manager: {fileID: 6966859214139682043}
-  _LockPlayer: 0
   HUDManager: {fileID: 5605113781152959942}
   Quiet_AS: {fileID: 998129158392099770}
   Modest_AS: {fileID: 3039990793000941887}
@@ -8341,6 +8342,7 @@ MonoBehaviour:
   Index: 0
   Ping: 0
   Team: 0
+  _LockPlayer: 0
   PlayerCanvas: {fileID: 7353167371214788922}
 --- !u!114 &-7009135778534889599
 MonoBehaviour:
@@ -8467,6 +8469,7 @@ MonoBehaviour:
   staminaRecoveryRate: 15
   maxStamina: 100
   currentStamina: 0
+  dead: 0
 --- !u!114 &858769467701975222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8544,6 +8547,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &7336853628982519476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723889319432024688}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8ee0f116a143a84490263c4ada4e78f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpectatorMovement
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  playerData: {fileID: 5726922814949680812}
 --- !u!1 &793824739247423219
 GameObject:
   m_ObjectHideFlags: 0

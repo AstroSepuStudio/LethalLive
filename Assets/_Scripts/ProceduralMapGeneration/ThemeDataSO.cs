@@ -13,12 +13,28 @@ public class ThemeDataSO : ScriptableObject
         public int maxSpawnCount;
     }
 
+    [Serializable]
+    public struct EerySFX
+    {
+        public AudioSFX clip;
+        public float weight;
+    }
+
+    public string levelName;
+
+    [Header("Room Generation")]
     public RoomDataSO startingRoom;
     public RoomDataSO[] spawnableRooms;
     public RoomDataSO[] deadEndRooms;
+
+    [Header("Features Generation")]
     public ItemSO[] spawnableItems;
     public GameObject[] furniturePrefabs;
     public EntitySpawn[] entitySpawns;
+
+    [Header("Ambient")]
+    public AudioSFX loopingMusic;
+    public EerySFX[] eerySFX;
 
     public int MinItems = 3;
     public int MaxItems = 12;

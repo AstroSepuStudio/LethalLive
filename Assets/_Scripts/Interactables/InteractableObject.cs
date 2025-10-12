@@ -1,4 +1,5 @@
 using Mirror;
+using Mirror.Examples.MultipleMatch;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -34,18 +35,26 @@ public class InteractableObject : NetworkBehaviour
     IEnumerator CheckForHold(PlayerData sourceData)
     {
         _holding = true;
-        canvas.holdImgDisplayer.fillAmount = 0;
+        TargetUpdateFill(sourceData.connectionToClient, 0f);
 
         float timer = 0f;
+        float updateTimer = 0f;
         while (timer < holdTime && _holding && OnHoldInteractEvent.GetPersistentEventCount() > 0)
         {
-            canvas.holdImgDisplayer.fillAmount = timer / holdTime;
             timer += Time.deltaTime;
+            updateTimer += Time.deltaTime;
+
+            if (updateTimer >= 0.05f)
+            {
+                float fillValue = timer / holdTime;
+                TargetUpdateFill(sourceData.connectionToClient, fillValue);
+                updateTimer = 0f;
+            }
             yield return null;
         }
 
         _holding = false;
-        canvas.holdImgDisplayer.fillAmount = 0;
+        TargetUpdateFill(sourceData.connectionToClient, 0f);
 
         if (timer >= holdTime)
             OnHoldInteractEvent?.Invoke(sourceData);
@@ -56,7 +65,14 @@ public class InteractableObject : NetworkBehaviour
     public virtual void OnStopInteract(PlayerData sourceData)
     {
         _holding = false;
-        canvas.holdImgDisplayer.fillAmount = 0;
+        TargetUpdateFill(sourceData.connectionToClient, 0f);
         OnStopInteractEvent?.Invoke(sourceData);
+    }
+
+    [TargetRpc]
+    private void TargetUpdateFill(NetworkConnection target, float value)
+    {
+        if (canvas != null && canvas.holdImgDisplayer != null)
+            canvas.holdImgDisplayer.fillAmount = value;
     }
 }

@@ -35,6 +35,8 @@ public class GameManager : NetworkBehaviour
     [HideInInspector] 
     public PlayerData LocalPlayer;
 
+    public List<PlayerData> playersOnDungeon = new();
+
     [SyncVar]
     public int selectedTheme = 0;
 
@@ -91,6 +93,16 @@ public class GameManager : NetworkBehaviour
         Instance = this;
     }
 
+    public PlayerData GetPlayerByIndex(int index)
+    {
+        foreach (PlayerData p in Instance.Players)
+        {
+            if (p.Index == index)
+                 return p;
+        }
+        return null;
+    }
+
     [Server]
     public void RegisterPlayer(PlayerData player)
     {
@@ -112,50 +124,6 @@ public class GameManager : NetworkBehaviour
     }
 
     [Command(requiresAuthority = false)]
-    public void CmdSetPlayerPing(int index, int ping) => players[index].Ping = ping;
-
-    [Server]
-    public void RequestScreenRefresh()
-    {
-        List<LobbyMemberData> members = new();
-
-        foreach (var player in players)
-        {
-            members.Add(new LobbyMemberData
-            {
-                SteamID = player.SteamID,
-                Name = player.PlayerName,
-                AvatarData = player.AvatarData,
-                Team = player.Team,
-                Ping = player.Ping
-            });
-        }
-
-        RpcRefreshScreen(members.ToArray());
-    }
-
-    [ClientRpc]
-    void RpcRefreshScreen(LobbyMemberData[] members)
-    {
-        if (lobbyManagerScreen == null)
-            return;
-
-        lobbyManagerScreen.RefreshScreen(members);
-    }
-
-    [Server]
-    public void CmdRequestOpenLMS(int index) => RpcOpenLobbyManagerScreen(index);
-
-    [ClientRpc]
-    void RpcOpenLobbyManagerScreen(int index)
-    {
-        if (lobbyManagerScreen == null)
-            return;
-
-        lobbyManagerScreen.OpenLobbyManagerScreen(index);
-    }
-
-    [Command(requiresAuthority = false)]
     public void CmdRequestTeamChange(int playerIndex, PlayerTeam team)
     {
         players[playerIndex].Team = team;
@@ -168,7 +136,24 @@ public class GameManager : NetworkBehaviour
         gameStarted = true;
 
         StartCoroutine(GameCoroutine());
-        StartCoroutine(lobbyManagerScreen.SwitchScreenState());
+        lobbyManagerScreen.RpcSwitchScreenState();
+    }
+
+    [Server]
+    public void OnEnterDungeon(PlayerData playerData)
+    {
+        if (ThemeDatas[selectedTheme].loopingMusic != null)
+            AudioManager.Instance.PlayMusic(ThemeDatas[selectedTheme].loopingMusic);
+
+        playersOnDungeon.Add(playerData);
+    }
+
+    [Server]
+    public void OnReturnOffice(PlayerData playerData)
+    {
+        AudioManager.Instance.StopMusic();
+
+        playersOnDungeon.Remove(playerData);
     }
 
     public void StartDay()
@@ -230,6 +215,16 @@ public class GameManager : NetworkBehaviour
     public void FinishDay()
     {
         OnDayEnded?.Invoke();
+
+        foreach (var player in playersOnDungeon)
+        {
+            player.Player_Stats.ForceDeath();
+            player.Character_Controller.enabled = false;
+            player.Character_Controller.transform.position = transform.position;
+            player.Character_Controller.enabled = true;
+        }
+
+        playersOnDungeon.Clear();
 
         dayStarted = false;
         currentDay++;

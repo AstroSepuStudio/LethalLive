@@ -39,9 +39,9 @@ public class FurnitureEntity : EntityStats
         rb.AddForce(momentum, ForceMode.Impulse);
     }
 
-    public override void ModifyHP(float amount)
+    public override void ModifyHP(EntityStats source, AttackStat attack)
     {
-        currentHP = Mathf.Clamp(currentHP + amount, 0f, maxHP);
+        currentHP = Mathf.Clamp(currentHP + attack.AttackDamage, 0f, maxHP);
 
         for (int i = 0; i < dropThresholds.Length; i++)
         {
@@ -57,9 +57,9 @@ public class FurnitureEntity : EntityStats
 
         if (currentHP <= 0)
         {
-            OnDeath();
+            OnDeath(source, attack);
         }
-        else if (amount >= 10f)
+        else if (attack.AttackDamage >= 10f)
         {
             RequestPlaySFX(3);
         }
@@ -69,7 +69,7 @@ public class FurnitureEntity : EntityStats
         }
     }
 
-    protected override void OnDeath()
+    protected override void OnDeath(EntityStats source, AttackStat attack)
     {
         RequestPlaySFX(2);
 

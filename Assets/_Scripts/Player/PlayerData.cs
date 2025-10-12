@@ -4,6 +4,8 @@ using Mirror;
 using Steamworks;
 using System.Collections;
 using System.Security.Principal;
+using Mirror.BouncyCastle.Math.EC.Multiplier;
+using static Unity.VisualScripting.Member;
 
 public enum PlayerTeam { Hololive, Gamers, HoloX, English };
 
@@ -12,11 +14,11 @@ public class PlayerData : NetworkBehaviour
     [Header("Input & Core Systems")]
     public PlayerInput Player_Input;
     public PlayerMovement Player_Movement;
+    public SpectatorMovement Spectator_Movement;
     public PunchManager Punch_Manager;
     public PlayerStats Player_Stats;
     public ItemInventory PlayerInventory;
     public SkinManager Skin_Manager;
-    public bool _LockPlayer = false;
     public HUD_Manager HUDManager;
     public AudioSource Quiet_AS;
     public AudioSource Modest_AS;
@@ -68,6 +70,9 @@ public class PlayerData : NetworkBehaviour
 
     [SyncVar]
     public PlayerTeam Team;
+
+    [SyncVar]
+    public bool _LockPlayer = false;
 
     [Header("Canvas")]
     public GameObject PlayerCanvas;
@@ -226,5 +231,14 @@ public class PlayerData : NetworkBehaviour
         {
             PlayerInventory.SecondaryInput(context);
         }
+    }
+
+    [Server]
+    public void OnPlayerDeath(AttackStat stat, Vector3 momentum)
+    {
+        Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
+
+        Player_Movement.enabled = false;
+        Spectator_Movement.enabled = true;
     }
 }

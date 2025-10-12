@@ -1,5 +1,6 @@
 using Mirror;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Int_Teleport : InteractableObject
 {
@@ -7,6 +8,8 @@ public class Int_Teleport : InteractableObject
     [SerializeField] float minDistance = 1f;
     [SerializeField] float maxDistance = 4f;
     [SerializeField] AudioSFX musicSFX;
+
+    public readonly UnityEvent<PlayerData> OnPlayerTeleports;
 
     [SyncVar]
     [SerializeField] bool requireGameStarted;
@@ -24,27 +27,51 @@ public class Int_Teleport : InteractableObject
         targetPosition.parent = parent;
         targetPosition.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
-    // [Server]
+    
     public void Teleport(PlayerData sourceData)
     {
         if (requireGameStarted && !GameManager.Instance.dayStarted) return;
 
+        Vector3 desiredPosition = Vector3.zero;
+        bool foundValidPos = false;
+        int tries = 0;
+
+        while (!foundValidPos && tries < 5)
+        {
+            Vector2 randomCircle = Random.insideUnitCircle.normalized;
+            float distance = Random.Range(minDistance, maxDistance);
+            Vector3 offset = new Vector3(randomCircle.x, 0f, randomCircle.y) * distance;
+
+            desiredPosition = targetPosition.position + offset;
+            Vector3 sourcePosition = sourceData.Character_Controller.transform.position + Vector3.up * 1.5f;
+            Vector3 rayDir = (desiredPosition - sourcePosition).normalized;
+
+            if (Physics.Raycast(sourcePosition, rayDir, out RaycastHit hit, Vector3.Distance(sourcePosition, desiredPosition)))
+            {
+                if (hit.distance >= minDistance + 0.5f)
+                {
+                    desiredPosition = sourcePosition + rayDir * (hit.distance - 0.5f);
+
+                    foundValidPos = true;
+                    break;
+                }
+                tries++;
+            }
+
+            foundValidPos = true;
+        }
+
+        if (!foundValidPos) return;
+
         sourceData.Character_Controller.enabled = false;
-
-        Vector2 randomCircle = Random.insideUnitCircle.normalized;
-        float distance = Random.Range(minDistance, maxDistance);
-        Vector3 offset = new Vector3(randomCircle.x, 0f, randomCircle.y) * distance;
-        sourceData.Character_Controller.transform.position = targetPosition.position + offset;
-
+        sourceData.Character_Controller.transform.position = desiredPosition;
         sourceData.Character_Controller.enabled = true;
 
         canvas.DisableCanvas();
-
-        AudioManager.Instance.PlayMusic(musicSFX);
-
+        
+        GameManager.Instance.OnEnterDungeon(sourceData);
         OnInteractEvent?.Invoke(sourceData);
     }
-
 
     private void OnDrawGizmos()
     {

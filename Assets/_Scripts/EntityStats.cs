@@ -62,7 +62,7 @@ public class EntityStats : NetworkBehaviour
     {
         RequestPlaySFX(0);
 
-        ModifyHP(-attack.AttackDamage);
+        ModifyHP(src, attack);
 
         float multiplier = Random.Range(1f, 2f);
         Vector3 dir = transform.position - src.transform.position;
@@ -101,12 +101,12 @@ public class EntityStats : NetworkBehaviour
     }
 
     [Server]
-    public virtual void ModifyHP(float amount)
+    public virtual void ModifyHP(EntityStats source, AttackStat attack)
     {
-        currentHP = Mathf.Clamp(currentHP + amount, 0f, maxHP);
+        currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
         if (currentHP <= 0)
         {
-            OnDeath();
+            OnDeath(source, attack);
         }
     }
 
@@ -115,7 +115,7 @@ public class EntityStats : NetworkBehaviour
     }
 
     [Server]
-    protected virtual void OnDeath()
+    protected virtual void OnDeath(EntityStats source, AttackStat attack)
     {
         RequestPlaySFX(2);
 

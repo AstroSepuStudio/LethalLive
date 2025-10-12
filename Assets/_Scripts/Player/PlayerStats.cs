@@ -16,6 +16,9 @@ public class PlayerStats : EntityStats
     [SyncVar(hook = nameof(OnStaminaChanged))] 
     public float currentStamina;
 
+    [SyncVar]
+    public bool dead = false;
+
     public override void OnStartServer()
     {
         currentHP = maxHP;
@@ -26,6 +29,8 @@ public class PlayerStats : EntityStats
     protected override void Update()
     {
         if (!isServer) return;
+    
+        if (dead) return;
 
         staminaRecoveryTimer = Mathf.Clamp(staminaRecoveryTimer + Time.deltaTime, 0, staminaRecoveryDelay);
         knockRecoveryTimer = Mathf.Clamp(knockRecoveryTimer + Time.deltaTime, 0, knockRecoveryDelay);
@@ -55,11 +60,11 @@ public class PlayerStats : EntityStats
                 ModifyKnock(source, stats);
 
             if (LobbyManager.Instace.LobbySettings.TeamDamage)
-                ModifyHP(-stats.AttackDamage);
+                ModifyHP(source.Player_Stats, stats);
         }
         else
         {
-            ModifyHP(-stats.AttackDamage);
+            ModifyHP(source.Player_Stats, stats);
             ModifyKnock(source, stats);
         }
     }
@@ -67,13 +72,19 @@ public class PlayerStats : EntityStats
     #region HP
 
     [Server]
-
-    public override void ModifyHP(float amount)
+    public void ForceDeath()
     {
-        currentHP = Mathf.Clamp(currentHP + amount, 0f, maxHP);
+        currentHP = 0;
+        OnDeath(null, null);
+    }
+
+    [Server]
+    public override void ModifyHP(EntityStats source, AttackStat stat)
+    {
+        currentHP = Mathf.Clamp(currentHP - stat.AttackDamage, 0f, maxHP);
         if (currentHP <= 0)
         {
-            OnDeath();
+            OnDeath(source, stat);
         }
     }
 
@@ -83,10 +94,19 @@ public class PlayerStats : EntityStats
     }
 
     [Server]
-    protected override void OnDeath()
+    protected override void OnDeath(EntityStats source, AttackStat stat)
     {
-        Debug.Log($"{gameObject.name} died.");
-        // Add ragdoll, respawn, disable movement, etc.
+        Vector3 momentum = Vector3.zero;
+
+        if (source != null && stat != null)
+        {
+            float multiplier = Random.Range(1f, 2f);
+            Vector3 dir = pData.transform.position - source.transform.position;
+            momentum = multiplier * stat.AttackForce * dir.normalized;
+        }
+
+        dead = true;
+        pData.OnPlayerDeath(stat, momentum);
     }
 
     #endregion
