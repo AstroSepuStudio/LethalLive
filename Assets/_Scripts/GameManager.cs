@@ -9,7 +9,7 @@ public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance { get; private set; }
     [SerializeField] ItemSO[] itemsData;
-    [SerializeField] LobbyManagerScreen lobbyManagerScreen;
+    public LobbyManagerScreen lobbyManagerScreen;
     [SerializeField] MapGenerator mapGenerator;
     [SerializeField] Int_Teleport teleporter;
     [SerializeField] List<PlayerData> players = new ();

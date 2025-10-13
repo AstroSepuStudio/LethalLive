@@ -21,6 +21,8 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] GameObject gameWindow;
     [SerializeField] GameObject loadingWindow;
     [SerializeField] Transform loadingThing;
+    [SerializeField] Transform playerTargetPos;
+    public Transform rightHCIKTarget;
 
     [SerializeField] TextMeshProUGUI dayText;
     [SerializeField] TextMeshProUGUI timeText;
@@ -109,6 +111,9 @@ public class LobbyManagerScreen : UIManagerNetwork
         playerData._LockPlayer = true;
         currentPlayer = playerData;
 
+        playerData.Teleport(playerTargetPos.position);
+        playerData.Skin_Data.Rigging_Manager.RpcEnableRightHandChainRig();
+
         RpcOpenLMS(playerData.Index);
     }
 
@@ -131,6 +136,7 @@ public class LobbyManagerScreen : UIManagerNetwork
         if (!open || index != playerOnLMS) return;
 
         Debug.Log("sending lms closing rpc");
+        currentPlayer.Skin_Data.Rigging_Manager.RpcDisableRightHandChainRig();
         currentPlayer._LockPlayer = false;
         currentPlayer = null;
 

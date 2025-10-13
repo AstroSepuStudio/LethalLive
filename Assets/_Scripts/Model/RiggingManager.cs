@@ -1,8 +1,9 @@
+using Mirror;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public class RiggingManager : MonoBehaviour
+public class RiggingManager : NetworkBehaviour
 {
     [SerializeField] SkinData skinData;
     [SerializeField] float maxAngle = 80;
@@ -10,24 +11,49 @@ public class RiggingManager : MonoBehaviour
     [SerializeField] RigBuilder rigBuilder;
     [SerializeField] Rig FollowCameraTargetRig;
     [SerializeField] Rig FollowCameraRig;
+    [SerializeField] Rig RightHandChainRig;
+    [SerializeField] Transform RHCRTarget;
 
     Coroutine camRigTransition;
     Coroutine camTargetRigTransition;
 
-    private void Start()
-    {
-        GameTick.OnTick += OnTick;
-        //rigBuilder.Build();
-    }
+    Transform RHCRTargetTarget;
+    public bool StopCameraRigs { get; private set; }
 
     private void OnDestroy()
     {
         GameTick.OnTick -= OnTick;
     }
 
+    private void OnDisable()
+    {
+        StopCameraRigs = false;
+        RHCRTargetTarget = null;
+        RightHandChainRig.weight = 0f;
+        GameTick.OnTick -= OnTick;
+    }
+
+    public void SetUp(bool RHCR)
+    {
+        GameTick.OnTick += OnTick;
+
+        if (RHCR)
+        {
+            StopCameraRigs = true;
+            RHCRTargetTarget = GameManager.Instance.lobbyManagerScreen.rightHCIKTarget;
+            RightHandChainRig.weight = 1f;
+        }
+    }
+
+    private void Update()
+    {
+        if (RHCRTargetTarget != null)
+            RHCRTarget.position = RHCRTargetTarget.position;
+    }
+
     void OnTick()
     {
-        if (skinData.pData.Skin_Data != skinData) return;
+        if (skinData.pData.Skin_Data != skinData || StopCameraRigs) return;
 
         bool isCameraInFront = IsInFront(skinData.pData.PlayerCamera.transform);
         bool isCameraTargetInFront = IsInFront(skinData.pData.LookCameraTarget);
@@ -89,5 +115,24 @@ public class RiggingManager : MonoBehaviour
 
         FollowCameraTargetRig.weight = targetWeight;
         camTargetRigTransition = null;
+    }
+
+    [ClientRpc]
+    public void RpcEnableRightHandChainRig()
+    {
+        RightHandChainRig.weight = 1f;
+        RHCRTargetTarget = GameManager.Instance.lobbyManagerScreen.rightHCIKTarget;
+
+        FollowCameraRig.weight = 0;
+        FollowCameraTargetRig.weight = 0;
+        StopCameraRigs = true;
+    }
+
+    [ClientRpc]
+    public void RpcDisableRightHandChainRig()
+    {
+        RHCRTargetTarget = null;
+        RightHandChainRig.weight = 0f;
+        StopCameraRigs = false;
     }
 }

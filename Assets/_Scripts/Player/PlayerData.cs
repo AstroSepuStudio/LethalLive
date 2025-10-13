@@ -3,9 +3,6 @@ using UnityEngine.InputSystem;
 using Mirror;
 using Steamworks;
 using System.Collections;
-using System.Security.Principal;
-using Mirror.BouncyCastle.Math.EC.Multiplier;
-using static Unity.VisualScripting.Member;
 
 public enum PlayerTeam { Hololive, Gamers, HoloX, English };
 
@@ -240,5 +237,13 @@ public class PlayerData : NetworkBehaviour
 
         Player_Movement.enabled = false;
         Spectator_Movement.enabled = true;
+    }
+
+    [Server]
+    public void Teleport(Vector3 position)
+    {
+        Character_Controller.enabled = false;
+        transform.position = position;
+        Character_Controller.enabled = true;
     }
 }
