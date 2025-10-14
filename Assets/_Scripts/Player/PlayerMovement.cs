@@ -320,7 +320,7 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!isServer) return;
-        if (pData.Skin_Data.Ragdoll_Manager.IsKnocked || pData.CameraPivot == null || pData._LockPlayer) return;
+        if (pData.Skin_Data.Ragdoll_Manager.IsKnocked || pData.CameraPivot == null || pData._LockPlayer || !pData.Character_Controller.enabled) return;
         if (_isSprinting && Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
         {
             CmdStopSprint();

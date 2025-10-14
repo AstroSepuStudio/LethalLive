@@ -103,6 +103,7 @@ public class EntityStats : NetworkBehaviour
     [Server]
     public virtual void ModifyHP(EntityStats source, AttackStat attack)
     {
+        Debug.Log($"Receives {attack.AttackDamage} damage");
         currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
         if (currentHP <= 0)
         {

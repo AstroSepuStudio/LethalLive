@@ -14,6 +14,8 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     [Header("References")]
     [SerializeField] NetworkIdentity identity;
+    [SerializeField] Canvas worldCanvas;
+    [SerializeField] RectTransform refRectTransform;
     [SerializeField] TextMeshProUGUI lobbyNameTxt;
     [SerializeField] Camera povCamera;
     [SerializeField] LobbyMemberUI[] lobbyMemberUIs;
@@ -35,6 +37,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] TextMeshProUGUI totalBalanceText;
 
     [Header("Settings")]
+    [SerializeField] Vector2 rhcikTargetLimit;
     [SerializeField] float loadThingRotSpd;
 
     [SerializeField] TMP_Dropdown lobbyType_DP;
@@ -71,7 +74,6 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         if (isLocalPlayer)
         {
-            Debug.Log("Suscribing escape event");
             GameManager.Instance.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
         }
     }
@@ -95,10 +97,8 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void CloseLMS()
     {
-        Debug.Log("Try close lms");
         if (isLocalPlayer &&!open) return;
 
-        Debug.Log("Requesting close lms");
         CmdCloseLMS(GameManager.Instance.LocalPlayer.Index);
     }
 
@@ -122,20 +122,23 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         if (GameManager.Instance.LocalPlayer.Index != index) return;
 
+        GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = false;
+        GameManager.Instance.LocalPlayer.PlayerCanvas.SetActive(false);
+
         povCamera.gameObject.SetActive(true);
         GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        StartCoroutine(RHCIKTPosHandler());
     }
 
     [Command(requiresAuthority = false)]
     void CmdCloseLMS(int index)
     {
-        Debug.Log("close lms request received");
         if (!open || index != playerOnLMS) return;
 
-        Debug.Log("sending lms closing rpc");
         currentPlayer.Skin_Data.Rigging_Manager.RpcDisableRightHandChainRig();
         currentPlayer._LockPlayer = false;
         currentPlayer = null;
@@ -149,10 +152,11 @@ public class LobbyManagerScreen : UIManagerNetwork
     [ClientRpc]
     public void RpcCloseLMS(int index)
     {
-        Debug.Log("received close lms rpc");
         if (GameManager.Instance.LocalPlayer.Index != index) return;
 
-        Debug.Log("closing lms");
+        GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = true;
+        GameManager.Instance.LocalPlayer.PlayerCanvas.SetActive(true);
+        
         GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(true);
         povCamera.gameObject.SetActive(false);
 
@@ -364,5 +368,51 @@ public class LobbyManagerScreen : UIManagerNetwork
     public void RequestThemeSelection(int index)
     {
         GameManager.Instance.RequestTheme(index);
+    }
+
+    IEnumerator RHCIKTPosHandler()
+    {
+        float w8timer = 0;
+        float timer = 0;
+        float syncDelay = 0.01f;
+        while (open || w8timer < 0.1f)
+        {
+            while (timer < syncDelay)
+            {
+                w8timer += Time.deltaTime;
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            timer = 0;
+
+            Vector2 mousePos = Input.mousePosition;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle (
+                refRectTransform, mousePos, worldCanvas.worldCamera, out Vector2 localPoint))
+            {
+                CmdRequestRHCIKTPosChange(localPoint);
+            }
+            else
+                CmdRequestRHCIKTPosChange(Vector2.zero);
+
+            yield return null;
+        }
+
+        Debug.Log("Stop syncing");
+    }
+
+    [Command(requiresAuthority = false)]
+    public void CmdRequestRHCIKTPosChange(Vector2 pos)
+    {
+        RpcSetRHCIKTPos(pos);
+    }
+
+    [ClientRpc]
+    void RpcSetRHCIKTPos(Vector2 pos)
+    {
+        pos.x = Mathf.Clamp(pos.x, -rhcikTargetLimit.x, rhcikTargetLimit.x);
+        pos.y = Mathf.Clamp(pos.y, -rhcikTargetLimit.y, rhcikTargetLimit.y);
+
+        rightHCIKTarget.localPosition = pos;
     }
 }

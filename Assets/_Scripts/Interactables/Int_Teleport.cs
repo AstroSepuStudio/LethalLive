@@ -63,9 +63,7 @@ public class Int_Teleport : InteractableObject
 
         if (!foundValidPos) return;
 
-        sourceData.Character_Controller.enabled = false;
-        sourceData.Character_Controller.transform.position = desiredPosition;
-        sourceData.Character_Controller.enabled = true;
+        sourceData.Teleport(desiredPosition);
 
         canvas.DisableCanvas();
         

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1976320c8433c7b4ba26890fb2382bee, type: 3}
   m_Name: _Level 1
   m_EditorClassIdentifier: 
+  levelName: Level 1
   startingRoom: {fileID: 11400000, guid: 74a8d1cf0b6ce7a4d856fa8094da36ce, type: 2}
   spawnableRooms:
   - {fileID: 11400000, guid: 757ebc56406bd074db367e05b2787e96, type: 2}
@@ -26,5 +27,7 @@ MonoBehaviour:
     spawnWeight: 10
     minSpawnCount: 1
     maxSpawnCount: 2
+  loopingMusic: {fileID: 0}
+  eerySFX: []
   MinItems: 3
   MaxItems: 12

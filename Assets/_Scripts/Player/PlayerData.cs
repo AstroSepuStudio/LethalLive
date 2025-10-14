@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using Mirror;
 using Steamworks;
 using System.Collections;
+using UnityEngine.UIElements;
 
 public enum PlayerTeam { Hololive, Gamers, HoloX, English };
 
@@ -20,6 +21,8 @@ public class PlayerData : NetworkBehaviour
     public AudioSource Quiet_AS;
     public AudioSource Modest_AS;
     public AudioSource Loud_AS;
+    [SerializeField] NetworkTransformHybrid netTransform;
+    [SerializeField] float tpDelay = 0.5f;
 
     [Header("Physics")]
     public CharacterController Character_Controller;
@@ -242,8 +245,24 @@ public class PlayerData : NetworkBehaviour
     [Server]
     public void Teleport(Vector3 position)
     {
+        StartCoroutine(TeleportCoroutine(position));
+    }
+
+    IEnumerator TeleportCoroutine(Vector3 position)
+    {
+        PlayerCollider.enabled = false;
         Character_Controller.enabled = false;
-        transform.position = position;
+        netTransform.ServerTeleport(position, transform.rotation);
+        //transform.position = position;
+        float timer = 0;
+        while (timer < tpDelay)
+        {
+            //netTransform.ServerTeleport(position, transform.rotation);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        PlayerCollider.enabled = true;
         Character_Controller.enabled = true;
     }
 }

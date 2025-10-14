@@ -41,7 +41,7 @@ public class FurnitureEntity : EntityStats
 
     public override void ModifyHP(EntityStats source, AttackStat attack)
     {
-        currentHP = Mathf.Clamp(currentHP + attack.AttackDamage, 0f, maxHP);
+        currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
 
         for (int i = 0; i < dropThresholds.Length; i++)
         {

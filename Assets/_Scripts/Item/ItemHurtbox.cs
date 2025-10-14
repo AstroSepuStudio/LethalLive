@@ -44,6 +44,9 @@ public class ItemHurtbox : NetworkBehaviour
     {
         if (!isServer) return;
 
+        if (item == null) return;
+        if (item.pData == null) return;
+
         if (other.gameObject == item.pData.gameObject) return;
 
         if (hitEntities.Contains(other.gameObject)) return;

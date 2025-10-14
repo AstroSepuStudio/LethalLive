@@ -7972,7 +7972,7 @@ MonoBehaviour:
   compressRotation: 1
   interpolatePosition: 1
   interpolateRotation: 1
-  interpolateScale: 1
+  interpolateScale: 0
   coordinateSpace: 0
   timelineOffset: 1
   showGizmos: 0
@@ -8482,7 +8482,7 @@ MonoBehaviour:
   syncMethod: 0
   syncDirection: 0
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.1
   Player_Input: {fileID: 2520668280935161701}
   Player_Movement: {fileID: -7009135778534889599}
   Spectator_Movement: {fileID: 7336853628982519476}
@@ -8494,11 +8494,13 @@ MonoBehaviour:
   Quiet_AS: {fileID: 998129158392099770}
   Modest_AS: {fileID: 3039990793000941887}
   Loud_AS: {fileID: 3352920377865551329}
+  netTransform: {fileID: 7899675796944327122}
+  tpDelay: 0.5
   Character_Controller: {fileID: 1800826492830073625}
   PlayerCollider: {fileID: 1800826492830073625}
   IgnorePlayer:
     serializedVersion: 2
-    m_Bits: 691
+    m_Bits: 129
   PlayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -8555,7 +8557,7 @@ MonoBehaviour:
   speedMultiplier: 1
   friction: 3
   staminaConsuption_Sprint: 10
-  staminaConsuption_Jump: 10
+  staminaConsuption_Jump: 5
   crouchHeight: 1
   crouchCenter: {x: 0, y: 0.5, z: 0}
   normalHeight: 2
@@ -8644,7 +8646,7 @@ MonoBehaviour:
   strenght: 100
   speed: 100
   pData: {fileID: 5726922814949680812}
-  staminaRecoveryDelay: 0.5
+  staminaRecoveryDelay: 0.2
   staminaRecoveryRate: 15
   maxStamina: 100
   currentStamina: 0
@@ -25747,11 +25749,11 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   explosionStat:
-    <AttackRadius>k__BackingField: 0
-    <AttackKnock>k__BackingField: 0
-    <AttackForce>k__BackingField: 0
-    <AttackDamage>k__BackingField: 0
-    <AttackCooldown>k__BackingField: 0
+    <AttackRadius>k__BackingField: 5
+    <AttackKnock>k__BackingField: 200
+    <AttackForce>k__BackingField: 30
+    <AttackDamage>k__BackingField: 70
+    <AttackCooldown>k__BackingField: 5
   explosionParticles:
   - {fileID: 6149968615087054525}
   - {fileID: 6784692493753068162}
