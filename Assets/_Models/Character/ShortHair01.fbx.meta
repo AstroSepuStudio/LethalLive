@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: d8095029fd1bd8a44b999161a79d7898
+guid: d6382b2cb4f7193439c069623d370af8
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,8 +7,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: rat material
-    second: {fileID: 2100000, guid: 854b3a20b91b98947a49468f3b4a9a59, type: 2}
+      name: ShortHair01Mat
+    second: {fileID: 2100000, guid: a43cea8a3e457c24eb656c7bca7ec585, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ShortHair01_Albedo
+    second: {fileID: 2800000, guid: 3c8553e3d91b8314aacc43b459a58179, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -27,7 +32,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 3
+    animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -38,7 +43,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.32
+    globalScale: 0.36
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -73,7 +78,7 @@ ModelImporter:
     secondaryUVMinLightmapResolution: 40
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
-    useFileScale: 1
+    useFileScale: 0
     strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
@@ -96,16 +101,16 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.32
+    globalScale: 0.36
     rootMotionBoneName: 
     hasTranslationDoF: 0
-    hasExtraRoot: 1
+    hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
-  animationType: 3
+  animationType: 2
   humanoidOversampling: 1
-  avatarSetup: 1
+  avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
   importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0

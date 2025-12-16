@@ -122,7 +122,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         if (GameManager.Instance.LocalPlayer.Index != index) return;
 
-        GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = false;
+        //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = false;
         GameManager.Instance.LocalPlayer.PlayerCanvas.SetActive(false);
 
         povCamera.gameObject.SetActive(true);
@@ -154,7 +154,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         if (GameManager.Instance.LocalPlayer.Index != index) return;
 
-        GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = true;
+        //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = true;
         GameManager.Instance.LocalPlayer.PlayerCanvas.SetActive(true);
         
         GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(true);

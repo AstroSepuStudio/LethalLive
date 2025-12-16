@@ -80,7 +80,7 @@ public class RagdollManager : NetworkBehaviour
 
         skinData.pData.Model.parent = skinData.pData.transform;
         skinData.pData.Model.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-        skinData.pData.Skin_Data.SkinRenderer.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        //skinData.pData.Skin_Data.SkinRenderer.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         skinData.pData.Skin_Data.CharacterAnimator.enabled = true;
         skinData.pData.Character_Controller.enabled = true;
     }

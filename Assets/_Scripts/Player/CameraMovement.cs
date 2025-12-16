@@ -74,31 +74,6 @@ public class CameraMovement : MonoBehaviour
             pData.PlayerCamera.transform.position = safePos;
         }
 
-        if (Vector3.Distance(pData.PlayerCamera.transform.position, pData.CameraPivot.position) <= 0.5f ||
-            Vector3.Distance(pData.PlayerCamera.transform.position, pData.Head.position) <= 0.5f ||
-            Vector3.Distance(pData.PlayerCamera.transform.position, pData.transform.position) <= 0.5f)
-        {
-            float blend = Mathf.MoveTowards(pData.Skin_Data.SkinMaterial.GetFloat("_Tweak_transparency"), -1, Time.deltaTime * 6f);
-            pData.Skin_Data.SkinMaterial.SetFloat("_Tweak_transparency", blend);
-
-            if (Mathf.Approximately(blend, -1))
-            {
-                pData.Skin_Data.SkinRenderer.enabled = false;
-                //if (!_ignoreCrosshair)
-                //    crosshair.SetActive(true);
-            }
-        }
-        else
-        {
-            if (pData.Skin_Data.SkinMaterial != null)
-            {
-                float blend = Mathf.MoveTowards(pData.Skin_Data.SkinMaterial.GetFloat("_Tweak_transparency"), 0, Time.deltaTime * 6f);
-                pData.Skin_Data.SkinMaterial.SetFloat("_Tweak_transparency", blend);
-                pData.Skin_Data.SkinRenderer.enabled = true;
-                //crosshair.SetActive(false);
-            }
-        }
-
         pData.CmdSetCameraData(horizontal, vertical, distanceToTarget, pData.CameraTarget.localPosition.x, pData.CameraTarget.localPosition.y);
     }
 
