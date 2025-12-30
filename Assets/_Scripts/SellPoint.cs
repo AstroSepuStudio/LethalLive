@@ -17,22 +17,24 @@ public class SellPoint : NetworkBehaviour
     {
         if (totalValue <= 0) return;
 
-        GameManager.Instance.totalBalance += totalValue;
-
         totalValue = 0;
 
         for (int i = itemsInside.Count - 1; i >= 0; i--)
         {
             if (itemsInside[i].pData != null)
             {
-                if (itemsInside[i].pData.Team == PlayerTeam.Hololive)
-                    GameManager.Instance.teamHololiveBalance += itemsInside[i].ItemValue;
-                else if (itemsInside[i].pData.Team == PlayerTeam.Gamers)
-                    GameManager.Instance.teamHololiveGamers += itemsInside[i].ItemValue;
-                else if (itemsInside[i].pData.Team == PlayerTeam.HoloX)
-                    GameManager.Instance.teamHoloXBalance += itemsInside[i].ItemValue;
-                else if (itemsInside[i].pData.Team == PlayerTeam.English)
-                    GameManager.Instance.teamEnglishBalance += itemsInside[i].ItemValue;
+                if (itemsInside[i].pData.Team == PlayerTeam.White)
+                    GameManager.Instance.economyModule.teamWhiteBalance += itemsInside[i].ItemValue;
+                else if (itemsInside[i].pData.Team == PlayerTeam.Red)
+                    GameManager.Instance.economyModule.teamRedBalance += itemsInside[i].ItemValue;
+                else if (itemsInside[i].pData.Team == PlayerTeam.Blue)
+                    GameManager.Instance.economyModule.teamBlueBalance += itemsInside[i].ItemValue;
+                else if (itemsInside[i].pData.Team == PlayerTeam.Yellow)
+                    GameManager.Instance.economyModule.teamYellowBalance += itemsInside[i].ItemValue;
+                else if (itemsInside[i].pData.Team == PlayerTeam.Green)
+                    GameManager.Instance.economyModule.teamGreenBalance += itemsInside[i].ItemValue;
+                else if (itemsInside[i].pData.Team == PlayerTeam.Pink)
+                    GameManager.Instance.economyModule.teamPinkBalance += itemsInside[i].ItemValue;
             }
 
             NetworkServer.Destroy(itemsInside[i].gameObject);

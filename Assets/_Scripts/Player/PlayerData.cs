@@ -3,9 +3,8 @@ using UnityEngine.InputSystem;
 using Mirror;
 using Steamworks;
 using System.Collections;
-using UnityEngine.UIElements;
 
-public enum PlayerTeam { Hololive, Gamers, HoloX, English };
+public enum PlayerTeam { White, Red, Blue, Yellow, Green, Pink };
 
 public class PlayerData : NetworkBehaviour
 {
@@ -18,6 +17,7 @@ public class PlayerData : NetworkBehaviour
     public ItemInventory PlayerInventory;
     public SkinManager Skin_Manager;
     public HUD_Manager HUDManager;
+    public GameObject TabletGMO;
     public AudioSource Quiet_AS;
     public AudioSource Modest_AS;
     public AudioSource Loud_AS;
@@ -92,6 +92,8 @@ public class PlayerData : NetworkBehaviour
             PlayerCamera.enabled = false;
         }
     }
+
+    public void SetLockPlayer(bool locked) => _LockPlayer = locked;
 
     public override void OnStartServer()
     {

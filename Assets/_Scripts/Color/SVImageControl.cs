@@ -34,6 +34,25 @@ public class SVImageControl : MonoBehaviour, IDragHandler, IPointerClickHandler
         colorPickerControl.SetSV(xNorm, yNorm);
     }
 
+    public void SetPickerPosition(float s, float v)
+    {
+        float width = rectTransform.sizeDelta.x;
+        float height = rectTransform.sizeDelta.y;
+
+        float deltaX = width * 0.5f;
+        float deltaY = height * 0.5f;
+
+        float x = (s * width) - deltaX;
+        float y = (v * height) - deltaY;
+
+        Vector3 localPos = new Vector3(x, y, 0f);
+
+        pickerTransform.localPosition = localPos;
+
+        pickerImage.color = Color.HSVToRGB(0f, 0f, 1f - v);
+    }
+
+
     public void OnDrag(PointerEventData eventData) => UpdateColour(eventData);
     public void OnPointerClick(PointerEventData eventData) => UpdateColour(eventData);
 }

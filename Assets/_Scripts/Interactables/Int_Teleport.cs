@@ -11,9 +11,6 @@ public class Int_Teleport : InteractableObject
 
     public readonly UnityEvent<PlayerData> OnPlayerTeleports;
 
-    [SyncVar]
-    [SerializeField] bool requireGameStarted;
-
     [Header("Debug")]
     [SerializeField] bool _displayRing;
 
@@ -30,7 +27,7 @@ public class Int_Teleport : InteractableObject
     
     public void Teleport(PlayerData sourceData)
     {
-        if (requireGameStarted && !GameManager.Instance.dayStarted) return;
+        if (!GameManager.Instance.dungeonOpen) return;
 
         Vector3 desiredPosition = Vector3.zero;
         bool foundValidPos = false;
@@ -43,14 +40,13 @@ public class Int_Teleport : InteractableObject
             Vector3 offset = new Vector3(randomCircle.x, 0f, randomCircle.y) * distance;
 
             desiredPosition = targetPosition.position + offset;
-            Vector3 sourcePosition = sourceData.Character_Controller.transform.position + Vector3.up * 1.5f;
-            Vector3 rayDir = (desiredPosition - sourcePosition).normalized;
+            Vector3 rayDir = (desiredPosition - targetPosition.position).normalized;
 
-            if (Physics.Raycast(sourcePosition, rayDir, out RaycastHit hit, Vector3.Distance(sourcePosition, desiredPosition)))
+            if (Physics.Raycast(targetPosition.position, rayDir, out RaycastHit hit, Vector3.Distance(targetPosition.position, desiredPosition)))
             {
                 if (hit.distance >= minDistance + 0.5f)
                 {
-                    desiredPosition = sourcePosition + rayDir * (hit.distance - 0.5f);
+                    desiredPosition = targetPosition.position + rayDir * (hit.distance - 0.5f);
 
                     foundValidPos = true;
                     break;

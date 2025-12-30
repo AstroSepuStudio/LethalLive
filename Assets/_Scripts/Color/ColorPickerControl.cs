@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class ColorPickerControl : MonoBehaviour
 {
+    [SerializeField] SVImageControl svIC;
+
     [SerializeField] RawImage hueImage;
     [SerializeField] RawImage satValImage;
     [SerializeField] RawImage outputImage;
@@ -14,7 +16,7 @@ public class ColorPickerControl : MonoBehaviour
     Texture2D hueTexture, svTexture;
     float CurrentHue, CurrentSat, CurrentVal;
 
-    private void Start()
+    private void Awake()
     {
         CreateHueImage();
         CreateSVImage();
@@ -59,7 +61,7 @@ public class ColorPickerControl : MonoBehaviour
         satValImage.texture = svTexture;
     }
 
-    void UpdateOutputImage()
+    public void UpdateOutputImage()
     {
         Color color = Color.HSVToRGB(CurrentHue, CurrentSat, CurrentVal);
 
@@ -94,6 +96,35 @@ public class ColorPickerControl : MonoBehaviour
         UpdateOutputImage();
     }
 
+    void SetHSV(Color color)
+    {
+        Color.RGBToHSV(color, out CurrentHue, out CurrentSat, out CurrentVal);
+
+        hueSlider.SetValueWithoutNotify(CurrentHue);
+
+        for (int y = 0; y < svTexture.height; y++)
+        {
+            for (int x = 0; x < svTexture.width; x++)
+            {
+                svTexture.SetPixel(
+                    x,
+                    y,
+                    Color.HSVToRGB(
+                        CurrentHue,
+                        (float)x / svTexture.width,
+                        (float)y / svTexture.height
+                    )
+                );
+            }
+        }
+
+        svTexture.Apply();
+
+        UpdateOutputImage();
+
+        svIC.SetPickerPosition(CurrentSat, CurrentVal);
+    }
+
     public void OnTextInput()
     {
         if (hexInputField.text.Length < 6) return;
@@ -106,5 +137,9 @@ public class ColorPickerControl : MonoBehaviour
         UpdateOutputImage();
     }
 
-    public void SetCurrentMatColPair(MatColPair pair) => currentPair = pair;
+    public void SetCurrentMatColPair(MatColPair pair)
+    {
+        currentPair = pair;
+        SetHSV(pair.GetColor());
+    }
 }

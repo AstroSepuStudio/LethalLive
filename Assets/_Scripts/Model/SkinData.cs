@@ -1,14 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static CusElementUI;
 
 public class SkinData : MonoBehaviour
 {
-    public enum AccessoryType { None, Upper, Legs, Feet, Extra }
+    public enum AccessoryType { None, Upper, Legs, Feet, Extra, Hair }
     [System.Serializable]
     public struct Accessory
     { 
         public AccessoryType type;
+        public string name;
         public SkinnedMeshRenderer renderer;
         public SkinnedMeshRenderer[] bodyPartsDisabled;
     }
@@ -24,7 +26,7 @@ public class SkinData : MonoBehaviour
 
     Material BodyMaterial;
     Material FacialMaterial;
-    Dictionary<string, Color> _accesoryColors = new();
+    Dictionary<AccessoryType, Dictionary<string, Color>> _accesoryColors = new();
 
     [Header("Mechanics")]
     public RagdollManager Ragdoll_Manager; 
@@ -49,6 +51,19 @@ public class SkinData : MonoBehaviour
 
     private void Awake()
     {
+        Dictionary<string, Color> colorDict = new()
+        {
+            { "_MainColor", Color.white },
+            { "_SecondColor", Color.lightBlue },
+            { "_ThirdColor", Color.lightBlue }
+        };
+
+        _accesoryColors.Add(AccessoryType.Upper, colorDict);
+        _accesoryColors.Add(AccessoryType.Legs, new(colorDict));
+        _accesoryColors.Add(AccessoryType.Feet, new(colorDict));
+        _accesoryColors.Add(AccessoryType.Hair, new(colorDict));
+        _accesoryColors.Add(AccessoryType.Extra, new(colorDict));
+
         BodyMaterial = new Material(BodySkinRenderers[0].material);
         FacialMaterial = new Material(FacialRenderers[0].material);
 
@@ -65,11 +80,16 @@ public class SkinData : MonoBehaviour
         for (int i = 0; i < Accesories.Length; i++)
         {
             Accesories[i].renderer.material = new(Accesories[i].renderer.material);
-        }
 
-        _accesoryColors.Add("_MainColor", Color.white);
-        _accesoryColors.Add("_SecondColor", Color.lightBlue);
-        _accesoryColors.Add("_ThirdColor", Color.lightBlue);
+            // Recover color from saved data if it exists
+            //_accesoryColors[Accesories[i].type]["_MainColor"] = Accesories[i].renderer.material.GetColor("_MainColor");
+            //_accesoryColors[Accesories[i].type]["_SecondColor"] = Accesories[i].renderer.material.GetColor("_MainColor");
+            //_accesoryColors[Accesories[i].type]["_ThirdColor"] = Accesories[i].renderer.material.GetColor("_MainColor");
+
+            Accesories[i].renderer.material.SetColor("_MainColor", Color.white);
+            Accesories[i].renderer.material.SetColor("_SecondColor", Color.lightBlue);
+            Accesories[i].renderer.material.SetColor("_ThirdColor", Color.lightBlue);
+        }
     }
 
     private void OnEnable()
@@ -165,42 +185,60 @@ public class SkinData : MonoBehaviour
 
     public void SetFacialColor(string param, Color color) => FacialMaterial.SetColor(param, ClampColorNoFullChannels(color));
 
+    public void SetFacialGlow(float intensity) => FacialMaterial.SetFloat("_GlowIntensity", intensity);
+
     public void SetAccesoryColor(int index, string param, Color color)
     {
         color = ClampColorNoFullChannels(color);
 
         Accesories[index].renderer.material.SetColor(param, color);
 
-        if (_accesoryColors.ContainsKey(param))
-            _accesoryColors[param] = color;
-        else
-            _accesoryColors.Add(param, color);
+        _accesoryColors[Accesories[index].type][param] = color;
     }
 
-    public void SwitchAccesory(int accesoryIndex)
+    public void SwitchAccesory(int oldAccesoryIndex, int newAccesoryIndex)
+    {
+        for (int i = 0; i < BodySkinRenderers.Length; i++)
+        {
+            if (Accesories[oldAccesoryIndex].bodyPartsDisabled.Contains(BodySkinRenderers[i]))
+                BodySkinRenderers[i].enabled = true;
+
+            if (Accesories[newAccesoryIndex].bodyPartsDisabled.Contains(BodySkinRenderers[i]))
+                BodySkinRenderers[i].enabled = false;
+        }
+
+        Accesories[oldAccesoryIndex].renderer.enabled = false;
+        Accesories[newAccesoryIndex].renderer.enabled = true;
+
+        Accesories[newAccesoryIndex].renderer.material.SetColor("_MainColor", 
+            _accesoryColors[Accesories[newAccesoryIndex].type]["_MainColor"]);
+
+        Accesories[newAccesoryIndex].renderer.material.SetColor("_SecondColor", 
+            _accesoryColors[Accesories[newAccesoryIndex].type]["_SecondColor"]);
+
+        Accesories[newAccesoryIndex].renderer.material.SetColor("_ThirdColor",
+            _accesoryColors[Accesories[newAccesoryIndex].type]["_ThirdColor"]);
+    }
+
+    public string DisableAccesory(int accesoryIndex)
     {
         for (int i = 0; i < BodySkinRenderers.Length; i++)
         {
             if (Accesories[accesoryIndex].bodyPartsDisabled.Contains(BodySkinRenderers[i]))
-                BodySkinRenderers[i].enabled = false;
-            else
                 BodySkinRenderers[i].enabled = true;
         }
 
-        for (int i = 0; i < Accesories.Length; i++)
-        {
-            if (Accesories[accesoryIndex].type != Accesories[i].type) continue;
+        Accesories[accesoryIndex].renderer.enabled = false;
 
-            if (i != accesoryIndex)
-                Accesories[i].renderer.enabled = false;
-            else
-            {
-                Accesories[i].renderer.enabled = true;
-                Accesories[i].renderer.material.SetColor("_MainColor", _accesoryColors["_MainColor"]);
-                Accesories[i].renderer.material.SetColor("_SecondColor", _accesoryColors["_SecondColor"]);
-                Accesories[i].renderer.material.SetColor("_ThirdColor", _accesoryColors["_ThirdColor"]);
-            }
-        }
+        return Accesories[accesoryIndex].type switch
+        {
+            AccessoryType.None => "Null",
+            AccessoryType.Upper => "Upper Body",
+            AccessoryType.Legs => "Legs",
+            AccessoryType.Feet => "Feet",
+            AccessoryType.Extra => "Extras",
+            _ => "Null",
+        };
     }
 
     public Color ClampColorNoFullChannels(Color color, float maxChannel = 0.99f)
@@ -209,5 +247,26 @@ public class SkinData : MonoBehaviour
         color.g = Mathf.Min(color.g, maxChannel);
         color.b = Mathf.Min(color.b, maxChannel);
         return color;
+    }
+
+    public Color GetColor(ColorType type, MaterialType matType, int index)
+    {
+        Material mat = matType switch
+        {
+            MaterialType.Body => BodyMaterial,
+            MaterialType.Facial => FacialMaterial,
+            MaterialType.Accesory => Accesories[index].renderer.material,
+            _ => null
+        };
+
+        return type switch
+        {
+            ColorType.Main => mat.GetColor("_MainColor"),
+            ColorType.Secondary => mat.GetColor("_SecondColor"),
+            ColorType.Tertiary => mat.GetColor("_ThirdColor"),
+            ColorType.Mask => mat.GetColor("_MultiplyColor"),
+            ColorType.Texture => mat.GetColor("_TextureColor"),
+            _ => Color.white
+        };
     }
 }

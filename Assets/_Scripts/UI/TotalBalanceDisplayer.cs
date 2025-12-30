@@ -12,13 +12,13 @@ public class TotalBalanceDisplayer : MonoBehaviour
 
     void OnTick()
     {
-        if (Mathf.Approximately(GameManager.Instance.totalBalance, 0))
+        if (Mathf.Approximately(GameManager.Instance.economyModule.TotalBalance, 0))
         {
             totalBalanceDisplayerTxt.enabled = false;
             return;
         }
 
         totalBalanceDisplayerTxt.enabled = true;
-        totalBalanceDisplayerTxt.SetText($"Total Balance\n${GameManager.Instance.totalBalance}");
+        totalBalanceDisplayerTxt.SetText($"Total Balance\n${GameManager.Instance.economyModule.TotalBalance}");
     }
 }

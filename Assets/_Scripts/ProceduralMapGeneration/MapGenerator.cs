@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.AI.Navigation;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [Serializable]
 public struct LootPosition
@@ -50,9 +49,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] int maxDepth = 30;
 
     [Header("Debug")]
-    [SerializeField] PlayerInput pInput;
     [SerializeField] bool generateOnStart = false;
-    [SerializeField] bool stepGenerationMode = false;
     [SerializeField] GameObject seedDisplayCanvas;
     [SerializeField] TextMeshProUGUI seedDisplayTxt;
 
@@ -124,19 +121,9 @@ public class MapGenerator : MonoBehaviour
 
         StartCoroutine(DisplaySeed(setSeed, 5f));
 
-        if (stepGenerationMode)
-        {
-            pInput.enabled = true;
-            //StartStepGeneration();
-        }
-        else
-        {
-            pInput.enabled = false;
-
-            Generate();
-            InstantiateRooms();
-            ResolveDoors();
-        }
+        Generate();
+        InstantiateRooms();
+        ResolveDoors();
     }
 
     private void Generate()

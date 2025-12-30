@@ -33,8 +33,8 @@ public class EntitySpawnerManager : NetworkBehaviour
     {
         if (isServer)
         {
-            GameManager.Instance.OnDayStarted.AddListener(OnDayStarted);
-            GameManager.Instance.OnDayEnded.AddListener(OnDayEnded);
+            GameManager.Instance.dayCycleModule.OnDayStarted.AddListener(OnDayStarted);
+            GameManager.Instance.dayCycleModule.OnDayEnded.AddListener(OnDayEnded);
         }
     }
 
@@ -42,8 +42,8 @@ public class EntitySpawnerManager : NetworkBehaviour
     {
         if (isServer)
         {
-            GameManager.Instance.OnDayStarted.RemoveListener(OnDayStarted);
-            GameManager.Instance.OnDayEnded.RemoveListener(OnDayEnded);
+            GameManager.Instance.dayCycleModule.OnDayStarted.RemoveListener(OnDayStarted);
+            GameManager.Instance.dayCycleModule.OnDayEnded.RemoveListener(OnDayEnded);
         }
     }
 

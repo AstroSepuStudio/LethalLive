@@ -7,6 +7,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static GameManager;
 
 public class LobbyManagerScreen : UIManagerNetwork
 {
@@ -30,10 +31,12 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] TextMeshProUGUI timeText;
     [SerializeField] TextMeshProUGUI levelText;
     [SerializeField] GameObject deadlineObj;
-    [SerializeField] TeamBalancePair hololiveTeamBalance;
-    [SerializeField] TeamBalancePair gamersTeamBalance;
-    [SerializeField] TeamBalancePair holoXTeamBalance;
-    [SerializeField] TeamBalancePair englishTeamBalance;
+    [SerializeField] TeamBalancePair teamWhiteBalance;
+    [SerializeField] TeamBalancePair teamRedBalance;
+    [SerializeField] TeamBalancePair teamBlueBalance;
+    [SerializeField] TeamBalancePair teamYellowBalance;
+    [SerializeField] TeamBalancePair teamGreenBalance;
+    [SerializeField] TeamBalancePair teamPinkBalance;
     [SerializeField] TextMeshProUGUI totalBalanceText;
 
     [Header("Settings")]
@@ -45,12 +48,6 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] Toggle teamDamage_Toggle;
     [SerializeField] Toggle teamKnock_Toggle;
 
-    [Header("Colors")]
-    public Color hololiveTeamColor = Color.cyan;
-    public Color gamersTeamColor = Color.yellow;
-    public Color holoXTeamColor = Color.magenta;
-    public Color hololiveEnglishTeamColor = Color.blue;
-
     [SyncVar] int playerOnLMS = -1;
     [SyncVar] bool open = false;
 
@@ -59,7 +56,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     [Serializable]
     struct TeamBalancePair
     {
-        public TextMeshProUGUI teamText;
+        public GameObject teamObj;
         public TextMeshProUGUI balanceText;
     }
 
@@ -74,7 +71,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         if (isLocalPlayer)
         {
-            GameManager.Instance.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
+            Instance.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
         }
     }
 
@@ -84,7 +81,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         if (isLocalPlayer)
         {
-            GameManager.Instance.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
+            Instance.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
         }
     }
 
@@ -99,7 +96,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         if (isLocalPlayer &&!open) return;
 
-        CmdCloseLMS(GameManager.Instance.LocalPlayer.Index);
+        CmdCloseLMS(Instance.LocalPlayer.Index);
     }
 
     public void OnInteract(PlayerData playerData)
@@ -120,13 +117,13 @@ public class LobbyManagerScreen : UIManagerNetwork
     [ClientRpc]
     void RpcOpenLMS(int index)
     {
-        if (GameManager.Instance.LocalPlayer.Index != index) return;
+        if (Instance.LocalPlayer.Index != index) return;
 
         //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = false;
-        GameManager.Instance.LocalPlayer.PlayerCanvas.SetActive(false);
+        Instance.LocalPlayer.PlayerCanvas.SetActive(false);
 
         povCamera.gameObject.SetActive(true);
-        GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
+        Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -152,12 +149,12 @@ public class LobbyManagerScreen : UIManagerNetwork
     [ClientRpc]
     public void RpcCloseLMS(int index)
     {
-        if (GameManager.Instance.LocalPlayer.Index != index) return;
+        if (Instance.LocalPlayer.Index != index) return;
 
         //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = true;
-        GameManager.Instance.LocalPlayer.PlayerCanvas.SetActive(true);
+        Instance.LocalPlayer.PlayerCanvas.SetActive(true);
         
-        GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(true);
+        Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(true);
         povCamera.gameObject.SetActive(false);
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -173,9 +170,9 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         if (!identity.isServer) return;
 
-        List<GameManager.LobbyMemberData> members = new();
+        List<LobbyMemberData> members = new();
 
-        foreach (var player in GameManager.Instance.Players)
+        foreach (var player in Instance.Players)
         {
             members.Add(new GameManager.LobbyMemberData
             {
@@ -187,13 +184,13 @@ public class LobbyManagerScreen : UIManagerNetwork
             });
         }
 
-        RpcRefreshScreen(members.ToArray(), GameManager.Instance.ThemeDatas[GameManager.Instance.selectedTheme].levelName);
+        RpcRefreshScreen(members.ToArray(), Instance.ThemeDatas[Instance.selectedTheme].levelName);
     }
 
     [ClientRpc]
-    void RpcRefreshScreen(GameManager.LobbyMemberData[] members, string themeName) => RefreshScreen(members, themeName);
+    void RpcRefreshScreen(LobbyMemberData[] members, string themeName) => RefreshScreen(members, themeName);
 
-    public void RefreshScreen(GameManager.LobbyMemberData[] members, string themeName)
+    public void RefreshScreen(LobbyMemberData[] members, string themeName)
     {
         int lobbyIndex = LobbyManager.Instace.LobbySettings.Lobby_Type switch
         {
@@ -220,17 +217,17 @@ public class LobbyManagerScreen : UIManagerNetwork
             lobbyMemberUIs[i].AssignPlayer(members[i]);
         }
 
-        if (GameManager.Instance == null) return;
+        if (Instance == null) return;
 
-        dayText.SetText($"{GameManager.Instance.currentDay}/{LobbySettings.Instance.MaxDays}");
+        dayText.SetText($"{Instance.dayCycleModule.currentDay}/{LobbySettings.Instance.MaxDays}");
 
-        if (GameManager.Instance.currentDayTime == -1)
+        if (Instance.dayCycleModule.currentDayTime == -1)
         {
             timeText.SetText("--:--");
         }
         else
         {
-            float minutesSinceStart = GameManager.Instance.currentDayTime * (960f / 900f);
+            float minutesSinceStart = Instance.dayCycleModule.currentDayTime * (960f / 900f);
             int totalMinutes = 8 * 60 + Mathf.RoundToInt(minutesSinceStart);
 
             int hours = totalMinutes / 60;
@@ -239,49 +236,38 @@ public class LobbyManagerScreen : UIManagerNetwork
             timeText.SetText($"{hours:00}:{minutes:00}");
         }
 
-        if (GameManager.Instance.currentDay >= LobbySettings.Instance.MaxDays)
+        if (Instance.dayCycleModule.currentDay >= LobbySettings.Instance.MaxDays)
             deadlineObj.SetActive(true);
         else 
             deadlineObj.SetActive(false);
 
-        if (GameManager.Instance.teamHololiveBalance > 0)
-        {
-            hololiveTeamBalance.teamText.gameObject.SetActive(true);
-            hololiveTeamBalance.balanceText.SetText($"${GameManager.Instance.teamHololiveBalance}");
-        }
-        else hololiveTeamBalance.teamText.gameObject.SetActive(false);
+        SetTeamBalance(Instance.economyModule.teamWhiteBalance, teamWhiteBalance);
+        SetTeamBalance(Instance.economyModule.teamRedBalance, teamRedBalance);
+        SetTeamBalance(Instance.economyModule.teamBlueBalance, teamBlueBalance);
+        SetTeamBalance(Instance.economyModule.teamYellowBalance, teamYellowBalance);
+        SetTeamBalance(Instance.economyModule.teamGreenBalance, teamGreenBalance);
+        SetTeamBalance(Instance.economyModule.teamPinkBalance, teamPinkBalance);
 
-        if (GameManager.Instance.teamHololiveGamers > 0)
-        {
-            gamersTeamBalance.teamText.gameObject.SetActive(true);
-            gamersTeamBalance.balanceText.SetText($"${GameManager.Instance.teamHololiveBalance}");
-        }
-        else gamersTeamBalance.teamText.gameObject.SetActive(false);
-
-        if (GameManager.Instance.teamHoloXBalance > 0)
-        {
-            holoXTeamBalance.teamText.gameObject.SetActive(true);
-            holoXTeamBalance.balanceText.SetText($"${GameManager.Instance.teamHololiveBalance}");
-        }
-        else holoXTeamBalance.teamText.gameObject.SetActive(false);
-
-        if (GameManager.Instance.teamEnglishBalance > 0)
-        {
-            englishTeamBalance.teamText.gameObject.SetActive(true);
-            englishTeamBalance.balanceText.SetText($"${GameManager.Instance.teamHololiveBalance}");
-        }
-        else englishTeamBalance.teamText.gameObject.SetActive(false);
-
-        totalBalanceText.SetText($"${GameManager.Instance.totalBalance}");
+        totalBalanceText.SetText($"${Instance.economyModule.TotalBalance}");
 
         levelText.SetText(themeName);
+    }
+
+    void SetTeamBalance(float balance, TeamBalancePair pair)
+    {
+        if (balance > 0)
+        {
+            pair.teamObj.SetActive(true);
+            pair.balanceText.SetText($"${Instance.economyModule.teamWhiteBalance}");
+        }
+        else pair.teamObj.SetActive(false);
     }
 
     public void RequestTeamSwap(int index)
     {
         PlayerTeam team = (PlayerTeam)index;
 
-        GameManager.Instance.CmdRequestTeamChange(GameManager.Instance.LocalPlayer.Index, team);
+        Instance.CmdRequestTeamChange(Instance.LocalPlayer.Index, team);
     }
 
     public void SetLobbyType(int index)
@@ -327,12 +313,12 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         if (!identity.isServer) return;
 
-        GameManager.Instance.StartGame();
+        Instance.StartGame();
     }
 
     public void StartDay()
     {
-        GameManager.Instance.StartDay();
+        Instance.dayCycleModule.StartDay();
     }
 
     [ClientRpc]
@@ -362,12 +348,12 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void RequestSkinChange(int index)
     {
-        GameManager.Instance.LocalPlayer.Skin_Manager.SetSkinIndex(index);
+        Instance.LocalPlayer.Skin_Manager.SetSkinIndex(index);
     }
 
     public void RequestThemeSelection(int index)
     {
-        GameManager.Instance.RequestTheme(index);
+        Instance.RequestTheme(index);
     }
 
     IEnumerator RHCIKTPosHandler()
@@ -397,8 +383,6 @@ public class LobbyManagerScreen : UIManagerNetwork
 
             yield return null;
         }
-
-        Debug.Log("Stop syncing");
     }
 
     [Command(requiresAuthority = false)]

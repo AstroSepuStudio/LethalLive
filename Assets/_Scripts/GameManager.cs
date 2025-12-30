@@ -7,72 +7,6 @@ using UnityEngine.Events;
 
 public class GameManager : NetworkBehaviour
 {
-    public static GameManager Instance { get; private set; }
-    [SerializeField] ItemSO[] itemsData;
-    public LobbyManagerScreen lobbyManagerScreen;
-    [SerializeField] MapGenerator mapGenerator;
-    [SerializeField] Int_Teleport teleporter;
-    [SerializeField] List<PlayerData> players = new ();
-    [SerializeField] Int_HomewardBeacon homewardBeacon;
-
-    [field: SerializeField] public ThemeDataSO[] ThemeDatas { get; private set; }
-
-    [Header("Day Settings")]
-    [SerializeField] float dayDuration = 900;
-    [SerializeField] int startingQuotaMin = 900;
-    [SerializeField] int startingQuotaMax = 1100;
-    [SerializeField] int linearIncreaseMin = 400;
-    [SerializeField] int linearIncreaseMax = 700;
-    [SerializeField] float exponentialRate = 1.15f;
-    [SerializeField] float exponentialFactor = 0.3f;
-
-    private readonly Dictionary<int, int> cachedQuotas = new ();
-
-    public IReadOnlyList<PlayerData> Players => players;
-    public UnityEvent OnDayStarted = new();
-    public UnityEvent OnDayEnded = new();
-
-    [HideInInspector] 
-    public PlayerData LocalPlayer;
-
-    public List<PlayerData> playersOnDungeon = new();
-
-    [SyncVar]
-    public int selectedTheme = 0;
-
-    [SyncVar]
-    public int mapSeed;
-
-    [SyncVar]
-    public Vector3 startRoomPos;
-
-    [SyncVar]
-    public bool dayStarted = false;
-
-    [SyncVar]
-    public bool gameStarted = false;
-
-    [SyncVar]
-    public float totalBalance = 0;
-
-    [SyncVar]
-    public float teamHololiveBalance = 0;
-    [SyncVar]
-    public float teamHololiveGamers = 0;
-    [SyncVar]
-    public float teamHoloXBalance = 0;
-    [SyncVar]
-    public float teamEnglishBalance = 0;
-
-    [SyncVar]
-    public int currentDay = 1;
-
-    [SyncVar]
-    public float targetQuota;
-
-    [SyncVar]
-    public float currentDayTime;
-
     public struct LobbyMemberData
     {
         public CSteamID SteamID;
@@ -81,6 +15,44 @@ public class GameManager : NetworkBehaviour
         public PlayerTeam Team;
         public int Ping;
     }
+    public static GameManager Instance { get; private set; }
+
+        [Header("References")]
+    [field: SerializeField] public ThemeDataSO[] ThemeDatas { get; private set; }
+    public LobbyManagerScreen lobbyManagerScreen;
+    public DayCycleModule dayCycleModule;
+    public EconomyModule economyModule;
+
+    [SerializeField] ItemSO[] itemsData;
+    [SerializeField] MapGenerator mapGenerator;
+    [SerializeField] Int_Teleport teleporter;
+    [SerializeField] List<PlayerData> players = new ();
+    [SerializeField] Int_HomewardBeacon homewardBeacon;
+
+    /* --- EVENTS --- */
+    public UnityEvent OnDungeonOpens = new();
+    public UnityEvent OnDungeonCloses = new();
+
+    [HideInInspector] 
+    public PlayerData LocalPlayer;
+
+    [SyncVar]
+    public Vector3 startRoomPos;
+
+    /* --- GAME STATE --- */
+    public IReadOnlyList<PlayerData> Players => players;
+    public List<PlayerData> playersOnDungeon = new();
+
+    [SyncVar]
+    public int selectedTheme = 0;
+    [SyncVar]
+    public int mapSeed;
+
+    /* --- FLAGS --- */
+    [SyncVar]
+    public bool gameStarted = false;
+    [SyncVar]
+    public bool dungeonOpen = false;
 
     private void Awake()
     {
@@ -109,7 +81,7 @@ public class GameManager : NetworkBehaviour
         if (!players.Contains(player))
         {
             player.Index = players.Count;
-            player.Team = PlayerTeam.Hololive;
+            player.Team = PlayerTeam.White;
             players.Add(player);
         }
     }
@@ -135,7 +107,7 @@ public class GameManager : NetworkBehaviour
         SteamMatchmaking.SetLobbyType(LobbyManager.Instace.CurrentLobbyID, ELobbyType.k_ELobbyTypePrivate);
         gameStarted = true;
 
-        StartCoroutine(GameCoroutine());
+        dayCycleModule.currentDayTime = -1;
         lobbyManagerScreen.RpcSwitchScreenState();
     }
 
@@ -156,79 +128,75 @@ public class GameManager : NetworkBehaviour
         playersOnDungeon.Remove(playerData);
     }
 
-    public void StartDay()
+    [Server]
+    public void CheckQuotaCompletion()
     {
-        if (!gameStarted || !isServer) return;
-
-        if (dayStarted)
+        if (economyModule.IsQuotaMet && economyModule.TakeQuotaValue())
         {
-            FinishDay();
+            StartCoroutine(QuotaCompletionSequence());
         }
         else
         {
-            mapSeed = Random.Range(-1000000, 1000000);
-            dayStarted = true;
-
-            targetQuota = GetQuota(currentDay);
-
-            RpcGenerateMap(mapSeed, selectedTheme);
+            StartCoroutine(QuotaNotMetSequence());
         }
-
-        OnDayStarted?.Invoke();
     }
 
-    public int GetQuota(int round)
+    IEnumerator QuotaCompletionSequence()
     {
-        if (round < 1) round = 1;
+        yield return null;
 
-        if (cachedQuotas.TryGetValue(round, out int quota))
-            return quota;
+        dayCycleModule.currentDay++;
+    }
 
-        int linearPart = (round - 1) * Random.Range(linearIncreaseMin, linearIncreaseMax);
-        float startingQuota = Random.Range(startingQuotaMin, startingQuotaMax);
-        float exponentialPart = startingQuota * Mathf.Pow(exponentialRate, round - 1) * exponentialFactor;
-
-        return Mathf.RoundToInt(startingQuota + linearPart + exponentialPart);
+    IEnumerator QuotaNotMetSequence()
+    {
+        yield return null;
     }
 
     [Server]
-    IEnumerator GameCoroutine()
+    public void OpenDungeon()
     {
-        currentDayTime = -1;
+        OnDungeonOpens?.Invoke();
+        dungeonOpen = true;
 
-        while (!dayStarted)
-        {
-            yield return null;
-        }
-
-        currentDayTime = 0;
-        while (currentDayTime < dayDuration)
-        {
-            currentDayTime += Time.deltaTime;
-            yield return null;
-        }
-
-        FinishDay();
+        RpcGenerateMap(mapSeed, selectedTheme);
     }
 
     [Server]
-    public void FinishDay()
+    public void CloseDungeon()
     {
-        OnDayEnded?.Invoke();
+        OnDungeonCloses?.Invoke();
+        dungeonOpen = false;
 
-        foreach (var player in playersOnDungeon)
-        {
-            player.Player_Stats.ForceDeath();
-            player.Character_Controller.enabled = false;
-            player.Character_Controller.transform.position = transform.position;
-            player.Character_Controller.enabled = true;
-        }
-
-        playersOnDungeon.Clear();
-
-        dayStarted = false;
-        currentDay++;
         RpcClearMap();
+    }
+
+    [Server]
+    public void TryOpenNewDungeon()
+    {
+        if (!gameStarted) return;
+
+        if (!dayCycleModule.dayStarted)
+        {
+            dayCycleModule.StartDay();
+            OpenDungeon();
+            return;
+        }
+
+        if (playersOnDungeon.Count > 0)
+        {
+            Debug.Log("There is players in the dungeon");
+            return;
+        }
+
+        CloseDungeon();
+        OpenDungeon();
+    }
+
+    public void SetUpNewDay()
+    {
+        mapSeed = Random.Range(-1000000, 1000000);
+        //OpenDungeon();
     }
 
     [ClientRpc]
