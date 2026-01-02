@@ -239,9 +239,31 @@ public class PlayerData : NetworkBehaviour
     public void OnPlayerDeath(AttackStat stat, Vector3 momentum)
     {
         Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
+        Rpc_OnPlayerDeath();
+    }
 
+    [ClientRpc]
+    void Rpc_OnPlayerDeath()
+    {
         Player_Movement.enabled = false;
         Spectator_Movement.enabled = true;
+    }
+
+    [Server]
+    public void RevivePlayer(Vector3 position)
+    {
+        Player_Stats.ResetStats();
+        Skin_Data.Ragdoll_Manager.DisableRagdoll();
+        Teleport(position);
+
+        Rpc_RevivePlayer();
+    }
+
+    [ClientRpc]
+    public void Rpc_RevivePlayer()
+    {
+        Spectator_Movement.enabled = false;
+        Player_Movement.enabled = true;
     }
 
     [Server]

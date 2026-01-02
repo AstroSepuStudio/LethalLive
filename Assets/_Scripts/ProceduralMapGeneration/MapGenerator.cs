@@ -2,6 +2,7 @@ using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Principal;
 using TMPro;
 using Unity.AI.Navigation;
 using UnityEngine;
@@ -23,7 +24,7 @@ public struct FurniturePosition
     public float chance;
 }
 
-public class MapGenerator : MonoBehaviour
+public class MapGenerator : NetworkBehaviour
 {
     public static MapGenerator Instance;
 
@@ -319,14 +320,11 @@ public class MapGenerator : MonoBehaviour
             entitySpawnerPositions.AddRange(rd.entitySpawnerPositions);
         }
 
-        if (GameManager.Instance != null)
+        if (isServer)
         {
-            if (GameManager.Instance.LocalPlayer.isServer)
-            {
-                SpawnFurniture();
-                SpawnLoot();
-                SetEntitySpawners();
-            }
+            SpawnFurniture();
+            SpawnLoot();
+            SetEntitySpawners();
         }
 
         StartCoroutine(GenerateNavMeshSurface());
@@ -350,6 +348,7 @@ public class MapGenerator : MonoBehaviour
                 UnityEngine.Random.Range(-pos.maxOffset.z, pos.maxOffset.z));
 
             GameObject furnObj = Instantiate(theme.furniturePrefabs[furnIndex], pos.position.position + offset, rot, furnitureParent);
+            Debug.Log($"Spawning {furnObj.GetComponent<NetworkIdentity>().assetId} ({furnObj.name})");
             NetworkServer.Spawn(furnObj);
 
             furnObj.transform.Rotate(Vector3.up * UnityEngine.Random.Range(-pos.maxRotation, pos.maxRotation));

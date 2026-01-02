@@ -59,11 +59,11 @@ public class EconomyModule : NetworkBehaviour
         return Mathf.RoundToInt(startingQuota + linearPart + exponentialPart);
     }
 
-    public bool TakeQuotaValue()
+    public void TakeQuotaValue()
     {
         float remainingQuota = targetQuota;
         if (remainingQuota <= 0f)
-            return false;
+            return;
 
         List<float> balances = new()
         {
@@ -82,7 +82,7 @@ public class EconomyModule : NetworkBehaviour
             totalBalance += b;
 
         if (totalBalance <= 0f)
-            return false;
+            return;
 
         remainingQuota = Mathf.Min(remainingQuota, totalBalance);
 
@@ -120,7 +120,5 @@ public class EconomyModule : NetworkBehaviour
         teamYellowBalance = balances[3];
         teamGreenBalance = balances[4];
         teamPinkBalance = balances[5];
-
-        return remainingQuota <= 0;
     }
 }

@@ -58,6 +58,8 @@ public class DayCycleModule : NetworkBehaviour
         Instance.playersOnDungeon.Clear();
 
         dayStarted = false;
+
         Instance.CloseDungeon();
+        Instance.CheckQuotaCompletion();
     }
 }

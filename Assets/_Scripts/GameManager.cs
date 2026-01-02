@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.ProBuilder.Shapes;
 
 public class GameManager : NetworkBehaviour
 {
@@ -22,11 +23,13 @@ public class GameManager : NetworkBehaviour
     public LobbyManagerScreen lobbyManagerScreen;
     public DayCycleModule dayCycleModule;
     public EconomyModule economyModule;
+    public Transform[] spawnPoints;
 
     [SerializeField] ItemSO[] itemsData;
     [SerializeField] MapGenerator mapGenerator;
     [SerializeField] Int_Teleport teleporter;
     [SerializeField] List<PlayerData> players = new ();
+    [SerializeField] List<uint> deadPlayers = new ();
     [SerializeField] Int_HomewardBeacon homewardBeacon;
 
     /* --- EVENTS --- */
@@ -131,8 +134,10 @@ public class GameManager : NetworkBehaviour
     [Server]
     public void CheckQuotaCompletion()
     {
-        if (economyModule.IsQuotaMet && economyModule.TakeQuotaValue())
+        if (economyModule.IsQuotaMet)
         {
+            Debug.Log("Quota Met");
+            economyModule.TakeQuotaValue();
             StartCoroutine(QuotaCompletionSequence());
         }
         else
@@ -143,13 +148,30 @@ public class GameManager : NetworkBehaviour
 
     IEnumerator QuotaCompletionSequence()
     {
+        Debug.Log("Quota completed");
+
         yield return null;
+
+        foreach (var player in players)
+        {
+            if (!deadPlayers.Contains(player.netId)) continue;
+
+            Transform spawn = spawnPoints.Length > 0
+            ? spawnPoints[player.Index % spawnPoints.Length]
+            : null;
+
+            Vector3 spawnPos = spawn ? spawn.position : transform.position;
+
+            player.RevivePlayer(spawnPos);
+            deadPlayers.Remove(player.netId);
+        }
 
         dayCycleModule.currentDay++;
     }
 
     IEnumerator QuotaNotMetSequence()
     {
+        Debug.Log("Quota not completed");
         yield return null;
     }
 
@@ -196,6 +218,7 @@ public class GameManager : NetworkBehaviour
     public void SetUpNewDay()
     {
         mapSeed = Random.Range(-1000000, 1000000);
+        economyModule.SetNewQuota();
         //OpenDungeon();
     }
 
@@ -230,4 +253,7 @@ public class GameManager : NetworkBehaviour
 
         selectedTheme = index;
     }
+
+    public void PlayerDies(uint index)
+        { if (!deadPlayers.Contains(index)) deadPlayers.Add(index); }
 }

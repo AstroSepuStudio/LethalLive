@@ -21,6 +21,12 @@ public class PlayerStats : EntityStats
 
     public override void OnStartServer()
     {
+        ResetStats();
+    }
+
+    [Server]
+    public void ResetStats()
+    {
         currentHP = maxHP;
         currentStamina = maxStamina;
         currentKnock = 0f;

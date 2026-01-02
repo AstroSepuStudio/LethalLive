@@ -85,7 +85,6 @@ public class PlayerMovement : NetworkBehaviour
     }
     bool IsSomethingAbove() => Physics.CheckSphere(pData.Head.position, groundRadius, pData.IgnorePlayer);
 
-
     private void Start()
     {
         normalCenter = pData.Character_Controller.center;
@@ -320,46 +319,76 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (!isServer) return;
-        if (pData.Skin_Data.Ragdoll_Manager.IsKnocked || pData.CameraPivot == null || pData._LockPlayer || !pData.Character_Controller.enabled) return;
-        if (_isSprinting && Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
-        {
-            CmdStopSprint();
-        }
-
-        UpdateMoveSpeed();
-
-        if (_wantsToUncrouch || _wantsToSprint)
-        {
-            if (!IsSomethingAbove())
-            {
-                ServerStopCrouch();
-                if (_wantsToSprint)
-                {
-                    _isSprinting = true;
-                    movSpeed = sprintSpeed;
-                }
-
-                _wantsToSprint = false;
-                _wantsToUncrouch = false;
-            }
-        }
+        if (pData.Skin_Data.Ragdoll_Manager.IsKnocked ||
+            pData.CameraPivot == null ||
+            !pData.Character_Controller.enabled)
+            return;
 
         groundedTime = IsGrounded() ? coyoteTime : groundedTime > 0 ? groundedTime - Time.deltaTime : 0;
         _isGrounded = groundedTime > 0f;
-
         jumpTime = jumpTime > 0 ? jumpTime - Time.deltaTime : 0;
         _tryJump = jumpTime > 0f;
 
-        if (_isGrounded && _tryJump)
+        Vector3 move = Vector3.zero;
+
+        if (!pData._LockPlayer)
         {
-            if (Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
-                velocity.y = jumpForce * 0.75f;
-            else
-                velocity.y = jumpForce;
-            jumpTime = 0f; _tryJump = false;
-            groundedTime = 0f; _isGrounded = false;
-            pData.Player_Stats.ModifyStamina(-staminaConsuption_Jump);
-            RpcTriggerJump();
+            if (_isSprinting && Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
+            {
+                CmdStopSprint();
+            }
+
+            UpdateMoveSpeed();
+
+            if (_wantsToUncrouch || _wantsToSprint)
+            {
+                if (!IsSomethingAbove())
+                {
+                    ServerStopCrouch();
+                    if (_wantsToSprint)
+                    {
+                        _isSprinting = true;
+                        movSpeed = sprintSpeed;
+                    }
+
+                    _wantsToSprint = false;
+                    _wantsToUncrouch = false;
+                }
+            }
+
+            if (_isGrounded && _tryJump)
+            {
+                if (Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
+                    velocity.y = jumpForce * 0.75f;
+                else
+                    velocity.y = jumpForce;
+                jumpTime = 0f; _tryJump = false;
+                groundedTime = 0f; _isGrounded = false;
+                pData.Player_Stats.ModifyStamina(-staminaConsuption_Jump);
+                RpcTriggerJump();
+            }
+
+            Vector3 camForward = pData.CameraPivot.forward;
+            Vector3 camRight = pData.CameraPivot.right;
+            camForward.y = 0f;
+            camRight.y = 0f;
+            camForward.Normalize();
+            camRight.Normalize();
+
+            move = (camForward * movementInput.y + camRight * movementInput.x).normalized;
+            if (!Mathf.Approximately(move.magnitude, 0) && !pData._IsPlayerAimLocked)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(move);
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                pData.EmoteManager.PlayerMoves();
+            }
+
+            move *= movSpeed * speedMultiplier * (pData.Player_Stats.speed / 100f);
+
+            if (_isSprinting && movementInput.magnitude > 0.1f)
+                pData.Player_Stats.ModifyStamina(-staminaConsuption_Sprint * Time.deltaTime);
+
+            FootstepUpdate();
         }
 
         if (_isGrounded && velocity.y <= 0)
@@ -367,31 +396,15 @@ public class PlayerMovement : NetworkBehaviour
         else
             velocity.y += gravity * Time.deltaTime;
 
-        Vector3 camForward = pData.CameraPivot.forward;
-        Vector3 camRight = pData.CameraPivot.right;
-        camForward.y = 0f;
-        camRight.y = 0f;
-        camForward.Normalize();
-        camRight.Normalize();
-
-        Vector3 move = (camForward * movementInput.y + camRight * movementInput.x).normalized;
-        if (!Mathf.Approximately(move.magnitude, 0) && !pData._IsPlayerAimLocked)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(move);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-            pData.EmoteManager.PlayerMoves();
-        }
-
-        move *= movSpeed * speedMultiplier * (pData.Player_Stats.speed / 100f);
-
         velocity.x = move.x + externalMomentum.x;
         velocity.z = move.z + externalMomentum.z;
         pData.Character_Controller.Move(velocity * Time.deltaTime);
 
         externalMomentum = Vector3.Lerp(externalMomentum, Vector3.zero, Time.deltaTime * friction);
 
-        float speed = new Vector2(velocity.x, velocity.z).magnitude;
         if (pData.Skin_Data.CharacterAnimator == null) return;
+
+        float speed = new Vector2(velocity.x, velocity.z).magnitude;
         if (IsCrouching)
         {
             standCrouchBlend = Mathf.MoveTowards(pData.Skin_Data.CharacterAnimator.GetFloat("StandCrouch"), 1, Time.deltaTime * animTransitionSpeed);
@@ -404,10 +417,6 @@ public class PlayerMovement : NetworkBehaviour
             float targetBlend = Mathf.Approximately(speed, 0f) ? 0f : speed;
             standMovBlend = Mathf.MoveTowards(standMovBlend, targetBlend, Time.deltaTime * animTransitionSpeed);
         }
-
-        if (_isSprinting && movementInput.magnitude > 0.1f)
-            pData.Player_Stats.ModifyStamina(-staminaConsuption_Sprint * Time.deltaTime);
-        FootstepUpdate();
 
         if (!_isGrounded && !_isFalling)
         {
