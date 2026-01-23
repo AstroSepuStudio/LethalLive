@@ -5,7 +5,7 @@ public class LLNetworkManager : NetworkManager
 {
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        Transform[] spawnPoints = GameManager.Instance.spawnPoints;
+        Transform[] spawnPoints = GameManager.Instance.playMod.spawnPoints;
 
         Transform spawn = spawnPoints.Length > 0
             ? spawnPoints[conn.connectionId % spawnPoints.Length]

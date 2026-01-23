@@ -2,7 +2,6 @@ using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Principal;
 using TMPro;
 using Unity.AI.Navigation;
 using UnityEngine;
@@ -65,6 +64,11 @@ public class MapGenerator : NetworkBehaviour
     readonly List<FurniturePosition> furniturePositions = new();
     readonly List<Transform> entitySpawnerPositions = new();
 
+    public IReadOnlyDictionary<int, RoomData> SpawnedRooms => spawned;
+    public Cell[,,] Grid => grid;
+    public int CellSize => cellSize;
+    public Vector3Int GridSize => gridSize;
+
     private struct OpenPort
     {
         public int roomId;
@@ -75,7 +79,7 @@ public class MapGenerator : NetworkBehaviour
         public RoomDataSO.PortType type;
     }
 
-    private class PlacedRoom
+    public class PlacedRoom
     {
         public int id;
         public RoomDataSO data;
@@ -84,7 +88,7 @@ public class MapGenerator : NetworkBehaviour
         public Biome biome;
     }
 
-    private class Cell
+    public class Cell
     {
         public PlacedRoom placedRoom;
         public Vector3Int local;
@@ -106,7 +110,7 @@ public class MapGenerator : NetworkBehaviour
         if (_generated) return;
         _generated = true;
 
-        theme = GameManager.Instance.ThemeDatas[themeIndex];
+        theme = GameManager.Instance.dngMod.ThemeDatas[themeIndex];
 
         int size = LobbySettings.Instance.MapSize;
         
@@ -134,7 +138,7 @@ public class MapGenerator : NetworkBehaviour
         var start = Place(theme.startingRoom, center, depth: 0);
 
         if (GameManager.Instance.isServer)
-            GameManager.Instance.startRoomPos = center * cellSize;
+            GameManager.Instance.dngMod.startRoomPos = center * cellSize;
 
         if (start == null) 
         { 

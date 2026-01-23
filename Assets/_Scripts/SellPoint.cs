@@ -23,18 +23,7 @@ public class SellPoint : NetworkBehaviour
         {
             if (itemsInside[i].pData != null)
             {
-                if (itemsInside[i].pData.Team == PlayerTeam.White)
-                    GameManager.Instance.economyModule.teamWhiteBalance += itemsInside[i].ItemValue;
-                else if (itemsInside[i].pData.Team == PlayerTeam.Red)
-                    GameManager.Instance.economyModule.teamRedBalance += itemsInside[i].ItemValue;
-                else if (itemsInside[i].pData.Team == PlayerTeam.Blue)
-                    GameManager.Instance.economyModule.teamBlueBalance += itemsInside[i].ItemValue;
-                else if (itemsInside[i].pData.Team == PlayerTeam.Yellow)
-                    GameManager.Instance.economyModule.teamYellowBalance += itemsInside[i].ItemValue;
-                else if (itemsInside[i].pData.Team == PlayerTeam.Green)
-                    GameManager.Instance.economyModule.teamGreenBalance += itemsInside[i].ItemValue;
-                else if (itemsInside[i].pData.Team == PlayerTeam.Pink)
-                    GameManager.Instance.economyModule.teamPinkBalance += itemsInside[i].ItemValue;
+                GameManager.Instance.ecoMod.teamsBalance[itemsInside[i].pData.Team] += itemsInside[i].ItemValue;
             }
 
             NetworkServer.Destroy(itemsInside[i].gameObject);

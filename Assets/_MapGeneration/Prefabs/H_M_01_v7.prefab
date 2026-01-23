@@ -1507,6 +1507,7 @@ MonoBehaviour:
     face: 1
     wall: {fileID: 1139905599493019200}
     door: {fileID: 0}
+  Data: {fileID: 0}
   itemSpawnPositions:
   - position: {fileID: 6511343529661619648}
     maxOffset: {x: 3, y: 0, z: 0.5}
@@ -1529,6 +1530,14 @@ MonoBehaviour:
   entitySpawnerPositions:
   - {fileID: 3637969829872985181}
   - {fileID: 6082872028185013565}
+  roomRenderers:
+  - {fileID: 5831102597273134099}
+  - {fileID: 5282216218995100695}
+  - {fileID: 1081716436597588977}
+  roomLights:
+  - {fileID: 365794995004590326}
+  - {fileID: 5296941988752333598}
+  - {fileID: 2428667041501006173}
 --- !u!1 &7131954953508128755
 GameObject:
   m_ObjectHideFlags: 0
@@ -2085,6 +2094,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!108 &365794995004590326 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 2021310895451070544}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5357465600021864959 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6220782909311238575, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -2221,6 +2235,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!108 &2428667041501006173 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 4083332054769230331}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7997902308495925332 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6220782909311238575, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -2360,6 +2379,11 @@ PrefabInstance:
 --- !u!4 &488814988981432855 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6220782909311238575, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 5808578901291479992}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &5296941988752333598 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 5808578901291479992}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6178710925970920229

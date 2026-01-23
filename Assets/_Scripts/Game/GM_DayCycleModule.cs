@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using static GameManager;
 
-public class DayCycleModule : NetworkBehaviour
+public class GM_DayCycleModule : NetworkBehaviour
 {
     [SerializeField] float dayDuration = 900;
 
@@ -50,16 +50,23 @@ public class DayCycleModule : NetworkBehaviour
     {
         OnDayEnded?.Invoke();
 
-        foreach (var player in Instance.playersOnDungeon)
+        foreach (var player in Instance.playMod.playersOnDungeon)
         {
-            player.Player_Stats.ForceDeath();
+            player.Player_Stats.ExecutePlayer();
         }
 
-        Instance.playersOnDungeon.Clear();
+        Instance.playMod.playersOnDungeon.Clear();
 
         dayStarted = false;
 
-        Instance.CloseDungeon();
+        Instance.dngMod.CloseDungeon();
         Instance.CheckQuotaCompletion();
+    }
+
+    [Server]
+    public void ResetDays()
+    {
+        currentDay = 0;
+        dayStarted = false;
     }
 }

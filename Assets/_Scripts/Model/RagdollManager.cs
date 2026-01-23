@@ -16,23 +16,23 @@ public class RagdollManager : NetworkBehaviour
     [Server]
     public void EnableRagdoll(Vector3 momentum)
     {
-        Debug.Log("Try to enable ragdoll");
         if (!skinData.pData.isServer) return;
-        Debug.Log("Enabling ragdoll");
         IsKnocked = true;
-        LocalEnableRagdoll(momentum);
-        RpcEnableRagdoll(momentum);
+
+        hipRigidbody.isKinematic = false;
+        hipRigidbody.AddForce(momentum * momentumMultiplier, ForceMode.Impulse);
+
+        RpcEnableRagdoll();
     }
 
     [ClientRpc]
-    void RpcEnableRagdoll(Vector3 momentum)
+    void RpcEnableRagdoll()
     {
-        LocalEnableRagdoll(momentum);
+        LocalEnableRagdoll();
     }
 
-    void LocalEnableRagdoll(Vector3 momentum)
+    void LocalEnableRagdoll()
     {
-        Debug.Log("Ragdoll enabled");
         skinData.pData.Skin_Data.CharacterAnimator.enabled = false;
         skinData.pData.Character_Controller.enabled = false;
         skinData.pData.Model.parent = null;
@@ -44,10 +44,9 @@ public class RagdollManager : NetworkBehaviour
 
         foreach (var rb in ragdollRigidbodies)
         {
+            if (rb == hipRigidbody) continue;
             rb.isKinematic = false;
         }
-
-        hipRigidbody.AddForce(momentum * momentumMultiplier, ForceMode.Impulse);
     }
 
     [Server]
@@ -56,7 +55,8 @@ public class RagdollManager : NetworkBehaviour
         if (!skinData.pData.isServer) return;
 
         IsKnocked = false;
-        LocalDisableRagdoll();
+        hipRigidbody.isKinematic = true;
+
         RpcDisableRagdoll();
     }
 

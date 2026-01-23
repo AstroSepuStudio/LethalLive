@@ -10,6 +10,6 @@ public class Int_HomewardBeacon : InteractableObject
         sourceData.Character_Controller.enabled = true;
 
         DisableCanvas();
-        GameManager.Instance.OnReturnOffice(sourceData);
+        GameManager.Instance.dngMod.OnReturnOffice(sourceData);
     }
 }

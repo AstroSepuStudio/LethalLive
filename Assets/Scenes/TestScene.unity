@@ -14,12 +14,12 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 0
-  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  m_FogMode: 3
+  m_Fog: 1
+  m_FogColor: {r: 0, g: 0, b: 0, a: 1}
+  m_FogMode: 1
   m_FogDensity: 0.01
-  m_LinearFogStart: 0
-  m_LinearFogEnd: 300
+  m_LinearFogStart: 30
+  m_LinearFogEnd: 45
   m_AmbientSkyColor: {r: 0.3584906, g: 0.27823147, b: 0, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
@@ -20803,12 +20803,6 @@ MonoBehaviour:
   exponentialRate: 1.15
   exponentialFactor: 0.3
   targetQuota: 0
-  teamWhiteBalance: 0
-  teamRedBalance: 0
-  teamBlueBalance: 0
-  teamYellowBalance: 0
-  teamGreenBalance: 0
-  teamPinkBalance: 0
 --- !u!4 &647318313
 Transform:
   m_ObjectHideFlags: 0
@@ -40848,6 +40842,70 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1141685885}
   m_CullTransparentMesh: 1
+--- !u!1 &1142356161
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1142356162}
+  - component: {fileID: 1142356163}
+  m_Layer: 0
+  m_Name: '- Dungeon -'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1142356162
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1142356161}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1730614855}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1142356163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1142356161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 344bca98ef8eab246a523f7220272870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GM_DungeonModule
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  <ThemeDatas>k__BackingField:
+  - {fileID: 11400000, guid: 580f57a2680f48c45877e251dc3e0e8d, type: 2}
+  - {fileID: 11400000, guid: a5de32237847b1048807778dd90ba4e7, type: 2}
+  mapGenerator: {fileID: 1410324981}
+  teleporter: {fileID: 2066666727}
+  homewardBeacon: {fileID: 7233261649696463764}
+  OnDungeonOpens:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDungeonCloses:
+    m_PersistentCalls:
+      m_Calls: []
+  startRoomPos: {x: 0, y: 0, z: 0}
+  selectedTheme: 0
+  mapSeed: 0
+  dungeonOpen: 0
 --- !u!1 &1144245870
 GameObject:
   m_ObjectHideFlags: 0
@@ -51147,6 +51205,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1865340140}
   - {fileID: 1348597483}
   - {fileID: 1993879864}
   - {fileID: 832593851}
@@ -53171,8 +53230,8 @@ MonoBehaviour:
   OnHoldInteractEvent:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1730614854}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+      - m_Target: {fileID: 1142356163}
+        m_TargetAssemblyTypeName: GM_DungeonModule, Assembly-CSharp
         m_MethodName: TryOpenNewDungeon
         m_Mode: 1
         m_Arguments:
@@ -60735,55 +60794,12 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  <ThemeDatas>k__BackingField:
-  - {fileID: 11400000, guid: 580f57a2680f48c45877e251dc3e0e8d, type: 2}
-  - {fileID: 11400000, guid: a5de32237847b1048807778dd90ba4e7, type: 2}
   lobbyManagerScreen: {fileID: 2134294514}
-  dayCycleModule: {fileID: 1250948260}
-  economyModule: {fileID: 647318312}
-  spawnPoints:
-  - {fileID: 133929965}
-  - {fileID: 98262170}
-  - {fileID: 1010116013}
-  - {fileID: 492979296}
-  - {fileID: 457758999}
-  - {fileID: 1184885003}
-  - {fileID: 476881624}
-  - {fileID: 449664175}
-  - {fileID: 1042580502}
-  - {fileID: 761464364}
-  - {fileID: 1423993979}
-  - {fileID: 1373545078}
-  - {fileID: 1628326738}
-  - {fileID: 134330204}
-  - {fileID: 1414301057}
-  - {fileID: 1563694447}
-  - {fileID: 601290226}
-  - {fileID: 322299342}
-  - {fileID: 1650778064}
-  - {fileID: 1700382927}
-  - {fileID: 1808753371}
-  itemsData:
-  - {fileID: 11400000, guid: d6015b7736f8f8c49b4af775dd7ff787, type: 2}
-  - {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
-  mapGenerator: {fileID: 1410324981}
-  teleporter: {fileID: 2066666727}
-  players: []
-  deadPlayers: 
-  homewardBeacon: {fileID: 7233261649696463764}
-  OnDungeonOpens:
-    m_PersistentCalls:
-      m_Calls: []
-  OnDungeonCloses:
-    m_PersistentCalls:
-      m_Calls: []
-  LocalPlayer: {fileID: 0}
-  startRoomPos: {x: 0, y: 0, z: 0}
-  playersOnDungeon: []
-  selectedTheme: 0
-  mapSeed: 0
+  dayMod: {fileID: 1250948260}
+  ecoMod: {fileID: 647318312}
+  playMod: {fileID: 1867659647}
+  dngMod: {fileID: 1142356163}
   gameStarted: 0
-  dungeonOpen: 0
 --- !u!4 &1730614855
 Transform:
   m_ObjectHideFlags: 0
@@ -60797,8 +60813,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 647318313}
   - {fileID: 1250948261}
+  - {fileID: 647318313}
+  - {fileID: 1867659646}
+  - {fileID: 1142356162}
+  - {fileID: 1980014894}
   m_Father: {fileID: 382441220}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1732480799
@@ -65493,6 +65512,127 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!1 &1865340139
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1865340140}
+  - component: {fileID: 1865340141}
+  m_Layer: 0
+  m_Name: '- Dynamic Occlusion -'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1865340140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865340139}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1410324980}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1865340141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865340139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b46effdbb0f1b1c479140de2e550b49b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DynamicOcclusionCulling
+  useCameraView: 0
+  aRR_H: 7
+  aRR_V: 2
+--- !u!1 &1867659645
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1867659646}
+  - component: {fileID: 1867659647}
+  m_Layer: 0
+  m_Name: '- Player -'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1867659646
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1867659645}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1730614855}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1867659647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1867659645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7480cf6d2ccf1d4bb63673af41d755e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GM_PlayerModule
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  spawnPoints:
+  - {fileID: 133929965}
+  - {fileID: 98262170}
+  - {fileID: 1010116013}
+  - {fileID: 492979296}
+  - {fileID: 457758999}
+  - {fileID: 1184885003}
+  - {fileID: 476881624}
+  - {fileID: 449664175}
+  - {fileID: 1042580502}
+  - {fileID: 761464364}
+  - {fileID: 1423993979}
+  - {fileID: 1373545078}
+  - {fileID: 1628326738}
+  - {fileID: 134330204}
+  - {fileID: 1414301057}
+  - {fileID: 1563694447}
+  - {fileID: 601290226}
+  - {fileID: 322299342}
+  - {fileID: 1650778064}
+  - {fileID: 1700382927}
+  - {fileID: 1808753371}
+  players: []
+  deadPlayers: 
+  LocalPlayer: {fileID: 0}
+  playersOnDungeon: []
 --- !u!1 &1874083581
 GameObject:
   m_ObjectHideFlags: 0
@@ -69334,6 +69474,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6220782909311238575, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 1977441044}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1980014893
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1980014894}
+  - component: {fileID: 1980014895}
+  m_Layer: 0
+  m_Name: --- Voice Chat ---
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1980014894
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980014893}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 300, y: -1, z: 300}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1730614855}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1980014895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980014893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a2eedecb432234408e7f6a264f6445c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VoicePlaybackManager
+  maxProximityDistance: 20
 --- !u!1 &1990915551
 GameObject:
   m_ObjectHideFlags: 0

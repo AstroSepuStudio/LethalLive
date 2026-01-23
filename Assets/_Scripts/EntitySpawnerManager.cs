@@ -33,8 +33,8 @@ public class EntitySpawnerManager : NetworkBehaviour
     {
         if (isServer)
         {
-            GameManager.Instance.dayCycleModule.OnDayStarted.AddListener(OnDayStarted);
-            GameManager.Instance.dayCycleModule.OnDayEnded.AddListener(OnDayEnded);
+            GameManager.Instance.dayMod.OnDayStarted.AddListener(OnDayStarted);
+            GameManager.Instance.dayMod.OnDayEnded.AddListener(OnDayEnded);
         }
     }
 
@@ -42,8 +42,8 @@ public class EntitySpawnerManager : NetworkBehaviour
     {
         if (isServer)
         {
-            GameManager.Instance.dayCycleModule.OnDayStarted.RemoveListener(OnDayStarted);
-            GameManager.Instance.dayCycleModule.OnDayEnded.RemoveListener(OnDayEnded);
+            GameManager.Instance.dayMod.OnDayStarted.RemoveListener(OnDayStarted);
+            GameManager.Instance.dayMod.OnDayEnded.RemoveListener(OnDayEnded);
         }
     }
 
@@ -120,7 +120,7 @@ public class EntitySpawnerManager : NetworkBehaviour
             return false;
         }
 
-        ThemeDataSO.EntitySpawn[] entitySpawn = GameManager.Instance.ThemeDatas[GameManager.Instance.selectedTheme].entitySpawns;
+        ThemeDataSO.EntitySpawn[] entitySpawn = GameManager.Instance.dngMod.ThemeDatas[GameManager.Instance.dngMod.selectedTheme].entitySpawns;
 
         float totalWeight = 0f;
         foreach (var spawn in entitySpawn)

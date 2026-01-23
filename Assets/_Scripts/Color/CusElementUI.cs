@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CusElementUI : MonoBehaviour
 {
@@ -9,24 +10,33 @@ public class CusElementUI : MonoBehaviour
     [Header("References")]
     [SerializeField] SkinData skinData;
     [SerializeField] TextMeshProUGUI accesoryName;
+    [SerializeField] Slider glowSlider;
 
     [Header("Config")]
     [SerializeField] MaterialType matType;
+    [SerializeField] SkinData.AccessoryType accesoryType;
 
-    [SerializeField] int accessoryIndex;
+    public Color GetColor(ColorType type) => skinData.GetColor(accesoryType, type, matType);
 
-    public Color GetColor(ColorType type) => skinData.GetColor(type, matType, accessoryIndex);
+    private void OnEnable()
+    {
+        if (glowSlider != null)
+            glowSlider.SetValueWithoutNotify(skinData.GetFacialGlow());
+
+        string name = skinData.GetAccessoryName(accesoryType);
+        if (name != null)
+            accesoryName.SetText(name);
+    }
 
     public void SwitchAccesory(int index)
     {
-        skinData.SwitchAccesory(accessoryIndex, index);
+        skinData.SwitchAccesory(index);
         accesoryName.SetText(skinData.Accesories[index].name);
-        accessoryIndex = index;
     }
 
     public void DisableAccessory()
     {
-        accesoryName.text = skinData.DisableAccesory(accessoryIndex);
+        accesoryName.text = skinData.DisableAccesory(accesoryType);
     }
 
     public void SetIntensity(float intensity) => skinData.SetFacialGlow(intensity);
@@ -64,7 +74,7 @@ public class CusElementUI : MonoBehaviour
                 skinData.SetFacialColor(colorParam, color);
                 break;
             case MaterialType.Accesory:
-                skinData.SetAccesoryColor(accessoryIndex, colorParam, color);
+                skinData.SetAccesoryColor(accesoryType, colorParam, color);
                 break;
             default:
                 break;

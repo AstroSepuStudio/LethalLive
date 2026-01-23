@@ -21,6 +21,7 @@ public class PlayerData : NetworkBehaviour
     public AudioSource Quiet_AS;
     public AudioSource Modest_AS;
     public AudioSource Loud_AS;
+    public VoiceSpeaker Voice_Speaker;
     [SerializeField] NetworkTransformHybrid netTransform;
     [SerializeField] float tpDelay = 0.5f;
 
@@ -83,7 +84,7 @@ public class PlayerData : NetworkBehaviour
         {
             PlayerAudio.enabled = true;
             //SettingsManager.Instance.LockMouse();
-            GameManager.Instance.LocalPlayer = this;
+            GameManager.Instance.playMod.LocalPlayer = this;
         }
         else
         {
@@ -98,12 +99,12 @@ public class PlayerData : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
-        GameManager.Instance.RegisterPlayer(this);
+        GameManager.Instance.playMod.RegisterPlayer(this);
     }
 
     public override void OnStopServer()
     {
-        GameManager.Instance.UnregisterPlayer(this);
+        GameManager.Instance.playMod.UnregisterPlayer(this);
     }
 
     public override void OnStartLocalPlayer()
@@ -215,6 +216,12 @@ public class PlayerData : NetworkBehaviour
     {
         if (!isLocalPlayer || HUDmanager.OpenedWindow) return;
 
+        if (Spectator_Movement.enabled)
+        {
+            Spectator_Movement.PrimaryAction(context);
+            return;
+        }
+
         if (PlayerInventory.HasPrimaryAction)
         {
             PlayerInventory.PrimaryInput(context);
@@ -229,6 +236,12 @@ public class PlayerData : NetworkBehaviour
     {
         if (!isLocalPlayer || HUDmanager.OpenedWindow) return;
 
+        if (Spectator_Movement.enabled)
+        {
+            Spectator_Movement.SecondaryAction(context);
+            return;
+        }
+
         if (PlayerInventory.HasSecondaryAction)
         {
             PlayerInventory.SecondaryInput(context);
@@ -238,11 +251,12 @@ public class PlayerData : NetworkBehaviour
     [Server]
     public void OnPlayerDeath(AttackStat stat, Vector3 momentum)
     {
+        GameManager.Instance.playMod.PlayerDies(netId);
         Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
         Rpc_OnPlayerDeath();
     }
 
-    [ClientRpc]
+    [TargetRpc]
     void Rpc_OnPlayerDeath()
     {
         Player_Movement.enabled = false;
@@ -259,7 +273,7 @@ public class PlayerData : NetworkBehaviour
         Rpc_RevivePlayer();
     }
 
-    [ClientRpc]
+    [TargetRpc]
     public void Rpc_RevivePlayer()
     {
         Spectator_Movement.enabled = false;

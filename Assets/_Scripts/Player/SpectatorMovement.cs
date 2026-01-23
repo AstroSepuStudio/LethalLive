@@ -6,14 +6,17 @@ public class SpectatorMovement : NetworkBehaviour
 {
     [SerializeField] PlayerData playerData;
 
-    [SyncVar] int currentIndex = 0;
+    public PlayerData GetPlayerData() => currentPlayer? currentPlayer : GameManager.Instance.playMod.LocalPlayer;
+
+    int currentIndex = 0;
+    uint currentID;
+    PlayerData currentPlayer;
 
     private void OnEnable()
     {
         if (!isLocalPlayer) return;
 
-        if (isServer)
-            currentIndex = playerData.Index;
+        currentIndex = playerData.Index;
 
         playerData.PlayerCamera.enabled = false;
         CmdRequestNewTarget(true);
@@ -23,28 +26,36 @@ public class SpectatorMovement : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
 
+        NetworkClient.spawned.TryGetValue(currentID, out NetworkIdentity identity);
+        if (identity == null) return;
+
+        PlayerData data = identity.GetComponent<PlayerData>();
+        data.PlayerCamera.enabled = false;
+
         playerData.PlayerCamera.enabled = true;
+        currentPlayer = null;
     }
 
     [Command(requiresAuthority = false)]
     void CmdRequestNewTarget(bool increase)
     {
-        uint oldID = GameManager.Instance.Players[currentIndex].netId;
+        uint oldID = GameManager.Instance.playMod.Players[currentIndex].netId;
 
         if (increase)
         {
             currentIndex++;
-            if (currentIndex >= GameManager.Instance.Players.Count) 
+
+            if (currentIndex >= GameManager.Instance.playMod.Players.Count) 
                 currentIndex = 0;
         }
         else
         {
             currentIndex--;
             if (currentIndex < 0) 
-                currentIndex = GameManager.Instance.Players.Count - 1;
+                currentIndex = GameManager.Instance.playMod.Players.Count - 1;
         }
 
-        RpcChangeSpectatorTarget(oldID, GameManager.Instance.Players[currentIndex].netId);
+        RpcChangeSpectatorTarget(oldID, GameManager.Instance.playMod.Players[currentIndex].netId);
     }
 
     public void PrimaryAction(InputAction.CallbackContext context)
@@ -61,7 +72,7 @@ public class SpectatorMovement : NetworkBehaviour
         CmdRequestNewTarget(false);
     }
 
-    [ClientRpc]
+    [TargetRpc]
     public void RpcChangeSpectatorTarget(uint oldID, uint newID)
     {
         if (!isLocalPlayer) return;
@@ -75,7 +86,10 @@ public class SpectatorMovement : NetworkBehaviour
         NetworkClient.spawned.TryGetValue(newID, out identity);
         if (identity == null) return;
 
+        currentID = newID;
         data = identity.GetComponent<PlayerData>();
         data.PlayerCamera.enabled = true;
+
+        currentPlayer = data;
     }
 }

@@ -1,9 +1,11 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ColorPickerControl : MonoBehaviour
 {
+    [SerializeField] SkinData skinData;
     [SerializeField] SVImageControl svIC;
 
     [SerializeField] RawImage hueImage;
@@ -16,11 +18,29 @@ public class ColorPickerControl : MonoBehaviour
     Texture2D hueTexture, svTexture;
     float CurrentHue, CurrentSat, CurrentVal;
 
-    private void Awake()
+    bool initialized = false;
+
+    Coroutine saveCoroutine;
+    readonly WaitForSeconds saveDelay = new(1);
+
+    private void OnEnable()
     {
+        if (initialized) return;
+        initialized = true;
+
         CreateHueImage();
         CreateSVImage();
+        SetHSV(currentPair.GetColor());
         UpdateOutputImage();
+    }
+
+    private void OnDisable()
+    {
+        if (saveCoroutine != null) 
+            StopCoroutine(saveCoroutine);
+
+        skinData.SaveToJson(SkinData.CustomizationSaveDataLocation);
+        skinData.SyncSkinData();
     }
 
     void CreateHueImage()
@@ -69,6 +89,8 @@ public class ColorPickerControl : MonoBehaviour
         outputImage.color = color;
 
         currentPair.SetColor(color);
+
+        RequestSave();
     }
 
     public void SetSV(float s, float v)
@@ -141,5 +163,21 @@ public class ColorPickerControl : MonoBehaviour
     {
         currentPair = pair;
         SetHSV(pair.GetColor());
+    }
+
+    void RequestSave()
+    {
+        if (saveCoroutine != null) return;
+
+        saveCoroutine = StartCoroutine(SaveAfterDelay());
+    }
+
+    IEnumerator SaveAfterDelay()
+    {
+        yield return saveDelay;
+
+        skinData.SaveToJson(SkinData.CustomizationSaveDataLocation);
+        skinData.SyncSkinData();
+        saveCoroutine = null;
     }
 }

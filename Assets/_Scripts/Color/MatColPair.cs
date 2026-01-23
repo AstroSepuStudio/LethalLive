@@ -9,7 +9,7 @@ public class MatColPair : MonoBehaviour
     [SerializeField] ColorPickerControl colorPC;
     [SerializeField] ColorType colorType;
 
-    private void Start()
+    private void OnEnable()
     {
         btnImage.color = elementUI.GetColor(colorType);
     }

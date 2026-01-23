@@ -14,9 +14,30 @@ public class RoomData : MonoBehaviour
     }
 
     [SerializeField] private WallPortKey[] ports = Array.Empty<WallPortKey>();
+    public RoomDataSO Data;
     public List<LootPosition> itemSpawnPositions;
     public List<FurniturePosition> furnitureSpawnPositions;
     public List<Transform> entitySpawnerPositions;
+    public Renderer[] roomRenderers;
+    public Light[] roomLights;
+    public Bounds roomBounds;
+
+    [SerializeField] bool beingRendered = true;
+
+    private void Awake()
+    {
+        RecalculateBounds();   
+    }
+
+    public void RecalculateBounds()
+    {
+        if (roomRenderers.Length == 0)
+            return;
+
+        roomBounds = roomRenderers[0].bounds;
+        for (int i = 1; i < roomRenderers.Length; i++)
+            roomBounds.Encapsulate(roomRenderers[i].bounds);
+    }
 
     public void SetPort(Vector3Int localCell, Direction face, bool open)
     {
@@ -28,6 +49,23 @@ public class RoomData : MonoBehaviour
                 if (ports[i].door) ports[i].door.SetActive(open);
                 return;
             }
+        }
+    }
+
+    public void SetRender(bool shouldRender)
+    {
+        if (beingRendered == shouldRender) return;
+
+        beingRendered = shouldRender;
+
+        foreach (Renderer renderer in roomRenderers)
+        {
+            renderer.enabled = shouldRender;
+        }
+
+        foreach (Light light in roomLights)
+        {
+            light.enabled = shouldRender;
         }
     }
 

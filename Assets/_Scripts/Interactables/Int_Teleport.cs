@@ -27,7 +27,7 @@ public class Int_Teleport : InteractableObject
     
     public void Teleport(PlayerData sourceData)
     {
-        if (!GameManager.Instance.dungeonOpen) return;
+        if (!GameManager.Instance.dngMod.dungeonOpen) return;
 
         Vector3 desiredPosition = Vector3.zero;
         bool foundValidPos = false;
@@ -63,7 +63,7 @@ public class Int_Teleport : InteractableObject
 
         canvas.DisableCanvas();
         
-        GameManager.Instance.OnEnterDungeon(sourceData);
+        GameManager.Instance.dngMod.OnEnterDungeon(sourceData);
         OnInteractEvent?.Invoke(sourceData);
     }
 

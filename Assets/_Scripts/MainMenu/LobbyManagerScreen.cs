@@ -71,7 +71,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         if (isLocalPlayer)
         {
-            Instance.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
+            Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
         }
     }
 
@@ -81,7 +81,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         if (isLocalPlayer)
         {
-            Instance.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
+            Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
         }
     }
 
@@ -96,7 +96,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         if (isLocalPlayer &&!open) return;
 
-        CmdCloseLMS(Instance.LocalPlayer.Index);
+        CmdCloseLMS(Instance.playMod.LocalPlayer.Index);
     }
 
     public void OnInteract(PlayerData playerData)
@@ -117,13 +117,13 @@ public class LobbyManagerScreen : UIManagerNetwork
     [ClientRpc]
     void RpcOpenLMS(int index)
     {
-        if (Instance.LocalPlayer.Index != index) return;
+        if (Instance.playMod.LocalPlayer.Index != index) return;
 
         //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = false;
-        Instance.LocalPlayer.PlayerCanvas.SetActive(false);
+        Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(false);
 
         povCamera.gameObject.SetActive(true);
-        Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
+        Instance.playMod.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -149,12 +149,12 @@ public class LobbyManagerScreen : UIManagerNetwork
     [ClientRpc]
     public void RpcCloseLMS(int index)
     {
-        if (Instance.LocalPlayer.Index != index) return;
+        if (Instance.playMod.LocalPlayer.Index != index) return;
 
         //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = true;
-        Instance.LocalPlayer.PlayerCanvas.SetActive(true);
+        Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(true);
         
-        Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(true);
+        Instance.playMod.LocalPlayer.PlayerCamera.gameObject.SetActive(true);
         povCamera.gameObject.SetActive(false);
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -172,9 +172,9 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         List<LobbyMemberData> members = new();
 
-        foreach (var player in Instance.Players)
+        foreach (var player in Instance.playMod.Players)
         {
-            members.Add(new GameManager.LobbyMemberData
+            members.Add(new LobbyMemberData
             {
                 SteamID = player.SteamID,
                 Name = player.PlayerName,
@@ -184,7 +184,7 @@ public class LobbyManagerScreen : UIManagerNetwork
             });
         }
 
-        RpcRefreshScreen(members.ToArray(), Instance.ThemeDatas[Instance.selectedTheme].levelName);
+        RpcRefreshScreen(members.ToArray(), Instance.dngMod.ThemeDatas[Instance.dngMod.selectedTheme].levelName);
     }
 
     [ClientRpc]
@@ -219,15 +219,15 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         if (Instance == null) return;
 
-        dayText.SetText($"{Instance.dayCycleModule.currentDay}/{LobbySettings.Instance.MaxDays}");
+        dayText.SetText($"{Instance.dayMod.currentDay}/{LobbySettings.Instance.MaxDays}");
 
-        if (Instance.dayCycleModule.currentDayTime == -1)
+        if (Instance.dayMod.currentDayTime == -1)
         {
             timeText.SetText("--:--");
         }
         else
         {
-            float minutesSinceStart = Instance.dayCycleModule.currentDayTime * (960f / 900f);
+            float minutesSinceStart = Instance.dayMod.currentDayTime * (960f / 900f);
             int totalMinutes = 8 * 60 + Mathf.RoundToInt(minutesSinceStart);
 
             int hours = totalMinutes / 60;
@@ -236,19 +236,19 @@ public class LobbyManagerScreen : UIManagerNetwork
             timeText.SetText($"{hours:00}:{minutes:00}");
         }
 
-        if (Instance.dayCycleModule.currentDay >= LobbySettings.Instance.MaxDays)
+        if (Instance.dayMod.currentDay >= LobbySettings.Instance.MaxDays)
             deadlineObj.SetActive(true);
         else 
             deadlineObj.SetActive(false);
 
-        SetTeamBalance(Instance.economyModule.teamWhiteBalance, teamWhiteBalance);
-        SetTeamBalance(Instance.economyModule.teamRedBalance, teamRedBalance);
-        SetTeamBalance(Instance.economyModule.teamBlueBalance, teamBlueBalance);
-        SetTeamBalance(Instance.economyModule.teamYellowBalance, teamYellowBalance);
-        SetTeamBalance(Instance.economyModule.teamGreenBalance, teamGreenBalance);
-        SetTeamBalance(Instance.economyModule.teamPinkBalance, teamPinkBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.White], teamWhiteBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Red], teamRedBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Blue], teamBlueBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Yellow], teamYellowBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Green], teamGreenBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Pink], teamPinkBalance);
 
-        totalBalanceText.SetText($"${Instance.economyModule.TotalBalance}");
+        totalBalanceText.SetText($"${Instance.ecoMod.TotalBalance}");
 
         levelText.SetText(themeName);
     }
@@ -258,7 +258,7 @@ public class LobbyManagerScreen : UIManagerNetwork
         if (balance > 0)
         {
             pair.teamObj.SetActive(true);
-            pair.balanceText.SetText($"${Instance.economyModule.teamWhiteBalance}");
+            pair.balanceText.SetText($"${balance}");
         }
         else pair.teamObj.SetActive(false);
     }
@@ -267,7 +267,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         PlayerTeam team = (PlayerTeam)index;
 
-        Instance.CmdRequestTeamChange(Instance.LocalPlayer.Index, team);
+        Instance.playMod.CmdRequestTeamChange(Instance.playMod.LocalPlayer.Index, team);
     }
 
     public void SetLobbyType(int index)
@@ -318,7 +318,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void StartDay()
     {
-        Instance.dayCycleModule.StartDay();
+        Instance.dayMod.StartDay();
     }
 
     [ClientRpc]
@@ -348,12 +348,12 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void RequestSkinChange(int index)
     {
-        Instance.LocalPlayer.Skin_Manager.SetSkinIndex(index);
+        Instance.playMod.LocalPlayer.Skin_Manager.SetSkinIndex(index);
     }
 
     public void RequestThemeSelection(int index)
     {
-        Instance.RequestTheme(index);
+        Instance.dngMod.RequestTheme(index);
     }
 
     IEnumerator RHCIKTPosHandler()

@@ -30,6 +30,7 @@ public class PlayerStats : EntityStats
         currentHP = maxHP;
         currentStamina = maxStamina;
         currentKnock = 0f;
+        dead = false;
     }
 
     protected override void Update()
@@ -78,7 +79,7 @@ public class PlayerStats : EntityStats
     #region HP
 
     [Server]
-    public void ForceDeath()
+    public void ExecutePlayer()
     {
         currentHP = 0;
         OnDeath(null, null);

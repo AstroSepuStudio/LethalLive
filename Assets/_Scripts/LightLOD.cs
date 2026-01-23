@@ -20,9 +20,9 @@ public class LightLOD : MonoBehaviour
 
     void OnSecond()
     {
-        if (GameManager.Instance.LocalPlayer == null) return;
+        if (GameManager.Instance.playMod.LocalPlayer == null) return;
 
-        float distance = Vector3.Distance(transform.position, GameManager.Instance.LocalPlayer.transform.position);
+        float distance = Vector3.Distance(transform.position, GameManager.Instance.playMod.LocalPlayer.transform.position);
         if (distance >= disableDistance)
             _light.enabled = false;
         else

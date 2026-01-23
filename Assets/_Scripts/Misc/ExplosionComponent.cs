@@ -32,11 +32,11 @@ public class ExplosionComponent : NetworkBehaviour
         Collider[] hitPlayers = Physics.OverlapSphere(transform.position, explosionStat.AttackRadius);
         foreach (Collider col in hitPlayers)
         {
-            for (int i = 0; i < GameManager.Instance.Players.Count; i++)
+            for (int i = 0; i < GameManager.Instance.playMod.Players.Count; i++)
             {
-                if (GameManager.Instance.Players[i].gameObject != col.gameObject) continue;
+                if (GameManager.Instance.playMod.Players[i].gameObject != col.gameObject) continue;
 
-                Vector3 dir = GameManager.Instance.Players[i].transform.position - transform.position;
+                Vector3 dir = GameManager.Instance.playMod.Players[i].transform.position - transform.position;
                 float distance = dir.magnitude;
 
                 float multiplier = Random.Range(0.75f, 1.25f);
@@ -45,10 +45,10 @@ public class ExplosionComponent : NetworkBehaviour
                 float knockAmount = explosionStat.AttackKnock * multiplier * effectiveness;
                 Vector3 momentum = effectiveness * explosionStat.AttackForce * multiplier * dir.normalized;
 
-                GameManager.Instance.Players[i].Player_Stats.ModifyKnock(knockAmount, momentum);
+                GameManager.Instance.playMod.Players[i].Player_Stats.ModifyKnock(knockAmount, momentum);
 
                 AttackStat modifiedAttack = new(explosionStat, explosionStat.AttackDamage * effectiveness * multiplier);
-                GameManager.Instance.Players[i].Player_Stats.ModifyHP(null, modifiedAttack);
+                GameManager.Instance.playMod.Players[i].Player_Stats.ModifyHP(null, modifiedAttack);
             }
         }
     }
