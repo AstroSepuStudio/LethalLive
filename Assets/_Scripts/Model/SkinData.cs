@@ -21,8 +21,6 @@ public class SkinData : NetworkBehaviour
         public bool active;
     }
 
-    [SerializeField] bool saveLoad;
-
     [Header("References")]
     public PlayerData pData;
     public Animator CharacterAnimator;
@@ -57,6 +55,11 @@ public class SkinData : NetworkBehaviour
     [SerializeField] float halfOpenTime = 0.03f;
     [SerializeField] float blkMinTime = 0.2f;
     [SerializeField] float blkMaxTime = 10f;
+
+    [SyncVar(hook = nameof(OnSkinChanged))]
+    private NetSkinData syncedSkin;
+
+    bool skinLoaded;
 
     private void Awake()
     {
@@ -98,7 +101,11 @@ public class SkinData : NetworkBehaviour
 
     private void Start()
     {
-        if (saveLoad) LoadFromJson(CustomizationSaveDataLocation);
+        if (isLocalPlayer)
+        {
+            LoadFromJson(CustomizationSaveDataLocation);
+            TrySyncSkin();
+        }
     }
 
     private void OnEnable()
@@ -111,9 +118,16 @@ public class SkinData : NetworkBehaviour
         GameTick.OnTick -= OnTick;
     }
 
-    private void OnConnectedToServer()
+    public override void OnStartLocalPlayer()
     {
-        SyncSkinData();
+        TrySyncSkin();
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        OnSkinChanged(syncedSkin, syncedSkin);
     }
 
     #region Blink/breath
@@ -424,6 +438,8 @@ public class SkinData : NetworkBehaviour
             {
                 Accesories[i].active = Accesories[i].renderer.enabled;
             }
+
+            skinLoaded = true;
             return;
         }
 
@@ -431,6 +447,7 @@ public class SkinData : NetworkBehaviour
         CharacterSkinSaveData data = JsonUtility.FromJson<CharacterSkinSaveData>(json);
 
         ApplySaveData(data);
+        skinLoaded = true;
     }
 
     public void ApplySaveData(CharacterSkinSaveData data)
@@ -475,6 +492,7 @@ public class SkinData : NetworkBehaviour
     #endregion
 
     #region Sync
+        #region Data
     [System.Serializable]
     public struct NetColor
     {
@@ -507,6 +525,8 @@ public class SkinData : NetworkBehaviour
     [System.Serializable]
     public struct NetSkinData
     {
+        public bool valid;
+
         public NetColor bodyMain;
         public NetColor bodySecond;
         public NetColor bodyThird;
@@ -520,6 +540,16 @@ public class SkinData : NetworkBehaviour
 
         public NetAccessoryData[] accessories;
     }
+    #endregion
+
+    void TrySyncSkin()
+    {
+        if (!isLocalPlayer) return;
+        if (!skinLoaded) return;
+
+        CmdSyncSkin(BuildNetSkinData());
+    }
+
 
     public void SyncSkinData()
     {
@@ -528,10 +558,15 @@ public class SkinData : NetworkBehaviour
     }
 
     [Command]
-    void CmdSyncSkin(NetSkinData data) => RpcApplySkin(data);
+    void CmdSyncSkin(NetSkinData data)
+    {
+        syncedSkin = data;
+    }
 
-    [ClientRpc]
-    void RpcApplySkin(NetSkinData data) => ApplyNetSkinData(data);
+    void OnSkinChanged(NetSkinData _, NetSkinData newData)
+    {
+        ApplyNetSkinData(newData);
+    }
 
     public NetSkinData BuildNetSkinData()
     {
@@ -539,6 +574,7 @@ public class SkinData : NetworkBehaviour
 
         NetSkinData net = new()
         {
+            valid = true,
             bodyMain = new NetColor(save.bodyMain.ToColor()),
             bodySecond = new NetColor(save.bodySecond.ToColor()),
             bodyThird = new NetColor(save.bodyThird.ToColor()),
@@ -572,6 +608,10 @@ public class SkinData : NetworkBehaviour
 
     public void ApplyNetSkinData(NetSkinData net)
     {
+        if (!net.valid) return;
+        if (net.accessories == null || net.accessories.Length == 0)
+            return;
+
         SetBodyColor("_MainColor", net.bodyMain.ToColor());
         SetBodyColor("_SecondColor", net.bodySecond.ToColor());
         SetBodyColor("_ThirdColor", net.bodyThird.ToColor());
@@ -582,7 +622,7 @@ public class SkinData : NetworkBehaviour
         SetFacialColor("_MultiplyColor", net.pupilColor.ToColor());
         SetFacialGlow(net.facialGlow);
 
-        foreach (var acc in net.accessories)
+        foreach (var acc in net.accessories) // line 620 here
         {
             var renderer = Accesories[acc.index].renderer;
 

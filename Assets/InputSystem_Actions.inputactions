@@ -257,6 +257,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ToggleVC",
+                    "type": "Button",
+                    "id": "5ce18790-9d9c-47df-9df3-25d9c6f8e6c3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -853,6 +862,17 @@
                     "action": "AdjustCam",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "3df2c98e-5821-47dd-bd27-be5bbe66d453",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleVC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
