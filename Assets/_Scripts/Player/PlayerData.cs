@@ -21,7 +21,8 @@ public class PlayerData : NetworkBehaviour
     public AudioSource Quiet_AS;
     public AudioSource Modest_AS;
     public AudioSource Loud_AS;
-    public VoiceSpeaker Voice_Speaker;
+    public VoiceChatHandler VCHandler;
+    public DeathOverlayManager DeathOvManager;
     [SerializeField] NetworkTransformHybrid netTransform;
     [SerializeField] float tpDelay = 0.5f;
 
@@ -51,6 +52,9 @@ public class PlayerData : NetworkBehaviour
     public CSteamID SteamID;
     public string PlayerName;
     public byte[] AvatarData;
+
+    [Header("Audio")]
+    public float VoiceChatVolume = 1;
 
     [SyncVar(hook = nameof(OnCameraPivotChanged))] 
     float syncedHoriz;
@@ -179,6 +183,8 @@ public class PlayerData : NetworkBehaviour
         SteamID = steamID;
         PlayerName = name;
         AvatarData = avatarData;
+
+        GameManager.Instance.lobbyManagerScreen.RefreshScreen();
     }
 
     [Command]
@@ -261,6 +267,7 @@ public class PlayerData : NetworkBehaviour
     {
         Player_Movement.enabled = false;
         Spectator_Movement.enabled = true;
+        DeathOvManager.EnableOverlay();
     }
 
     [Server]
@@ -278,6 +285,7 @@ public class PlayerData : NetworkBehaviour
     {
         Spectator_Movement.enabled = false;
         Player_Movement.enabled = true;
+        DeathOvManager.DisableOverlay();
     }
 
     [Server]

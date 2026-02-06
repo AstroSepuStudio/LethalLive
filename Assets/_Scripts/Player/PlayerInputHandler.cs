@@ -1,5 +1,4 @@
 using Mirror;
-using SimpleVoiceChat;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,6 +10,11 @@ public class PlayerInputHandler : NetworkBehaviour
     {
         if (!context.started || !isLocalPlayer) return;
 
+        RequestSwitchTabletState();
+    }
+
+    public void RequestSwitchTabletState()
+    {
         bool newState = !pData.TabletGMO.activeInHierarchy;
         pData.TabletGMO.SetActive(newState);
         Cmd_SwitchTabletState(newState);

@@ -10,8 +10,9 @@ namespace SimpleVoiceChat {
     /// </summary>
     public class Speaker : MonoBehaviour {
 
+        [SerializeField] PlayerData pData;
         private VoiceBuffer _buffer;
-        private AudioSource _source;
+        [SerializeField] private AudioSource _source;
         private AudioClip _voiceClip;
         private float _testDelay;
 
@@ -46,7 +47,34 @@ namespace SimpleVoiceChat {
         /// Direct audio stream from the network to this method.
         /// </summary>
         public void ProcessVoiceData(byte[] voiceData) {
+            float volume = 1;
+
+            if (SettingsManager.Instance != null)
+                volume *= SettingsManager.Instance.UserSettings.VoiceChatVolume;
+            if (pData != null)
+                volume *= pData.VoiceChatVolume;
+
+            _source.volume = volume;
             _buffer.Add(Settings.compression ? AudioCompressor.Decompress(voiceData) : voiceData);
+        }
+
+        public void ConfigureSpatialMode(bool speakerIsDead)
+        {
+            if (_source == null)
+                _source = GetComponent<AudioSource>();
+
+            if (speakerIsDead)
+            {
+                // Dead players speak in global 2D
+                _source.spatialBlend = 0f;
+                _source.dopplerLevel = 0f;
+            }
+            else
+            {
+                // Alive players speak in 3D
+                _source.spatialBlend = 1f;
+                _source.dopplerLevel = 1f;
+            }
         }
     }
 }

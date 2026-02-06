@@ -39,6 +39,8 @@ public class SpectatorMovement : NetworkBehaviour
     [Command(requiresAuthority = false)]
     void CmdRequestNewTarget(bool increase)
     {
+        if (playerData._LockPlayer) return;
+
         uint oldID = GameManager.Instance.playMod.Players[currentIndex].netId;
 
         if (increase)

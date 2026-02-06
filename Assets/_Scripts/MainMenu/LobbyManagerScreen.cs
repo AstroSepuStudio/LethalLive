@@ -64,8 +64,6 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         base.Start();
 
-        GameTick.OnSecond += OnSecond;
-
         pregameWindow.SetActive(true);
         gameWindow.SetActive(false);
 
@@ -77,8 +75,6 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     private void OnDestroy()
     {
-        GameTick.OnSecond -= OnSecond;
-
         if (isLocalPlayer)
         {
             Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
@@ -161,15 +157,9 @@ public class LobbyManagerScreen : UIManagerNetwork
         Cursor.visible = false;
     }
 
-    void OnSecond()
+    [Server]
+    public void RefreshScreen()
     {
-        if (!NetworkClient.isConnected) return;
-
-        //if (identity.isLocalPlayer)
-        //    GameManager.Instance.CmdSetPlayerPing(GameManager.Instance.LocalPlayer.Index, (int)(NetworkTime.rtt * 1000));
-
-        if (!identity.isServer) return;
-
         List<LobbyMemberData> members = new();
 
         foreach (var player in Instance.playMod.Players)
@@ -188,9 +178,9 @@ public class LobbyManagerScreen : UIManagerNetwork
     }
 
     [ClientRpc]
-    void RpcRefreshScreen(LobbyMemberData[] members, string themeName) => RefreshScreen(members, themeName);
+    void RpcRefreshScreen(LobbyMemberData[] members, string themeName) => LocalRefreshScreen(members, themeName);
 
-    public void RefreshScreen(LobbyMemberData[] members, string themeName)
+    public void LocalRefreshScreen(LobbyMemberData[] members, string themeName)
     {
         int lobbyIndex = LobbyManager.Instace.LobbySettings.Lobby_Type switch
         {
@@ -344,11 +334,6 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         loadingWindow.SetActive(false);
         gameWindow.SetActive(true);
-    }
-
-    public void RequestSkinChange(int index)
-    {
-        Instance.playMod.LocalPlayer.Skin_Manager.SetSkinIndex(index);
     }
 
     public void RequestThemeSelection(int index)

@@ -4,63 +4,63 @@ using UnityEngine;
 
 public class SteamVoiceCapture : NetworkBehaviour
 {
-    const int SEND_RATE = 20;
-    float sendTimer;
+    //const int SEND_RATE = 20;
+    //float sendTimer;
 
-    bool recording;
+    //bool recording;
 
-    public override void OnStartLocalPlayer()
-    {
-        if (isLocalPlayer)
-        {
-            SteamUser.StartVoiceRecording();
-            recording = true;
-        }
-    }
+    //public override void OnStartLocalPlayer()
+    //{
+    //    if (isLocalPlayer)
+    //    {
+    //        SteamUser.StartVoiceRecording();
+    //        recording = true;
+    //    }
+    //}
 
-    void OnDestroy()
-    {
-        if (isLocalPlayer)
-            SteamUser.StopVoiceRecording();
-    }
+    //void OnDestroy()
+    //{
+    //    if (isLocalPlayer)
+    //        SteamUser.StopVoiceRecording();
+    //}
 
-    void Update()
-    {
-        if (!isLocalPlayer || !recording)
-            return;
+    //void Update()
+    //{
+    //    if (!isLocalPlayer || !recording)
+    //        return;
 
-        sendTimer += Time.deltaTime;
-        if (sendTimer < 1f / SEND_RATE)
-            return;
+    //    sendTimer += Time.deltaTime;
+    //    if (sendTimer < 1f / SEND_RATE)
+    //        return;
 
-        sendTimer = 0f;
+    //    sendTimer = 0f;
 
-        SteamUser.GetAvailableVoice(out uint compressedSize);
+    //    SteamUser.GetAvailableVoice(out uint compressedSize);
 
-        if (compressedSize == 0)
-            return;
+    //    if (compressedSize == 0)
+    //        return;
 
-        byte[] buffer = new byte[compressedSize];
+    //    byte[] buffer = new byte[compressedSize];
 
-        SteamUser.GetVoice(
-            true,
-            buffer,
-            compressedSize,
-            out uint bytesWritten
-        );
+    //    SteamUser.GetVoice(
+    //        true,
+    //        buffer,
+    //        compressedSize,
+    //        out uint bytesWritten
+    //    );
 
-        CmdSendVoice(buffer, bytesWritten);
-    }
+    //    CmdSendVoice(buffer, bytesWritten);
+    //}
 
-    [Command(channel = Channels.Unreliable)]
-    void CmdSendVoice(byte[] data, uint length)
-    {
-        RpcReceiveVoice(data, length, netIdentity.netId);
-    }
+    //[Command(channel = Channels.Unreliable)]
+    //void CmdSendVoice(byte[] data, uint length)
+    //{
+    //    RpcReceiveVoice(data, length, netIdentity.netId);
+    //}
 
-    [ClientRpc(channel = Channels.Unreliable)]
-    void RpcReceiveVoice(byte[] data, uint length, uint senderNetId)
-    {
-        VoicePlaybackManager.Instance.HandleVoice(senderNetId, data, length);
-    }
+    //[ClientRpc(channel = Channels.Unreliable)]
+    //void RpcReceiveVoice(byte[] data, uint length, uint senderNetId)
+    //{
+    //    VoicePlaybackManager.Instance.HandleVoice(senderNetId, data, length);
+    //}
 }

@@ -161,6 +161,15 @@ namespace SimpleVoiceChat {
                 StartRecord();
         }
 
+        public void SwitchState(bool record)
+        {
+            gameObject.SetActive(true); // Just to be sure.
+            if (record && !IsRecording)
+                StartRecord();
+            else if (!record && IsRecording)
+                StopRecord();
+        }
+
         /// <summary>
         /// Get audio data from microphone and prepare it for sending via network.
         /// </summary>
@@ -227,6 +236,11 @@ namespace SimpleVoiceChat {
         /// Also play echo audio (if enabled).
         /// </summary>
         private void PrepareDataForTransfer(List<float> samples) {
+            float rms = CalculateRMS(samples.ToArray());
+            float db = RMS_To_dB(rms);
+
+            GameManager.Instance.playMod.LocalPlayer.VCHandler.VoiceDetected(db);
+
             byte[] bytes = Tools.FloatToByte(samples);
             if (Settings.compression)
                 bytes = AudioCompressor.Compress(bytes);
@@ -298,6 +312,21 @@ namespace SimpleVoiceChat {
             _averageVoiceLevel = (_averageVoiceLevel + (float)sumTwo) / 2f;
 
             return detected || sumTwo > Settings.voiceDetectionThreshold;
+        }
+
+        public static float CalculateRMS(float[] samples)
+        {
+            double sum = 0.0;
+
+            for (int i = 0; i < samples.Length; i++)
+                sum += samples[i] * samples[i];
+
+            return Mathf.Sqrt((float)(sum / samples.Length));
+        }
+
+        public static float RMS_To_dB(float rms)
+        {
+            return rms > 0f ? 20f * Mathf.Log10(rms) : -80f;
         }
     }
 }

@@ -40,8 +40,16 @@ public class AudioManager : MonoBehaviour
 
     void OnSettingsChanged()
     {
-        musicSource.volume = UserSettings.GlobalVolume * UserSettings.MusicVolume * currentSong.clipVolume;
-        ambienceSource.volume = UserSettings.AmbienceVolume * UserSettings.AmbienceVolume * currentAmbience.clipVolume;
+        if (currentSong != null)
+            musicSource.volume = UserSettings.GlobalVolume * UserSettings.MusicVolume * currentSong.clipVolume;
+        else
+            musicSource.volume = UserSettings.GlobalVolume * UserSettings.MusicVolume;
+
+        if (currentAmbience != null)
+            ambienceSource.volume = UserSettings.GlobalVolume * UserSettings.AmbienceVolume * currentAmbience.clipVolume;
+        else
+            ambienceSource.volume = UserSettings.GlobalVolume * UserSettings.AmbienceVolume;
+
         voiceChatSource.volume = UserSettings.VoiceChatVolume;
     }
 

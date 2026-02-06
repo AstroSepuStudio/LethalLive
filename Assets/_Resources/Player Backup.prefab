@@ -6603,7 +6603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 3651475315
+  _assetId: 3164120664
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
@@ -7121,6 +7121,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 745b51f9-c728-4a8f-ab41-f043529eb459
     m_ActionName: 'Player/Tablet[/Keyboard/tab]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 5ce18790-9d9c-47df-9df3-25d9c6f8e6c3
+    m_ActionName: 'Player/ToggleVC[/Keyboard/v]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -7179,7 +7183,8 @@ MonoBehaviour:
   Quiet_AS: {fileID: 3199293460911934012}
   Modest_AS: {fileID: 1393795464085875247}
   Loud_AS: {fileID: 1502312304058461982}
-  Voice_Speaker: {fileID: 311531318758446589}
+  VCHandler: {fileID: 0}
+  DeathOvManager: {fileID: 0}
   netTransform: {fileID: 6644539252882334671}
   tpDelay: 0.5
   Character_Controller: {fileID: 8975883514099598521}
@@ -14945,7 +14950,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26dc07f6fbb0e54b8b39e6509de6af8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  saveLoad: 0
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   pData: {fileID: 1474215364020704457}
   CharacterAnimator: {fileID: 825152577531222136}
   RightHand: {fileID: 4634341187055827362}
@@ -33942,7 +33950,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26dc07f6fbb0e54b8b39e6509de6af8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  saveLoad: 0
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   pData: {fileID: 1474215364020704457}
   CharacterAnimator: {fileID: 5055305516977601081}
   RightHand: {fileID: 3268644941196049618}
@@ -45694,7 +45705,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26dc07f6fbb0e54b8b39e6509de6af8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkinData
-  saveLoad: 1
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   pData: {fileID: 1474215364020704457}
   CharacterAnimator: {fileID: 6753658413453515523}
   RightHand: {fileID: 1481178689619548923}
@@ -51247,7 +51261,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f73fc680c077f4641945e713c1a1c5c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoiceSpeaker
-  source: {fileID: 4271297342180155193}
 --- !u!82 &4271297342180155193
 AudioSource:
   m_ObjectHideFlags: 0
@@ -53925,7 +53938,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26dc07f6fbb0e54b8b39e6509de6af8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  saveLoad: 0
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   pData: {fileID: 1474215364020704457}
   CharacterAnimator: {fileID: 8592468040709677725}
   RightHand: {fileID: 2240032661931737523}

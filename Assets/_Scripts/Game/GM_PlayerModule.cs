@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -63,12 +64,25 @@ public class GM_PlayerModule : NetworkBehaviour
         foreach (var player in players)
         {
             player.Player_Stats.ExecutePlayer();
+            deadPlayers.Add(player.netId);
         }
+
+        foreach (var player in players)
+            player.DeathOvManager.RefreshPlayers();
     }
 
     [Server]
     public void PlayerDies(uint index)
-    { if (!deadPlayers.Contains(index)) deadPlayers.Add(index); }
+    { 
+        if (!deadPlayers.Contains(index)) 
+            deadPlayers.Add(index);
+
+        foreach (var player in players)
+        {
+            if (deadPlayers.Contains(player.netId))
+                player.DeathOvManager.RefreshPlayers();
+        }
+    }
 
     [Server]
     public void ReviveAllPlayers()
