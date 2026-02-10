@@ -17,7 +17,7 @@ public class PlayerData : NetworkBehaviour
     public ItemInventory PlayerInventory;
     public SkinManager Skin_Manager;
     public HUD_Manager HUDManager;
-    public GameObject TabletGMO;
+    public TabletManager TabletManager;
     public AudioSource Quiet_AS;
     public AudioSource Modest_AS;
     public AudioSource Loud_AS;

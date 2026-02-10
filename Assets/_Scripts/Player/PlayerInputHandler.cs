@@ -15,9 +15,8 @@ public class PlayerInputHandler : NetworkBehaviour
 
     public void RequestSwitchTabletState()
     {
-        bool newState = !pData.TabletGMO.activeInHierarchy;
-        pData.TabletGMO.SetActive(newState);
-        Cmd_SwitchTabletState(newState);
+        if (pData.TabletManager.TrySwitchState())
+            Cmd_SwitchTabletState(pData.TabletManager.IsActive);
     }
 
     [Command(requiresAuthority = false)]

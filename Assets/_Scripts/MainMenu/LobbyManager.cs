@@ -15,9 +15,9 @@ public class LobbyManager : MonoBehaviour
     [SerializeField] LobbySettings lobbySettings;
 
     #region Callbacks
-    [HideInInspector] public UnityEvent<LobbyCreated_t> OnLobbyCreatedEvent;
-    [HideInInspector] public UnityEvent<LobbyEnter_t> OnLobbyJoinedEvent;
-    [HideInInspector] public UnityEvent<LobbyChatUpdate_t> OnLobbyChatUpdateEvent;
+    public UnityEvent<LobbyCreated_t> OnLobbyCreatedEvent;
+    public UnityEvent<LobbyEnter_t> OnLobbyJoinedEvent;
+    public UnityEvent<LobbyChatUpdate_t> OnLobbyChatUpdateEvent;
 
     protected Callback<LobbyCreated_t> lobbyCreatedCallback;
     protected Callback<GameLobbyJoinRequested_t> lobbyJoinRequestCallback;

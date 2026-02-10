@@ -8,7 +8,6 @@ public class AudioManager : MonoBehaviour
     public AudioSource sfxSource;
     public AudioSource musicSource;
     public AudioSource ambienceSource;
-    public AudioSource voiceChatSource;
 
     AudioSFX currentSong;
     AudioSFX currentAmbience;
@@ -49,8 +48,6 @@ public class AudioManager : MonoBehaviour
             ambienceSource.volume = UserSettings.GlobalVolume * UserSettings.AmbienceVolume * currentAmbience.clipVolume;
         else
             ambienceSource.volume = UserSettings.GlobalVolume * UserSettings.AmbienceVolume;
-
-        voiceChatSource.volume = UserSettings.VoiceChatVolume;
     }
 
     private float GetTypeVolume(AudioType type)
