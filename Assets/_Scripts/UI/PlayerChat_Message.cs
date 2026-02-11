@@ -12,6 +12,11 @@ public struct ChatMessage
     public bool IsValid =>
         !string.IsNullOrWhiteSpace(SenderName) &&
         !string.IsNullOrWhiteSpace(Message);
+
+    public override string ToString()
+    {
+        return $"SenderName: {SenderName}, Message: {Message}, Team: {Team}";
+    }
 }
 
 public class PlayerChat_Message : MonoBehaviour

@@ -20,6 +20,7 @@ public class GM_PlayerModule : NetworkBehaviour
     public void CmdRequestTeamChange(int playerIndex, PlayerTeam team)
     {
         players[playerIndex].Team = team;
+        players[playerIndex].RPC_OnPlayerTeamChanged(team);
     }
 
     public PlayerData GetPlayerByIndex(int index)

@@ -1465,6 +1465,65 @@
             "id": "93fafe77-9f0f-489b-a59d-3765f2c24d27",
             "actions": [],
             "bindings": []
+        },
+        {
+            "name": "Tablet",
+            "id": "ec69c5fb-abf2-4345-aa6b-000ead4eaf66",
+            "actions": [
+                {
+                    "name": "Tablet",
+                    "type": "Button",
+                    "id": "65f300ec-ce79-4959-863b-852aa4f2dce8",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Submit",
+                    "type": "Button",
+                    "id": "a9bfa5d8-f2d4-4998-9689-403d1e633f8f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "3deaeae5-b9b4-4eb9-ab63-b9cd7e0ec246",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Tablet",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b8cc17a7-2130-423f-ba26-649f5cf18b30",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Tablet",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8877d2e5-d0ff-4dba-b3ba-5897ce6e5505",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

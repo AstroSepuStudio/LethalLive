@@ -26,6 +26,11 @@ public class TabletManager : MonoBehaviour
         tabletObj.SetActive(IsActive);
 
         SettingsManager.Instance.SetMouseLockState(!IsActive);
+        
+        if (IsActive)
+            GameManager.Instance.playMod.LocalPlayer.Player_Input.SwitchCurrentActionMap("Tablet");
+        else
+            GameManager.Instance.playMod.LocalPlayer.Player_Input.SwitchCurrentActionMap("Player");
         return true;
     }
 }

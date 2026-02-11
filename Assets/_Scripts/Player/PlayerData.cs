@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using Mirror;
 using Steamworks;
 using System.Collections;
+using UnityEngine.Events;
 
 public enum PlayerTeam { White, Red, Blue, Yellow, Green, Pink }
 
@@ -23,6 +24,8 @@ public class PlayerData : NetworkBehaviour
     public AudioSource Loud_AS;
     public VoiceChatHandler VCHandler;
     public DeathOverlayManager DeathOvManager;
+    public UnityEvent<PlayerTeam> OnPlayerTeamChanged;
+    public UnityEvent<int, ChatMessage> OnReceiveChatMessage;
     [SerializeField] NetworkTransformHybrid netTransform;
     [SerializeField] float tpDelay = 0.5f;
 
@@ -96,6 +99,15 @@ public class PlayerData : NetworkBehaviour
             PlayerAudio.enabled = false;
             PlayerCamera.enabled = false;
         }
+    }
+
+    [TargetRpc]
+    public void RPC_OnPlayerTeamChanged(PlayerTeam team) => OnPlayerTeamChanged?.Invoke(team);
+
+    [TargetRpc]
+    public void Rpc_ReceiveChatMessage(int channelIndex, ChatMessage chatMessage)
+    {
+        OnReceiveChatMessage?.Invoke(channelIndex, chatMessage);
     }
 
     public void SetLockPlayer(bool locked) => _LockPlayer = locked;
