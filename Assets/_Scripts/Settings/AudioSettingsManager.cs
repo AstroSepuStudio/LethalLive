@@ -1,10 +1,26 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AudioSettingsManager : MonoBehaviour
 {
     SettingsManager SettingsManager => SettingsManager.Instance;
 
     [SerializeField] PlayerData pData;
+
+    [SerializeField] Slider globalVolumeSlider;
+    [SerializeField] Slider musicVolumeSlider;
+    [SerializeField] Slider sfxVolumeSlider;
+    [SerializeField] Slider ambienceVolumeSlider;
+    [SerializeField] Slider voicechatVolumeSlider;
+
+    private void Start()
+    {
+        globalVolumeSlider.value = SettingsManager.UserSettings.GetGlobalVolume();
+        musicVolumeSlider.value = SettingsManager.UserSettings.GetMusicVolume();
+        sfxVolumeSlider.value = SettingsManager.UserSettings.GetSFXVolume();
+        ambienceVolumeSlider.value = SettingsManager.UserSettings.GetAmbienceVolume();
+        voicechatVolumeSlider.value = SettingsManager.UserSettings.GetVoiceChatVolume();
+    }
 
     public void OnGlobalVolumeChanged(float value)
     {

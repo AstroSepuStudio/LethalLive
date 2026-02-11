@@ -44,7 +44,7 @@ public class GraphicsSettingsManager : MonoBehaviour
 
     Settings UserSettings => SettingsManager.Instance.UserSettings;
 
-    void Awake()
+    private void Start()
     {
         BuildResolutionList();
         LoadSettings();
@@ -197,6 +197,12 @@ public class GraphicsSettingsManager : MonoBehaviour
         if (cam == null)
             cam = Camera.main;
 
+        if (cam == null)
+        {
+            Debug.LogWarning("[Settings - PostProcessing] No camera was found, couldn't apply saved settings");
+            return;
+        }
+
         cam.GetUniversalAdditionalCameraData().renderPostProcessing = postProcessingEnabled;
     }
     #endregion
@@ -215,16 +221,16 @@ public class GraphicsSettingsManager : MonoBehaviour
     void LoadSettings()
     {
         currentResolutionIndex =
-            UserSettings.ResolutionIndex;
+            UserSettings.GetResolutionIndex();
 
         currentScreenMode =
-            (ScreenMode)UserSettings.ScreenModeIndex;
+            (ScreenMode)UserSettings.GetScreenModeIndex();
 
-        vsyncEnabled = UserSettings.VsyncEnabled;
+        vsyncEnabled = UserSettings.GetVsyncEnabled();
 
-        targetFPS = UserSettings.targetFPS;
+        targetFPS = UserSettings.GetTargetFPS();
 
-        postProcessingEnabled = UserSettings.PostProcessingEnabled;
+        postProcessingEnabled = UserSettings.GetPostProcessingEnabled();
     }
     #endregion
 

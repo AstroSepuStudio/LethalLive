@@ -1,8 +1,14 @@
+using TMPro;
 using UnityEngine;
 
 public class TabletManager : MonoBehaviour
 {
     [SerializeField] GameObject tabletObj;
+    [SerializeField] GameObject rebindOverlay;
+    [SerializeField] TextMeshProUGUI rebindText;
+
+    public GameObject RebindOverlay => rebindOverlay;
+    public TextMeshProUGUI RebindText => rebindText;
 
     public bool CanSwitchState => currentActivities == 0;
 
@@ -18,6 +24,8 @@ public class TabletManager : MonoBehaviour
 
         IsActive = !IsActive;
         tabletObj.SetActive(IsActive);
+
+        SettingsManager.Instance.SetMouseLockState(!IsActive);
         return true;
     }
 }

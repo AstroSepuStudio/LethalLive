@@ -40,24 +40,24 @@ public class AudioManager : MonoBehaviour
     void OnSettingsChanged()
     {
         if (currentSong != null)
-            musicSource.volume = UserSettings.GlobalVolume * UserSettings.MusicVolume * currentSong.clipVolume;
+            musicSource.volume = UserSettings.GetGlobalVolume() * UserSettings.GetMusicVolume() * currentSong.clipVolume;
         else
-            musicSource.volume = UserSettings.GlobalVolume * UserSettings.MusicVolume;
+            musicSource.volume = UserSettings.GetGlobalVolume() * UserSettings.GetMusicVolume();
 
         if (currentAmbience != null)
-            ambienceSource.volume = UserSettings.GlobalVolume * UserSettings.AmbienceVolume * currentAmbience.clipVolume;
+            ambienceSource.volume = UserSettings.GetGlobalVolume() * UserSettings.GetAmbienceVolume() * currentAmbience.clipVolume;
         else
-            ambienceSource.volume = UserSettings.GlobalVolume * UserSettings.AmbienceVolume;
+            ambienceSource.volume = UserSettings.GetGlobalVolume() * UserSettings.GetAmbienceVolume();
     }
 
     private float GetTypeVolume(AudioType type)
     {
         return type switch
         {
-            AudioType.Music => UserSettings.MusicVolume,
-            AudioType.SFX => UserSettings.SFXVolume,
-            AudioType.Ambience => UserSettings.AmbienceVolume,
-            AudioType.VoiceChat => UserSettings.VoiceChatVolume,
+            AudioType.Music => UserSettings.GetMusicVolume(),
+            AudioType.SFX => UserSettings.GetSFXVolume(),
+            AudioType.Ambience => UserSettings.GetAmbienceVolume(),
+            AudioType.VoiceChat => UserSettings.GetVoiceChatVolume(),
             _ => 1f
         };
     }
@@ -65,7 +65,7 @@ public class AudioManager : MonoBehaviour
     public void PlayOneShot(AudioSFX sfx)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
-        float finalVolume = UserSettings.GlobalVolume * typeVolume * sfx.clipVolume;
+        float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
 
         sfxSource.PlayOneShot(sfx.clip, finalVolume);
     }
@@ -73,7 +73,7 @@ public class AudioManager : MonoBehaviour
     public void PlayOneShotAndDestroy(Vector3 position, AudioSFX sfx)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
-        float finalVolume = UserSettings.GlobalVolume * typeVolume * sfx.clipVolume;
+        float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
 
         AudioSource.PlayClipAtPoint(sfx.clip, position, finalVolume);
     }
@@ -81,7 +81,7 @@ public class AudioManager : MonoBehaviour
     public void PlayOneShot(AudioSource source, AudioSFX sfx)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
-        float finalVolume = UserSettings.GlobalVolume * typeVolume * sfx.clipVolume;
+        float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
 
         source.PlayOneShot(sfx.clip, finalVolume);
     }
@@ -89,7 +89,7 @@ public class AudioManager : MonoBehaviour
     public void PlayOneShot(AudioSource source, AudioSFX sfx, float multiplier)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
-        float finalVolume = UserSettings.GlobalVolume * typeVolume * sfx.clipVolume * multiplier;
+        float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume * multiplier;
 
         source.PlayOneShot(sfx.clip, finalVolume);
     }
@@ -97,7 +97,7 @@ public class AudioManager : MonoBehaviour
     public void PlayMusic(AudioSFX song)
     {
         musicSource.clip = song.clip;
-        musicSource.volume = UserSettings.GlobalVolume * UserSettings.MusicVolume * song.clipVolume;
+        musicSource.volume = UserSettings.GetGlobalVolume() * UserSettings.GetMusicVolume() * song.clipVolume;
         musicSource.Play();
         currentSong = song;
     }
@@ -110,7 +110,7 @@ public class AudioManager : MonoBehaviour
     public void PlayAmbience(AudioSFX ambience)
     {
         ambienceSource.clip = ambience.clip;
-        ambienceSource.volume = UserSettings.GlobalVolume * UserSettings.AmbienceVolume * ambience.clipVolume;
+        ambienceSource.volume = UserSettings.GetGlobalVolume() * UserSettings.GetAmbienceVolume() * ambience.clipVolume;
         ambienceSource.Play();
         currentAmbience = ambience;
     }

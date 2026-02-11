@@ -108,10 +108,6 @@ namespace SimpleVoiceChat {
         }
 
         void Update() {
-
-            if (Input.GetKeyDown(KeyCode.R))
-                SwitchState();
-
             if (!string.IsNullOrEmpty(_currentMicrophone)) {
                 ProcessRecording();
             }

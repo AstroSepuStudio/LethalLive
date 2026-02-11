@@ -4,7 +4,7 @@ using Mirror;
 using Steamworks;
 using System.Collections;
 
-public enum PlayerTeam { White, Red, Blue, Yellow, Green, Pink };
+public enum PlayerTeam { White, Red, Blue, Yellow, Green, Pink }
 
 public class PlayerData : NetworkBehaviour
 {

@@ -1,23 +1,40 @@
+using UnityEngine;
+
 [System.Serializable]
 public class Settings
 {
     // - Controls -
-    public float Sensitivity = 8f;
+    [SerializeField] float Sensitivity = 8f;
+
+    public float GetSensitivity() => Sensitivity;
 
     // - Audio -
-    public float GlobalVolume = 1f;
-    public float MusicVolume = 1f;
-    public float SFXVolume = 1f;
-    public float AmbienceVolume = 1f;
-    public float VoiceChatVolume = 1f;
-    public bool HoldToTalk = false;
+    [SerializeField] float GlobalVolume = 1f;
+    [SerializeField] float MusicVolume = 1f;
+    [SerializeField] float SFXVolume = 1f;
+    [SerializeField] float AmbienceVolume = 1f;
+    [SerializeField] float VoiceChatVolume = 1f;
+    [SerializeField] bool HoldToTalk = false;
+
+    public float GetGlobalVolume() => GlobalVolume;
+    public float GetMusicVolume() => MusicVolume;
+    public float GetSFXVolume() => SFXVolume;
+    public float GetAmbienceVolume() => AmbienceVolume;
+    public float GetVoiceChatVolume() => VoiceChatVolume;
+    public bool GetHoldToTalk() => HoldToTalk;
 
     // - Graphics -
-    public int ScreenModeIndex = 0;
-    public int ResolutionIndex = 0;
-    public int targetFPS = 60;
-    public bool VsyncEnabled = true;
-    public bool PostProcessingEnabled = true;
+    [SerializeField] int ScreenModeIndex = 0;
+    [SerializeField] int ResolutionIndex = 0;
+    [SerializeField] int TargetFPS = 60;
+    [SerializeField] bool VsyncEnabled = true;
+    [SerializeField] bool PostProcessingEnabled = true;
+
+    public int GetScreenModeIndex() => ScreenModeIndex;
+    public int GetResolutionIndex() => ResolutionIndex;
+    public int GetTargetFPS() => TargetFPS;
+    public bool GetVsyncEnabled() => VsyncEnabled;
+    public bool GetPostProcessingEnabled() => PostProcessingEnabled;
 
     public event System.Action OnSettingsChanged;
 
@@ -71,7 +88,7 @@ public class Settings
 
     public void SetTargetFPS(int fps)
     {
-        targetFPS = fps;
+        TargetFPS = fps;
         OnSettingsChanged?.Invoke();
     }
 

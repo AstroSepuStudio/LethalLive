@@ -13,6 +13,15 @@ public class PlayerInputHandler : NetworkBehaviour
         RequestSwitchTabletState();
     }
 
+    public void OnForceMouseFreeState(InputAction.CallbackContext context)
+    {
+        if (context.started)
+            SettingsManager.Instance.SetMouseLockState(false);
+
+        if (context.canceled)
+            SettingsManager.Instance.SetMouseLockState(true);
+    }
+
     public void RequestSwitchTabletState()
     {
         if (pData.TabletManager.TrySwitchState())

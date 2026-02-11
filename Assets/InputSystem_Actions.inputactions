@@ -257,6 +257,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ForceMouseFree",
+                    "type": "Button",
+                    "id": "048bc716-c291-451f-9cee-052863569aa4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -851,6 +860,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Toggle Voice Chat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f4f2d1ab-d43a-45e8-a17b-89d35cbcb126",
+                    "path": "<Keyboard>/leftAlt",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ForceMouseFree",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

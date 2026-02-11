@@ -50,7 +50,7 @@ namespace SimpleVoiceChat {
             float volume = 1;
 
             if (SettingsManager.Instance != null)
-                volume *= SettingsManager.Instance.UserSettings.VoiceChatVolume;
+                volume *= SettingsManager.Instance.UserSettings.GetVoiceChatVolume();
             if (pData != null)
                 volume *= pData.VoiceChatVolume;
 

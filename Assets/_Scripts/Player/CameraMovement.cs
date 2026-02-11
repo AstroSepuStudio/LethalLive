@@ -54,8 +54,8 @@ public class CameraMovement : MonoBehaviour
         distanceToTarget = Mathf.Clamp(distanceToTarget - scrollInput * zoomSensitivity * Time.deltaTime, minZoom, maxZoom);
 
         Vector2 mouseDelta = pData.Player_Input.actions["Look"].ReadValue<Vector2>();
-        float mouseX = mouseDelta.x * SettingsManager.Instance.UserSettings.Sensitivity * Time.deltaTime;
-        float mouseY = mouseDelta.y * SettingsManager.Instance.UserSettings.Sensitivity * Time.deltaTime;
+        float mouseX = mouseDelta.x * SettingsManager.Instance.UserSettings.GetSensitivity() * Time.deltaTime;
+        float mouseY = mouseDelta.y * SettingsManager.Instance.UserSettings.GetSensitivity() * Time.deltaTime;
 
         horizontal += mouseX;
         vertical -= mouseY;

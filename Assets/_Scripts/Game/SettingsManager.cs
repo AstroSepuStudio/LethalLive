@@ -55,4 +55,10 @@ public class SettingsManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
+
+    public void SetMouseLockState(bool locked)
+    {
+        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !locked;
+    }
 }
