@@ -1,7 +1,9 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
 public struct ChatMessage
 {
     public byte[] AvatarData;
@@ -25,6 +27,8 @@ public class PlayerChat_Message : MonoBehaviour
     [SerializeField] TextMeshProUGUI senderNameText;
     [SerializeField] TextMeshProUGUI messageText;
 
+    public ChatMessage? CurrentChatMessage { get; private set; }
+
     public void DisplayChatMessage(ChatMessage message)
     {
         gameObject.SetActive(true);
@@ -33,8 +37,15 @@ public class PlayerChat_Message : MonoBehaviour
         iconImage.sprite = AvatarUtils.ByteArrayToSprite(message.AvatarData);
         senderNameText.text = message.SenderName;
         messageText.text = message.Message;
+
+        CurrentChatMessage = message;
     }
 
-    public void HideChatMessage() => gameObject.SetActive(false);
+    public void HideChatMessage()
+    {
+        gameObject.SetActive(false);
+        CurrentChatMessage = null;
+    }
+
     public bool IsActive() => gameObject.activeInHierarchy;
 }

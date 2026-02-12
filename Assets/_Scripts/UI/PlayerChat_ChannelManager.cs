@@ -18,7 +18,6 @@ public class PlayerChat_ChannelManager : MonoBehaviour
 
     private void Awake()
     {
-        HideAllMessages();
         channelMessages = new()
         {
             { 0, new ChatMessage[maxMessages] }, // Global
@@ -44,6 +43,7 @@ public class PlayerChat_ChannelManager : MonoBehaviour
         if (messageInstances.Length >= maxMessages)
         {
             Debug.Log($"There is {messageInstances.Length} messages instances for a max of {maxMessages}, this is fine");
+            HideAllMessages();
             return;
         }
 
@@ -53,8 +53,11 @@ public class PlayerChat_ChannelManager : MonoBehaviour
         {
             GameObject newMessage = Instantiate(chatMessagePrefab, chatMessageParent);
             messages.Add(newMessage.GetComponent<PlayerChat_Message>());
+
         }
         messageInstances = messages.ToArray();
+
+        HideAllMessages();
     }
 
     private void Start()
@@ -72,43 +75,20 @@ public class PlayerChat_ChannelManager : MonoBehaviour
 
     private void OnReceiveChatMessage(int channelIndex, ChatMessage chatMessage)
     {
-        Debug.Log($"Receiving chat message from server,\n" +
-            $"target channel: {channelIndex}\n" +
-            $"message: {chatMessage}");
-
         int index = channelFirstMessageIndexes[channelIndex];
-        bool foundEmpty = false;
-        for (int i = 0; i < channelMessages[channelIndex].Length; i++)
-        {
-            if (channelMessages[channelIndex][i].IsValid)
-            {
-                Debug.Log($"Found a valid message of index {i} in channel {currentChannelIndex}, checking next messages");
-                continue;
-            }
-
-            index = i;
-            foundEmpty = true;
-            Debug.Log($"Found an empty message instance at index {i} in channel {currentChannelIndex}");
-            break;
-        }
-
-        if (!foundEmpty)
-        {
-            index++;
-            if (index >= messageInstances.Length) index = 0;
-            channelFirstMessageIndexes[channelIndex] += index;
-        }
 
         channelMessages[channelIndex][index] = chatMessage;
-        Debug.Log($"Setting message {index} of chat channel {channelIndex} to {chatMessage}");
+
+        // advance pointer (ring)
+        channelFirstMessageIndexes[channelIndex] =
+            (index + 1) % maxMessages;
+
+        Debug.Log($"Stored message at {index}. Next write = {channelFirstMessageIndexes[channelIndex]}");
 
         if (channelIndex != currentChannelIndex)
-        {
-            Debug.Log($"Active chat channel {currentChannelIndex} doesn't match target chat channel {channelIndex}, not displaying chat message");
             return;
-        }
 
-        DisplayChatMessage(chatMessage);
+        RebuildChannel(channelIndex);
     }
 
     private void HideAllMessages()
@@ -142,6 +122,29 @@ public class PlayerChat_ChannelManager : MonoBehaviour
         }
     }
 
+    private void RebuildChannel(int channelIndex)
+    {
+        HideAllMessages();
+
+        int start = channelFirstMessageIndexes[channelIndex];
+        int ui = 0;
+
+        for (int i = 0; i < maxMessages; i++)
+        {
+            int dataIndex = (start + i) % maxMessages;
+            var msg = channelMessages[channelIndex][dataIndex];
+
+            if (!msg.IsValid)
+            {
+                Debug.Log("invalid message");
+                continue;
+            }
+
+            messageInstances[ui].DisplayChatMessage(msg);
+            ui++;
+        }
+    }
+
     public void SwitchChannel(int channelIndex)
     {
         if (channelIndex == currentChannelIndex)
@@ -150,33 +153,22 @@ public class PlayerChat_ChannelManager : MonoBehaviour
             return;
         }
 
-        if (channelIndex < 0 || 
-            channelIndex >= messageInstances.Length)
+        if (channelIndex < 0)
         {
             Debug.Log($"Invalid channel index ({channelIndex})");
             return;
         }
 
-        Debug.Log($"Changing player chat channel to {channelIndex}");
         currentChannelIndex = channelIndex;
-        HideAllMessages();
 
-        for (int i = 0; i < messageInstances.Length; i++)
-        {
-            if (!channelMessages[channelIndex][i].IsValid)
-            {
-                Debug.Log($"Found invalid message of index {i} in channel {channelIndex}, canceling action");
-                break;
-            }
-            messageInstances[i].DisplayChatMessage(channelMessages[channelIndex][i]);
-        }
+        RebuildChannel(channelIndex);
     }
 
     public void DisplayChatMessage(ChatMessage message)
     {
         int index = 0;
 
-        for (int i = 0; i < messageInstances.Length; i++)
+        for (int i = 0; i < maxMessages; i++)
         {
             if (messageInstances[i].IsActive())
             {
