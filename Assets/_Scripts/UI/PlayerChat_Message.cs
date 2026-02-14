@@ -24,6 +24,7 @@ public struct ChatMessage
 public class PlayerChat_Message : MonoBehaviour
 {
     [SerializeField] Image iconImage;
+    [SerializeField] Image backgroundImg;
     [SerializeField] TextMeshProUGUI senderNameText;
     [SerializeField] TextMeshProUGUI messageText;
 
@@ -37,6 +38,12 @@ public class PlayerChat_Message : MonoBehaviour
         iconImage.sprite = AvatarUtils.ByteArrayToSprite(message.AvatarData);
         senderNameText.text = message.SenderName;
         messageText.text = message.Message;
+
+        Color textColor = PlayerTeamColorUtils.GetPlayerTeamTextColor(message.Team);
+        senderNameText.color = textColor;
+        messageText.color = textColor;
+
+        backgroundImg.color = PlayerTeamColorUtils.GetPlayerTeamColor(message.Team);
 
         CurrentChatMessage = message;
     }

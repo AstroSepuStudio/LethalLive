@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerChat_ChannelManager : MonoBehaviour
 {
@@ -9,12 +10,15 @@ public class PlayerChat_ChannelManager : MonoBehaviour
     [SerializeField] Transform chatMessageParent;
     [SerializeField] GameObject chatMessagePrefab;
     [SerializeField] PlayerChat_Message[] messageInstances;
-    [SerializeField] GameObject[] channelButtons;
+    [SerializeField] ChannelButtonUI[] channelButtons;
     [SerializeField] int currentChannelIndex;
     [SerializeField] int maxMessages;
 
     Dictionary<int, ChatMessage[]> channelMessages;
     Dictionary<int, int> channelFirstMessageIndexes;
+
+    [HideInInspector]
+    public UnityEvent<int> OnSwitchChannel;
 
     private void Awake()
     {
@@ -40,14 +44,21 @@ public class PlayerChat_ChannelManager : MonoBehaviour
             { 6, 0 } // Pink
         };
 
+        for (int i = 0; i < channelButtons.Length; i++)
+        {
+            channelButtons[i].Initialize();
+            if (i != 0)
+                channelButtons[i].HideChannel();
+        }
+
         if (messageInstances.Length >= maxMessages)
         {
-            Debug.Log($"There is {messageInstances.Length} messages instances for a max of {maxMessages}, this is fine");
+            //Debug.Log($"There is {messageInstances.Length} messages instances for a max of {maxMessages}, this is fine");
             HideAllMessages();
             return;
         }
 
-        Debug.Log($"There is {messageInstances.Length} messages instances for a max of {maxMessages}, instancing new messages");
+        //Debug.Log($"There is {messageInstances.Length} messages instances for a max of {maxMessages}, instancing new messages");
         List<PlayerChat_Message> messages = messageInstances.ToList();
         while (messages.Count < maxMessages)
         {
@@ -83,7 +94,7 @@ public class PlayerChat_ChannelManager : MonoBehaviour
         channelFirstMessageIndexes[channelIndex] =
             (index + 1) % maxMessages;
 
-        Debug.Log($"Stored message at {index}. Next write = {channelFirstMessageIndexes[channelIndex]}");
+        //Debug.Log($"Stored message at {index}. Next write = {channelFirstMessageIndexes[channelIndex]}");
 
         if (channelIndex != currentChannelIndex)
             return;
@@ -101,7 +112,7 @@ public class PlayerChat_ChannelManager : MonoBehaviour
 
     private void UpdateTeamChannels(PlayerTeam team)
     {
-        Debug.Log($"Updating team channels for {team}");
+        //Debug.Log($"Updating team channels for {team}");
 
         int teamIndex = team switch
         {
@@ -114,12 +125,15 @@ public class PlayerChat_ChannelManager : MonoBehaviour
             _ => 0
         };
 
-        channelButtons[teamIndex].SetActive(true);
+        channelButtons[teamIndex].Initialize();
         for (int i = 1; i < channelButtons.Length; i++)
         {
             if (i == teamIndex) continue;
-            channelButtons[i].SetActive(false);
+            channelButtons[i].HideChannel();
         }
+
+        if (currentChannelIndex != 0)
+            SwitchChannel(teamIndex);
     }
 
     private void RebuildChannel(int channelIndex)
@@ -136,7 +150,7 @@ public class PlayerChat_ChannelManager : MonoBehaviour
 
             if (!msg.IsValid)
             {
-                Debug.Log("invalid message");
+                //Debug.Log("invalid message");
                 continue;
             }
 
@@ -149,18 +163,19 @@ public class PlayerChat_ChannelManager : MonoBehaviour
     {
         if (channelIndex == currentChannelIndex)
         {
-            Debug.Log($"Already in this channel {channelIndex}");
+            //Debug.Log($"Already in this channel {channelIndex}");
             return;
         }
 
         if (channelIndex < 0)
         {
-            Debug.Log($"Invalid channel index ({channelIndex})");
+            //Debug.Log($"Invalid channel index ({channelIndex})");
             return;
         }
 
         currentChannelIndex = channelIndex;
 
+        OnSwitchChannel?.Invoke(channelIndex);
         RebuildChannel(channelIndex);
     }
 
@@ -172,12 +187,12 @@ public class PlayerChat_ChannelManager : MonoBehaviour
         {
             if (messageInstances[i].IsActive())
             {
-                Debug.Log($"Found a valid message of index {i} in channel {currentChannelIndex}, checking next messages");
+                //Debug.Log($"Found a valid message of index {i} in channel {currentChannelIndex}, checking next messages");
                 continue;
             }
 
             index = i;
-            Debug.Log($"Found an empty message instance at index {i} in channel {currentChannelIndex}");
+            //Debug.Log($"Found an empty message instance at index {i} in channel {currentChannelIndex}");
             break;
         }
 
