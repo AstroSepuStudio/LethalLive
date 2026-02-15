@@ -84,7 +84,7 @@ public class LobbyManager : MonoBehaviour
             return;
         }
 
-        CurrentLobbyID = new (callback.m_ulSteamIDLobby);
+        CurrentLobbyID = new(callback.m_ulSteamIDLobby);
         BuildConsole.Instance.SendConsoleMessage($"Lobby created successfully! Lobby ID: {CurrentLobbyID}");
 
         networkManager.StartHost();
@@ -122,7 +122,7 @@ public class LobbyManager : MonoBehaviour
             BuildConsole.Instance.SendConsoleMessage("Host address is missing in lobby data.");
             return;
         }
-        
+
         networkManager.networkAddress = hostAddress;
         networkManager.StartClient();
 
@@ -131,6 +131,11 @@ public class LobbyManager : MonoBehaviour
     #endregion
 
     #region Lobby Leave
+    public void ClearLobby()
+    {
+        CurrentLobbyID = default;
+    }
+
     public void LeaveLobby()
     {
         if (CurrentLobbyID.m_SteamID == 0)

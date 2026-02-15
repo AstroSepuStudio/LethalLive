@@ -88,6 +88,10 @@ public class PlayerStats : EntityStats
     [Server]
     public override void ModifyHP(EntityStats source, AttackStat stat)
     {
+        if (!GameManager.Instance.gameStarted ||
+            !GameManager.Instance.dayMod.dayStarted)
+            return;
+
         currentHP = Mathf.Clamp(currentHP - stat.AttackDamage, 0f, maxHP);
         if (currentHP <= 0)
         {

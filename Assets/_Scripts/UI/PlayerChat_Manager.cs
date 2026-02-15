@@ -25,7 +25,7 @@ public class PlayerChat_Manager : NetworkBehaviour
         foreach (var player in GameManager.Instance.playMod.Players)
         {
             if (channelIndex != 0 && pData.Team != player.Team) continue;
-            pData.Rpc_ReceiveChatMessage(channelIndex, chatMessage);
+            player.Rpc_ReceiveChatMessage(channelIndex, chatMessage);
         }
     }
 }
