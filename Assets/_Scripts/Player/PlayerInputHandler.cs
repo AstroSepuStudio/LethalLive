@@ -6,6 +6,8 @@ public class PlayerInputHandler : NetworkBehaviour
 {
     [SerializeField] PlayerData pData;
 
+    public void RequestReturnMainMenu() => GameManager.Instance.playMod.RequestReturnToMainMenu();
+
     public void OnPlayerPressEscape(InputAction.CallbackContext context)
     {
         if (!context.started || !isLocalPlayer) return;

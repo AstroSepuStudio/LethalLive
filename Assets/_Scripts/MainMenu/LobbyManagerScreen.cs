@@ -182,7 +182,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void LocalRefreshScreen(LobbyMemberData[] members, string themeName)
     {
-        int lobbyIndex = LobbyManager.Instace.LobbySettings.Lobby_Type switch
+        int lobbyIndex = LobbyManager.Instance.LobbySettings.Lobby_Type switch
         {
             ELobbyType.k_ELobbyTypeFriendsOnly => 0,
             ELobbyType.k_ELobbyTypePublic => 1,
@@ -191,9 +191,9 @@ public class LobbyManagerScreen : UIManagerNetwork
         };
 
         lobbyType_DP.SetValueWithoutNotify(lobbyIndex);
-        mapSize_IP.SetTextWithoutNotify(LobbyManager.Instace.LobbySettings.MapSize.ToString());
-        teamDamage_Toggle.SetIsOnWithoutNotify(LobbyManager.Instace.LobbySettings.TeamDamage);
-        teamKnock_Toggle.SetIsOnWithoutNotify(LobbyManager.Instace.LobbySettings.TeamKnock);
+        mapSize_IP.SetTextWithoutNotify(LobbyManager.Instance.LobbySettings.MapSize.ToString());
+        teamDamage_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamDamage);
+        teamKnock_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamKnock);
 
         for (int i = 0; i < lobbyMemberUIs.Length; i++)
         {
@@ -272,7 +272,7 @@ public class LobbyManagerScreen : UIManagerNetwork
             _ => ELobbyType.k_ELobbyTypeFriendsOnly,
         };
 
-        LobbyManager.Instace.LobbySettings.SetLobbyType(type);
+        LobbyManager.Instance.LobbySettings.SetLobbyType(type);
     }
 
     public void SetMapSize(string value)
@@ -281,7 +281,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         if (int.TryParse(value, out int size))
         {
-            LobbyManager.Instace.LobbySettings.SetMapSize(size);
+            LobbyManager.Instance.LobbySettings.SetMapSize(size);
         }
     }
 
@@ -289,14 +289,14 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         if (!identity.isServer) return;
 
-        LobbyManager.Instace.LobbySettings.SetTeamDamage(value);
+        LobbyManager.Instance.LobbySettings.SetTeamDamage(value);
     }
 
     public void TeamKnock(bool value)
     {
         if (!identity.isServer) return;
 
-        LobbyManager.Instace.LobbySettings.SetTeamKnock(value);
+        LobbyManager.Instance.LobbySettings.SetTeamKnock(value);
     }
 
     public void StartGame()

@@ -1,3 +1,5 @@
+using Steamworks;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -30,7 +32,19 @@ public class CameraMovement : MonoBehaviour
     {
         pData.CameraPivot.SetParent(null);
         crosshair.SetActive(false);
+
+        LobbyManager.Instance.OnLobbyLeaveEvent.AddListener(DestroyGameobject);
+        LobbyManager.Instance.OnLobbyKickedEvent.AddListener(DestroyGameobject);
     }
+
+    private void OnDestroy()
+    {
+        LobbyManager.Instance.OnLobbyLeaveEvent.AddListener(DestroyGameobject);
+        LobbyManager.Instance.OnLobbyKickedEvent.RemoveListener(DestroyGameobject);
+    }
+
+    void DestroyGameobject() => Destroy(gameObject);
+    void DestroyGameobject(LobbyKicked_t arg0) => Destroy(gameObject);
 
     private void LateUpdate()
     {

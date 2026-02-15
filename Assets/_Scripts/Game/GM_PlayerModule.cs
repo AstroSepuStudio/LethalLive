@@ -1,5 +1,5 @@
 using Mirror;
-using System;
+using Steamworks;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -83,6 +83,12 @@ public class GM_PlayerModule : NetworkBehaviour
             if (deadPlayers.Contains(player.netId))
                 player.DeathOvManager.RefreshPlayers();
         }
+
+        if (deadPlayers.Count == players.Count)
+        {
+            Debug.Log("All players died");
+            GameManager.Instance.ResetGame();
+        }
     }
 
     [Server]
@@ -124,5 +130,10 @@ public class GM_PlayerModule : NetworkBehaviour
             player.RevivePlayer(spawnPos);
             deadPlayers.Remove(player.netId);
         }
+    }
+
+    public void RequestReturnToMainMenu()
+    {
+        LobbyManager.Instance.LeaveLobby();
     }
 }

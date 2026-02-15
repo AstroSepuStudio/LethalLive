@@ -63,10 +63,10 @@ public class PlayerStats : EntityStats
     {
         if (source.Team == pData.Team)
         {
-            if (LobbyManager.Instace.LobbySettings.TeamKnock)
+            if (LobbyManager.Instance.LobbySettings.TeamKnock)
                 ModifyKnock(source, stats);
 
-            if (LobbyManager.Instace.LobbySettings.TeamDamage)
+            if (LobbyManager.Instance.LobbySettings.TeamDamage)
                 ModifyHP(source.Player_Stats, stats);
         }
         else

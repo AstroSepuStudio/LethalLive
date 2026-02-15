@@ -41,7 +41,7 @@ public class GameManager : NetworkBehaviour
     [Server]
     public void StartGame()
     {
-        SteamMatchmaking.SetLobbyType(LobbyManager.Instace.CurrentLobbyID, ELobbyType.k_ELobbyTypePrivate);
+        SteamMatchmaking.SetLobbyType(LobbyManager.Instance.CurrentLobbyID, ELobbyType.k_ELobbyTypePrivate);
         gameStarted = true;
 
         dayMod.currentDayTime = -1;
@@ -63,6 +63,12 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    [Server]
+    public void ResetGame()
+    {
+        StartCoroutine(ResetGameSequence());
+    }
+
     IEnumerator QuotaCompletionSequence()
     {
         Debug.Log("Quota completed");
@@ -79,6 +85,17 @@ public class GameManager : NetworkBehaviour
         Debug.Log("Quota not completed");
         yield return null;
 
+        playMod.ExecuteAllPlayers();
+        dayMod.ResetDays();
+        ecoMod.ResetEconomy();
+
+        yield return new WaitForSeconds(3f);
+
+        playMod.ReviveAllPlayers();
+    }
+
+    IEnumerator ResetGameSequence()
+    {
         playMod.ExecuteAllPlayers();
         dayMod.ResetDays();
         ecoMod.ResetEconomy();

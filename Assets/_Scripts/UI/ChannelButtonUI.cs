@@ -72,13 +72,10 @@ public class ChannelButtonUI : MonoBehaviour
     {
         Color darkerClr = new (ChannelColor.r * 0.7f, ChannelColor.g * 0.7f, ChannelColor.b * 0.7f, ChannelColor.a);
         btnImage.color = darkerClr;
-
-        Debug.Log($"{gameObject.name} deselected");
     }
 
     void SelectChannel()
     {
         btnImage.color = ChannelColor;
-        Debug.Log($"{gameObject.name} selected");
     }
 }

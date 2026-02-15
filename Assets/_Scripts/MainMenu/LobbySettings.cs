@@ -29,7 +29,7 @@ public class LobbySettings : NetworkBehaviour
     public void SetLobbyType(ELobbyType lobbyType)
     {
         lobby_Type = lobbyType;
-        SteamMatchmaking.SetLobbyType(LobbyManager.Instace.CurrentLobbyID, lobbyType);
+        SteamMatchmaking.SetLobbyType(LobbyManager.Instance.CurrentLobbyID, lobbyType);
     }
 
     [Server]
