@@ -45,9 +45,10 @@ public class ExplosionComponent : NetworkBehaviour
                 float knockAmount = explosionStat.AttackKnock * multiplier * effectiveness;
                 Vector3 momentum = effectiveness * explosionStat.AttackForce * multiplier * dir.normalized;
 
-                GameManager.Instance.playMod.Players[i].Player_Stats.ModifyKnock(knockAmount, momentum);
-
                 AttackStat modifiedAttack = new(explosionStat, explosionStat.AttackDamage * effectiveness * multiplier);
+                //GameManager.Instance.playMod.Players[i].Player_Stats.ReceiveAttack(null, modifiedAttack);
+
+                GameManager.Instance.playMod.Players[i].Player_Stats.ModifyKnock(knockAmount, momentum);
                 GameManager.Instance.playMod.Players[i].Player_Stats.ModifyHP(null, modifiedAttack);
             }
         }

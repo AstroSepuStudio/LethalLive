@@ -88,6 +88,7 @@ public class GameManager : NetworkBehaviour
         playMod.ExecuteAllPlayers();
         dayMod.ResetDays();
         ecoMod.ResetEconomy();
+        dngMod.CloseDungeon();
 
         yield return new WaitForSeconds(3f);
 
@@ -96,9 +97,9 @@ public class GameManager : NetworkBehaviour
 
     IEnumerator ResetGameSequence()
     {
-        playMod.ExecuteAllPlayers();
         dayMod.ResetDays();
         ecoMod.ResetEconomy();
+        dngMod.CloseDungeon();
 
         yield return new WaitForSeconds(3f);
 

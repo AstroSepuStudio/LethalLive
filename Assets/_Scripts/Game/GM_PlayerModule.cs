@@ -64,6 +64,7 @@ public class GM_PlayerModule : NetworkBehaviour
     {
         foreach (var player in players)
         {
+            if (deadPlayers.Contains(player.netId)) continue;
             player.Player_Stats.ExecutePlayer();
             deadPlayers.Add(player.netId);
         }

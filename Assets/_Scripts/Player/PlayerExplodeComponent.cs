@@ -8,6 +8,8 @@ public class PlayerExplodeComponent : NetworkBehaviour
 
     public void ExplodeInput(InputAction.CallbackContext context)
     {
+        if (!context.started) return;
+
         if (!isLocalPlayer && !GameManager.Instance.playMod.LocalPlayer._LockPlayer) return;
 
         explosionComponent.TriggerExplosion();

@@ -143,10 +143,14 @@ public class PlayerStats : EntityStats
     [Server]    
     public void ModifyKnock(PlayerData source, AttackStat stat)
     {
+        float strenght = 100;
+        if (source != null)
+            strenght = source.Player_Stats.strenght;
+
         float multiplier = Random.Range(1f, 2f);
         Vector3 dir = pData.transform.position - source.transform.position;
 
-        float knockAmount = stat.AttackKnock * multiplier * (source.Player_Stats.strenght / 100f);
+        float knockAmount = stat.AttackKnock * multiplier * (strenght / 100f);
         Vector3 momentum = multiplier * stat.AttackForce * dir.normalized;
 
         ModifyKnock(knockAmount, momentum);
