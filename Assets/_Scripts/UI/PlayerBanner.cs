@@ -17,7 +17,7 @@ public class PlayerBanner : MonoBehaviour
     Coroutine playerTalked;
     float talkedTime;
 
-    public void SetPlayer(LobbyMemberData memberData)
+    public virtual void SetPlayer(LobbyMemberData memberData)
     {
         MemberData = memberData;
 

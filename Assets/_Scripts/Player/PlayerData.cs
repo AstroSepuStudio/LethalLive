@@ -24,8 +24,10 @@ public class PlayerData : NetworkBehaviour
     public AudioSource Loud_AS;
     public VoiceChatHandler VCHandler;
     public DeathOverlayManager DeathOvManager;
+    public SocialPlayerList SocialPlayList;
     public UnityEvent<PlayerTeam> OnPlayerTeamChanged;
     public UnityEvent<int, ChatMessage> OnReceiveChatMessage;
+
     [SerializeField] NetworkTransformHybrid netTransform;
     [SerializeField] float tpDelay = 0.5f;
 
@@ -197,6 +199,10 @@ public class PlayerData : NetworkBehaviour
         AvatarData = avatarData;
 
         GameManager.Instance.lobbyManagerScreen.RefreshScreen();
+        foreach (PlayerData p in GameManager.Instance.playMod.Players)
+        {
+            p.SocialPlayList.RefreshPlayers();
+        }
     }
 
     [Command]

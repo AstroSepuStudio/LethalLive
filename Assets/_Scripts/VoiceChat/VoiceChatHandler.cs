@@ -82,8 +82,12 @@ public class VoiceChatHandler : NetworkBehaviour
         speaker.ConfigureSpatialMode(speakerIsDead);
 
         speaker.ProcessVoiceData(voiceData);
+
         if (pData.Player_Stats.dead)
             pData.DeathOvManager.PlayerTalked(pData.SteamID);
+
+        pData.SocialPlayList.PlayerTalked(pData.SteamID);
+
         ShowSpeakingIconAboveHead();
     }
 

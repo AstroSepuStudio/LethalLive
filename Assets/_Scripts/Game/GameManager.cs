@@ -8,6 +8,7 @@ public class GameManager : NetworkBehaviour
     public struct LobbyMemberData
     {
         public CSteamID SteamID;
+        public uint netID;
         public string Name;
         public byte[] AvatarData;
         public PlayerTeam Team;
