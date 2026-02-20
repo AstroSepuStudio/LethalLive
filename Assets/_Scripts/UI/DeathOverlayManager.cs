@@ -14,33 +14,19 @@ public class DeathOverlayManager : NetworkBehaviour
     private void Start()
     {
         overlayGroup.alpha = 0f;
+
+        Instance.playMod.OnLobbyMemberDataChanged.AddListener(RefreshOverlay);
     }
 
-    [Server]
-    public void RefreshPlayers()
+    private void OnDestroy()
     {
-        List<LobbyMemberData> players = new();
-
-        foreach (var player in Instance.playMod.Players)
-        {
-            if (!player.Player_Stats.dead) continue;
-
-            players.Add(new LobbyMemberData
-            {
-                SteamID = player.SteamID,
-                Name = player.PlayerName,
-                AvatarData = player.AvatarData,
-                Team = player.Team,
-                Ping = player.Ping
-            });
-        }
-
-        Rpc_RefreshOverlay(players.ToArray());
+        Instance.playMod.OnLobbyMemberDataChanged.RemoveListener(RefreshOverlay);
     }
 
-    [TargetRpc]
-    void Rpc_RefreshOverlay(LobbyMemberData[] members)
+    void RefreshOverlay()
     {
+        LobbyMemberData[] members = Instance.playMod.CachedMemberData;
+
         foreach (var banner in playerBanners)
             banner.gameObject.SetActive(false);
 

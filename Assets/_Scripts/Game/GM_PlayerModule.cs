@@ -2,6 +2,8 @@ using Mirror;
 using Steamworks;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using static GameManager;
 
 public class GM_PlayerModule : NetworkBehaviour
 {
@@ -15,6 +17,9 @@ public class GM_PlayerModule : NetworkBehaviour
 
     public IReadOnlyList<PlayerData> Players => players;
     public List<PlayerData> playersOnDungeon = new();
+
+    public LobbyMemberData[] CachedMemberData { get; private set; }
+    public UnityEvent OnLobbyMemberDataChanged;
 
     [Command(requiresAuthority = false)]
     public void CmdRequestTeamChange(int playerIndex, PlayerTeam team)
@@ -33,8 +38,16 @@ public class GM_PlayerModule : NetworkBehaviour
 
     public PlayerData GetPlayerByNetId(uint netId)
     {
-        foreach(PlayerData p in players)
+        foreach (PlayerData p in players)
             if (p.netId == netId)
+                return p;
+        return null;
+    }
+
+    public PlayerData GetPlayerBySteamId(CSteamID steamID)
+    {
+        foreach (PlayerData p in players)
+            if (p.SteamID == steamID)
                 return p;
         return null;
     }
@@ -69,26 +82,21 @@ public class GM_PlayerModule : NetworkBehaviour
             deadPlayers.Add(player.netId);
         }
 
-        foreach (var player in players)
-            player.DeathOvManager.RefreshPlayers();
+        RefreshLobbyMemberData();
     }
 
     [Server]
     public void PlayerDies(uint index)
-    { 
-        if (!deadPlayers.Contains(index)) 
+    {
+        if (!deadPlayers.Contains(index))
             deadPlayers.Add(index);
 
-        foreach (var player in players)
-        {
-            if (deadPlayers.Contains(player.netId))
-                player.DeathOvManager.RefreshPlayers();
-        }
+        RefreshLobbyMemberData();
 
         if (deadPlayers.Count == players.Count)
         {
             Debug.Log("All players died");
-            GameManager.Instance.ResetGame();
+            Instance.ResetGame();
         }
     }
 
@@ -109,6 +117,8 @@ public class GM_PlayerModule : NetworkBehaviour
 
             player.RevivePlayer(spawnPos);
             deadPlayers.Remove(player.netId);
+
+            RefreshLobbyMemberData();
         }
     }
 
@@ -130,11 +140,63 @@ public class GM_PlayerModule : NetworkBehaviour
 
             player.RevivePlayer(spawnPos);
             deadPlayers.Remove(player.netId);
+
+            RefreshLobbyMemberData();
         }
     }
 
     public void RequestReturnToMainMenu()
     {
         LobbyManager.Instance.LeaveLobby();
+    }
+
+    [Server]
+    public void RefreshLobbyMemberData()
+    {
+        List<LobbyMemberData> players = new();
+
+        foreach (var player in Instance.playMod.Players)
+        {
+            players.Add(new LobbyMemberData
+            {
+                SteamID = player.SteamID,
+                netID = player.netId,
+                Name = player.PlayerName,
+                AvatarData = player.AvatarData,
+                Team = player.Team,
+                Ping = player.Ping
+            });
+        }
+
+        Rpc_RefreshLobbyMemberData(players.ToArray());
+    }
+
+    [ClientRpc]
+    public void Rpc_RefreshLobbyMemberData(LobbyMemberData[] members)
+    {
+        CachedMemberData = members;
+
+        foreach (var member in members)
+        {
+            if (PlayerContains(member.SteamID))
+                continue;
+
+            if (NetworkClient.spawned.TryGetValue(member.netID, out NetworkIdentity identity))
+                if (identity.TryGetComponent(out PlayerData pData))
+                    players.Add(pData);
+        }
+
+        OnLobbyMemberDataChanged?.Invoke();
+    }
+
+    private bool PlayerContains(CSteamID steamID)
+    {
+        foreach (var player in players)
+        {
+            if (player == null) continue;
+            if (player.SteamID == steamID)
+                return true;
+        }
+        return false;
     }
 }

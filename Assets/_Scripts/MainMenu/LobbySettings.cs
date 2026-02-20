@@ -1,6 +1,7 @@
 using Mirror;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class LobbySettings : NetworkBehaviour
 {
@@ -20,6 +21,8 @@ public class LobbySettings : NetworkBehaviour
 
     public int MaxDays => maxDays;
 
+    public UnityEvent OnLobbySettingsChanged;
+
     private void Awake()
     {
         Instance = this;
@@ -30,23 +33,37 @@ public class LobbySettings : NetworkBehaviour
     {
         lobby_Type = lobbyType;
         SteamMatchmaking.SetLobbyType(LobbyManager.Instance.CurrentLobbyID, lobbyType);
+        Rpc_LobbySettingsChanged();
     }
 
     [Server]
     public void SetMapSize(int mapSize)
     {
         this.mapSize = mapSize;
+        Rpc_LobbySettingsChanged();
     }
 
     [Server]
     public void SetTeamDamage(bool teamDamage)
     {
         this.teamDamage = teamDamage;
+        Rpc_LobbySettingsChanged();
     }
 
     [Server]
     public void SetTeamKnock(bool teamKnock)
     {
         this.teamKnock = teamKnock;
+        Rpc_LobbySettingsChanged();
     }
+
+    [Server]
+    public void SetMaxDays(int maxDays)
+    {
+        this.maxDays = maxDays;
+        Rpc_LobbySettingsChanged();
+    }
+
+    [ClientRpc]
+    private void Rpc_LobbySettingsChanged() => OnLobbySettingsChanged?.Invoke();
 }

@@ -9,30 +9,20 @@ public class SocialPlayerList : NetworkBehaviour
     [SerializeField] List<PlayerBannerMicMod> playerBanners;
     [SerializeField] Transform playerPanelParent;
 
-    [Server]
-    public void RefreshPlayers()
+    private void Start()
     {
-        List<LobbyMemberData> players = new();
-
-        foreach (var player in Instance.playMod.Players)
-        {
-            players.Add(new LobbyMemberData
-            {
-                SteamID = player.SteamID,
-                netID = player.netId,
-                Name = player.PlayerName,
-                AvatarData = player.AvatarData,
-                Team = player.Team,
-                Ping = player.Ping
-            });
-        }
-
-        Rpc_RefreshOverlay(players.ToArray());
+        Instance.playMod.OnLobbyMemberDataChanged.AddListener(OnLobbyMemberDataChanged);
     }
 
-    [TargetRpc]
-    void Rpc_RefreshOverlay(LobbyMemberData[] members)
+    private void OnDestroy()
     {
+        Instance.playMod.OnLobbyMemberDataChanged.AddListener(OnLobbyMemberDataChanged);
+    }
+
+    void OnLobbyMemberDataChanged()
+    {
+        LobbyMemberData[] members = Instance.playMod.CachedMemberData;
+
         foreach (var banner in playerBanners)
             banner.gameObject.SetActive(false);
 

@@ -72,9 +72,13 @@ public class VoiceChatHandler : NetworkBehaviour
         Rpc_SendVoice(voiceData, speakerIsDead);
     }
 
-    [ClientRpc(includeOwner = false)]
+    [ClientRpc]
     void Rpc_SendVoice(byte[] voiceData, bool speakerIsDead)
     {
+        pData.PlayerTalked();
+
+        if (isLocalPlayer) return;
+
         // Alive listeners never hear dead players
         if (!pData.Player_Stats.dead && speakerIsDead)
             return;
@@ -82,11 +86,6 @@ public class VoiceChatHandler : NetworkBehaviour
         speaker.ConfigureSpatialMode(speakerIsDead);
 
         speaker.ProcessVoiceData(voiceData);
-
-        if (pData.Player_Stats.dead)
-            pData.DeathOvManager.PlayerTalked(pData.SteamID);
-
-        pData.SocialPlayList.PlayerTalked(pData.SteamID);
 
         ShowSpeakingIconAboveHead();
     }

@@ -27,6 +27,8 @@ public class PlayerBanner : MonoBehaviour
 
     public void PlayerTalked()
     {
+        if (!gameObject.activeInHierarchy) return;
+
         talkedTime = Time.time;
         if (playerTalked != null) return;
 

@@ -67,6 +67,9 @@ public class LobbyManagerScreen : UIManagerNetwork
         pregameWindow.SetActive(true);
         gameWindow.SetActive(false);
 
+        Instance.playMod.OnLobbyMemberDataChanged.AddListener(RefreshLobbyManagerScreen);
+        LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.AddListener(RefreshLobbyManagerScreen);
+
         if (isLocalPlayer)
         {
             Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
@@ -75,6 +78,9 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     private void OnDestroy()
     {
+        Instance.playMod.OnLobbyMemberDataChanged.RemoveListener(RefreshLobbyManagerScreen);
+        LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.RemoveListener(RefreshLobbyManagerScreen);
+
         if (isLocalPlayer)
         {
             Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
@@ -157,31 +163,10 @@ public class LobbyManagerScreen : UIManagerNetwork
         Cursor.visible = false;
     }
 
-    [Server]
-    public void RefreshScreen()
+    public void RefreshLobbyManagerScreen()
     {
-        List<LobbyMemberData> members = new();
+        LobbyMemberData[] members = Instance.playMod.CachedMemberData;
 
-        foreach (var player in Instance.playMod.Players)
-        {
-            members.Add(new LobbyMemberData
-            {
-                SteamID = player.SteamID,
-                Name = player.PlayerName,
-                AvatarData = player.AvatarData,
-                Team = player.Team,
-                Ping = player.Ping
-            });
-        }
-
-        RpcRefreshScreen(members.ToArray(), Instance.dngMod.ThemeDatas[Instance.dngMod.selectedTheme].levelName);
-    }
-
-    [ClientRpc]
-    void RpcRefreshScreen(LobbyMemberData[] members, string themeName) => LocalRefreshScreen(members, themeName);
-
-    public void LocalRefreshScreen(LobbyMemberData[] members, string themeName)
-    {
         int lobbyIndex = LobbyManager.Instance.LobbySettings.Lobby_Type switch
         {
             ELobbyType.k_ELobbyTypeFriendsOnly => 0,
@@ -240,7 +225,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         totalBalanceText.SetText($"${Instance.ecoMod.TotalBalance}");
 
-        levelText.SetText(themeName);
+        levelText.SetText(Instance.dngMod.ThemeDatas[Instance.dngMod.selectedTheme].levelName);
     }
 
     void SetTeamBalance(float balance, TeamBalancePair pair)

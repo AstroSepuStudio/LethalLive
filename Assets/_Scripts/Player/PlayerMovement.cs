@@ -37,6 +37,9 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float normalHeight = 2f;
     [SerializeField] Vector3 normalCenter = new(0f, 1f, 0f);
 
+    [SerializeField] float normalCamTarget = 1.1f;
+    [SerializeField] float crouchCamTarget = 0.5f;
+
     [Header("Jumping")]
     [SerializeField] float jumpForce;
 
@@ -95,7 +98,7 @@ public class PlayerMovement : NetworkBehaviour
 
         movSpeed = walkSpeed;
 
-        pData.CameraTarget.localPosition = new Vector3(0, normalHeight - 0.1f, 0);
+        pData.CameraTarget.localPosition = new Vector3(0, normalCamTarget, 0);
     }
 
     #region Synvars
@@ -279,7 +282,7 @@ public class PlayerMovement : NetworkBehaviour
         IsCrouching = true;
         pData.Character_Controller.height = crouchHeight;
         pData.Character_Controller.center = crouchCenter;
-        pData.CameraTarget.localPosition = new Vector3(0, crouchHeight - 0.1f, 0);
+        pData.CameraTarget.localPosition = new Vector3(0, crouchCamTarget, 0);
     }
 
     void StopCrouch()
@@ -287,7 +290,7 @@ public class PlayerMovement : NetworkBehaviour
         IsCrouching = false;
         pData.Character_Controller.height = normalHeight;
         pData.Character_Controller.center = normalCenter;
-        pData.CameraTarget.localPosition = new Vector3(0, normalHeight - 0.1f, 0);
+        pData.CameraTarget.localPosition = new Vector3(0, normalCamTarget - 0.1f, 0);
     }
     #endregion
 

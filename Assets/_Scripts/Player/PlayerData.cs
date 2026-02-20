@@ -198,11 +198,7 @@ public class PlayerData : NetworkBehaviour
         PlayerName = name;
         AvatarData = avatarData;
 
-        GameManager.Instance.lobbyManagerScreen.RefreshScreen();
-        foreach (PlayerData p in GameManager.Instance.playMod.Players)
-        {
-            p.SocialPlayList.RefreshPlayers();
-        }
+        GameManager.Instance.playMod.RefreshLobbyMemberData();
     }
 
     [Command]
@@ -328,5 +324,13 @@ public class PlayerData : NetworkBehaviour
 
         PlayerCollider.enabled = true;
         Character_Controller.enabled = true;
+    }
+
+    public void PlayerTalked()
+    {
+        if (Player_Stats.dead)
+            DeathOvManager.PlayerTalked(SteamID);
+        SocialPlayList.PlayerTalked(SteamID);
+        Skin_Data.PlayerTalked(SteamID);
     }
 }

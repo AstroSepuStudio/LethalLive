@@ -1,4 +1,6 @@
 using Mirror;
+using Steamworks;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,6 +28,7 @@ public class SkinData : NetworkBehaviour
     public Animator CharacterAnimator;
     public Transform RightHand;
     public Transform GrabPoint;
+    [SerializeField] SkinnedMeshRenderer mouthRenderer;
     public SkinnedMeshRenderer[] BodySkinRenderers;
     public SkinnedMeshRenderer[] FacialRenderers;
     public Accessory[] Accesories;
@@ -208,6 +211,65 @@ public class SkinData : NetworkBehaviour
                 blinkState = BlinkState.None;
                 break;
         }
+    }
+    #endregion
+
+    #region Talk
+    float talkTimer;
+    Coroutine talkCor;
+    readonly int[] mouthIndexes = new int[] { 0, 1, 2, 6 };
+
+    public void PlayerTalked(CSteamID steamID)
+    {
+        PlayerData pData = GameManager.Instance.playMod.GetPlayerBySteamId(steamID);
+        pData.Skin_Data.HandleTalk();
+    }
+
+    void HandleTalk()
+    {
+        talkTimer = 0.2f;
+        if (talkCor != null) return;
+
+        talkCor = StartCoroutine(TalkAnimationCor());
+    }
+
+    IEnumerator TalkAnimationCor()
+    {
+        float delay = 0;
+        float mouthT = 0;
+        int ci = 0;
+        int loop = 0;
+        int maxLoops = Random.Range(2, 5);
+
+        while (talkTimer > 0)
+        {
+            if (mouthT >= delay)
+            {
+                mouthRenderer.SetBlendShapeWeight(mouthIndexes[ci], 0);
+
+                loop++;
+                if (loop < maxLoops)
+                {
+                    ci = Random.Range(0, mouthIndexes.Length);
+                    mouthRenderer.SetBlendShapeWeight(mouthIndexes[ci], 100);
+                }
+                else
+                {
+                    loop = 0;
+                    maxLoops = Random.Range(2, 5);
+                }
+
+                mouthT = 0;
+                delay = Random.Range(0.1f, 0.3f);
+            }
+
+            mouthT += Time.deltaTime;
+            talkTimer -= Time.deltaTime;
+            yield return null;
+        }
+
+        mouthRenderer.SetBlendShapeWeight(mouthIndexes[ci], 0);
+        talkCor = null;
     }
     #endregion
 
