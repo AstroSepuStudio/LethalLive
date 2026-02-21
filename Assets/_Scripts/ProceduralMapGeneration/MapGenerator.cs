@@ -51,6 +51,7 @@ public class MapGenerator : NetworkBehaviour
     [Header("Debug")]
     [SerializeField] bool generateOnStart = false;
     [SerializeField] GameObject seedDisplayCanvas;
+    [SerializeField] CanvasGroup seedDisplayGroup;
     [SerializeField] TextMeshProUGUI seedDisplayTxt;
 
     System.Random rng;
@@ -124,11 +125,7 @@ public class MapGenerator : NetworkBehaviour
         seed = setSeed;
         rng = new System.Random(seed);
 
-        StartCoroutine(DisplaySeed(setSeed, 5f));
-
-        Generate();
-        InstantiateRooms();
-        ResolveDoors();
+        StartCoroutine(GenerationCoroutine(setSeed, 5f));
     }
 
     private void Generate()
@@ -475,13 +472,40 @@ public class MapGenerator : NetworkBehaviour
         }
     }
 
-    IEnumerator DisplaySeed(int seed, float duration)
+    IEnumerator GenerationCoroutine(int seed, float duration)
     {
+        seedDisplayGroup.alpha = 0;
         seedDisplayCanvas.SetActive(true);
-        seedDisplayTxt.SetText($"Seed: {seed}");
+        seedDisplayTxt.SetText($"Generating Dungeon . . .\n({seed})");
 
+        float t = 0;
+        while (t < 0.75f)
+        {
+            seedDisplayGroup.alpha = t * 2;
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        seedDisplayGroup.alpha = 1;
+
+        yield return null;
+
+        Generate();
+        InstantiateRooms();
+        ResolveDoors();
+
+        seedDisplayTxt.SetText($"Dungeon Generated!\n({seed})");
         yield return new WaitForSeconds(duration);
 
+        t = 0.5f;
+        while (t > 0)
+        {
+            seedDisplayGroup.alpha = t;
+            t -= Time.deltaTime * 2;
+            yield return null;
+        }
+
+        seedDisplayGroup.alpha = 0;
         seedDisplayCanvas.SetActive(false);
     }
 
