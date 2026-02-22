@@ -2,7 +2,6 @@ using Mirror;
 using Steamworks;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,11 +16,11 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] NetworkIdentity identity;
     [SerializeField] Canvas worldCanvas;
     [SerializeField] RectTransform refRectTransform;
-    [SerializeField] TextMeshProUGUI lobbyNameTxt;
+    //[SerializeField] TextMeshProUGUI lobbyNameTxt;
     [SerializeField] Camera povCamera;
-    [SerializeField] LobbyMemberUI[] lobbyMemberUIs;
-    [SerializeField] GameObject pregameWindow;
-    [SerializeField] GameObject gameWindow;
+    //[SerializeField] LobbyMemberUI[] lobbyMemberUIs;
+    //[SerializeField] GameObject pregameWindow;
+    //[SerializeField] GameObject gameWindow;
     [SerializeField] GameObject loadingWindow;
     [SerializeField] Transform loadingThing;
     [SerializeField] Transform playerTargetPos;
@@ -30,7 +29,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] TextMeshProUGUI dayText;
     [SerializeField] TextMeshProUGUI timeText;
     [SerializeField] TextMeshProUGUI levelText;
-    [SerializeField] GameObject deadlineObj;
+    //[SerializeField] GameObject deadlineObj;
     [SerializeField] TeamBalancePair teamWhiteBalance;
     [SerializeField] TeamBalancePair teamRedBalance;
     [SerializeField] TeamBalancePair teamBlueBalance;
@@ -48,7 +47,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] Toggle teamDamage_Toggle;
     [SerializeField] Toggle teamKnock_Toggle;
 
-    [SyncVar] int playerOnLMS = -1;
+    [SyncVar] public int playerOnLMS = -1;
     [SyncVar] bool open = false;
 
     PlayerData currentPlayer;
@@ -64,27 +63,17 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         base.Start();
 
-        pregameWindow.SetActive(true);
-        gameWindow.SetActive(false);
+        //pregameWindow.SetActive(true);
+        //gameWindow.SetActive(false);
 
         Instance.playMod.OnLobbyMemberDataChanged.AddListener(RefreshLobbyManagerScreen);
         LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.AddListener(RefreshLobbyManagerScreen);
-
-        if (isLocalPlayer)
-        {
-            Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].canceled += OnEscapePressed;
-        }
     }
 
     private void OnDestroy()
     {
         Instance.playMod.OnLobbyMemberDataChanged.RemoveListener(RefreshLobbyManagerScreen);
         LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.RemoveListener(RefreshLobbyManagerScreen);
-
-        if (isLocalPlayer)
-        {
-            Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].canceled -= OnEscapePressed;
-        }
     }
 
     public void OnEscapePressed(InputAction.CallbackContext context)
@@ -96,7 +85,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void CloseLMS()
     {
-        if (isLocalPlayer &&!open) return;
+        if (isLocalPlayer && !open) return;
 
         CmdCloseLMS(Instance.playMod.LocalPlayer.Index);
     }
@@ -120,6 +109,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     void RpcOpenLMS(int index)
     {
         if (Instance.playMod.LocalPlayer.Index != index) return;
+        Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started += OnEscapePressed;
 
         //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = false;
         Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(false);
@@ -152,6 +142,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     public void RpcCloseLMS(int index)
     {
         if (Instance.playMod.LocalPlayer.Index != index) return;
+        Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started -= OnEscapePressed;
 
         //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = true;
         Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(true);
@@ -165,7 +156,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void RefreshLobbyManagerScreen()
     {
-        LobbyMemberData[] members = Instance.playMod.CachedMemberData;
+        //LobbyMemberData[] members = Instance.playMod.CachedMemberData;
 
         int lobbyIndex = LobbyManager.Instance.LobbySettings.Lobby_Type switch
         {
@@ -180,17 +171,17 @@ public class LobbyManagerScreen : UIManagerNetwork
         teamDamage_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamDamage);
         teamKnock_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamKnock);
 
-        for (int i = 0; i < lobbyMemberUIs.Length; i++)
-        {
-            if (i >= members.Length)
-            {
-                lobbyMemberUIs[i].gameObject.SetActive(false);
-                continue;
-            }
+        //for (int i = 0; i < lobbyMemberUIs.Length; i++)
+        //{
+        //    if (i >= members.Length)
+        //    {
+        //        lobbyMemberUIs[i].gameObject.SetActive(false);
+        //        continue;
+        //    }
 
-            lobbyMemberUIs[i].gameObject.SetActive(true);
-            lobbyMemberUIs[i].AssignPlayer(members[i]);
-        }
+        //    lobbyMemberUIs[i].gameObject.SetActive(true);
+        //    lobbyMemberUIs[i].AssignPlayer(members[i]);
+        //}
 
         if (Instance == null) return;
 
@@ -211,10 +202,10 @@ public class LobbyManagerScreen : UIManagerNetwork
             timeText.SetText($"{hours:00}:{minutes:00}");
         }
 
-        if (Instance.dayMod.currentDay >= LobbySettings.Instance.MaxDays)
-            deadlineObj.SetActive(true);
-        else 
-            deadlineObj.SetActive(false);
+        //if (Instance.dayMod.currentDay >= LobbySettings.Instance.MaxDays)
+        //    deadlineObj.SetActive(true);
+        //else 
+        //    deadlineObj.SetActive(false);
 
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.White], teamWhiteBalance);
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Red], teamRedBalance);
@@ -296,30 +287,30 @@ public class LobbyManagerScreen : UIManagerNetwork
         Instance.dayMod.StartDay();
     }
 
-    [ClientRpc]
-    public void RpcSwitchScreenState()
-    {
-        float duration = UnityEngine.Random.Range(1f, 3f);
-        StartCoroutine(SwitchCoroutine(duration));
-    }
+    //[ClientRpc]
+    //public void RpcSwitchScreenState()
+    //{
+    //    float duration = UnityEngine.Random.Range(1f, 3f);
+    //    StartCoroutine(SwitchCoroutine(duration));
+    //}
 
-    IEnumerator SwitchCoroutine(float duration)
-    {
-        pregameWindow.SetActive(false);
-        loadingWindow.SetActive(true);
+    //IEnumerator SwitchCoroutine(float duration)
+    //{
+    //    pregameWindow.SetActive(false);
+    //    loadingWindow.SetActive(true);
 
-        float timer = 0;
-        while (timer <= duration)
-        {
-            loadingThing.localRotation = Quaternion.Euler(0, 0, loadingThing.localRotation.eulerAngles.z - loadThingRotSpd * Time.deltaTime);
+    //    float timer = 0;
+    //    while (timer <= duration)
+    //    {
+    //        loadingThing.localRotation = Quaternion.Euler(0, 0, loadingThing.localRotation.eulerAngles.z - loadThingRotSpd * Time.deltaTime);
 
-            timer += Time.deltaTime;
-            yield return null;
-        }
+    //        timer += Time.deltaTime;
+    //        yield return null;
+    //    }
 
-        loadingWindow.SetActive(false);
-        gameWindow.SetActive(true);
-    }
+    //    loadingWindow.SetActive(false);
+    //    gameWindow.SetActive(true);
+    //}
 
     public void RequestThemeSelection(int index)
     {

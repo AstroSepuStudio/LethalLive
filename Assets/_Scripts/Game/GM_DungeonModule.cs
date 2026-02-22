@@ -65,7 +65,8 @@ public class GM_DungeonModule : NetworkBehaviour
     [Server]
     public void TryOpenNewDungeon()
     {
-        if (!Instance.gameStarted) return;
+        if (!Instance.gameStarted)
+            Instance.StartGame();
 
         if (!Instance.dayMod.dayStarted)
         {

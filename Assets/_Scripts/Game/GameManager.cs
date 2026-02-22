@@ -45,7 +45,7 @@ public class GameManager : NetworkBehaviour
         gameStarted = true;
 
         dayMod.currentDayTime = -1;
-        lobbyManagerScreen.RpcSwitchScreenState();
+        //lobbyManagerScreen.RpcSwitchScreenState();
     }
 
     [Server]

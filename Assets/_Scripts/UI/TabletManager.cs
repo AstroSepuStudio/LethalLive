@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -13,14 +14,19 @@ public class TabletManager : MonoBehaviour
     public bool CanSwitchState => currentActivities == 0;
 
     int currentActivities = 0;
-    public bool IsActive { get; private set; }
+    public bool IsActive { get; private set; } = false;
 
     public void AddActivity() => currentActivities++;
     public void RemoveActivity() => currentActivities--;
 
+    bool esc;
+
     public bool TrySwitchState()
     {
         if (!CanSwitchState) return false;
+        if (esc) return false;
+        esc = true;
+        StartCoroutine(WaitForNextFrame());
 
         IsActive = !IsActive;
         tabletObj.SetActive(IsActive);
@@ -32,5 +38,11 @@ public class TabletManager : MonoBehaviour
         else
             GameManager.Instance.playMod.LocalPlayer.Player_Input.SwitchCurrentActionMap("Player");
         return true;
+    }
+
+    IEnumerator WaitForNextFrame()
+    {
+        yield return null;
+        esc = false;
     }
 }

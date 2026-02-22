@@ -92,7 +92,7 @@ public class PlayerData : NetworkBehaviour
         if (isLocalPlayer)
         {
             PlayerAudio.enabled = true;
-            //SettingsManager.Instance.LockMouse();
+            SettingsManager.Instance.LockMouse();
             GameManager.Instance.playMod.LocalPlayer = this;
         }
         else
