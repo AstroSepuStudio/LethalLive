@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.Events;
 
 [Serializable]
 public struct LootPosition
@@ -51,6 +52,7 @@ public class MapGenerator : NetworkBehaviour
     [Header("Debug")]
     [SerializeField] bool generateOnStart = false;
     [SerializeField] GameObject seedDisplayCanvas;
+    [SerializeField] RectTransform seedDisplayTransform;
     [SerializeField] CanvasGroup seedDisplayGroup;
     [SerializeField] TextMeshProUGUI seedDisplayTxt;
 
@@ -69,6 +71,7 @@ public class MapGenerator : NetworkBehaviour
     public Cell[,,] Grid => grid;
     public int CellSize => cellSize;
     public Vector3Int GridSize => gridSize;
+    public UnityEvent OnDungeonGenerated;
 
     private struct OpenPort
     {
@@ -474,15 +477,36 @@ public class MapGenerator : NetworkBehaviour
 
     IEnumerator GenerationCoroutine(int seed, float duration)
     {
+        yield return null;
+
+        seedDisplayTransform.anchoredPosition = new Vector2(0, -225f);
+        LeanTween.moveY(seedDisplayTransform, 0f, 0.5f)
+         .setEaseOutSine();
+
         seedDisplayGroup.alpha = 0;
         seedDisplayCanvas.SetActive(true);
-        seedDisplayTxt.SetText($"Generating Dungeon . . .\n({seed})");
+        seedDisplayTxt.SetText($"Connecting to new location\n({seed})");
 
-        float t = 0;
-        while (t < 0.75f)
+        float fadeTimer = 0f;
+        float dotTimer = 0f;
+
+        int dotCount = 0;
+        const float dotInterval = 0.22f;
+
+        while (fadeTimer < 0.75f)
         {
-            seedDisplayGroup.alpha = t * 2;
-            t += Time.deltaTime;
+            seedDisplayGroup.alpha = fadeTimer * 2;
+            fadeTimer += Time.deltaTime;
+
+            dotTimer += Time.deltaTime;
+            if (dotTimer >= dotInterval)
+            {
+                dotTimer = 0f;
+                dotCount = (dotCount + 1) % 4;
+            }
+
+            string dots = new('.', dotCount);
+            seedDisplayTxt.SetText($"Connecting to new location{dots}\n({seed})");
             yield return null;
         }
 
@@ -494,14 +518,15 @@ public class MapGenerator : NetworkBehaviour
         InstantiateRooms();
         ResolveDoors();
 
-        seedDisplayTxt.SetText($"Dungeon Generated!\n({seed})");
+        seedDisplayTxt.SetText($"New location found!\n({seed})");
+        OnDungeonGenerated?.Invoke();
         yield return new WaitForSeconds(duration);
 
-        t = 0.5f;
-        while (t > 0)
+        fadeTimer = 0.5f;
+        while (fadeTimer > 0)
         {
-            seedDisplayGroup.alpha = t;
-            t -= Time.deltaTime * 2;
+            seedDisplayGroup.alpha = fadeTimer * 2;
+            fadeTimer -= Time.deltaTime;
             yield return null;
         }
 

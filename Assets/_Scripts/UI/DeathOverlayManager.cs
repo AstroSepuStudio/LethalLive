@@ -7,21 +7,12 @@ using static GameManager;
 
 public class DeathOverlayManager : NetworkBehaviour
 {
+    [SerializeField] GameObject overlayObj;
     [SerializeField] CanvasGroup overlayGroup;
     [SerializeField] Transform content;
     [SerializeField] List<PlayerBanner> playerBanners;
 
-    private void Start()
-    {
-        overlayGroup.alpha = 0f;
-
-        Instance.playMod.OnLobbyMemberDataChanged.AddListener(RefreshOverlay);
-    }
-
-    private void OnDestroy()
-    {
-        Instance.playMod.OnLobbyMemberDataChanged.RemoveListener(RefreshOverlay);
-    }
+    private void Start() => overlayGroup.alpha = 0f;
 
     void RefreshOverlay()
     {
@@ -54,11 +45,23 @@ public class DeathOverlayManager : NetworkBehaviour
         }
     }
 
-    public void EnableOverlay() => StartCoroutine(EnableOverlayCor());
-    public void DisableOverlay() => StartCoroutine(DisableOverlayCor());
+    public void EnableOverlay()
+    {
+        Instance.playMod.OnLobbyMemberDataChanged.AddListener(RefreshOverlay);
+        RefreshOverlay();
+        StartCoroutine(EnableOverlayCor());
+    }
+
+    public void DisableOverlay()
+    {
+        Instance.playMod.OnLobbyMemberDataChanged.RemoveListener(RefreshOverlay);
+        StartCoroutine(DisableOverlayCor());
+    }
 
     IEnumerator EnableOverlayCor()
     {
+        overlayObj.SetActive(true);
+
         float t = 0;
         while (t < 2f)
         {
@@ -79,5 +82,7 @@ public class DeathOverlayManager : NetworkBehaviour
             yield return null;
         }
         overlayGroup.alpha = 0;
+
+        overlayObj.SetActive(false);
     }
 }

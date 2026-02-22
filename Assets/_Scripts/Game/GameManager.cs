@@ -108,7 +108,6 @@ public class GameManager : NetworkBehaviour
 
     public void SetUpNewDay()
     {
-        dngMod.mapSeed = Random.Range(-1000000, 1000000);
         ecoMod.SetNewQuota();
         //OpenDungeon();
     }

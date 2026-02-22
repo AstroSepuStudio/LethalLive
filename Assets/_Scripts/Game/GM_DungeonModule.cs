@@ -49,6 +49,7 @@ public class GM_DungeonModule : NetworkBehaviour
         OnDungeonOpens?.Invoke();
         dungeonOpen = true;
 
+        mapSeed = Random.Range(-1000000, 1000000);
         RpcGenerateMap(mapSeed, selectedTheme);
     }
 
@@ -68,14 +69,14 @@ public class GM_DungeonModule : NetworkBehaviour
 
         if (!Instance.dayMod.dayStarted)
         {
-            Instance.dayMod.StartDay();
+            mapGenerator.OnDungeonGenerated.AddListener(StartDay);
             OpenDungeon();
             return;
         }
 
         if (Instance.playMod.playersOnDungeon.Count > 0)
         {
-            Debug.Log("There is players in the dungeon");
+            Debug.Log("There is players in the liminal space");
             return;
         }
 
@@ -113,5 +114,11 @@ public class GM_DungeonModule : NetworkBehaviour
         }
 
         selectedTheme = index;
+    }
+
+    void StartDay()
+    {
+        Instance.dayMod.StartDay();
+        mapGenerator.OnDungeonGenerated.RemoveListener(StartDay);
     }
 }
