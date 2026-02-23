@@ -47,12 +47,12 @@ public class EntitySpawnerManager : NetworkBehaviour
         }
     }
 
-    private void OnDayEnded()
+    private void OnDayEnded(int day)
     {
         StopCoroutine(enemySpawningCoroutine);
     }
 
-    private void OnDayStarted()
+    private void OnDayStarted(int day)
     {
         enemySpawningCoroutine = StartCoroutine(EnemySpawning());
     }

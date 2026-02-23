@@ -63,19 +63,29 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         base.Start();
 
-        //pregameWindow.SetActive(true);
-        //gameWindow.SetActive(false);
+        LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.AddListener(RefreshLobbySettings);
+        GameTick.OnSecond += OnSecond;
 
-        Instance.playMod.OnLobbyMemberDataChanged.AddListener(RefreshLobbyManagerScreen);
-        LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.AddListener(RefreshLobbyManagerScreen);
+        Instance.dngMod.OnThemeChangedEv.AddListener(RefreshLevelName);
+        Instance.dayMod.OnDayStarted.AddListener(RefreshDay);
+        Instance.dayMod.OnDayEnded.AddListener(RefreshDay);
+        Instance.ecoMod.OnTeamBalanceChangedEv.AddListener(RefreshTeamBalances);
+
+        InitialRefresh();
     }
 
     private void OnDestroy()
     {
-        Instance.playMod.OnLobbyMemberDataChanged.RemoveListener(RefreshLobbyManagerScreen);
-        LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.RemoveListener(RefreshLobbyManagerScreen);
+        LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.RemoveListener(RefreshLobbySettings);
+        GameTick.OnSecond -= OnSecond;
+
+        Instance.dngMod.OnThemeChangedEv.RemoveListener(RefreshLevelName);
+        Instance.dayMod.OnDayStarted.RemoveListener(RefreshDay);
+        Instance.dayMod.OnDayEnded.RemoveListener(RefreshDay);
+        Instance.ecoMod.OnTeamBalanceChangedEv.RemoveListener(RefreshTeamBalances);
     }
 
+    #region State Change
     public void OnEscapePressed(InputAction.CallbackContext context)
     {
         if (!context.started) return;
@@ -153,40 +163,25 @@ public class LobbyManagerScreen : UIManagerNetwork
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+    #endregion
 
-    public void RefreshLobbyManagerScreen()
+    #region Screen Refresh
+    private void InitialRefresh()
     {
-        //LobbyMemberData[] members = Instance.playMod.CachedMemberData;
+        RefreshLevelName(Instance.dngMod.selectedTheme);
+        RefreshDay(Instance.dayMod.currentDay);
+        RefreshLobbySettings();
+        RefreshTeamBalances(PlayerTeam.White, 0);
+    }
 
-        int lobbyIndex = LobbyManager.Instance.LobbySettings.Lobby_Type switch
-        {
-            ELobbyType.k_ELobbyTypeFriendsOnly => 0,
-            ELobbyType.k_ELobbyTypePublic => 1,
-            ELobbyType.k_ELobbyTypePrivate => 2,
-            _ => 0,
-        };
+    private void OnSecond() => RefreshDayTime();
 
-        lobbyType_DP.SetValueWithoutNotify(lobbyIndex);
-        mapSize_IP.SetTextWithoutNotify(LobbyManager.Instance.LobbySettings.MapSize.ToString());
-        teamDamage_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamDamage);
-        teamKnock_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamKnock);
+    public void RefreshLevelName(int index) => levelText.SetText(Instance.dngMod.ThemeDatas[index].levelName);
 
-        //for (int i = 0; i < lobbyMemberUIs.Length; i++)
-        //{
-        //    if (i >= members.Length)
-        //    {
-        //        lobbyMemberUIs[i].gameObject.SetActive(false);
-        //        continue;
-        //    }
+    public void RefreshDay(int day) => dayText.SetText($"Day {day}");
 
-        //    lobbyMemberUIs[i].gameObject.SetActive(true);
-        //    lobbyMemberUIs[i].AssignPlayer(members[i]);
-        //}
-
-        if (Instance == null) return;
-
-        dayText.SetText($"{Instance.dayMod.currentDay}/{LobbySettings.Instance.MaxDays}");
-
+    public void RefreshDayTime()
+    {
         if (Instance.dayMod.currentDayTime == -1)
         {
             timeText.SetText("--:--");
@@ -201,12 +196,26 @@ public class LobbyManagerScreen : UIManagerNetwork
 
             timeText.SetText($"{hours:00}:{minutes:00}");
         }
+    }
 
-        //if (Instance.dayMod.currentDay >= LobbySettings.Instance.MaxDays)
-        //    deadlineObj.SetActive(true);
-        //else 
-        //    deadlineObj.SetActive(false);
+    public void RefreshLobbySettings()
+    {
+        int lobbyIndex = LobbyManager.Instance.LobbySettings.Lobby_Type switch
+        {
+            ELobbyType.k_ELobbyTypeFriendsOnly => 0,
+            ELobbyType.k_ELobbyTypePublic => 1,
+            ELobbyType.k_ELobbyTypePrivate => 2,
+            _ => 0,
+        };
 
+        lobbyType_DP.SetValueWithoutNotify(lobbyIndex);
+        mapSize_IP.SetTextWithoutNotify(LobbyManager.Instance.LobbySettings.MapSize.ToString());
+        teamDamage_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamDamage);
+        teamKnock_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamKnock);
+    }
+
+    public void RefreshTeamBalances(PlayerTeam t, float v)
+    {
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.White], teamWhiteBalance);
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Red], teamRedBalance);
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Blue], teamBlueBalance);
@@ -214,9 +223,7 @@ public class LobbyManagerScreen : UIManagerNetwork
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Green], teamGreenBalance);
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Pink], teamPinkBalance);
 
-        totalBalanceText.SetText($"${Instance.ecoMod.TotalBalance}");
-
-        levelText.SetText(Instance.dngMod.ThemeDatas[Instance.dngMod.selectedTheme].levelName);
+        totalBalanceText.SetText($"{Instance.ecoMod.TotalBalance}");
     }
 
     void SetTeamBalance(float balance, TeamBalancePair pair)
@@ -228,7 +235,9 @@ public class LobbyManagerScreen : UIManagerNetwork
         }
         else pair.teamObj.SetActive(false);
     }
+    #endregion
 
+    #region Settings
     public void RequestTeamSwap(int index)
     {
         PlayerTeam team = (PlayerTeam)index;
@@ -274,7 +283,9 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         LobbyManager.Instance.LobbySettings.SetTeamKnock(value);
     }
+    #endregion
 
+    #region Logic
     public void StartGame()
     {
         if (!identity.isServer) return;
@@ -287,36 +298,13 @@ public class LobbyManagerScreen : UIManagerNetwork
         Instance.dayMod.StartDay();
     }
 
-    //[ClientRpc]
-    //public void RpcSwitchScreenState()
-    //{
-    //    float duration = UnityEngine.Random.Range(1f, 3f);
-    //    StartCoroutine(SwitchCoroutine(duration));
-    //}
-
-    //IEnumerator SwitchCoroutine(float duration)
-    //{
-    //    pregameWindow.SetActive(false);
-    //    loadingWindow.SetActive(true);
-
-    //    float timer = 0;
-    //    while (timer <= duration)
-    //    {
-    //        loadingThing.localRotation = Quaternion.Euler(0, 0, loadingThing.localRotation.eulerAngles.z - loadThingRotSpd * Time.deltaTime);
-
-    //        timer += Time.deltaTime;
-    //        yield return null;
-    //    }
-
-    //    loadingWindow.SetActive(false);
-    //    gameWindow.SetActive(true);
-    //}
-
     public void RequestThemeSelection(int index)
     {
         Instance.dngMod.RequestTheme(index);
     }
+    #endregion
 
+    #region IK
     IEnumerator RHCIKTPosHandler()
     {
         float w8timer = 0;
@@ -360,4 +348,5 @@ public class LobbyManagerScreen : UIManagerNetwork
 
         rightHCIKTarget.localPosition = pos;
     }
+    #endregion
 }

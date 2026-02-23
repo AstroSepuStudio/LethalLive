@@ -2,6 +2,7 @@ using Mirror;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GM_EconomyModule : NetworkBehaviour
 {
@@ -13,35 +14,29 @@ public class GM_EconomyModule : NetworkBehaviour
     [SerializeField] float exponentialRate = 1.15f;
     [SerializeField] float exponentialFactor = 0.3f;
 
-    [SyncVar]
-    public int targetQuota;
+    public SyncDictionary<PlayerTeam, float> teamsBalance = new()
+    {
+        { PlayerTeam.White, 0 }, { PlayerTeam.Red, 0 }, { PlayerTeam.Blue, 0 },
+        { PlayerTeam.Yellow, 0 }, { PlayerTeam.Green, 0 }, { PlayerTeam.Pink, 0 }
+    };
 
     public float TotalBalance => 
-        teamsBalance[PlayerTeam.White] +
-        teamsBalance[PlayerTeam.Red] +
-        teamsBalance[PlayerTeam.Blue] +
-        teamsBalance[PlayerTeam.Yellow] +
-        teamsBalance[PlayerTeam.Green] +
-        teamsBalance[PlayerTeam.Pink];
-
-    public Dictionary<PlayerTeam, float> teamsBalance;
+        teamsBalance[PlayerTeam.White] + teamsBalance[PlayerTeam.Red] + teamsBalance[PlayerTeam.Blue] +
+        teamsBalance[PlayerTeam.Yellow] + teamsBalance[PlayerTeam.Green] + teamsBalance[PlayerTeam.Pink];
 
     [SyncVar]
     int startingQuota = 0;
 
+    [SyncVar]
+    public int targetQuota;
+
     public bool IsQuotaMet => TotalBalance >= targetQuota;
 
-    private void Awake()
+    public UnityEvent<PlayerTeam, float> OnTeamBalanceChangedEv;
+
+    private void Start()
     {
-        teamsBalance = new()
-        {
-            { PlayerTeam.White, 0 },
-            { PlayerTeam.Red, 0 },
-            { PlayerTeam.Blue, 0 },
-            { PlayerTeam.Yellow, 0 },
-            { PlayerTeam.Green, 0 },
-            { PlayerTeam.Pink, 0 }
-        };
+        teamsBalance.OnChange += OnTeamBalanceChanged;
     }
 
     [Server]
@@ -67,6 +62,7 @@ public class GM_EconomyModule : NetworkBehaviour
         return Mathf.RoundToInt(startingQuota + linearPart + exponentialPart);
     }
 
+    [Server]
     public void TakeQuotaValue()
     {
         if (!IsQuotaMet) return;
@@ -114,6 +110,7 @@ public class GM_EconomyModule : NetworkBehaviour
         }
     }
 
+    [Server]
     public void ResetEconomy()
     {
         var keys = teamsBalance.Keys.ToList();
@@ -124,5 +121,12 @@ public class GM_EconomyModule : NetworkBehaviour
 
         startingQuota = 0;
         SetNewQuota();
+    }
+
+    private void OnTeamBalanceChanged(SyncDictionary<PlayerTeam, float>.Operation op,
+                                  PlayerTeam key,
+                                  float item)
+    {
+        OnTeamBalanceChangedEv?.Invoke(key, item);
     }
 }

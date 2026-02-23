@@ -27,8 +27,8 @@ public class GM_DayCycleModule : NetworkBehaviour
     [SyncVar]
     public bool dayStarted = false;
 
-    public UnityEvent OnDayStarted = new();
-    public UnityEvent OnDayEnded = new();
+    public UnityEvent<int> OnDayStarted = new();
+    public UnityEvent<int> OnDayEnded = new();
 
     [Server]
     public void StartDay()
@@ -37,7 +37,7 @@ public class GM_DayCycleModule : NetworkBehaviour
 
         dayStarted = true;
         Instance.SetUpNewDay();
-        OnDayStarted?.Invoke();
+        OnDayStarted?.Invoke(currentDay);
 
         StartCoroutine(DayTimer());
         StartCoroutine(DisplayDayStart());
@@ -61,7 +61,7 @@ public class GM_DayCycleModule : NetworkBehaviour
     [Server]
     public void FinishDay()
     {
-        OnDayEnded?.Invoke();
+        OnDayEnded?.Invoke(currentDay);
 
         foreach (var player in Instance.playMod.playersOnDungeon)
         {

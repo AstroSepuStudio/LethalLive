@@ -13,11 +13,12 @@ public class GM_DungeonModule : NetworkBehaviour
 
     public UnityEvent OnDungeonOpens = new();
     public UnityEvent OnDungeonCloses = new();
+    public UnityEvent<int> OnThemeChangedEv = new();
 
     [SyncVar]
     public Vector3 startRoomPos;
 
-    [SyncVar]
+    [SyncVar(hook = nameof(OnThemeChanged))]
     public int selectedTheme = 0;
 
     [SyncVar]
@@ -25,6 +26,8 @@ public class GM_DungeonModule : NetworkBehaviour
 
     [SyncVar]
     public bool dungeonOpen = false;
+
+    private void OnThemeChanged(int oldValue, int newValue) => OnThemeChangedEv?.Invoke(newValue);
 
     [Server]
     public void OnEnterDungeon(PlayerData playerData)
