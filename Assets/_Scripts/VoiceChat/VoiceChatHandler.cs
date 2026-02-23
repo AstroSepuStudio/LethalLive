@@ -13,6 +13,7 @@ public class VoiceChatHandler : NetworkBehaviour
 
     float speakTime;
     bool hold2Talk;
+    bool hearYS;
 
     private void Start()
     {
@@ -25,6 +26,7 @@ public class VoiceChatHandler : NetworkBehaviour
     }
 
     public void SetVoiceChatMode(bool hold2Talk) => this.hold2Talk = hold2Talk;
+    public void SetHearYourself(bool hearYS) => this.hearYS = hearYS;
 
     public void OnVoiceChatTrigger(InputAction.CallbackContext context)
     {
@@ -77,7 +79,7 @@ public class VoiceChatHandler : NetworkBehaviour
     {
         pData.PlayerTalked();
 
-        if (isLocalPlayer) return;
+        if (isLocalPlayer && !hearYS) return;
 
         // Alive listeners never hear dead players
         if (!pData.Player_Stats.dead && speakerIsDead)

@@ -181,7 +181,9 @@ namespace SimpleVoiceChat {
                     _workingClip.GetData(_rawSamples, 0);
                     if (_lastPosition != currentPosition && _rawSamples.Length > 0) {
                         // Do we have some new data?
-                        if (!Settings.autoVoiceDetection || VoiceIsDetected(_rawSamples)) {
+                        if (
+                            //!Settings.autoVoiceDetection || 
+                            VoiceIsDetected(_rawSamples)) {
                             if (_lastPosition > currentPosition) {
                                 _buffer.AddRange(GetPieceOfData(_rawSamples, _lastPosition, _rawSamples.Length - _lastPosition));
                                 _buffer.AddRange(GetPieceOfData(_rawSamples, 0, currentPosition));
@@ -190,6 +192,13 @@ namespace SimpleVoiceChat {
                                 _buffer.AddRange(GetPieceOfData(_rawSamples, _lastPosition, currentPosition - _lastPosition));
                             }
                         }
+                        //else // -- Hard cut --
+                        //{
+                        //    _buffer.Clear(); // hard gate
+                        //    _lastPosition = currentPosition;
+                        //    return;
+                        //}
+
                         if (_buffer.Count >= Settings.pieceSize) {
                             // Sends data in pieces.
                             PrepareDataForTransfer(_buffer.GetRange(0, Settings.pieceSize));
