@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace SimpleVoiceChat {
-
+    using LethalLive;
     /// <summary>
     /// It is used for play voice audio from other people.
     /// In usual you need 1 'speaker' for 1 person.

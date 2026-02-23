@@ -12,7 +12,10 @@ public static class AvatarUtils
 
         Texture2D src = new(2, 2, TextureFormat.RGBA32, false);
         if (!src.LoadImage(imageData))
+        {
+            Debug.Log("Could NOT load the image form the image data.");
             return null;
+        }
 
         RenderTexture rt = RenderTexture.GetTemporary(src.width, src.height);
         Graphics.Blit(src, rt, new Vector2(1, -1), new Vector2(0, 1));

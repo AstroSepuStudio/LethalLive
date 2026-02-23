@@ -263,7 +263,10 @@ namespace SimpleVoiceChat {
         /// </summary>
         public void SetMicrophone(string microphone) {
             if (!string.IsNullOrEmpty(_currentMicrophone))
-                Microphone.End(_currentMicrophone);
+            {
+                if (!_currentMicrophone.Equals(microphone))
+                    Microphone.End(_currentMicrophone);
+            }
             _currentMicrophone = microphone;
         }
 
@@ -301,13 +304,13 @@ namespace SimpleVoiceChat {
             for (int index = 0; index < samples.Length; index++) {
                 tempValue = samples[index];
                 sumTwo += tempValue * tempValue;
-                if (tempValue > Settings.voiceDetectionThreshold)
+                if (tempValue > LethalLive.SettingsManager.Instance.UserSettings.GetDetectionThreshold())
                     detected = true;
             }
             sumTwo /= samples.Length;
             _averageVoiceLevel = (_averageVoiceLevel + (float)sumTwo) / 2f;
 
-            return detected || sumTwo > Settings.voiceDetectionThreshold;
+            return detected || sumTwo > LethalLive.SettingsManager.Instance.UserSettings.GetDetectionThreshold();
         }
 
         public static float CalculateRMS(float[] samples)

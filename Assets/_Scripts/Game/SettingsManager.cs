@@ -1,64 +1,67 @@
 using System.IO;
 using UnityEngine;
 
-public class SettingsManager : MonoBehaviour
+namespace LethalLive
 {
-    public static SettingsManager Instance;
-    public Settings UserSettings;
-    string SettingsPath => Path.Combine(Application.persistentDataPath, "UserSettings.json");
-
-    private void Awake()
+    public class SettingsManager : MonoBehaviour
     {
-        if (Instance != null)
+        public static SettingsManager Instance;
+        public Settings UserSettings;
+        string SettingsPath => Path.Combine(Application.persistentDataPath, "UserSettings.json");
+
+        private void Awake()
         {
-            Destroy(gameObject);
+            if (Instance != null)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                Instance = this;
+                LoadSettings();
+            }
         }
-        else
+
+        private void OnDestroy()
         {
-            Instance = this;
-            LoadSettings();
-        }
-    }
-
-    private void OnDestroy()
-    {
-        SaveSettings();
-    }
-
-    public void SaveSettings()
-    {
-        string json = JsonUtility.ToJson(UserSettings, true);
-        File.WriteAllText(SettingsPath, json);
-    }
-
-    public void LoadSettings()
-    {
-        if (!File.Exists(SettingsPath))
-        {
-            UserSettings = new Settings();
             SaveSettings();
-            return;
         }
 
-        string json = File.ReadAllText(SettingsPath);
-        UserSettings = JsonUtility.FromJson<Settings>(json);
-    }
+        public void SaveSettings()
+        {
+            string json = JsonUtility.ToJson(UserSettings, true);
+            File.WriteAllText(SettingsPath, json);
+        }
 
-    public void LockMouse()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
+        public void LoadSettings()
+        {
+            if (!File.Exists(SettingsPath))
+            {
+                UserSettings = new Settings();
+                SaveSettings();
+                return;
+            }
 
-    public void UnlockMouse()
-    {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-    }
+            string json = File.ReadAllText(SettingsPath);
+            UserSettings = JsonUtility.FromJson<Settings>(json);
+        }
 
-    public void SetMouseLockState(bool locked)
-    {
-        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
-        Cursor.visible = !locked;
+        public void LockMouse()
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        public void UnlockMouse()
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        public void SetMouseLockState(bool locked)
+        {
+            Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+            Cursor.visible = !locked;
+        }
     }
 }

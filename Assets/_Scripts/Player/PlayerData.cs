@@ -4,6 +4,7 @@ using Mirror;
 using Steamworks;
 using System.Collections;
 using UnityEngine.Events;
+using LethalLive;
 
 public enum PlayerTeam { White, Red, Blue, Yellow, Green, Pink }
 

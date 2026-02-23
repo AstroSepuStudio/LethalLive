@@ -15,7 +15,7 @@ public class GM_DungeonModule : NetworkBehaviour
     public UnityEvent OnDungeonCloses = new();
     public UnityEvent<int> OnThemeChangedEv = new();
 
-    [SyncVar]
+    [SyncVar(hook = nameof(SetHomewardBeaconPosition))]
     public Vector3 startRoomPos;
 
     [SyncVar(hook = nameof(OnThemeChanged))]
@@ -92,10 +92,13 @@ public class GM_DungeonModule : NetworkBehaviour
     void RpcGenerateMap(int seed, int theme)
     {
         mapGenerator.StartGeneration(seed, theme);
+    }
 
+    private void SetHomewardBeaconPosition(Vector3 oldValue, Vector3 newValue)
+    {
         if (isServer)
         {
-            homewardBeacon.transform.position = startRoomPos;
+            homewardBeacon.transform.position = newValue;
             teleporter.SetParent(homewardBeacon.transform);
         }
     }

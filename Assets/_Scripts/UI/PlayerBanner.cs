@@ -8,14 +8,15 @@ public class PlayerBanner : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI playerName;
     [SerializeField] Image playerIcon;
-    [SerializeField] Image border;
+    public Image border;
 
-    [SerializeField] Color defaultColor = Color.green;
-    [SerializeField] Color talkingColor = Color.white;
+    public Color defaultColor = Color.white;
+    public Color talkingColor = Color.green;
+
+    public float lastTalkTime;
+    public bool IsTalking;
 
     public LobbyMemberData MemberData { get; private set; }
-    Coroutine playerTalked;
-    float talkedTime;
 
     public virtual void SetPlayer(LobbyMemberData memberData)
     {
@@ -23,34 +24,5 @@ public class PlayerBanner : MonoBehaviour
 
         playerName.text = memberData.Name;
         playerIcon.sprite = AvatarUtils.ByteArrayToSprite(memberData.AvatarData);
-    }
-
-    public void PlayerTalked()
-    {
-        if (!gameObject.activeInHierarchy) return;
-
-        talkedTime = Time.time;
-        if (playerTalked != null) return;
-
-        playerTalked = StartCoroutine(PlayerTalkedCor());
-    }
-
-    IEnumerator PlayerTalkedCor()
-    {
-        border.color = talkingColor;
-
-        while (talkedTime > Time.time - 0.3f)
-            yield return null;
-
-        float t = 0;
-        while (t < 0.3f)
-        {
-            t += Time.deltaTime;
-            border.color = Color.Lerp(talkingColor, defaultColor, t / 0.3f);
-            yield return null;
-        }
-
-        border.color = defaultColor;
-        playerTalked = null;
     }
 }

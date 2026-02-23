@@ -40,9 +40,36 @@ public class DeathOverlayManager : NetworkBehaviour
         {
             if (player.MemberData.SteamID != steamID) continue;
 
-            player.PlayerTalked();
+            player.lastTalkTime = Time.time;
+
+            if (!player.IsTalking)
+            {
+                player.IsTalking = true;
+                StartCoroutine(PlayerTalkedCor(player));
+            }
             break;
         }
+    }
+
+    IEnumerator PlayerTalkedCor(PlayerBanner player)
+    {
+        player.border.color = player.talkingColor;
+
+        while (Time.time - player.lastTalkTime < 0.3f)
+        {
+            yield return null;
+        }
+
+        float t = 0;
+        while (t < 0.3f)
+        {
+            t += Time.deltaTime;
+            player.border.color = Color.Lerp(player.talkingColor, player.defaultColor, t / 0.3f);
+            yield return null;
+        }
+
+        player.border.color = player.defaultColor;
+        player.IsTalking = false;
     }
 
     public void EnableOverlay()

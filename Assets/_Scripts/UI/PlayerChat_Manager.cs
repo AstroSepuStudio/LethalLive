@@ -1,4 +1,5 @@
 using Mirror;
+using UnityEngine;
 
 public class PlayerChat_Manager : NetworkBehaviour
 {
@@ -21,6 +22,7 @@ public class PlayerChat_Manager : NetworkBehaviour
             Message = message,
             Team = pData.Team
         };
+        Debug.Log(pData.AvatarData.Length);
 
         foreach (var player in GameManager.Instance.playMod.Players)
         {

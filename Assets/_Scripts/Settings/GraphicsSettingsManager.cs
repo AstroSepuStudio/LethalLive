@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using LethalLive;
 
 public class GraphicsSettingsManager : MonoBehaviour
 {

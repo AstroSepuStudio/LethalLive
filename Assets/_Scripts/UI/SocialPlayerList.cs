@@ -1,5 +1,6 @@
 using Mirror;
 using Steamworks;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static GameManager;
@@ -21,6 +22,8 @@ public class SocialPlayerList : NetworkBehaviour
 
     void OnLobbyMemberDataChanged()
     {
+        if (Instance == null || Instance.playMod.CachedMemberData == null) return;
+
         LobbyMemberData[] members = Instance.playMod.CachedMemberData;
 
         foreach (var banner in playerBanners)
@@ -45,8 +48,35 @@ public class SocialPlayerList : NetworkBehaviour
         {
             if (player.MemberData.SteamID != steamID) continue;
 
-            player.PlayerTalked();
+            player.lastTalkTime = Time.time;
+
+            if (!player.IsTalking)
+            {
+                player.IsTalking = true;
+                StartCoroutine(PlayerTalkedCor(player));
+            }
             break;
         }
+    }
+
+    IEnumerator PlayerTalkedCor(PlayerBanner player)
+    {
+        player.border.color = player.talkingColor;
+
+        while (Time.time - player.lastTalkTime < 0.3f)
+        {
+            yield return null;
+        }
+
+        float t = 0;
+        while (t < 0.3f)
+        {
+            t += Time.deltaTime;
+            player.border.color = Color.Lerp(player.talkingColor, player.defaultColor, t / 0.3f);
+            yield return null;
+        }
+
+        player.border.color = player.defaultColor;
+        player.IsTalking = false;
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using LethalLive;
 
 public class AudioSettingsManager : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class AudioSettingsManager : MonoBehaviour
     [SerializeField] Slider sfxVolumeSlider;
     [SerializeField] Slider ambienceVolumeSlider;
     [SerializeField] Slider voicechatVolumeSlider;
+    [SerializeField] Slider voiceDetectionThreshold;
 
     private void Start()
     {
@@ -20,6 +22,7 @@ public class AudioSettingsManager : MonoBehaviour
         sfxVolumeSlider.value = SettingsManager.UserSettings.GetSFXVolume();
         ambienceVolumeSlider.value = SettingsManager.UserSettings.GetAmbienceVolume();
         voicechatVolumeSlider.value = SettingsManager.UserSettings.GetVoiceChatVolume();
+        voiceDetectionThreshold.value = SettingsManager.UserSettings.GetDetectionThreshold();
     }
 
     public void OnGlobalVolumeChanged(float value)
@@ -61,6 +64,12 @@ public class AudioSettingsManager : MonoBehaviour
                 GameManager.Instance.playMod.LocalPlayer.VCHandler.SetVoiceChatMode(hold2Talk);
 
         SettingsManager.UserSettings.SetHoldToTalk(hold2Talk);
+        SettingsManager.SaveSettings();
+    }
+
+    public void OnDetectionThresholdChanged(float value)
+    {
+        SettingsManager.UserSettings.SetDetectionThreshold(value);
         SettingsManager.SaveSettings();
     }
 }
