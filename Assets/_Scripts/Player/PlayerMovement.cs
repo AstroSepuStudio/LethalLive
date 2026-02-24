@@ -27,6 +27,8 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float friction = 3f;
     [SerializeField] float staminaConsuption_Sprint = 10f;
     [SerializeField] float staminaConsuption_Jump = 20f;
+    [SerializeField] float airRotationSpd = 10f;
+    [SerializeField] float airDecelerationMultiplier = 0.98f;
     Dictionary<int, float> speedModifiers = new();
     int nextModifierId = 0;
     Vector3 externalMomentum = Vector3.zero;
@@ -75,6 +77,9 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] Collider[] res;
     Vector2 movementInput;
     Vector3 velocity;
+    Vector3 airborneVelocity;
+    bool wasGroundedLastFrame;
+
     bool IsGrounded()
     {
         res = Physics.OverlapSphere(feet.position, groundRadius);
@@ -329,6 +334,7 @@ public class PlayerMovement : NetworkBehaviour
 
         groundedTime = IsGrounded() ? coyoteTime : groundedTime > 0 ? groundedTime - Time.deltaTime : 0;
         _isGrounded = groundedTime > 0f;
+
         jumpTime = jumpTime > 0 ? jumpTime - Time.deltaTime : 0;
         _tryJump = jumpTime > 0f;
 
@@ -359,8 +365,10 @@ public class PlayerMovement : NetworkBehaviour
                 }
             }
 
+            bool jpd = false;
             if (_isGrounded && _tryJump)
             {
+                jpd = true;
                 if (Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
                     velocity.y = jumpForce * 0.75f;
                 else
@@ -388,7 +396,12 @@ public class PlayerMovement : NetworkBehaviour
 
             move *= movSpeed * speedMultiplier * (pData.Player_Stats.speed / 100f);
 
-            if (_isSprinting && movementInput.magnitude > 0.1f)
+            if (jpd)
+                airborneVelocity = new Vector3(
+                    move.x + externalMomentum.x, 0f,
+                    move.z + externalMomentum.z);
+
+            if (_isSprinting && movementInput.magnitude > 0.1f && _isGrounded)
                 pData.Player_Stats.ModifyStamina(-staminaConsuption_Sprint * Time.deltaTime);
 
             FootstepUpdate();
@@ -399,10 +412,57 @@ public class PlayerMovement : NetworkBehaviour
         else
             velocity.y += gravity * Time.deltaTime;
 
-        velocity.x = move.x + externalMomentum.x;
-        velocity.z = move.z + externalMomentum.z;
-        pData.Character_Controller.Move(velocity * Time.deltaTime);
+        if (wasGroundedLastFrame && !_isGrounded)
+        {
+            airborneVelocity = new Vector3(
+                    move.x + externalMomentum.x,
+                    0f,
+                    move.z + externalMomentum.z);
 
+            //airborneVelocity = new Vector3(velocity.x, 0f, velocity.z);
+        }
+        wasGroundedLastFrame = _isGrounded;
+
+        if (_isGrounded)
+        {
+            velocity.x = move.x + externalMomentum.x;
+            velocity.z = move.z + externalMomentum.z;
+        }
+        else
+        {
+            //velocity.x = move.x * 0.4f + airborneVelocity.x + externalMomentum.x;
+            //velocity.z = move.z * 0.4f + airborneVelocity.z + externalMomentum.z;
+            Vector3 horizontalAirVel = new(airborneVelocity.x, 0f, airborneVelocity.z);
+
+            if (move.sqrMagnitude > 0.001f)
+            {
+                Vector3 desiredDir = move.normalized;
+                Vector3 currentDir = horizontalAirVel.normalized;
+
+                float currentSpeed = horizontalAirVel.magnitude;
+                float dot = Vector3.Dot(currentDir, desiredDir);
+
+                if (dot < -0.3f)
+                {
+                    currentSpeed *= airDecelerationMultiplier;
+                }
+
+                Vector3 newDir = Vector3.RotateTowards(
+                    currentDir,
+                    desiredDir,
+                    airRotationSpd * Mathf.Deg2Rad * Time.deltaTime,
+                    0f
+                );
+
+                horizontalAirVel = newDir * currentSpeed;
+                airborneVelocity = horizontalAirVel;
+            }
+
+            velocity.x = airborneVelocity.x + externalMomentum.x;
+            velocity.z = airborneVelocity.z + externalMomentum.z;
+        }
+
+        pData.Character_Controller.Move(velocity * Time.deltaTime);
         externalMomentum = Vector3.Lerp(externalMomentum, Vector3.zero, Time.deltaTime * friction);
 
         if (pData.Skin_Data.CharacterAnimator == null) return;
