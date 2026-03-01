@@ -27,6 +27,8 @@ public class GameManager : NetworkBehaviour
     [SyncVar]
     public bool gameStarted = false;
 
+    public bool debug = false;
+
     private void Awake()
     {
         if (Instance != null)
@@ -75,6 +77,8 @@ public class GameManager : NetworkBehaviour
 
         yield return null;
 
+        dngMod.CloseDungeon();
+        dngMod.ResetCooldown();
         playMod.ReviveAllPlayers();
 
         dayMod.currentDay++;
@@ -89,6 +93,7 @@ public class GameManager : NetworkBehaviour
         dayMod.ResetDays();
         ecoMod.ResetEconomy();
         dngMod.CloseDungeon();
+        dngMod.ResetCooldown();
 
         yield return new WaitForSeconds(3f);
 
@@ -100,6 +105,7 @@ public class GameManager : NetworkBehaviour
         dayMod.ResetDays();
         ecoMod.ResetEconomy();
         dngMod.CloseDungeon();
+        dngMod.ResetCooldown();
 
         yield return new WaitForSeconds(3f);
 

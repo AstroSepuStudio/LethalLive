@@ -257,6 +257,18 @@ public class ItemInventory : NetworkBehaviour
         LocalDropItem(false);
     }
 
+    [Server]
+    public void DropEverything()
+    {
+        RpcDropAllItems();
+    }
+
+    [Server]
+    public void DestroyAllItems()
+    {
+        RpcDestroyAllItems();
+    }
+
     [Command]
     void CmdDropItem()
     {
@@ -269,6 +281,12 @@ public class ItemInventory : NetworkBehaviour
 
     [ClientRpc]
     void RpcDropItem() => LocalDropItem();
+
+    [ClientRpc]
+    void RpcDropAllItems() => LocalDropAllItems();
+
+    [ClientRpc]
+    void RpcDestroyAllItems() => LocalDestroyAllItems();
 
     void LocalDropItem(bool drop = true)
     {
@@ -300,6 +318,75 @@ public class ItemInventory : NetworkBehaviour
         pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 0);
 
         if (drop) equippedItem.OnDrop(this);
+        equippedItem = null;
+    }
+
+    void LocalDropAllItems(bool drop = true)
+    {
+        for (int i = 0; i < inventorySlots.Length; i++)
+        {
+            if (inventorySlots[i] == null) continue;
+
+            hotbarSlots[i].RemoveItem();
+            if (drop)
+                inventorySlots[i].OnDrop(this);
+            inventorySlots[i] = null;
+        }
+
+        if (equippedItem == null) return;
+
+        if (!equippedItem.ItemData.droppable) return;
+
+        if (equippedItem.ItemData.isTwoHanded)
+        {
+            pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", false);
+        }
+        else
+        {
+            switch (equippedItem.ItemData.itemName.ToLower())
+            {
+                case "crowbar": pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", false); break;
+
+                default: pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", false); break;
+            }
+        }
+
+        pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 0);
+
+        equippedItem = null;
+    }
+
+    void LocalDestroyAllItems()
+    {
+        for (int i = 0; i < inventorySlots.Length; i++)
+        {
+            if (inventorySlots[i] == null) continue;
+
+            hotbarSlots[i].RemoveItem();
+            if (inventorySlots[i] != equippedItem)
+                Destroy(inventorySlots[i]);
+            inventorySlots[i] = null;
+        }
+
+        if (!equippedItem.ItemData.droppable) return;
+
+        if (equippedItem.ItemData.isTwoHanded)
+        {
+            pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", false);
+        }
+        else
+        {
+            switch (equippedItem.ItemData.itemName.ToLower())
+            {
+                case "crowbar": pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", false); break;
+
+                default: pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", false); break;
+            }
+        }
+
+        pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, 0);
+
+        Destroy(equippedItem);
         equippedItem = null;
     }
 

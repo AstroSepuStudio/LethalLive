@@ -1,9 +1,13 @@
 using UnityEngine;
+using static LL_Tier;
 
 [CreateAssetMenu(menuName = "LethalLive/Item")]
-public class ItemSO : ScriptableObject
+public class ItemSO : ScriptableObject, IHaveTier
 {
     public GameObject itemPrefab;
+    public Tier Tier;
+    public Tier GetTier() => Tier;
+
     public string itemName;
     public Sprite icon;
     public bool isTwoHanded;

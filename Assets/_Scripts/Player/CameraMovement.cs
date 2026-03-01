@@ -49,7 +49,6 @@ public class CameraMovement : MonoBehaviour
     private void LateUpdate()
     {
         if (pData == null) return;
-        if (pData._LockPlayer) return;
 
         pData.CameraPivot.position = Vector3.SmoothDamp(
             pData.CameraPivot.position,
@@ -57,6 +56,7 @@ public class CameraMovement : MonoBehaviour
             ref velocity,
             smoothTime);
 
+        if (pData._LockPlayer || Cursor.lockState == CursorLockMode.None) return;
         if (!pData.isLocalPlayer || _stop || pData.HUDManager.OpenedWindow) return;
 
         Vector2 camOffset = pData.Player_Input.actions["AdjustCam"].ReadValue<Vector2>();

@@ -4,33 +4,14 @@ using UnityEngine;
 
 public class FurnitureEntity : EntityStats
 {
+    [Space]
+    [Header("Furniture")]
+    [SerializeField] FurnitureDataSO dataSO;
+
     [SerializeField] Rigidbody rb;
     [SerializeField] AudioSFX[] strongHitSFX;
 
     public List<LootPosition> lootPositions;
-
-    [SerializeField] ItemDropThreshold[] dropThresholds;
-    [SerializeField] ItemDrop[] lootTable;
-
-    [SerializeField] float minDistance = 1f;
-    [SerializeField] float maxDistance = 2f;
-
-    [System.Serializable]
-    struct ItemDrop
-    {
-        public ItemSO Item;
-        public float dropChance;
-        public int minQuantity;
-        public int maxQuantity;
-    }
-
-    [System.Serializable]
-    struct ItemDropThreshold
-    {
-        public ItemDrop Item_Drop;
-        public float dropThreshold; // Ex: 50% (currentHP)
-        public bool dropped;
-    }
 
     public override void ModifyKnock(float amount, Vector3 momentum)
     {
@@ -43,15 +24,15 @@ public class FurnitureEntity : EntityStats
     {
         currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
 
-        for (int i = 0; i < dropThresholds.Length; i++)
+        for (int i = 0; i < dataSO.dropThresholds.Length; i++)
         {
-            if (dropThresholds[i].dropped) continue;
+            if (dataSO.dropThresholds[i].dropped) continue;
 
-            float hpThreshold = maxHP * (dropThresholds[i].dropThreshold / 100);
+            float hpThreshold = maxHP * (dataSO.dropThresholds[i].dropThreshold / 100);
             if (currentHP <= hpThreshold)
             {
-                if (TryDropItem(dropThresholds[i].Item_Drop))
-                    dropThresholds[i].dropped = true;
+                if (TryDropItem(dataSO.dropThresholds[i].Item_Drop))
+                    dataSO.dropThresholds[i].dropped = true;
             }
         }
 
@@ -73,7 +54,7 @@ public class FurnitureEntity : EntityStats
     {
         RequestPlaySFX(2);
 
-        foreach (var item in lootTable)
+        foreach (var item in dataSO.lootTable)
         {
             TryDropItem(item);
         }
@@ -82,7 +63,7 @@ public class FurnitureEntity : EntityStats
     }
 
     [Server]
-    bool TryDropItem(ItemDrop ItemDrop)
+    bool TryDropItem(FurnitureDataSO.ItemDrop ItemDrop)
     {
         float rand = Random.Range(0f, 100f);
         if (rand > ItemDrop.dropChance)
@@ -93,7 +74,7 @@ public class FurnitureEntity : EntityStats
         for (int q = 0; q < quantity; q++)
         {
             Vector2 randomCircle = Random.insideUnitCircle.normalized;
-            float distance = Random.Range(minDistance, maxDistance);
+            float distance = Random.Range(dataSO.minDistance, dataSO.maxDistance);
             Vector3 offset = new Vector3(randomCircle.x, 1f, randomCircle.y) * distance;
             Vector3 pos = transform.position + offset;
             GameObject spawned = Instantiate(ItemDrop.Item.itemPrefab, pos, Quaternion.identity);
@@ -134,5 +115,15 @@ public class FurnitureEntity : EntityStats
             AudioManager.Instance.PlayOneShotAndDestroy(transform.position, diedSFX[sfxIndex]);
         else if (index == 3 && strongHitSFX.Length > 0)
             AudioManager.Instance.PlayOneShot(audioSource, strongHitSFX[sfxIndex]);
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (GameManager.Instance == null) return;
+        if (!GameManager.Instance.debug) return;
+
+        Color color = new(Random.Range(0, 255), Random.Range(0, 255), Random.Range(0, 255));
+        Gizmos.color = color;
+        Gizmos.DrawWireSphere(transform.position, 1.5f);
     }
 }

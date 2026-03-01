@@ -16,7 +16,7 @@ public class RoomData : MonoBehaviour
     [SerializeField] private WallPortKey[] ports = Array.Empty<WallPortKey>();
     public RoomDataSO Data;
     public List<LootPosition> itemSpawnPositions;
-    public List<FurniturePosition> furnitureSpawnPositions;
+    public List<FurnitureDataSO.FurniturePosition> furnitureSpawnPositions;
     public List<Transform> entitySpawnerPositions;
     public Renderer[] roomRenderers;
     public Light[] roomLights;

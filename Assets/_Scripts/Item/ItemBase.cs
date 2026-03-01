@@ -99,4 +99,14 @@ public class ItemBase : InteractableObject
     public virtual void PrimaryAnimationFinish() { }
     public virtual void SecondaryAnimationTrigger() { }
     public virtual void SecondaryAnimationFinish() { }
+
+    private void OnDrawGizmos()
+    {
+        if (GameManager.Instance == null) return;
+        if (!GameManager.Instance.debug) return;
+
+        Color color = new(Random.Range(0, 255), Random.Range(0, 255), Random.Range(0, 255));
+        Gizmos.color = color;
+        Gizmos.DrawWireSphere(transform.position, 0.5f);
+    }
 }

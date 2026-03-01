@@ -1,4 +1,5 @@
 using Mirror;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using static GameManager;
@@ -7,9 +8,10 @@ public class GM_DungeonModule : NetworkBehaviour
 {
     [field: SerializeField] public ThemeDataSO[] ThemeDatas { get; private set; }
 
-    [SerializeField] MapGenerator mapGenerator;
+    [SerializeField] DungeonGenerator mapGenerator;
     [SerializeField] Int_Teleport teleporter;
     [SerializeField] Int_HomewardBeacon homewardBeacon;
+    [SerializeField] float generationCD = 300;
 
     public UnityEvent OnDungeonOpens = new();
     public UnityEvent OnDungeonCloses = new();
@@ -26,6 +28,9 @@ public class GM_DungeonModule : NetworkBehaviour
 
     [SyncVar]
     public bool dungeonOpen = false;
+
+    [SyncVar]
+    public float genTimer = 0;
 
     private void OnThemeChanged(int oldValue, int newValue) => OnThemeChangedEv?.Invoke(newValue);
 
@@ -49,6 +54,8 @@ public class GM_DungeonModule : NetworkBehaviour
     [Server]
     public void OpenDungeon()
     {
+        StartCoroutine(GenerationCooldown());
+
         OnDungeonOpens?.Invoke();
         dungeonOpen = true;
 
@@ -66,8 +73,17 @@ public class GM_DungeonModule : NetworkBehaviour
     }
 
     [Server]
+    public void ResetCooldown() => genTimer = 0;
+
+    [Server]
     public void TryOpenNewDungeon()
     {
+        if (genTimer > 0)
+        {
+            Debug.Log($"Generation on cooldown {genTimer}");
+            return;
+        }
+
         if (!Instance.gameStarted)
             Instance.StartGame();
 
@@ -127,5 +143,16 @@ public class GM_DungeonModule : NetworkBehaviour
     {
         Instance.dayMod.StartDay();
         mapGenerator.OnDungeonGenerated.RemoveListener(StartDay);
+    }
+
+    IEnumerator GenerationCooldown()
+    {
+        genTimer = generationCD;
+        while (genTimer > 0)
+        {
+            genTimer -= Time.deltaTime;
+            yield return null;
+        }
+        genTimer = 0;
     }
 }

@@ -1,79 +1,91 @@
+using System.Collections.Generic;
 using UnityEngine;
+using static DungeonGenerator;
 
 public class DynamicOcclusionCulling : MonoBehaviour
 {
-    [SerializeField] bool useCameraView = true;
-    [SerializeField] int aRR_H = 6;
-    [SerializeField] int aRR_V = 2;
+    [SerializeField] int renderDistance = 3;
+    [SerializeField] int triesToUpdate = 10;
 
-    void OnEnable()
-    {
-        GameTick.OnTick += UpdateCulling;
-    }
+    int updateTries = 0;
+    Vector3Int lastCellPos = Vector3Int.zero;
+    bool disabledAll = false;
 
-    void OnDisable()
-    {
-        GameTick.OnTick -= UpdateCulling;
-    }
+    void OnEnable() { GameTick.OnTick += UpdateCulling; }
+    void OnDisable() { GameTick.OnTick -= UpdateCulling; }
 
-    void UpdateCulling()
+    private void UpdateCulling()
     {
-        if (!MapGenerator.Instance.GeneratedDungeon) return;
+        if (!Instance.GeneratedDungeon) return;
 
         PlayerData pData = GameManager.Instance.playMod.LocalPlayer.Spectator_Movement.GetPlayerData();
 
-        if (useCameraView)
-        {
-            Plane[] planes = GeometryUtility.CalculateFrustumPlanes(pData.PlayerCamera);
+        Vector3 playerPos = pData.transform.position;
+        Vector3Int cellPosition = new(
+            Mathf.RoundToInt(playerPos.x) / Instance.CellSize,
+            Mathf.RoundToInt(playerPos.y) / Instance.CellSize,
+            Mathf.RoundToInt(playerPos.z) / Instance.CellSize
+        );
 
-            foreach (var room in MapGenerator.Instance.SpawnedRooms)
+        if (!Instance.InBounds(cellPosition))
+        {
+            if (!disabledAll)
             {
-                room.Value.SetRender(GeometryUtility.TestPlanesAABB(planes, room.Value.roomBounds));
+                foreach (var room in Instance.SpawnedRooms)
+                    room.Value.SetRender(false);
+                disabledAll = true;
+            }
+            return;
+        }
+
+        disabledAll = false;
+
+        if (lastCellPos == cellPosition && updateTries < triesToUpdate)
+        {
+            updateTries++;
+            return;
+        }
+        lastCellPos = cellPosition;
+        updateTries = 0;
+
+        var grid = Instance.Grid;
+        var startCell = grid[cellPosition.x, cellPosition.y, cellPosition.z];
+        if (startCell?.placedRoom == null) return;
+
+        int startId = startCell.placedRoom.id;
+        var adjacency = Instance.RoomAdjacency;
+
+        HashSet<int> coreVisible = new();
+        Queue<(int id, int depth)> queue = new();
+
+        coreVisible.Add(startId);
+        queue.Enqueue((startId, 0));
+
+        while (queue.Count > 0)
+        {
+            var (id, depth) = queue.Dequeue();
+
+            if (depth >= renderDistance) continue;
+
+            if (!adjacency.TryGetValue(id, out var neighbors)) continue;
+
+            foreach (var neighborId in neighbors)
+            {
+                if (coreVisible.Contains(neighborId)) continue;
+                coreVisible.Add(neighborId);
+                queue.Enqueue((neighborId, depth + 1));
             }
         }
-        else
+
+        // Bleeding pass
+        HashSet<int> expanded = new(coreVisible);
+        if (adjacency.TryGetValue(startId, out var playerRoomNeighbors))
         {
-            foreach (var room in MapGenerator.Instance.SpawnedRooms)
-            {
-                room.Value.SetRender(false);
-            }
+            foreach (var neighborId in playerRoomNeighbors)
+                expanded.Add(neighborId);
         }
 
-        if (aRR_H <= 0 || aRR_V <= 0) return;
-
-        // Always render 3x3 area
-        Vector3 pp = pData.transform.position;
-        Vector3Int cellPosition = Vector3Int.zero;
-        cellPosition.x = Mathf.RoundToInt(pp.x) / MapGenerator.Instance.CellSize;
-        cellPosition.y = Mathf.RoundToInt(pp.y) / MapGenerator.Instance.CellSize;
-        cellPosition.z = Mathf.RoundToInt(pp.z) / MapGenerator.Instance.CellSize;
-
-        var grid = MapGenerator.Instance.Grid;
-
-        for (int dx = -aRR_H; dx <= aRR_H; dx++) 
-        { 
-            for (int dz = -aRR_H; dz <= aRR_H; dz++) 
-            {
-                for (int dy = -aRR_V; dy <= aRR_V; dy++)
-                {
-                    int nx = cellPosition.x + dx;
-                    int nz = cellPosition.z + dz;
-                    int ny = cellPosition.y + dy;
-                    if (nx < 0 ||
-                        nz < 0 ||
-                        ny < 0 ||
-                        nx >= grid.GetLength(0) ||
-                        nz >= grid.GetLength(2) ||
-                        ny >= grid.GetLength(1))
-                        continue;
-
-                    var cell = grid[nx, ny, nz];
-                    if (cell?.placedRoom != null)
-                    {
-                        MapGenerator.Instance.SpawnedRooms[cell.placedRoom.id].SetRender(true);
-                    }
-                }
-            } 
-        }
+        foreach (var r in Instance.SpawnedRooms)
+            r.Value.SetRender(expanded.Contains(r.Key));
     }
 }

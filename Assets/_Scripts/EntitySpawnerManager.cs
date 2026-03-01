@@ -33,8 +33,8 @@ public class EntitySpawnerManager : NetworkBehaviour
     {
         if (isServer)
         {
-            GameManager.Instance.dayMod.OnDayStarted.AddListener(OnDayStarted);
-            GameManager.Instance.dayMod.OnDayEnded.AddListener(OnDayEnded);
+            GameManager.Instance.dngMod.OnDungeonOpens.AddListener(OnDungeonOpens);
+            GameManager.Instance.dngMod.OnDungeonCloses.AddListener(OnDungeonCloses);
         }
     }
 
@@ -42,17 +42,29 @@ public class EntitySpawnerManager : NetworkBehaviour
     {
         if (isServer)
         {
-            GameManager.Instance.dayMod.OnDayStarted.RemoveListener(OnDayStarted);
-            GameManager.Instance.dayMod.OnDayEnded.RemoveListener(OnDayEnded);
+            GameManager.Instance.dngMod.OnDungeonOpens.RemoveListener(OnDungeonOpens);
+            GameManager.Instance.dngMod.OnDungeonCloses.RemoveListener(OnDungeonCloses);
         }
     }
 
-    private void OnDayEnded(int day)
+    private void OnDungeonCloses()
     {
+        foreach (var e in aliveEntities)
+        {
+            if (e == null) continue;
+            NetworkServer.Destroy(e.gameObject);
+        }
+
+        foreach (var e in deadEntities)
+        {
+            if (e == null) continue;
+            NetworkServer.Destroy(e.gameObject);
+        }
+
         StopCoroutine(enemySpawningCoroutine);
     }
 
-    private void OnDayStarted(int day)
+    private void OnDungeonOpens()
     {
         enemySpawningCoroutine = StartCoroutine(EnemySpawning());
     }
@@ -133,10 +145,10 @@ public class EntitySpawnerManager : NetworkBehaviour
         foreach (var spawn in entitySpawn)
         {
             cumulative += spawn.spawnWeight;
-            if (roll <= cumulative)
+            int positionIndex = Random.Range(0, spawnerPositions.Length);
+            Transform position = spawnerPositions[positionIndex];
+            if (roll <= cumulative * DungeonGenerator.Instance.GetDificultyMultiplier(position.position))
             {
-                int positionIndex = Random.Range(0, spawnerPositions.Length);
-                Transform position = spawnerPositions[positionIndex];
                 GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation);
                 NetworkServer.Spawn(entityObj);
 

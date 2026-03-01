@@ -274,6 +274,7 @@ public class PlayerData : NetworkBehaviour
     {
         GameManager.Instance.playMod.PlayerDies(netId);
         Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
+        PlayerInventory.DropEverything();
         Rpc_OnPlayerDeath();
     }
 

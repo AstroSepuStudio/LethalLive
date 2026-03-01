@@ -211,9 +211,9 @@ public class VortexAI : NetworkBehaviour
 
     void PickNewWanderDestination()
     {
-        if (MapGenerator.Instance != null && MapGenerator.Instance.GeneratedDungeon)
+        if (DungeonGenerator.Instance != null && DungeonGenerator.Instance.GeneratedDungeon)
         {
-            Vector3 position = MapGenerator.Instance.GetRandomPosition();
+            Vector3 position = DungeonGenerator.Instance.GetRandomPosition();
             agent.SetDestination(position);
             return;
         }

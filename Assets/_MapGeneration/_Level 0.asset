@@ -47,9 +47,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b49e30fbb5f9cb745b662de9b31ac9d4, type: 2}
   - {fileID: 11400000, guid: 21421b535844a01479c45506a9d63be6, type: 2}
   deadEndRooms: []
-  spawnableItems: []
-  furniturePrefabs: []
-  entitySpawns: []
+  spawnableItems:
+  - {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
+  - {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+  - {fileID: 11400000, guid: 3c30ba55c7604f4498556a7791c247f0, type: 2}
+  spawnableFurniture:
+  - {fileID: 11400000, guid: 5ec73b96afe77a740b868e17e16ac691, type: 2}
+  entitySpawns:
+  - entityPrefab: {fileID: 284735472298521281, guid: 915dc52131c4b7f4db4cda7c84aec2f3, type: 3}
+    spawnWeight: 10
+    minSpawnCount: 1
+    maxSpawnCount: 2
   loopingMusic: {fileID: 11400000, guid: 21e4fcf983c0ff04ea75d61c8c3ef203, type: 2}
   eerySFX: []
   MinItems: 3

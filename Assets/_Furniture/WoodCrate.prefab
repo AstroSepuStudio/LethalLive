@@ -141,41 +141,23 @@ MonoBehaviour:
   currentKnock: 0
   strenght: 0
   speed: 0
+  dataSO: {fileID: 11400000, guid: 5ec73b96afe77a740b868e17e16ac691, type: 2}
   rb: {fileID: 3239674297409390666}
   strongHitSFX:
   - {fileID: 11400000, guid: 708f6ea01fb19b64bb00d0c9d4248899, type: 2}
   lootPositions:
   - position: {fileID: 2468905640288472950}
     maxOffset: {x: 0, y: 0, z: 0}
-    chance: 20
+    chance: 10
   - position: {fileID: 3257007326395931590}
     maxOffset: {x: 0, y: 0, z: 0}
-    chance: 20
+    chance: 10
   - position: {fileID: 6699951464937609206}
     maxOffset: {x: 0, y: 0, z: 0}
-    chance: 20
+    chance: 10
   - position: {fileID: 635165725465157655}
     maxOffset: {x: 0, y: 0, z: 0}
-    chance: 20
-  dropThresholds:
-  - Item_Drop:
-      Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
-      dropChance: 100
-      minQuantity: 1
-      maxQuantity: 2
-    dropThreshold: 50
-    dropped: 0
-  lootTable:
-  - Item: {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
-    dropChance: 30
-    minQuantity: 1
-    maxQuantity: 1
-  - Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
-    dropChance: 100
-    minQuantity: 1
-    maxQuantity: 5
-  minDistance: 0.3
-  maxDistance: 1
+    chance: 10
 --- !u!82 &1878123820758244030
 AudioSource:
   m_ObjectHideFlags: 0

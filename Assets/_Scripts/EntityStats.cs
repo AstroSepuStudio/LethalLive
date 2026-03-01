@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class EntityStats : NetworkBehaviour
 {
+    [Header("Entity Stats")]
     [SerializeField] protected AudioSource audioSource;
     [SerializeField] protected AudioSFX[] takeDamageSFX;
     [SerializeField] protected AudioSFX[] knockedSFX;

@@ -888,6 +888,37 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &45718052
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 45718053}
+  m_Layer: 0
+  m_Name: Entity Spawner Parent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &45718053
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 45718052}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1410324980}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &47228675
 GameObject:
   m_ObjectHideFlags: 0
@@ -39043,6 +39074,7 @@ MonoBehaviour:
   mapGenerator: {fileID: 1410324981}
   teleporter: {fileID: 2066666727}
   homewardBeacon: {fileID: 7233261649696463764}
+  generationCD: 300
   OnDungeonOpens:
     m_PersistentCalls:
       m_Calls: []
@@ -39056,6 +39088,7 @@ MonoBehaviour:
   selectedTheme: 0
   mapSeed: 0
   dungeonOpen: 0
+  genTimer: 0
 --- !u!4 &1145969124 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8024986880752806315, guid: ba05fcd835a57154fb4482cdc588cd3f, type: 3}
@@ -49163,6 +49196,7 @@ Transform:
   - {fileID: 1993879864}
   - {fileID: 832593851}
   - {fileID: 822107717}
+  - {fileID: 45718053}
   m_Father: {fileID: 382441220}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1410324981
@@ -49174,7 +49208,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1410324979}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e46469ced965cd4390b376261d14f8f, type: 3}
+  m_Script: {fileID: 11500000, guid: 06945298f6edcd141a4c5b0b4479ff68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncMethod: 0
@@ -49186,13 +49220,38 @@ MonoBehaviour:
   roomsParent: {fileID: 1993879864}
   furnitureParent: {fileID: 832593851}
   itemsParent: {fileID: 822107717}
+  entSpawnParent: {fileID: 45718053}
   surface: {fileID: 1993879865}
+  difficultyCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0.000037937225
+      outSlope: 0.000037937225
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 1
+    - serializedVersion: 3
+      time: 20
+      value: 10
+      inSlope: 24.206398
+      outSlope: 24.206398
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0.010863495
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   gameSeed: Default
   seed: 0
-  gridSize: {x: 25, y: 15, z: 25}
+  gridSize: {x: 10, y: 5, z: 10}
   cellSize: 5
-  maxRooms: 25
-  maxDepth: 5
+  maxRooms: 250
+  maxDepth: 1
   generateOnStart: 0
   seedDisplayCanvas: {fileID: 1348597482}
   seedDisplayTransform: {fileID: 1067416731}
@@ -49201,6 +49260,7 @@ MonoBehaviour:
   OnDungeonGenerated:
     m_PersistentCalls:
       m_Calls: []
+  maxDistance: 0
 --- !u!114 &1410324982
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59385,6 +59445,7 @@ MonoBehaviour:
   playMod: {fileID: 1867659647}
   dngMod: {fileID: 1142356163}
   gameStarted: 0
+  debug: 0
 --- !u!4 &1730614855
 Transform:
   m_ObjectHideFlags: 0
@@ -64407,9 +64468,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b46effdbb0f1b1c479140de2e550b49b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DynamicOcclusionCulling
-  useCameraView: 0
-  aRR_H: 8
-  aRR_V: 2
+  renderDistance: 4
+  triesToUpdate: 10
 --- !u!1 &1867659645
 GameObject:
   m_ObjectHideFlags: 0
