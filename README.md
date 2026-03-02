@@ -1,4 +1,4 @@
-# ⚠️ LETHAL LIVE
+# ⚠️ LETHAL LIVE (WIP)
 
 > *"Suit up. Scavenge. Survive. Don't miss quota."*
 
