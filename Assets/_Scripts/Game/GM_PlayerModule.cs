@@ -116,6 +116,8 @@ public class GM_PlayerModule : NetworkBehaviour
             Vector3 spawnPos = spawn ? spawn.position : transform.position;
 
             player.RevivePlayer(spawnPos);
+            player._PlayerInOffice = true;
+
             deadPlayers.Remove(player.netId);
 
             RefreshLobbyMemberData();
@@ -139,6 +141,8 @@ public class GM_PlayerModule : NetworkBehaviour
             Vector3 spawnPos = spawn ? spawn.position : transform.position;
 
             player.RevivePlayer(spawnPos);
+            player._PlayerInOffice = true;
+
             deadPlayers.Remove(player.netId);
 
             RefreshLobbyMemberData();

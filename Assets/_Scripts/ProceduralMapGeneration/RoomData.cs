@@ -20,24 +20,21 @@ public class RoomData : MonoBehaviour
     public List<Transform> entitySpawnerPositions;
     public Renderer[] roomRenderers;
     public Light[] roomLights;
-    public Bounds roomBounds;
 
     [SerializeField] bool beingRendered = true;
 
-    private void Awake()
-    {
-        RecalculateBounds();   
-    }
+    [Header("Gizmo Settings")]
+    [SerializeField] bool showItemSpawnAreas = false;
+    [SerializeField] bool showFootprint = false;
+    [SerializeField] bool showFootprintCoords = false;
+    [SerializeField] bool showFootprintSprites = false;
 
-    public void RecalculateBounds()
-    {
-        if (roomRenderers.Length == 0)
-            return;
+    [SerializeField] Color fontColor = Color.darkRed;
+    [SerializeField] int fontSize = 25;
+    [SerializeField] int spriteSize = 150;
 
-        roomBounds = roomRenderers[0].bounds;
-        for (int i = 1; i < roomRenderers.Length; i++)
-            roomBounds.Encapsulate(roomRenderers[i].bounds);
-    }
+    [SerializeField] bool useLayers = false;
+    [SerializeField] int currentLayer = 0;
 
     public void SetPort(Vector3Int localCell, Direction face, bool open)
     {
@@ -71,16 +68,81 @@ public class RoomData : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.yellow;
-
-        foreach (var pos in itemSpawnPositions)
+        if (showItemSpawnAreas)
         {
-            if (pos.position == null) continue;
+            Gizmos.color = Color.yellow;
+            foreach (var pos in itemSpawnPositions)
+            {
+                if (pos.position == null) continue;
+                Gizmos.DrawWireCube(pos.position.position, pos.maxOffset * 2f);
+            }
+        }
 
-            Vector3 center = pos.position.position;
-            Vector3 size = pos.maxOffset * 2f;
+        if (Data == null || Data.RoomFootprint == null) return;
 
-            Gizmos.DrawWireCube(center, size);
+        Vector3 origin = transform.position;
+        const float cellSize = 5f;
+
+        foreach (var entry in Data.RoomFootprint)
+        {
+            if (useLayers && entry.Footprint.y != currentLayer)
+                continue;
+
+            Vector3 worldCenter = origin + new Vector3(
+                entry.Footprint.x * cellSize,
+                entry.Footprint.y * cellSize + (cellSize / 2),
+                entry.Footprint.z * cellSize);
+
+            if (showFootprint)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireCube(worldCenter, new Vector3(cellSize, cellSize, cellSize));
+            }
+
+#if UNITY_EDITOR
+            if (showFootprintSprites && entry.MapSprite != null)
+            {
+                Texture2D tex = UnityEditor.AssetPreview.GetAssetPreview(entry.MapSprite);
+                if (tex == null) tex = entry.MapSprite.texture; // fallback to full texture
+
+                if (tex != null)
+                {
+                    float worldSize = spriteSize / 100f; // 100 = pixels per world unit, tweak to taste
+
+                    Vector3 right = UnityEditor.SceneView.lastActiveSceneView?.camera.transform.right ?? Vector3.right;
+                    Vector3 up = UnityEditor.SceneView.lastActiveSceneView?.camera.transform.up ?? Vector3.up;
+
+                    Vector3 tl = worldCenter + (-right + up) * worldSize * 0.5f;
+                    Vector3 tr = worldCenter + (right + up) * worldSize * 0.5f;
+                    Vector3 br = worldCenter + (right - up) * worldSize * 0.5f;
+                    Vector3 bl = worldCenter + (-right - up) * worldSize * 0.5f;
+
+                    // Draw a billboard quad facing the scene camera
+                    UnityEditor.Handles.color = Color.white;
+                    UnityEditor.Handles.DrawSolidRectangleWithOutline(
+                        new Vector3[] { tl, tr, br, bl },
+                        Color.white, Color.clear
+                    );
+
+                    // Overlay the texture on that quad using a GUI callback
+                    UnityEditor.Handles.BeginGUI();
+                    Vector2 guiCenter = UnityEditor.HandleUtility.WorldToGUIPoint(worldCenter);
+                    float guiSize = spriteSize;
+                    Rect guiRect = new Rect(guiCenter.x - guiSize * 0.5f, guiCenter.y - guiSize * 0.5f, guiSize, guiSize);
+                    GUI.DrawTexture(guiRect, tex, ScaleMode.ScaleToFit, true);
+                    UnityEditor.Handles.EndGUI();
+                }
+            }
+
+            if (showFootprintCoords)
+            {
+                UnityEditor.Handles.Label(
+                    worldCenter + Vector3.up * 0.25f,
+                    $"{entry.Footprint.x},{entry.Footprint.y},{entry.Footprint.z}",
+                    new GUIStyle { normal = { textColor = fontColor }, fontSize = fontSize, alignment = TextAnchor.MiddleCenter }
+                );
+            }
+#endif
         }
     }
 }

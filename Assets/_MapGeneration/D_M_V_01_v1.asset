@@ -13,31 +13,49 @@ MonoBehaviour:
   m_Name: D_M_V_01_v1
   m_EditorClassIdentifier: 
   Prefab: {fileID: 6859338258297046723, guid: 0e6cb0dcd5b3e5146ab8250f1b379962, type: 3}
-  Footprint:
-  - {x: 0, y: 0, z: 0}
-  - {x: 1, y: 0, z: 0}
-  - {x: 0, y: 0, z: 1}
-  - {x: 1, y: 0, z: 1}
-  - {x: 0, y: -1, z: 0}
-  - {x: 1, y: -1, z: 0}
-  - {x: 0, y: -1, z: 1}
-  - {x: 1, y: -1, z: 1}
+  biome: 0
+  RoomFootprint:
+  - Footprint: {x: 0, y: 0, z: 0}
+    MapSprite: {fileID: 21300000, guid: 6469faaddb26a904dbf09a9d892ea2f6, type: 3}
+  - Footprint: {x: 1, y: 0, z: 0}
+    MapSprite: {fileID: 21300000, guid: 6d886aeeea22c4f4398ab38631c5793a, type: 3}
+  - Footprint: {x: 0, y: 0, z: 1}
+    MapSprite: {fileID: 21300000, guid: 8cae911f60ba2cd44b7bb7a1681a5a76, type: 3}
+  - Footprint: {x: 1, y: 0, z: 1}
+    MapSprite: {fileID: 21300000, guid: 364fe8144c2123049b4eb6a41583cce6, type: 3}
+  - Footprint: {x: 0, y: -1, z: 0}
+    MapSprite: {fileID: 21300000, guid: 6469faaddb26a904dbf09a9d892ea2f6, type: 3}
+  - Footprint: {x: 1, y: -1, z: 0}
+    MapSprite: {fileID: 21300000, guid: 29f015b1aa9bf914ea2c226b03708643, type: 3}
+  - Footprint: {x: 0, y: -1, z: 1}
+    MapSprite: {fileID: 21300000, guid: 8cae911f60ba2cd44b7bb7a1681a5a76, type: 3}
+  - Footprint: {x: 1, y: -1, z: 1}
+    MapSprite: {fileID: 21300000, guid: 65b2d5431a17fd54186c2fe088de619a, type: 3}
   Ports:
   - localCell: {x: 0, y: 0, z: 1}
     face: 0
+    type: 0
   - localCell: {x: 0, y: 0, z: 0}
     face: 1
+    type: 0
   - localCell: {x: 0, y: 0, z: 0}
     face: 3
+    type: 0
   - localCell: {x: 0, y: 0, z: 1}
     face: 3
+    type: 0
   - localCell: {x: 0, y: -1, z: 1}
     face: 0
+    type: 0
   - localCell: {x: 0, y: -1, z: 0}
     face: 1
+    type: 0
   - localCell: {x: 0, y: -1, z: 0}
     face: 3
+    type: 0
   - localCell: {x: 0, y: -1, z: 1}
     face: 3
+    type: 0
   - localCell: {x: 1, y: 0, z: 0}
     face: 2
+    type: 0

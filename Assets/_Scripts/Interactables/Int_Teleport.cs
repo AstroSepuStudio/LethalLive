@@ -60,6 +60,7 @@ public class Int_Teleport : InteractableObject
         if (!foundValidPos) return;
 
         sourceData.Teleport(desiredPosition);
+        sourceData._PlayerInOffice = false;
 
         canvas.DisableCanvas();
         

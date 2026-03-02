@@ -372,6 +372,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &6986684547017864166
 MeshFilter:
@@ -588,6 +589,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &4186701858196641007
 MeshFilter:
@@ -804,6 +806,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &173493062603823325
 MeshFilter:
@@ -1312,6 +1315,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &3691631986856500179
 MeshFilter:
@@ -1762,6 +1766,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &3692733289173493321
 MeshFilter:
@@ -1923,7 +1928,7 @@ MonoBehaviour:
     face: 3
     wall: {fileID: 1139905599493019200}
     door: {fileID: 0}
-  Data: {fileID: 0}
+  Data: {fileID: 11400000, guid: cc8bb3da76d675e41810e1b49db2b3f0, type: 2}
   itemSpawnPositions:
   - position: {fileID: 3665227010199735901}
     maxOffset: {x: 0.5, y: 0, z: 3}
@@ -1954,6 +1959,19 @@ MonoBehaviour:
   - {fileID: 5920942345067975286}
   - {fileID: 3345472691754934921}
   - {fileID: 4028630613826492912}
+  roomBounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  beingRendered: 1
+  showItemSpawnAreas: 0
+  showFootprint: 0
+  showFootprintCoords: 1
+  showFootprintSprites: 1
+  fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
+  fontSize: 25
+  spriteSize: 150
+  useLayers: 0
+  currentLayer: 0
 --- !u!1 &7326344540596269561
 GameObject:
   m_ObjectHideFlags: 0

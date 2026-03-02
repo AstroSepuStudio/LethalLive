@@ -18,12 +18,6 @@ public struct LootPosition
 public class DungeonGenerator : NetworkBehaviour
 {
     public static DungeonGenerator Instance;
-    static readonly Vector3Int[] AdjacentOffsets =
-    {
-        new( 1, 0, 0), new(-1, 0, 0),
-        new( 0, 1, 0), new( 0,-1, 0),
-        new( 0, 0, 1), new( 0, 0,-1),
-    };
 
     [Header("Content")]
     [SerializeField] ThemeDataSO theme;
@@ -69,11 +63,18 @@ public class DungeonGenerator : NetworkBehaviour
     readonly List<Transform> entitySpawnerPositions = new();
 
     public IReadOnlyDictionary<int, RoomData> SpawnedRooms => spawned;
+    public IReadOnlyList<PlacedRoom> PlacedRooms => placed;
+
+    public Dictionary<int, List<FurnitureEntity>> RoomFurniture = new();
+    public Dictionary<int, List<ItemBase>> RoomItems = new();
+
     public Cell[,,] Grid => grid;
     public int CellSize => cellSize;
     public Vector3Int GridSize => gridSize;
     public UnityEvent OnDungeonGenerated;
+    public UnityEvent OnDungeonClear;
     public Dictionary<int, HashSet<int>> RoomAdjacency = new();
+    public Vector3Int StartRoomPos;
 
     [SerializeField] float maxDistance = 0;
 
@@ -140,6 +141,7 @@ public class DungeonGenerator : NetworkBehaviour
         if (theme == null || theme.startingRoom == null) { Debug.LogError("Theme or startingRoom is missing."); return; }
         var center = new Vector3Int(gridSize.x / 2, Mathf.Clamp(gridSize.y / 2, 0, gridSize.y - 1), gridSize.z / 2); 
         var start = Place(theme.startingRoom, center, depth: 0);
+        StartRoomPos = center * cellSize;
 
         if (GameManager.Instance.isServer)
             GameManager.Instance.dngMod.startRoomPos = center * cellSize;
@@ -215,12 +217,12 @@ public class DungeonGenerator : NetworkBehaviour
         };
         placed.Add(placedRoom);
 
-        foreach (var local in data.Footprint)
+        foreach (var local in data.RoomFootprint)
         {
-            var w = anchor + local;
+            var w = anchor + local.Footprint;
             var cell = grid[w.x, w.y, w.z];
             cell.placedRoom = placedRoom;
-            cell.local = local;
+            cell.local = local.Footprint;
         }
 
         return placedRoom;
@@ -256,9 +258,9 @@ public class DungeonGenerator : NetworkBehaviour
     private bool FootprintFits(RoomDataSO data, Vector3Int anchor)
     {
         if (data == null) return false;
-        for (int i = 0; i < data.Footprint.Length; i++)
+        for (int i = 0; i < data.RoomFootprint.Length; i++)
         {
-            var w = anchor + data.Footprint[i];
+            var w = anchor + data.RoomFootprint[i].Footprint;
             if (!InBounds(w)) return false;
             if (grid[w.x, w.y, w.z].placedRoom != null) return false;
         }
@@ -347,6 +349,18 @@ public class DungeonGenerator : NetworkBehaviour
         }
     }
 
+    public int GetRoomIdAtPosition(Vector3 worldPos)
+    {
+        Vector3Int cellPos = new(
+            Mathf.RoundToInt(worldPos.x) / cellSize,
+            Mathf.RoundToInt(worldPos.y) / cellSize,
+            Mathf.RoundToInt(worldPos.z) / cellSize
+        );
+
+        if (!InBounds(cellPos)) return -1;
+        return grid[cellPos.x, cellPos.y, cellPos.z]?.placedRoom?.id ?? -1;
+    }
+
     #endregion
 
     #region Instantiate
@@ -414,8 +428,17 @@ public class DungeonGenerator : NetworkBehaviour
             GameObject furnObj = Instantiate(data.Prefab, pos.position.position + offset, rot, furnitureParent);
             NetworkServer.Spawn(furnObj);
 
-            FurnitureEntity furnEnt = furnObj.GetComponent<FurnitureEntity>();
+            if (!furnObj.TryGetComponent(out FurnitureEntity furnEnt)) continue;
+
             lootPositions.AddRange(furnEnt.lootPositions);
+
+            int roomId = GetRoomIdAtPosition(pos.position.position);
+            if (roomId != -1)
+            {
+                if (!RoomFurniture.ContainsKey(roomId))
+                    RoomFurniture[roomId] = new();
+                RoomFurniture[roomId].Add(furnEnt);
+            }
         }
 
         Debug.Log($"Furniture spawned -> total: {q}, inner: {inner}, mid: {mid}, outer: {outer}");
@@ -456,6 +479,16 @@ public class DungeonGenerator : NetworkBehaviour
             ItemSO item = theme.GetWeightedItem(pos.position.position);
             GameObject itemObj = Instantiate(item.itemPrefab, pos.position.position + offset, rot, itemsParent);
             NetworkServer.Spawn(itemObj);
+
+            if (!itemObj.TryGetComponent<ItemBase>(out var itemBase)) continue;
+            
+            int roomId = GetRoomIdAtPosition(pos.position.position);
+            if (roomId != -1)
+            {
+                if (!RoomItems.ContainsKey(roomId))
+                    RoomItems[roomId] = new();
+                RoomItems[roomId].Add(itemBase);
+            }
         }
 
         Debug.Log($"Loot spawned -> total: {q}, inner: {inner}, mid: {mid}, outer: {outer}");
@@ -630,6 +663,8 @@ public class DungeonGenerator : NetworkBehaviour
 
     public void ClearMap()
     {
+        OnDungeonClear?.Invoke();
+
         DestroyChildren(roomsParent);
         DestroyChildren(furnitureParent);
         DestroyChildren(itemsParent);
@@ -644,6 +679,8 @@ public class DungeonGenerator : NetworkBehaviour
         lootPositions.Clear();
         furniturePositions.Clear();
         entitySpawnerPositions.Clear();
+        RoomFurniture.Clear();
+        RoomItems.Clear();
 
         grid = null;
         nextRoomId = 1;

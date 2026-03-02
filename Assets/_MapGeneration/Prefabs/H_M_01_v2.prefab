@@ -185,6 +185,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &4186701858196641007
 MeshFilter:
@@ -401,6 +402,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &173493062603823325
 MeshFilter:
@@ -658,6 +660,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &4830062991491228006
 MeshFilter:
@@ -874,6 +877,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &796840052955113194
 MeshFilter:
@@ -1001,7 +1005,7 @@ MonoBehaviour:
     face: 3
     wall: {fileID: 1139905599493019200}
     door: {fileID: 0}
-  Data: {fileID: 0}
+  Data: {fileID: 11400000, guid: cea8b4f4b6af8cc44a47b56b75e07737, type: 2}
   itemSpawnPositions: []
   furnitureSpawnPositions: []
   entitySpawnerPositions: []
@@ -1012,6 +1016,19 @@ MonoBehaviour:
   roomLights:
   - {fileID: 395574645846904005}
   - {fileID: 3299153057295867419}
+  roomBounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  beingRendered: 1
+  showItemSpawnAreas: 0
+  showFootprint: 0
+  showFootprintCoords: 1
+  showFootprintSprites: 1
+  fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
+  fontSize: 25
+  spriteSize: 150
+  useLayers: 0
+  currentLayer: 0
 --- !u!1 &8955281576470855834
 GameObject:
   m_ObjectHideFlags: 0
@@ -1197,6 +1214,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &7095139907198213193
 MeshFilter:

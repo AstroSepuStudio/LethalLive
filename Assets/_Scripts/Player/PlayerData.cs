@@ -85,6 +85,9 @@ public class PlayerData : NetworkBehaviour
     [SyncVar]
     public bool _LockPlayer = false;
 
+    [SyncVar]
+    public bool _PlayerInOffice = false;
+
     [Header("Canvas")]
     public GameObject PlayerCanvas;
 

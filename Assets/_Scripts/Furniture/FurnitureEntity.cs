@@ -6,12 +6,26 @@ public class FurnitureEntity : EntityStats
 {
     [Space]
     [Header("Furniture")]
+    [SerializeField] Renderer furRenderer;
     [SerializeField] FurnitureDataSO dataSO;
 
     [SerializeField] Rigidbody rb;
     [SerializeField] AudioSFX[] strongHitSFX;
 
     public List<LootPosition> lootPositions;
+
+    public void SetRender(bool render)
+    {
+        if (furRenderer == null)
+        {
+            if (furRenderer.TryGetComponent(out Renderer rend))
+                furRenderer = rend;
+            else
+                return;
+        }
+
+        furRenderer.enabled = render;
+    }
 
     public override void ModifyKnock(float amount, Vector3 momentum)
     {

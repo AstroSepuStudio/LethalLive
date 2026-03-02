@@ -9,7 +9,7 @@ public class LobbySettings : NetworkBehaviour
 
     [Header("Lobby Settings")]
     [SyncVar] private ELobbyType lobby_Type = ELobbyType.k_ELobbyTypeFriendsOnly;
-    [SyncVar] private int mapSize = 50;
+    [SyncVar] private int mapSize = 10;
     [SyncVar] private bool teamDamage = false;
     [SyncVar] private bool teamKnock = true;
     [SyncVar] private int maxDays = 3;

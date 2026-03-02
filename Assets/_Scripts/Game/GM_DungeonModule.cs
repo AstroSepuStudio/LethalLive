@@ -17,6 +17,8 @@ public class GM_DungeonModule : NetworkBehaviour
     public UnityEvent OnDungeonCloses = new();
     public UnityEvent<int> OnThemeChangedEv = new();
 
+    public Int_HomewardBeacon HomewardBeacon => homewardBeacon;
+
     [SyncVar(hook = nameof(SetHomewardBeaconPosition))]
     public Vector3 startRoomPos;
 

@@ -89,6 +89,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &8592110826460274391
 BoxCollider:
@@ -296,6 +297,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &4186701858196641007
 MeshFilter:
@@ -512,6 +514,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &173493062603823325
 MeshFilter:
@@ -632,6 +635,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &6737352939486204428
 BoxCollider:
@@ -1192,6 +1196,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &4830062991491228006
 MeshFilter:
@@ -1312,6 +1317,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &7698393977122892919
 BoxCollider:
@@ -1675,6 +1681,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &796840052955113194
 MeshFilter:
@@ -1930,7 +1937,7 @@ MonoBehaviour:
     face: 1
     wall: {fileID: 1139905599493019200}
     door: {fileID: 0}
-  Data: {fileID: 0}
+  Data: {fileID: 11400000, guid: bf7a1f4be44e2124eaa48130a3f06ca1, type: 2}
   itemSpawnPositions: []
   furnitureSpawnPositions: []
   entitySpawnerPositions: []
@@ -1941,6 +1948,19 @@ MonoBehaviour:
   roomLights:
   - {fileID: 9203937027133267501}
   - {fileID: 7241381474516494088}
+  roomBounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  beingRendered: 1
+  showItemSpawnAreas: 0
+  showFootprint: 0
+  showFootprintCoords: 1
+  showFootprintSprites: 1
+  fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
+  fontSize: 25
+  spriteSize: 150
+  useLayers: 0
+  currentLayer: 1
 --- !u!1 &8635226035053102297
 GameObject:
   m_ObjectHideFlags: 0
@@ -2030,6 +2050,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &1337560042353315691
 BoxCollider:
@@ -2393,6 +2414,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &7095139907198213193
 MeshFilter:

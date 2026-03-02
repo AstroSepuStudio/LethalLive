@@ -66,6 +66,8 @@ public class LobbyManagerScreen : UIManagerNetwork
         LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.AddListener(RefreshLobbySettings);
         GameTick.OnSecond += OnSecond;
 
+        mapSize_IP.SetTextWithoutNotify(LobbyManager.Instance.LobbySettings.MapSize.ToString());
+
         Instance.dngMod.OnThemeChangedEv.AddListener(RefreshLevelName);
         Instance.dayMod.OnDayStarted.AddListener(RefreshDay);
         Instance.dayMod.OnDayEnded.AddListener(RefreshDay);

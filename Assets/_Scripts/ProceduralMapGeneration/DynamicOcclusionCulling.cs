@@ -4,6 +4,8 @@ using static DungeonGenerator;
 
 public class DynamicOcclusionCulling : MonoBehaviour
 {
+    [SerializeField] bool docActive = false;
+
     [SerializeField] int renderDistance = 3;
     [SerializeField] int triesToUpdate = 10;
 
@@ -11,12 +13,24 @@ public class DynamicOcclusionCulling : MonoBehaviour
     Vector3Int lastCellPos = Vector3Int.zero;
     bool disabledAll = false;
 
-    void OnEnable() { GameTick.OnTick += UpdateCulling; }
-    void OnDisable() { GameTick.OnTick -= UpdateCulling; }
+    void OnEnable()
+    {
+        GameTick.OnTick -= UpdateCulling;
+        GameTick.OnTick += UpdateCulling;
+    }
+
+    void OnDisable()
+    {
+        GameTick.OnTick -= UpdateCulling;
+
+        if (Instance == null || !Instance.GeneratedDungeon) return;
+        foreach (var room in Instance.SpawnedRooms)
+            room.Value.SetRender(true);
+    }
 
     private void UpdateCulling()
     {
-        if (!Instance.GeneratedDungeon) return;
+        if (!Instance.GeneratedDungeon || !docActive) return;
 
         PlayerData pData = GameManager.Instance.playMod.LocalPlayer.Spectator_Movement.GetPlayerData();
 
@@ -27,7 +41,7 @@ public class DynamicOcclusionCulling : MonoBehaviour
             Mathf.RoundToInt(playerPos.z) / Instance.CellSize
         );
 
-        if (!Instance.InBounds(cellPosition))
+        if (!Instance.InBounds(cellPosition) || GameManager.Instance.playMod.LocalPlayer._PlayerInOffice)
         {
             if (!disabledAll)
             {
@@ -86,6 +100,17 @@ public class DynamicOcclusionCulling : MonoBehaviour
         }
 
         foreach (var r in Instance.SpawnedRooms)
-            r.Value.SetRender(expanded.Contains(r.Key));
+        {
+            bool shouldRender = expanded.Contains(r.Key);
+            r.Value.SetRender(shouldRender);
+
+            if (Instance.RoomFurniture.TryGetValue(r.Key, out var furniture))
+                foreach (var f in furniture)
+                    if (f != null) f.SetRender(shouldRender);
+
+            if (Instance.RoomItems.TryGetValue(r.Key, out var items))
+                foreach (var item in items)
+                    if (item != null) item.SetRender(shouldRender);
+        }
     }
 }

@@ -1,6 +1,7 @@
 using Mirror;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ItemBase : InteractableObject
 {
@@ -8,6 +9,7 @@ public class ItemBase : InteractableObject
     [SerializeField] protected NetworkIdentity identity;
     [SerializeField] protected Rigidbody rb;
     [SerializeField] protected Collider coll;
+    [SerializeField] protected Renderer itemRenderer;
 
     [SerializeField] TextMeshProUGUI itemNameTxt;
     [SerializeField] TextMeshProUGUI itemPriceTxt;
@@ -32,6 +34,19 @@ public class ItemBase : InteractableObject
     {
         if (isServer && ItemData.isSellable)
             ItemValue = Random.Range(ItemData.minValue, ItemData.maxValue);
+    }
+
+    public void SetRender(bool render)
+    {
+        if (itemRenderer == null)
+        {
+            if (itemRenderer.TryGetComponent(out Renderer rend))
+                itemRenderer = rend;
+            else
+                return;
+        }
+
+        itemRenderer.enabled = render;
     }
 
     [Server]

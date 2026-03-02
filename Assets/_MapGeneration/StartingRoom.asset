@@ -16,6 +16,9 @@ MonoBehaviour:
   biome: 0
   Footprint:
   - {x: 0, y: 0, z: 0}
+  RoomFootprint:
+  - Footprint: {x: 0, y: 0, z: 0}
+    MapSprite: {fileID: 0}
   Ports:
   - localCell: {x: 0, y: 0, z: 0}
     face: 0

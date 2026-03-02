@@ -141,6 +141,7 @@ MonoBehaviour:
   currentKnock: 0
   strenght: 0
   speed: 0
+  furRenderer: {fileID: 1896758767346647573}
   dataSO: {fileID: 11400000, guid: 5ec73b96afe77a740b868e17e16ac691, type: 2}
   rb: {fileID: 3239674297409390666}
   strongHitSFX:
@@ -439,5 +440,10 @@ PrefabInstance:
 --- !u!4 &727763241804102010 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 6711c8fa340877443a02d76ca217cc11, type: 3}
+  m_PrefabInstance: {fileID: 978180165230960273}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1896758767346647573 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 6711c8fa340877443a02d76ca217cc11, type: 3}
   m_PrefabInstance: {fileID: 978180165230960273}
   m_PrefabAsset: {fileID: 0}

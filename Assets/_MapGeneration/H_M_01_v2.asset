@@ -14,11 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Prefab: {fileID: 6859338258297046723, guid: ec00fa296ecf0a84eb129ba552ce8cf3, type: 3}
   biome: 3
-  Footprint:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 1}
-  - {x: 1, y: 0, z: 0}
-  - {x: 1, y: 0, z: 1}
+  RoomFootprint:
+  - Footprint: {x: 0, y: 0, z: 0}
+    MapSprite: {fileID: 21300000, guid: 6d611c73dfd179c40b32f220cc3b06a2, type: 3}
+  - Footprint: {x: 0, y: 0, z: 1}
+    MapSprite: {fileID: 21300000, guid: 608631a97780db845b41b74482191de7, type: 3}
+  - Footprint: {x: 1, y: 0, z: 0}
+    MapSprite: {fileID: 21300000, guid: 2917dd46f098fd546917d0162b75e699, type: 3}
+  - Footprint: {x: 1, y: 0, z: 1}
+    MapSprite: {fileID: 21300000, guid: 09b8fca65d02ec7448249a8ebd709d1b, type: 3}
   Ports:
   - localCell: {x: 0, y: 0, z: 0}
     face: 3

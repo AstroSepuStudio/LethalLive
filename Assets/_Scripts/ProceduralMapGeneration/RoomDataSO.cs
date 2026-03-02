@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "LethalLive/RoomData")]
 public class RoomDataSO : ScriptableObject
 {
+    public enum PortType { Doorway, Continuous }
+
     [Serializable]
     public struct RoomPort
     {
@@ -12,20 +14,25 @@ public class RoomDataSO : ScriptableObject
         public PortType type;
     }
 
-    public enum PortType
+    [Serializable]
+    public struct FootprintStr
     {
-        Doorway,
-        Continuous
+        public Vector3Int Footprint;
+        public Sprite MapSprite;
     }
 
     public GameObject Prefab;
     public Biome biome = Biome.Default;
-    public Vector3Int[] Footprint = new Vector3Int[] { Vector3Int.zero };
+
+    //public Vector3Int[] Footprint = new Vector3Int[] { Vector3Int.zero };
+    public Color roomColor = Color.white;
+    public FootprintStr[] RoomFootprint = Array.Empty<FootprintStr>();
+
     public RoomPort[] Ports = Array.Empty<RoomPort>();
 
     public bool ContainsLocalCell(in Vector3Int local)
     {
-        for (int i = 0; i < Footprint.Length; i++) if (Footprint[i] == local) return true;
+        for (int i = 0; i < RoomFootprint.Length; i++) if (RoomFootprint[i].Footprint == local) return true;
         return false;
     }
 }

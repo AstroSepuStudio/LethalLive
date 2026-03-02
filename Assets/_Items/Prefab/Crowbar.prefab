@@ -121,6 +121,7 @@ MonoBehaviour:
   identity: {fileID: 6818651458780780045}
   rb: {fileID: 2342669760519003277}
   coll: {fileID: 2545860507069542307}
+  itemRenderer: {fileID: 8832228895478999914}
   itemNameTxt: {fileID: 9102689919361804620}
   itemPriceTxt: {fileID: 6880008698537713054}
   Index: 0
@@ -550,5 +551,10 @@ AudioSource:
 --- !u!4 &7699270516639043589 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2ca4c87c722289b43adde1d0c123356c, type: 3}
+  m_PrefabInstance: {fileID: 7877909293491943406}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8832228895478999914 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 2ca4c87c722289b43adde1d0c123356c, type: 3}
   m_PrefabInstance: {fileID: 7877909293491943406}
   m_PrefabAsset: {fileID: 0}

@@ -779,6 +779,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &5984249877254787582
 MeshFilter:
@@ -1091,6 +1092,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &8663308447916002552
 MeshFilter:
@@ -2218,6 +2220,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &4225272592230811136
 MeshFilter:
@@ -2318,7 +2321,7 @@ MonoBehaviour:
     face: 3
     wall: {fileID: 7902075461504336613}
     door: {fileID: 0}
-  Data: {fileID: 0}
+  Data: {fileID: 11400000, guid: d1dc947ea053de54ca1648fb0d564d9d, type: 2}
   itemSpawnPositions:
   - position: {fileID: 966753672010881581}
     maxOffset: {x: 2, y: 0, z: 2}
@@ -2347,6 +2350,17 @@ MonoBehaviour:
   - {fileID: 3360243180150290842}
   - {fileID: 305521879740468522}
   - {fileID: 5982349376885146103}
+  roomBounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  beingRendered: 1
+  showItemSpawnAreas: 1
+  showFootprint: 1
+  showFootprintCoords: 1
+  showFootprintSprites: 1
+  fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
+  fontSize: 25
+  spriteSize: 150
 --- !u!1 &6920348852391357163
 GameObject:
   m_ObjectHideFlags: 0
@@ -2532,6 +2546,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &436623381327820524
 MeshFilter:
@@ -2782,6 +2797,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1242189596428609455
 MeshFilter:
@@ -3655,6 +3671,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &2138076287652932856
 MeshFilter:
@@ -3871,6 +3888,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &2954117244334874567
 MeshFilter:
