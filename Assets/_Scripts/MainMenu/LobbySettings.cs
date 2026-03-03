@@ -13,6 +13,7 @@ public class LobbySettings : NetworkBehaviour
     [SyncVar] private bool teamDamage = false;
     [SyncVar] private bool teamKnock = true;
     [SyncVar] private int maxDays = 3;
+    [SyncVar] private bool useSetSeed = false;
 
     public ELobbyType Lobby_Type => lobby_Type;
     public int MapSize => mapSize;
@@ -20,6 +21,8 @@ public class LobbySettings : NetworkBehaviour
     public bool TeamKnock => teamKnock;
 
     public int MaxDays => maxDays;
+
+    public bool UseSetSeed => useSetSeed;
 
     public UnityEvent OnLobbySettingsChanged;
 
@@ -61,6 +64,13 @@ public class LobbySettings : NetworkBehaviour
     public void SetMaxDays(int maxDays)
     {
         this.maxDays = maxDays;
+        Rpc_LobbySettingsChanged();
+    }
+
+    [Server]
+    public void SetUseSetSeed(bool useSetSeed)
+    {
+        this.useSetSeed = useSetSeed;
         Rpc_LobbySettingsChanged();
     }
 

@@ -2907,14 +2907,18 @@ MonoBehaviour:
   furnitureSpawnPositions: []
   entitySpawnerPositions: []
   roomRenderers:
+  - {fileID: 1320188683045567862}
+  - {fileID: 2734533666922115502}
   - {fileID: 1871273562808815107}
   - {fileID: 9114911972048381305}
   - {fileID: 5624045176572024923}
+  - {fileID: 3096962779179652150}
+  - {fileID: 7708221638271193412}
+  - {fileID: 2412949786478203187}
+  - {fileID: 8882785824798355551}
+  - {fileID: 7822858696686299766}
   roomLights:
   - {fileID: 4190881419233961473}
-  roomBounds:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0, y: 0, z: 0}
   beingRendered: 1
   showItemSpawnAreas: 0
   showFootprint: 0
@@ -3447,6 +3451,16 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!23 &1320188683045567862 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 2537694151740755623}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2734533666922115502 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 2537694151740755623}
+  m_PrefabAsset: {fileID: 0}
 --- !u!108 &4190881419233961473 stripped
 Light:
   m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}

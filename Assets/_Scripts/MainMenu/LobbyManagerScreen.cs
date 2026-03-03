@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using static GameManager;
+using static UnityEngine.Rendering.DebugUI;
 
 public class LobbyManagerScreen : UIManagerNetwork
 {
@@ -46,6 +47,7 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] TMP_InputField mapSize_IP;
     [SerializeField] Toggle teamDamage_Toggle;
     [SerializeField] Toggle teamKnock_Toggle;
+    [SerializeField] Toggle setSeed_Toggle;
 
     [SyncVar] public int playerOnLMS = -1;
     [SyncVar] bool open = false;
@@ -63,10 +65,11 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         base.Start();
 
-        LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.AddListener(RefreshLobbySettings);
+        LobbySettings.Instance.OnLobbySettingsChanged.AddListener(RefreshLobbySettings);
         GameTick.OnSecond += OnSecond;
 
-        mapSize_IP.SetTextWithoutNotify(LobbyManager.Instance.LobbySettings.MapSize.ToString());
+        mapSize_IP.SetTextWithoutNotify(LobbySettings.Instance.MapSize.ToString());
+        setSeed_Toggle.SetIsOnWithoutNotify(LobbySettings.Instance.UseSetSeed);
 
         Instance.dngMod.OnThemeChangedEv.AddListener(RefreshLevelName);
         Instance.dayMod.OnDayStarted.AddListener(RefreshDay);
@@ -78,7 +81,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     private void OnDestroy()
     {
-        LobbyManager.Instance.LobbySettings.OnLobbySettingsChanged.RemoveListener(RefreshLobbySettings);
+        LobbySettings.Instance.OnLobbySettingsChanged.RemoveListener(RefreshLobbySettings);
         GameTick.OnSecond -= OnSecond;
 
         Instance.dngMod.OnThemeChangedEv.RemoveListener(RefreshLevelName);
@@ -202,7 +205,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void RefreshLobbySettings()
     {
-        int lobbyIndex = LobbyManager.Instance.LobbySettings.Lobby_Type switch
+        int lobbyIndex = LobbySettings.Instance.Lobby_Type switch
         {
             ELobbyType.k_ELobbyTypeFriendsOnly => 0,
             ELobbyType.k_ELobbyTypePublic => 1,
@@ -211,9 +214,9 @@ public class LobbyManagerScreen : UIManagerNetwork
         };
 
         lobbyType_DP.SetValueWithoutNotify(lobbyIndex);
-        mapSize_IP.SetTextWithoutNotify(LobbyManager.Instance.LobbySettings.MapSize.ToString());
-        teamDamage_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamDamage);
-        teamKnock_Toggle.SetIsOnWithoutNotify(LobbyManager.Instance.LobbySettings.TeamKnock);
+        mapSize_IP.SetTextWithoutNotify(LobbySettings.Instance.MapSize.ToString());
+        teamDamage_Toggle.SetIsOnWithoutNotify(LobbySettings.Instance.TeamDamage);
+        teamKnock_Toggle.SetIsOnWithoutNotify(LobbySettings.Instance.TeamKnock);
     }
 
     public void RefreshTeamBalances(PlayerTeam t, float v)
@@ -259,7 +262,7 @@ public class LobbyManagerScreen : UIManagerNetwork
             _ => ELobbyType.k_ELobbyTypeFriendsOnly,
         };
 
-        LobbyManager.Instance.LobbySettings.SetLobbyType(type);
+        LobbySettings.Instance.SetLobbyType(type);
     }
 
     public void SetMapSize(string value)
@@ -267,23 +270,36 @@ public class LobbyManagerScreen : UIManagerNetwork
         if (!identity.isServer) return;
 
         if (int.TryParse(value, out int size))
-        {
-            LobbyManager.Instance.LobbySettings.SetMapSize(size);
-        }
+            LobbySettings.Instance.SetMapSize(size);
     }
 
     public void TeamDamage(bool value)
     {
         if (!identity.isServer) return;
 
-        LobbyManager.Instance.LobbySettings.SetTeamDamage(value);
+        LobbySettings.Instance.SetTeamDamage(value);
     }
 
     public void TeamKnock(bool value)
     {
         if (!identity.isServer) return;
 
-        LobbyManager.Instance.LobbySettings.SetTeamKnock(value);
+        LobbySettings.Instance.SetTeamKnock(value);
+    }
+
+    public void SetSeed(string value)
+    {
+        if (!identity.isServer) return;
+
+        if (int.TryParse(value, out int seed))
+            Instance.SetSeed(seed);
+    }
+
+    public void SetUseSetSeed(bool useSetSeed)
+    {
+        if (!identity.isServer) return;
+
+        LobbySettings.Instance.SetUseSetSeed(useSetSeed);
     }
     #endregion
 

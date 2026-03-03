@@ -633,6 +633,7 @@ public class DungeonGenerator : NetworkBehaviour
         Generate();
         InstantiateRooms();
         ResolveDoors();
+        GenSeedSaver.SaveSeed(seed);
 
         seedDisplayTxt.SetText($"New location found!\n({seed})");
         OnDungeonGenerated?.Invoke();

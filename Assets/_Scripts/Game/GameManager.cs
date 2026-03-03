@@ -1,5 +1,6 @@
 using Mirror;
 using Steamworks;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -26,6 +27,11 @@ public class GameManager : NetworkBehaviour
 
     [SyncVar]
     public bool gameStarted = false;
+
+    [SyncVar]
+    public int Seed = 67;
+
+    [Server] public void SetSeed(int seed) => Seed = seed;
 
     public bool debug = false;
 
@@ -116,5 +122,5 @@ public class GameManager : NetworkBehaviour
     {
         ecoMod.SetNewQuota();
         //OpenDungeon();
-    }
+    }    
 }

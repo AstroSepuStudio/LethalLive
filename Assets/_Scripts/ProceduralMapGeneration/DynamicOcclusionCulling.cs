@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static DungeonGenerator;
 
@@ -8,6 +9,11 @@ public class DynamicOcclusionCulling : MonoBehaviour
 
     [SerializeField] int renderDistance = 3;
     [SerializeField] int triesToUpdate = 10;
+
+    [Header("Fog")]
+    [SerializeField] bool fogEnabled = true;
+    [SerializeField] float fogStartRatio = 0.35f;
+    [SerializeField] float fogEndRatio = 0.5f;
 
     int updateTries = 0;
     Vector3Int lastCellPos = Vector3Int.zero;
@@ -28,6 +34,11 @@ public class DynamicOcclusionCulling : MonoBehaviour
             room.Value.SetRender(true);
     }
 
+    public void SetRenderDistance(int renderDistance)
+    {
+        this.renderDistance = renderDistance;
+    }
+
     private void UpdateCulling()
     {
         if (!Instance.GeneratedDungeon || !docActive) return;
@@ -36,9 +47,9 @@ public class DynamicOcclusionCulling : MonoBehaviour
 
         Vector3 playerPos = pData.transform.position;
         Vector3Int cellPosition = new(
-            Mathf.RoundToInt(playerPos.x) / Instance.CellSize,
-            Mathf.RoundToInt(playerPos.y) / Instance.CellSize,
-            Mathf.RoundToInt(playerPos.z) / Instance.CellSize
+            Mathf.RoundToInt(playerPos.x / Instance.CellSize),
+            Mathf.RoundToInt(playerPos.y / Instance.CellSize),
+            Mathf.RoundToInt(playerPos.z / Instance.CellSize)
         );
 
         if (!Instance.InBounds(cellPosition) || GameManager.Instance.playMod.LocalPlayer._PlayerInOffice)
@@ -91,7 +102,6 @@ public class DynamicOcclusionCulling : MonoBehaviour
             }
         }
 
-        // Bleeding pass
         HashSet<int> expanded = new(coreVisible);
         if (adjacency.TryGetValue(startId, out var playerRoomNeighbors))
         {
@@ -99,6 +109,7 @@ public class DynamicOcclusionCulling : MonoBehaviour
                 expanded.Add(neighborId);
         }
 
+        float maxWorldDist = 0f;
         foreach (var r in Instance.SpawnedRooms)
         {
             bool shouldRender = expanded.Contains(r.Key);
@@ -111,6 +122,27 @@ public class DynamicOcclusionCulling : MonoBehaviour
             if (Instance.RoomItems.TryGetValue(r.Key, out var items))
                 foreach (var item in items)
                     if (item != null) item.SetRender(shouldRender);
+
+            if (shouldRender)
+            {
+                var pr = Instance.PlacedRooms.FirstOrDefault(p => p.id == r.Key);
+                if (pr != null)
+                {
+                    Vector3 roomWorldPos = (Vector3)pr.anchor * Instance.CellSize;
+                    float dist = Vector3.Distance(playerPos, roomWorldPos);
+                    float roomRadius = pr.data.RoomFootprint.Length * Instance.CellSize;
+                    maxWorldDist = Mathf.Max(maxWorldDist, dist + roomRadius);
+                }
+            }
         }
+
+        if (fogEnabled) UpdateFog(maxWorldDist);
+    }
+
+    private void UpdateFog(float maxVisibleDist)
+    {
+        RenderSettings.fog = true;
+        RenderSettings.fogEndDistance = maxVisibleDist * fogEndRatio;
+        RenderSettings.fogStartDistance = maxVisibleDist * fogStartRatio;
     }
 }

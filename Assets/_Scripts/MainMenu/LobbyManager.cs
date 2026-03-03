@@ -1,6 +1,5 @@
 using Mirror;
 using Steamworks;
-using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -9,11 +8,9 @@ public class LobbyManager : MonoBehaviour
     public static LobbyManager Instance;
 
     public CSteamID CurrentLobbyID { get; private set; }
-    public LobbySettings LobbySettings => lobbySettings;
 
     [SerializeField] NetworkManager networkManager;
     [SerializeField] string lobbyName = "New Lobby";
-    [SerializeField] LobbySettings lobbySettings;
 
     #region Callbacks
     public UnityEvent<LobbyCreated_t> OnLobbyCreatedEvent;

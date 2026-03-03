@@ -61,7 +61,10 @@ public class GM_DungeonModule : NetworkBehaviour
         OnDungeonOpens?.Invoke();
         dungeonOpen = true;
 
-        mapSeed = Random.Range(-1000000, 1000000);
+        mapSeed = LobbySettings.Instance.UseSetSeed
+        ? Instance.Seed
+        : Random.Range(int.MinValue, int.MaxValue);
+
         RpcGenerateMap(mapSeed, selectedTheme);
     }
 

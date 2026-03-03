@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RoomData : MonoBehaviour
@@ -35,6 +36,11 @@ public class RoomData : MonoBehaviour
 
     [SerializeField] bool useLayers = false;
     [SerializeField] int currentLayer = 0;
+
+    private void Start()
+    {
+        roomRenderers = roomRenderers.Where(r => r != null && r.enabled).ToArray();
+    }
 
     public void SetPort(Vector3Int localCell, Direction face, bool open)
     {
@@ -103,11 +109,11 @@ public class RoomData : MonoBehaviour
             if (showFootprintSprites && entry.MapSprite != null)
             {
                 Texture2D tex = UnityEditor.AssetPreview.GetAssetPreview(entry.MapSprite);
-                if (tex == null) tex = entry.MapSprite.texture; // fallback to full texture
-
+                if (tex == null) tex = entry.MapSprite.texture;
+                
                 if (tex != null)
                 {
-                    float worldSize = spriteSize / 100f; // 100 = pixels per world unit, tweak to taste
+                    float worldSize = spriteSize / 100f;
 
                     Vector3 right = UnityEditor.SceneView.lastActiveSceneView?.camera.transform.right ?? Vector3.right;
                     Vector3 up = UnityEditor.SceneView.lastActiveSceneView?.camera.transform.up ?? Vector3.up;
@@ -117,14 +123,6 @@ public class RoomData : MonoBehaviour
                     Vector3 br = worldCenter + (right - up) * worldSize * 0.5f;
                     Vector3 bl = worldCenter + (-right - up) * worldSize * 0.5f;
 
-                    // Draw a billboard quad facing the scene camera
-                    UnityEditor.Handles.color = Color.white;
-                    UnityEditor.Handles.DrawSolidRectangleWithOutline(
-                        new Vector3[] { tl, tr, br, bl },
-                        Color.white, Color.clear
-                    );
-
-                    // Overlay the texture on that quad using a GUI callback
                     UnityEditor.Handles.BeginGUI();
                     Vector2 guiCenter = UnityEditor.HandleUtility.WorldToGUIPoint(worldCenter);
                     float guiSize = spriteSize;
