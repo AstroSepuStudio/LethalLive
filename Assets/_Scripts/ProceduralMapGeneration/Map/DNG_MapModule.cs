@@ -5,14 +5,28 @@ using UnityEngine.UI;
 
 public class DNG_MapModule : MonoBehaviour
 {
+    [System.Serializable] 
+    struct DirectionalSprite 
+    { public Sprite sprite; public Direction direction; }
+
     [SerializeField] GameObject imgPrefab;
+    [SerializeField] DirectionalSprite[] deadEndSprites;
     [SerializeField] Transform targetParent;
     [SerializeField] RectTransform playerDot;
     [SerializeField] float cellSize = 200;
 
     readonly Dictionary<int, List<GameObject>> mapLayers = new();
+    readonly Dictionary<Vector3Int, GameObject> cellObjects = new();
     int currentLayer = 0;
     Vector3Int _mapMin;
+
+    private Sprite GetDeadEnd(Direction direction)
+    {
+        foreach (var des in deadEndSprites)
+            if (des.direction == direction)
+                return des.sprite;
+        return null;
+    }
 
     public void OnDungeonOpens()
     {
@@ -63,12 +77,41 @@ public class DNG_MapModule : MonoBehaviour
         var gen = DungeonGenerator.Instance;
         _mapMin = ComputeMapMin(gen.PlacedRooms);
 
-        foreach (var pr in gen.PlacedRooms)
+        //foreach (var pr in gen.PlacedRooms)
+        //{
+        //    foreach (var fp in pr.data.RoomFootprint)
+        //    {
+        //        Vector3Int worldCell = pr.anchor + fp.Footprint;
+        //        SpawnCell(worldCell.x, worldCell.y, worldCell.z, fp.MapSprite, pr.data.roomColor);
+        //    }
+        //}
+
+        foreach (var sr in gen.SpawnedRooms)
         {
-            foreach (var fp in pr.data.RoomFootprint)
+            DungeonGenerator.PlacedRoom pr = sr.Value.PlacedRoom;
+            foreach (var fp in sr.Value.PlacedRoom.data.RoomFootprint)
             {
                 Vector3Int worldCell = pr.anchor + fp.Footprint;
-                SpawnCell(worldCell.x, worldCell.y, worldCell.z, fp.MapSprite, pr.data.roomColor);
+                var go = SpawnCell(worldCell.x, worldCell.y, worldCell.z, fp.MapSprite, pr.data.roomColor);
+
+                if (go != null)
+                {
+                    cellObjects[worldCell] = go;
+
+                    var mask = go.AddComponent<Mask>();
+                    mask.showMaskGraphic = true;
+                }
+            }
+
+            foreach (var port in sr.Value.closedPorts)
+            {
+                Sprite deadEndSprite = GetDeadEnd(port.face);
+                if (deadEndSprite == null) continue;
+
+                Vector3Int worldCell = pr.anchor + port.localCell;
+                if (!cellObjects.TryGetValue(worldCell, out var parent)) continue;
+
+                SpawnDeadEnd(parent, deadEndSprite, pr.data.roomColor);
             }
         }
 
@@ -76,9 +119,9 @@ public class DNG_MapModule : MonoBehaviour
         SetRenderLayer(startLayer);
     }
 
-    private void SpawnCell(int x, int y, int z, Sprite sprite, Color color)
+    private GameObject SpawnCell(int x, int y, int z, Sprite sprite, Color color)
     {
-        if (sprite == null) return;
+        if (sprite == null) return null;
 
         GameObject go = Instantiate(imgPrefab, targetParent);
         RectTransform rt = go.GetComponent<RectTransform>();
@@ -95,23 +138,44 @@ public class DNG_MapModule : MonoBehaviour
 
             mapLayers[y].Add(go);
             go.SetActive(false);
+            return go;
         }
         else
         {
             Destroy(go);
         }
+        return null;
+    }
+
+    private void SpawnDeadEnd(GameObject parent, Sprite sprite, Color color)
+    {
+        GameObject go = Instantiate(imgPrefab, parent.transform);
+        RectTransform rt = go.GetComponent<RectTransform>();
+        rt.anchoredPosition = Vector2.zero;
+        rt.localRotation = Quaternion.identity;
+
+        if (go.TryGetComponent(out Image img))
+        {
+            img.sprite = sprite;
+            img.color = color;
+            img.maskable = true;
+        }
+        else
+        {
+            Destroy(go);
+        }
+
+        go.SetActive(true);
     }
 
     private void SetRenderLayer(int layer)
     {
         if (!mapLayers.ContainsKey(layer)) return;
 
-        // Hide current
         if (mapLayers.TryGetValue(currentLayer, out var prev))
             foreach (var cell in prev)
                 cell.SetActive(false);
 
-        // Show new
         foreach (var cell in mapLayers[layer])
             cell.SetActive(true);
 
@@ -125,6 +189,7 @@ public class DNG_MapModule : MonoBehaviour
                 if (cell) Destroy(cell);
 
         mapLayers.Clear();
+        cellObjects.Clear();
         currentLayer = 0;
     }
 

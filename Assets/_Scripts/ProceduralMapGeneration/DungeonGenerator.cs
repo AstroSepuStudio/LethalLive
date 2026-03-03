@@ -374,6 +374,7 @@ public class DungeonGenerator : NetworkBehaviour
             if (!go.TryGetComponent<RoomData>(out var rd)) 
                 Debug.LogWarning($"Prefab {pr.data.Prefab.name} lacks RoomData component.");
 
+            rd.PlacedRoom = pr;
             spawned[pr.id] = rd;
             Vector3 initialRoomPos = spawned[placed[0].id].transform.position;
             float distance = Vector3.Distance(initialRoomPos, go.transform.position);

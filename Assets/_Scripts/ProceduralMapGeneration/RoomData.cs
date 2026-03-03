@@ -16,6 +16,7 @@ public class RoomData : MonoBehaviour
 
     [SerializeField] private WallPortKey[] ports = Array.Empty<WallPortKey>();
     public RoomDataSO Data;
+    public DungeonGenerator.PlacedRoom PlacedRoom;
     public List<LootPosition> itemSpawnPositions;
     public List<FurnitureDataSO.FurniturePosition> furnitureSpawnPositions;
     public List<Transform> entitySpawnerPositions;
@@ -37,6 +38,8 @@ public class RoomData : MonoBehaviour
     [SerializeField] bool useLayers = false;
     [SerializeField] int currentLayer = 0;
 
+    public readonly List<WallPortKey> closedPorts = new();
+
     private void Start()
     {
         roomRenderers = roomRenderers.Where(r => r != null && r.enabled).ToArray();
@@ -44,6 +47,13 @@ public class RoomData : MonoBehaviour
 
     public void SetPort(Vector3Int localCell, Direction face, bool open)
     {
+        if (!open)
+        {
+            WallPortKey key = new() { localCell = localCell, face = face };
+
+            closedPorts.Add(key);
+        }
+
         for (int i = 0; i < ports.Length; i++)
         {
             if (ports[i].localCell == localCell && ports[i].face == face)
