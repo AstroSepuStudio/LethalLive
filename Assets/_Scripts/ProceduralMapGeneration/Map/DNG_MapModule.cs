@@ -9,19 +9,44 @@ public class DNG_MapModule : MonoBehaviour
     struct DirectionalSprite 
     { public Sprite sprite; public Direction direction; }
 
-    [SerializeField] GameObject imgPrefab;
+    [Header("References")]
+    [SerializeField] GameObject mapCellPrefab;
+    [SerializeField] GameObject deadEndPrefab;
+    [SerializeField] GameObject mapFeaturePrefab;
     [SerializeField] Image followPlayerImg;
-    [SerializeField] DirectionalSprite[] deadEndSprites;
-    [SerializeField] Transform targetParent;
+
     [SerializeField] RectTransform playerDot;
+    [SerializeField] RectTransform mapAnchor;
+    [SerializeField] Transform cellParent;
+    [SerializeField] Transform itemParent;
+    [SerializeField] Transform furnParent;
+    [SerializeField] Transform extraParent;
+
+    [Header("Visual")]
+    [SerializeField] DirectionalSprite[] deadEndSprites;
+    [SerializeField] Sprite itemSprite;
+    [SerializeField] Color itemColor = Color.softYellow;
+    [SerializeField] Sprite furnSprite;
+    [SerializeField] Color furnColor = Color.rosyBrown;
+    [SerializeField] Sprite beaconSprite;
+    [SerializeField] Color beaconColor = Color.cyan;
+
+    [Header("Config")]
     [SerializeField] float cellSize = 200;
-    [SerializeField] Color mapColor = new Color(0, 175, 0);
+    [SerializeField] Color mapColor = new Color(0, 150, 0);
+
+    public bool IsFollowingPlayer => followPlayer;
+    bool followPlayer = true;
+    bool displayFeatures = true;
 
     readonly Dictionary<int, List<GameObject>> mapLayers = new();
     readonly Dictionary<Vector3Int, GameObject> cellObjects = new();
+    readonly Dictionary<Transform, RectTransform> trackedIcons = new();
+    readonly Dictionary<Transform, int> trackedIconLayers = new();
+    readonly HashSet<GameObject> trackedIconObjects = new();
+
     int currentLayer = 0;
     Vector3Int _mapMin;
-    bool followPlayer = true;
 
     private Sprite GetDeadEnd(Direction direction)
     {
@@ -50,26 +75,13 @@ public class DNG_MapModule : MonoBehaviour
         ClearMap();
     }
 
-    private void SetNextLayer(InputAction.CallbackContext ctx) => SetRenderLayer(currentLayer + 1);
-    public void SetNextLayer() => SetRenderLayer(currentLayer + 1);
+    private void SetNextLayer(InputAction.CallbackContext ctx) => SetNextLayer();
+    public void SetNextLayer() { if (followPlayer) ToggleFollowPlayer(); SetRenderLayer(currentLayer + 1); }
 
-    private void SetPreviousLayer(InputAction.CallbackContext ctx) => SetRenderLayer(currentLayer - 1);
-    public void SetPreviousLayer() => SetRenderLayer(currentLayer - 1);
+    private void SetPreviousLayer(InputAction.CallbackContext ctx) => SetPreviousLayer();
+    public void SetPreviousLayer() { if (followPlayer) ToggleFollowPlayer();  SetRenderLayer(currentLayer - 1); }
 
-    private void ToggleFollowPlayer(InputAction.CallbackContext ctx)
-    {
-        followPlayer = !followPlayer;
-        if (followPlayerImg == null) return;
-
-        Color target;
-        if (followPlayer)
-            ColorUtility.TryParseHtmlString("#DC9632", out target);
-        else
-            ColorUtility.TryParseHtmlString("#4D4D4D", out target);
-        
-        followPlayerImg.color = target;
-    }
-
+    private void ToggleFollowPlayer(InputAction.CallbackContext ctx) => ToggleFollowPlayer();
     public void ToggleFollowPlayer()
     {
         followPlayer = !followPlayer;
@@ -84,7 +96,43 @@ public class DNG_MapModule : MonoBehaviour
         followPlayerImg.color = target;
     }
 
+    public void ToggleFeatures()
+    {
+        displayFeatures = !displayFeatures;
+        foreach (var kv in trackedIcons)
+        {
+            if (!trackedIconLayers.ContainsKey(kv.Key)) continue;
+            if (trackedIconLayers[kv.Key] != currentLayer) continue;
+
+            kv.Value.gameObject.SetActive(displayFeatures);
+        }
+    }
+
+    private void SetRenderLayer(int layer)
+    {
+        if (!mapLayers.ContainsKey(layer)) return;
+
+        if (mapLayers.TryGetValue(currentLayer, out var prev))
+            foreach (var cell in prev)
+                cell.SetActive(false);
+
+        foreach (var cell in mapLayers[layer])
+        {
+            if (!displayFeatures && trackedIconObjects.Contains(cell))
+                continue;
+
+            cell.SetActive(true);
+        }
+
+        currentLayer = layer;
+    }
+
     private void Update()
+    {
+        UpdateMap();
+    }
+
+    private void UpdateMap()
     {
         var pData = GameManager.Instance.playMod.LocalPlayer;
         if (pData == null) return;
@@ -92,15 +140,21 @@ public class DNG_MapModule : MonoBehaviour
 
         Vector3 worldPos;
         if (pData._PlayerInOffice)
+        {
             worldPos = GameManager.Instance.dngMod.HomewardBeacon.transform.position;
+            playerDot.gameObject.SetActive(false);
+        }
         else
+        {
             worldPos = pData.transform.position;
+            playerDot.gameObject.SetActive(true);
+        }
 
         int playerLayer = Mathf.RoundToInt(worldPos.y / gen.CellSize);
         if (playerLayer != currentLayer && followPlayer)
             SetRenderLayer(playerLayer);
 
-        playerDot.gameObject.SetActive(playerLayer == currentLayer);
+        playerDot.gameObject.SetActive(!pData._PlayerInOffice && playerLayer == currentLayer);
 
         float uiX = (worldPos.x / gen.CellSize - _mapMin.x) * cellSize;
         float uiY = (worldPos.z / gen.CellSize - _mapMin.z) * cellSize;
@@ -108,12 +162,43 @@ public class DNG_MapModule : MonoBehaviour
 
         if (followPlayer)
         {
-            ((RectTransform)targetParent).anchoredPosition = -playerMapPos;
+            mapAnchor.anchoredPosition = -playerMapPos;
             playerDot.anchoredPosition = Vector2.zero;
         }
         else
         {
-            playerDot.anchoredPosition = playerMapPos + ((RectTransform)targetParent).anchoredPosition;
+            playerDot.anchoredPosition = playerMapPos + mapAnchor.anchoredPosition;
+        }
+
+        if (!displayFeatures) return;
+
+        foreach (var kvp in trackedIcons)
+        {
+            if (kvp.Key == null)
+            {
+                Destroy(kvp.Value.gameObject);
+                continue;
+            }
+
+            if (kvp.Value == null) continue;
+
+            worldPos = kvp.Key.position;
+            kvp.Value.anchoredPosition = new Vector2(
+                (worldPos.x / gen.CellSize - _mapMin.x) * cellSize,
+                (worldPos.z / gen.CellSize - _mapMin.z) * cellSize);
+
+            int newLayer = Mathf.RoundToInt(worldPos.y / gen.CellSize);
+            int oldLayer = trackedIconLayers[kvp.Key];
+            if (oldLayer == newLayer) continue;
+
+            mapLayers[oldLayer].Remove(kvp.Value.gameObject);
+
+            if (!mapLayers.ContainsKey(newLayer))
+                mapLayers[newLayer] = new();
+
+            mapLayers[newLayer].Add(kvp.Value.gameObject);
+            kvp.Value.gameObject.SetActive(newLayer == currentLayer);
+            trackedIconLayers[kvp.Key] = newLayer;
         }
     }
 
@@ -130,13 +215,7 @@ public class DNG_MapModule : MonoBehaviour
                 Vector3Int worldCell = pr.anchor + fp.Footprint;
                 var go = SpawnCell(worldCell.x, worldCell.y, worldCell.z, fp.MapSprite, pr.data.roomColor);
 
-                if (go != null)
-                {
-                    cellObjects[worldCell] = go;
-
-                    var mask = go.AddComponent<Mask>();
-                    mask.showMaskGraphic = true;
-                }
+                if (go != null) cellObjects[worldCell] = go;
             }
 
             foreach (var port in sr.Value.closedPorts)
@@ -149,6 +228,21 @@ public class DNG_MapModule : MonoBehaviour
 
                 SpawnDeadEnd(parent, deadEndSprite, pr.data.roomColor);
             }
+
+            if (gen.RoomItems.TryGetValue(sr.Key, out var items))
+                foreach (var item in items)
+                    if (item != null) SpawnDynamicIcon(item.transform, itemSprite, itemColor, itemParent, sr.Value.PlacedRoom.anchor.y);
+
+            if (gen.RoomFurniture.TryGetValue(sr.Key, out var furniture))
+                foreach (var furn in furniture)
+                    if (furn != null) SpawnDynamicIcon(furn.transform, furnSprite, furnColor, furnParent, sr.Value.PlacedRoom.anchor.y);
+        }
+
+        var beacon = GameManager.Instance.dngMod.HomewardBeacon;
+        if (beacon != null)
+        {
+            int beaconLayer = Mathf.RoundToInt(beacon.transform.position.y / gen.CellSize);
+            SpawnDynamicIcon(beacon.transform, beaconSprite, beaconColor, extraParent, beaconLayer, false);
         }
 
         int startLayer = gen.StartRoomPos.y / gen.CellSize;
@@ -159,7 +253,7 @@ public class DNG_MapModule : MonoBehaviour
     {
         if (sprite == null) return null;
 
-        GameObject go = Instantiate(imgPrefab, targetParent);
+        GameObject go = Instantiate(mapCellPrefab, cellParent);
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchoredPosition = new Vector2((x - _mapMin.x) * cellSize, (z - _mapMin.z) * cellSize);
         rt.localRotation = Quaternion.identity;
@@ -190,7 +284,7 @@ public class DNG_MapModule : MonoBehaviour
 
     private void SpawnDeadEnd(GameObject parent, Sprite sprite, Color color)
     {
-        GameObject go = Instantiate(imgPrefab, parent.transform);
+        GameObject go = Instantiate(deadEndPrefab, parent.transform);
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchoredPosition = Vector2.zero;
         rt.localRotation = Quaternion.identity;
@@ -199,6 +293,12 @@ public class DNG_MapModule : MonoBehaviour
         {
             img.sprite = sprite;
             img.color = color;
+
+            if (Mathf.Approximately(color.r, Color.white.r) &&
+                Mathf.Approximately(color.g, Color.white.g) &&
+                Mathf.Approximately(color.b, Color.white.b))
+            { img.color = mapColor; }
+
             img.maskable = true;
         }
         else
@@ -209,18 +309,39 @@ public class DNG_MapModule : MonoBehaviour
         go.SetActive(true);
     }
 
-    private void SetRenderLayer(int layer)
+    private void SpawnDynamicIcon(Transform worldTransform, Sprite sprite, Color color, Transform parent, int layer, bool track = true)
     {
-        if (!mapLayers.ContainsKey(layer)) return;
+        if (sprite == null) return;
 
-        if (mapLayers.TryGetValue(currentLayer, out var prev))
-            foreach (var cell in prev)
-                cell.SetActive(false);
+        var gen = DungeonGenerator.Instance;
+        Vector3 worldPos = worldTransform.position;
 
-        foreach (var cell in mapLayers[layer])
-            cell.SetActive(true);
+        GameObject go = Instantiate(mapFeaturePrefab, parent);
+        RectTransform rt = go.GetComponent<RectTransform>();
+        rt.anchoredPosition = new Vector2(
+            (worldPos.x / gen.CellSize - _mapMin.x) * cellSize,
+            (worldPos.z / gen.CellSize - _mapMin.z) * cellSize);
+        rt.localRotation = Quaternion.identity;
 
-        currentLayer = layer;
+        if (go.TryGetComponent(out Image img))
+        {
+            img.sprite = sprite;
+            img.color = color;
+
+            if (!mapLayers.ContainsKey(layer))
+                mapLayers[layer] = new();
+            mapLayers[layer].Add(go);
+
+            if (track)
+            {
+                trackedIcons[worldTransform] = rt;
+                trackedIconLayers[worldTransform] = layer;
+                trackedIconObjects.Add(go);
+            }
+            
+            go.SetActive(false);
+        }
+        else Destroy(go);
     }
 
     private void ClearMap()
@@ -231,6 +352,10 @@ public class DNG_MapModule : MonoBehaviour
 
         mapLayers.Clear();
         cellObjects.Clear();
+        trackedIcons.Clear();
+        trackedIconLayers.Clear();
+        trackedIconObjects.Clear();
+
         currentLayer = 0;
     }
 
