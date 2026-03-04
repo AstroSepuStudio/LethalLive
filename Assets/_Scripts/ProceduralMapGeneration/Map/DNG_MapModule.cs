@@ -10,15 +10,18 @@ public class DNG_MapModule : MonoBehaviour
     { public Sprite sprite; public Direction direction; }
 
     [SerializeField] GameObject imgPrefab;
+    [SerializeField] Image followPlayerImg;
     [SerializeField] DirectionalSprite[] deadEndSprites;
     [SerializeField] Transform targetParent;
     [SerializeField] RectTransform playerDot;
     [SerializeField] float cellSize = 200;
+    [SerializeField] Color mapColor = new Color(0, 175, 0);
 
     readonly Dictionary<int, List<GameObject>> mapLayers = new();
     readonly Dictionary<Vector3Int, GameObject> cellObjects = new();
     int currentLayer = 0;
     Vector3Int _mapMin;
+    bool followPlayer = true;
 
     private Sprite GetDeadEnd(Direction direction)
     {
@@ -33,6 +36,7 @@ public class DNG_MapModule : MonoBehaviour
         var input = GameManager.Instance.playMod.LocalPlayer.Player_Input;
         input.actions["mapnext"].started += SetNextLayer;
         input.actions["mapprevious"].started += SetPreviousLayer;
+        input.actions["map"].started += ToggleFollowPlayer;
         GenerateMap();
     }
 
@@ -41,50 +45,82 @@ public class DNG_MapModule : MonoBehaviour
         var input = GameManager.Instance.playMod.LocalPlayer.Player_Input;
         input.actions["mapnext"].started -= SetNextLayer;
         input.actions["mapprevious"].started -= SetPreviousLayer;
+        input.actions["map"].started -= ToggleFollowPlayer;
 
         ClearMap();
     }
 
-    private void SetNextLayer(InputAction.CallbackContext ctx)
+    private void SetNextLayer(InputAction.CallbackContext ctx) => SetRenderLayer(currentLayer + 1);
+    public void SetNextLayer() => SetRenderLayer(currentLayer + 1);
+
+    private void SetPreviousLayer(InputAction.CallbackContext ctx) => SetRenderLayer(currentLayer - 1);
+    public void SetPreviousLayer() => SetRenderLayer(currentLayer - 1);
+
+    private void ToggleFollowPlayer(InputAction.CallbackContext ctx)
     {
-        SetRenderLayer(currentLayer + 1);
+        followPlayer = !followPlayer;
+        if (followPlayerImg == null) return;
+
+        Color target;
+        if (followPlayer)
+            ColorUtility.TryParseHtmlString("#DC9632", out target);
+        else
+            ColorUtility.TryParseHtmlString("#4D4D4D", out target);
+        
+        followPlayerImg.color = target;
     }
 
-    private void SetPreviousLayer(InputAction.CallbackContext ctx)
+    public void ToggleFollowPlayer()
     {
-        SetRenderLayer(currentLayer - 1);
+        followPlayer = !followPlayer;
+        if (followPlayerImg == null) return;
+
+        Color target;
+        if (followPlayer)
+            ColorUtility.TryParseHtmlString("#DC9632", out target);
+        else
+            ColorUtility.TryParseHtmlString("#4D4D4D", out target);
+
+        followPlayerImg.color = target;
     }
 
     private void Update()
     {
-        if (GameManager.Instance.playMod.LocalPlayer == null) return;
-
+        var pData = GameManager.Instance.playMod.LocalPlayer;
+        if (pData == null) return;
         var gen = DungeonGenerator.Instance;
-        Vector3 worldPos = GameManager.Instance.playMod.LocalPlayer.transform.position;
+
+        Vector3 worldPos;
+        if (pData._PlayerInOffice)
+            worldPos = GameManager.Instance.dngMod.HomewardBeacon.transform.position;
+        else
+            worldPos = pData.transform.position;
 
         int playerLayer = Mathf.RoundToInt(worldPos.y / gen.CellSize);
+        if (playerLayer != currentLayer && followPlayer)
+            SetRenderLayer(playerLayer);
+
         playerDot.gameObject.SetActive(playerLayer == currentLayer);
 
         float uiX = (worldPos.x / gen.CellSize - _mapMin.x) * cellSize;
         float uiY = (worldPos.z / gen.CellSize - _mapMin.z) * cellSize;
+        Vector2 playerMapPos = new(uiX, uiY);
 
-        playerDot.anchoredPosition = new Vector2(uiX, uiY);
-        playerDot.SetAsLastSibling();
+        if (followPlayer)
+        {
+            ((RectTransform)targetParent).anchoredPosition = -playerMapPos;
+            playerDot.anchoredPosition = Vector2.zero;
+        }
+        else
+        {
+            playerDot.anchoredPosition = playerMapPos + ((RectTransform)targetParent).anchoredPosition;
+        }
     }
 
     private void GenerateMap()
     {
         var gen = DungeonGenerator.Instance;
         _mapMin = ComputeMapMin(gen.PlacedRooms);
-
-        //foreach (var pr in gen.PlacedRooms)
-        //{
-        //    foreach (var fp in pr.data.RoomFootprint)
-        //    {
-        //        Vector3Int worldCell = pr.anchor + fp.Footprint;
-        //        SpawnCell(worldCell.x, worldCell.y, worldCell.z, fp.MapSprite, pr.data.roomColor);
-        //    }
-        //}
 
         foreach (var sr in gen.SpawnedRooms)
         {
@@ -132,6 +168,11 @@ public class DNG_MapModule : MonoBehaviour
         {
             img.sprite = sprite;
             img.color = color;
+
+            if (Mathf.Approximately(color.r, Color.white.r) &&
+                Mathf.Approximately(color.g, Color.white.g) &&
+                Mathf.Approximately(color.b, Color.white.b))
+            { img.color = mapColor; }
 
             if (!mapLayers.ContainsKey(y))
                 mapLayers[y] = new();
