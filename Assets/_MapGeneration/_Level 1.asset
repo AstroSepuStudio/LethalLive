@@ -20,7 +20,11 @@ MonoBehaviour:
   deadEndRooms: []
   spawnableItems: []
   spawnableFurniture: []
-  entitySpawns: []
+  entitySpawns:
+  - entityPrefab: {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
+    spawnWeight: 100
+    minSpawnCount: 1
+    maxSpawnCount: 1
   loopingMusic: {fileID: 0}
   eerySFX: []
   MinItems: 3

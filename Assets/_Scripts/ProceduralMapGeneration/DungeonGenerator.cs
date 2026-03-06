@@ -6,6 +6,7 @@ using TMPro;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEditor.PlayerSettings;
 
 [Serializable]
 public struct LootPosition
@@ -532,6 +533,26 @@ public class DungeonGenerator : NetworkBehaviour
             spawnedPos.Add(spawner.transform);
         }
 
+        if (spawnedPos.Count <= 3)
+        {
+            int quantity = 3 > entitySpawnerPositions.Count ? entitySpawnerPositions.Count : 3;
+            for (int i = 0; i < quantity; i++)
+            {
+                float distance = Vector3.Distance(initialRoomPos, entitySpawnerPositions[i].position);
+                if (distance < maxDistance / 3) inner++;
+                else if (distance < maxDistance / 3 * 2) mid++;
+                else outer++;
+                q++;
+
+                GameObject spawner = Instantiate(entitySpawnerPref, 
+                    entitySpawnerPositions[i].position, 
+                    entitySpawnerPositions[i].rotation, entSpawnParent);
+                NetworkServer.Spawn(spawner);
+
+                spawnedPos.Add(spawner.transform);
+            }
+        }
+
         EntitySpawnerManager.Instance.SetSpawnerPositions(spawnedPos);
         Debug.Log($"Entity Spawners -> total: {q}, inner: {inner}, mid: {mid}, outer: {outer}");
     }
@@ -662,6 +683,16 @@ public class DungeonGenerator : NetworkBehaviour
 
         return world;
     }
+
+    public RoomData GetRoomDataAtPosition(Vector3 worldPos)
+    {
+        int roomId = GetRoomIdAtPosition(worldPos);
+        if (roomId == -1) return null;
+
+        spawned.TryGetValue(roomId, out var rd);
+        return rd;
+    }
+
 
     public void ClearMap()
     {

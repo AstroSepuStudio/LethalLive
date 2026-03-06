@@ -1,7 +1,12 @@
 using Mirror;
+using UnityEngine;
 
-public class Int_HomewardBeacon : InteractableObject
+public class Int_HomewardBeacon : InteractableObject, IMapFollowTarget
 {
+    public Transform FollowTransform => transform;
+
+    public bool IsAvailable => true;
+
     [Server]
     public void GoBackToOffice(PlayerData sourceData)
     {

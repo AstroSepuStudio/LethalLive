@@ -15,7 +15,7 @@ public class GM_PlayerModule : NetworkBehaviour
     [HideInInspector]
     public PlayerData LocalPlayer;
 
-    public IReadOnlyList<PlayerData> Players => players;
+    public List<PlayerData> Players => players;
     public List<PlayerData> playersOnDungeon = new();
 
     public LobbyMemberData[] CachedMemberData { get; private set; }
@@ -187,7 +187,10 @@ public class GM_PlayerModule : NetworkBehaviour
 
             if (NetworkClient.spawned.TryGetValue(member.netID, out NetworkIdentity identity))
                 if (identity.TryGetComponent(out PlayerData pData))
+                {
                     players.Add(pData);
+                    pData.AvatarData = member.AvatarData;
+                }
         }
 
         OnLobbyMemberDataChanged?.Invoke();

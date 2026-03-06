@@ -1,5 +1,7 @@
 using Mirror;
 using UnityEngine;
+using UnityEngine.Events;
+using static Unity.VisualScripting.Member;
 
 public class EntityStats : NetworkBehaviour
 {
@@ -12,8 +14,9 @@ public class EntityStats : NetworkBehaviour
     [SerializeField] protected float knockRecoveryDelay;
     [SerializeField] protected float knockRecoveryRate;
     [SerializeField] protected float ragdollRecoveryValue;
-
     protected float knockRecoveryTimer;
+
+    public UnityEvent<EntityStats, AttackStat> OnDeathEv;
 
     [SyncVar]
     public float maxHP = 100f;
@@ -119,6 +122,7 @@ public class EntityStats : NetworkBehaviour
     [Server]
     protected virtual void OnDeath(EntityStats source, AttackStat attack)
     {
+        OnDeathEv?.Invoke(source, attack);
         RequestPlaySFX(2);
 
         Debug.Log($"{gameObject.name} died.");

@@ -8,7 +8,7 @@ using LethalLive;
 
 public enum PlayerTeam { White, Red, Blue, Yellow, Green, Pink }
 
-public class PlayerData : NetworkBehaviour
+public class PlayerData : NetworkBehaviour, IMapFollowTarget
 {
     [Header("Input & Core Systems")]
     public PlayerInput Player_Input;
@@ -58,6 +58,13 @@ public class PlayerData : NetworkBehaviour
     public CSteamID SteamID;
     public string PlayerName;
     public byte[] AvatarData;
+    private Sprite CachedAvatar;
+    public Sprite GetAvatar()
+    {
+        if (CachedAvatar == null)
+            CachedAvatar = AvatarUtils.ByteArrayToSprite(AvatarData);
+        return CachedAvatar;
+    }
 
     [Header("Audio")]
     public float VoiceChatVolume = 1;
@@ -90,6 +97,9 @@ public class PlayerData : NetworkBehaviour
 
     [Header("Canvas")]
     public GameObject PlayerCanvas;
+
+    public Transform FollowTransform => transform;
+    public bool IsAvailable => !_PlayerInOffice;
 
     private void Start()
     {

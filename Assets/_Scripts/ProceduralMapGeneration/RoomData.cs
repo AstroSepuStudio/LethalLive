@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class RoomData : MonoBehaviour
 {
-    [Serializable]
+    [System.Serializable]
     public struct WallPortKey
     {
         public Vector3Int localCell;
@@ -14,7 +13,7 @@ public class RoomData : MonoBehaviour
         public GameObject door;
     }
 
-    [SerializeField] private WallPortKey[] ports = Array.Empty<WallPortKey>();
+    [SerializeField] private WallPortKey[] ports = System.Array.Empty<WallPortKey>();
     public RoomDataSO Data;
     public DungeonGenerator.PlacedRoom PlacedRoom;
     public List<LootPosition> itemSpawnPositions;
@@ -80,6 +79,25 @@ public class RoomData : MonoBehaviour
         {
             light.enabled = shouldRender;
         }
+    }
+
+    public Vector3 GetRandomPositionInRoom(float yOffset = 0f)
+    {
+        var footprint = PlacedRoom.data.RoomFootprint;
+        var entry = footprint[Random.Range(0, footprint.Length)];
+
+        float cellSize = DungeonGenerator.Instance.CellSize;
+
+        Vector3 cellOrigin = transform.position + new Vector3(
+            entry.Footprint.x * cellSize,
+            entry.Footprint.y * cellSize + yOffset,
+            entry.Footprint.z * cellSize);
+
+        cellSize *= 0.9f;
+        float x = Random.Range(-cellSize, cellSize);
+        float z = Random.Range(-cellSize, cellSize);
+
+        return cellOrigin + new Vector3(x, 0f, z);
     }
 
     private void OnDrawGizmosSelected()

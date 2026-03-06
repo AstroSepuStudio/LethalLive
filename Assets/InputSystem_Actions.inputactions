@@ -286,9 +286,36 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "map",
+                    "name": "mapfollow",
                     "type": "Button",
                     "id": "da5b7760-9af7-4e4d-87fe-07a975f91de9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "mapnextplayer",
+                    "type": "Button",
+                    "id": "b1add6b1-64b8-4bd7-91c8-8d0b85c130b1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "mapprevplayer",
+                    "type": "Button",
+                    "id": "901e54b0-1b2a-4c8f-ae8a-6a2883086b03",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "mapfeatures",
+                    "type": "Button",
+                    "id": "1b185424-7ccd-4e3d-81d0-99c3d7069620",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -904,7 +931,7 @@
                 {
                     "name": "",
                     "id": "7d1db164-f97a-4dd6-9a30-f5b342739db2",
-                    "path": "<Keyboard>/x",
+                    "path": "<Keyboard>/numpad5",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -915,7 +942,7 @@
                 {
                     "name": "",
                     "id": "c6cd9db3-f52c-4929-b4ac-e8bcf4d81221",
-                    "path": "<Keyboard>/z",
+                    "path": "<Keyboard>/numpad2",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -926,11 +953,44 @@
                 {
                     "name": "",
                     "id": "ad43d2bb-7ca0-42c9-b38a-db5646fe1a98",
-                    "path": "<Keyboard>/m",
+                    "path": "<Keyboard>/numpad7",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "map",
+                    "action": "mapfollow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "31290351-218d-48a3-a684-c67dc257bb15",
+                    "path": "<Keyboard>/numpad3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "mapnextplayer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f8d97eed-d055-4fbb-98cf-6bed48535a82",
+                    "path": "<Keyboard>/numpad1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "mapprevplayer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "287ec493-33fe-4dfb-98eb-34e6ff3cac98",
+                    "path": "<Keyboard>/numpad8",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "mapfeatures",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

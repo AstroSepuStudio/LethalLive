@@ -1,0 +1,85 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Events;
+
+public class AIS_WanderBetweenRooms : AIState
+{
+    [SerializeField] int minRooms = 1;
+    [SerializeField] int maxRooms = 5;
+
+    [SerializeField] float minSleep = 3f;
+    [SerializeField] float maxSleep = 10f;
+
+    float sleepTimer = 0;
+
+    public UnityEvent OnWanderStart;
+    public UnityEvent OnWanderCompleted;
+
+    bool moving = false;
+
+    public override void OnEnterState(AIBrain brain)
+    {
+        MoveAgent(brain);
+    }
+
+    public override void OnExitState(AIBrain brain)
+    {
+
+    }
+
+    public override void OnUpdateState(AIBrain brain)
+    {
+        if (brain.IsAgentInMovement()) return;
+
+        if (moving)
+        {
+            moving = false;
+            OnWanderCompleted?.Invoke();
+        }
+
+        sleepTimer = sleepTimer > 0 ? sleepTimer - Time.deltaTime : 0;
+
+        if (sleepTimer < 0)
+            MoveAgent(brain);
+    }
+
+    private Vector3 GetRandomRoomPosition(Vector3 origin, int maxRoomDist, int minRoomDist = 0)
+    {
+        var gen = DungeonGenerator.Instance;
+        if (gen == null) return origin;
+
+        RoomData startRd = gen.GetRoomDataAtPosition(origin);
+        if (startRd == null) return origin;
+
+        int startId = startRd.PlacedRoom.id;
+        int targetSteps = Random.Range(minRoomDist, maxRoomDist + 1);
+
+        int currentId = startId;
+        for (int i = 0; i < targetSteps; i++)
+        {
+            if (!gen.RoomAdjacency.TryGetValue(currentId, out var neighbors) || neighbors.Count == 0)
+                break;
+
+            var candidates = new List<int>(neighbors);
+            if (candidates.Count > 1) candidates.Remove(startId);
+
+            currentId = candidates[Random.Range(0, candidates.Count)];
+        }
+
+        if (!gen.SpawnedRooms.TryGetValue(currentId, out var targetRd) || targetRd == null)
+            return origin;
+
+        return targetRd.GetRandomPositionInRoom();
+    }
+
+    private void MoveAgent(AIBrain brain)
+    {
+        if (sleepTimer > 0) return;
+
+        brain.MoveAgent(GetRandomRoomPosition(transform.position, maxRooms, minRooms));
+        sleepTimer = Random.Range(minSleep, maxSleep);
+
+        moving = true;
+        OnWanderStart?.Invoke();
+    }
+}
