@@ -4,8 +4,12 @@ using static LL_Tier;
 [CreateAssetMenu(menuName = "LethalLive/Item")]
 public class ItemSO : ScriptableObject, IHaveTier
 {
+    public enum ItemAnimationType { Default, OneHanded, TwoHanded, Crowbar }
+
     public GameObject itemPrefab;
     public Tier Tier;
+    public ItemAnimationType animationType;
+
     public Tier GetTier() => Tier;
 
     public string itemName;

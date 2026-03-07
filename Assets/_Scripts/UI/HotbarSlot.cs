@@ -12,9 +12,16 @@ public class HotbarSlot : MonoBehaviour
 
     public void SetItem(ItemBase item)
     {
+        if (item == null || item.ItemData == null)
+        {
+            Debug.LogWarning("[HotbarSlot] SetItem called with null item or missing ItemData.");
+            RemoveItem();
+            return;
+        }
+
         slotItem = item;
-        iconImg.enabled = true;
         iconImg.sprite = slotItem.ItemData.icon;
+        iconImg.enabled = iconImg.sprite != null;
     }
 
     public void RemoveItem()
@@ -22,11 +29,7 @@ public class HotbarSlot : MonoBehaviour
         slotItem = null;
         iconImg.enabled = false;
         iconImg.sprite = null;
-    }
-
-    public void SelectItem()
-    {
-
+        Debug.Log("[HotbarSlot] Removed item from slot.", gameObject);
     }
 
     public void SelectSlot()

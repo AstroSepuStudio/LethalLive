@@ -14,6 +14,15 @@ public class AttackStat
 
     float timer;
 
+    public AttackStat()
+    {
+        AttackRadius = 0;
+        AttackKnock = 0;
+        AttackForce = 0;
+        AttackDamage = 0;
+        AttackCooldown = 0;
+    }
+
     public AttackStat(AttackStat stat, float attackDamage)
     {
         AttackRadius = stat.AttackRadius;

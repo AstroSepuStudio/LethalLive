@@ -11,9 +11,11 @@ public class AIBrain : NetworkBehaviour
 
     [SerializeField] protected AIState[] states;
 
-    string Prefix => $"[AIBrain ({gameObject.name})]";
+    protected string Prefix => $"[AIBrain ({gameObject.name})]";
 
-    protected AIState CurrentState { get; private set; }
+    [field:SerializeField] protected AIState CurrentState { get; private set; }
+
+    public NavMeshAgent Agent => agent;
 
     protected virtual void Awake()
     {
@@ -32,10 +34,10 @@ public class AIBrain : NetworkBehaviour
         SetState(states[0]);
     }
 
-    protected void SetState(AIState state)
+    protected void SetState(AIState newState)
     {
-        if (state != null) state.OnExitState(this);
-        CurrentState = state;
+        if (CurrentState != null) CurrentState.OnExitState(this);
+        CurrentState = newState;
         CurrentState.OnEnterState(this);
     }
 
@@ -49,7 +51,7 @@ public class AIBrain : NetworkBehaviour
     public void StopAgentMovement() => agent.isStopped = true;
     public void ResumeAgentMovement() => agent.isStopped = false;
     public void DisableAgent() => agent.enabled = false;
-    public bool IsAgentInMovement() => 
+    public bool IsAgentInMovement() =>  
         !agent.isStopped && agent.hasPath && 
         agent.remainingDistance > agent.stoppingDistance && 
         agent.velocity.sqrMagnitude > 0.01f;

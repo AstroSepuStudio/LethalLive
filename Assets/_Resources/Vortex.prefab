@@ -97,8 +97,73 @@ Transform:
   m_Children:
   - {fileID: 6989369875583294188}
   - {fileID: 1129531367027361159}
+  - {fileID: 4398678187888901562}
+  - {fileID: 5002428553436339625}
+  - {fileID: 2072101232030819499}
   m_Father: {fileID: 5360604290841652880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1154420825500620997
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4398678187888901562}
+  - component: {fileID: 36289192184949634}
+  m_Layer: 0
+  m_Name: Follow Alpha
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4398678187888901562
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154420825500620997}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &36289192184949634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154420825500620997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 433108a8384cf9743b254971620fc9f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_FollowAlpha
+  followStopDistance: 2
+  giveUpDistance: 20
+  recalculateInterval: 0.5
+  OnFollowLost:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnFollowLost
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &3498123862162605214
 GameObject:
   m_ObjectHideFlags: 0
@@ -395,9 +460,21 @@ MonoBehaviour:
   states:
   - {fileID: 4665471481818912242}
   - {fileID: 2413247349213477552}
+  - {fileID: 3180477249304640464}
+  - {fileID: 36289192184949634}
+  - {fileID: 7133718605970597530}
+  <CurrentState>k__BackingField: {fileID: 0}
+  stareStateIndex: 2
+  followStateIndex: 3
+  pickUpStateIndex: 4
   wanderIndexes: 0000000001000000
   minWanderCycles: 1
   maxWanderCycles: 4
+  alpha: 0
+  detectionRadius: 8
+  detectionInterval: 1
+  itemDetectionRadius: 5
+  itemDetectionInterval: 1.5
 --- !u!114 &3384841598755132090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,6 +530,144 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!1 &5739359130965052901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5002428553436339625}
+  - component: {fileID: 3180477249304640464}
+  m_Layer: 0
+  m_Name: Stare
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5002428553436339625
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5739359130965052901}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3180477249304640464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5739359130965052901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 181ce9610ef71de40a86a5032defd7fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_StareAtVortex
+  minStareDuration: 1.5
+  maxStareDuration: 3.5
+  turnSpeed: 5
+  OnStareDecisionMade:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnStareDecisionMade
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!1 &6788792008377803996
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2072101232030819499}
+  - component: {fileID: 7133718605970597530}
+  m_Layer: 0
+  m_Name: Pick Up Item
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2072101232030819499
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6788792008377803996}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7133718605970597530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6788792008377803996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92f70ddd4682db04a828364b1de79660, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_PickUpItem
+  pickUpRange: 1.2
+  validationInterval: 0.5
+  OnItemPickedUp:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnItemPickedUp
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnItemLost:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnItemLost
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7667933668852956304
 GameObject:
   m_ObjectHideFlags: 0

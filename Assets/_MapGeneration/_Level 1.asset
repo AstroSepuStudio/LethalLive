@@ -18,8 +18,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 74a8d1cf0b6ce7a4d856fa8094da36ce, type: 2}
   - {fileID: 11400000, guid: 757ebc56406bd074db367e05b2787e96, type: 2}
   deadEndRooms: []
-  spawnableItems: []
-  spawnableFurniture: []
+  spawnableItems:
+  - {fileID: 11400000, guid: d6015b7736f8f8c49b4af775dd7ff787, type: 2}
+  - {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
+  - {fileID: 11400000, guid: 3c30ba55c7604f4498556a7791c247f0, type: 2}
+  - {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+  spawnableFurniture:
+  - {fileID: 11400000, guid: 5ec73b96afe77a740b868e17e16ac691, type: 2}
   entitySpawns:
   - entityPrefab: {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
     spawnWeight: 100

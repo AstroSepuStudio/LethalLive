@@ -1,11 +1,11 @@
 using Mirror;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class ItemBase : InteractableObject
 {
     public ItemSO ItemData;
+
     [SerializeField] protected NetworkIdentity identity;
     [SerializeField] protected Rigidbody rb;
     [SerializeField] protected Collider coll;
@@ -16,38 +16,35 @@ public class ItemBase : InteractableObject
 
     public uint ID => identity.netId;
 
-    [SyncVar]
-    public int Index = 0;
-
-    [SyncVar]
-    public int ItemValue;
+    [SyncVar] public int ItemValue;
+    [SyncVar] public bool InUse = false;
+    [SyncVar] public bool HasOwner = false;
 
     public PlayerData pData { get; private set; }
 
-    public AttackStat primaryAtkStats;
-    public AttackStat secondaryAtkStats;
+    public AttackStat primaryAtkStats = new();
+    public AttackStat secondaryAtkStats = new();
 
-    [SyncVar]
-    public bool InUse = false;
+    Color _gizmoColor;
+
+    protected virtual void Awake()
+    {
+        _gizmoColor = new Color(Random.value, Random.value, Random.value);
+    }
 
     protected virtual void Start()
     {
+        if (ItemData == null)
+        {
+            Debug.LogError($"[ItemBase] ItemData is not assigned on '{gameObject.name}'!", this);
+            return;
+        }
+
         if (isServer && ItemData.isSellable)
             ItemValue = Random.Range(ItemData.minValue, ItemData.maxValue);
     }
 
-    public void SetRender(bool render)
-    {
-        if (itemRenderer == null)
-        {
-            if (itemRenderer.TryGetComponent(out Renderer rend))
-                itemRenderer = rend;
-            else
-                return;
-        }
-
-        itemRenderer.enabled = render;
-    }
+    #region Interaction
 
     [Server]
     public override void OnInteract(PlayerData sourceData)
@@ -64,11 +61,16 @@ public class ItemBase : InteractableObject
     [ClientRpc]
     protected void RpcGetPlayerData(uint playerID)
     {
-        NetworkClient.spawned.TryGetValue(playerID, out NetworkIdentity identity);
+        if (isServer) return;
 
-        if (identity == null) return;
-        pData = identity.GetComponent<PlayerData>();
+        NetworkClient.spawned.TryGetValue(playerID, out NetworkIdentity netIdentity);
+        if (netIdentity == null) return;
+        pData = netIdentity.GetComponent<PlayerData>();
     }
+
+    #endregion
+
+    #region Lifecycle
 
     public virtual void OnPickUp()
     {
@@ -94,17 +96,39 @@ public class ItemBase : InteractableObject
         coll.enabled = true;
         transform.SetParent(null);
         rb.isKinematic = false;
+
+        pData = null;
     }
+
+    #endregion
+
+    #region Canvas / UI
 
     public override void EnableCanvas()
     {
         canvas.EnableCanvas();
-    
-        itemNameTxt.SetText(ItemData.itemName);
+
+        if (itemNameTxt != null)
+            itemNameTxt.SetText(ItemData.itemName);
 
         if (ItemData.isSellable && itemPriceTxt != null)
             itemPriceTxt.SetText($"${ItemValue}");
     }
+
+    public void SetRender(bool render)
+    {
+        if (itemRenderer == null)
+        {
+            Debug.LogWarning($"[ItemBase] itemRenderer not assigned on '{gameObject.name}'", this);
+            return;
+        }
+
+        itemRenderer.enabled = render;
+    }
+
+    #endregion
+
+    #region Item Actions
 
     public virtual void PrimaryAction() { }
     public virtual void SecondaryAction() { }
@@ -115,13 +139,17 @@ public class ItemBase : InteractableObject
     public virtual void SecondaryAnimationTrigger() { }
     public virtual void SecondaryAnimationFinish() { }
 
+    #endregion
+
+    #region Gizmos
+
     private void OnDrawGizmos()
     {
-        if (GameManager.Instance == null) return;
-        if (!GameManager.Instance.debug) return;
+        if (GameManager.Instance == null || !GameManager.Instance.debug) return;
 
-        Color color = new(Random.Range(0, 255), Random.Range(0, 255), Random.Range(0, 255));
-        Gizmos.color = color;
+        Gizmos.color = _gizmoColor;
         Gizmos.DrawWireSphere(transform.position, 0.5f);
     }
+
+    #endregion
 }
