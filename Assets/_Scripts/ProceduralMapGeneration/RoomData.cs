@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class RoomData : MonoBehaviour
 {
@@ -85,7 +86,6 @@ public class RoomData : MonoBehaviour
     {
         var footprint = PlacedRoom.data.RoomFootprint;
         var entry = footprint[Random.Range(0, footprint.Length)];
-
         float cellSize = DungeonGenerator.Instance.CellSize;
 
         Vector3 cellOrigin = transform.position + new Vector3(
@@ -93,11 +93,18 @@ public class RoomData : MonoBehaviour
             entry.Footprint.y * cellSize + yOffset,
             entry.Footprint.z * cellSize);
 
-        cellSize *= 0.9f;
+        cellSize *= 0.8f;
         float x = Random.Range(-cellSize, cellSize);
         float z = Random.Range(-cellSize, cellSize);
+        Vector3 candidate = cellOrigin + new Vector3(x, 0f, z);
 
-        return cellOrigin + new Vector3(x, 0f, z);
+        if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, cellSize, NavMesh.AllAreas))
+            return hit.position;
+
+        if (NavMesh.SamplePosition(cellOrigin, out NavMeshHit centerHit, cellSize, NavMesh.AllAreas))
+            return centerHit.position;
+
+        return candidate;
     }
 
     private void OnDrawGizmosSelected()

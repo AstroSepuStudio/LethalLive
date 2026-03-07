@@ -6,16 +6,18 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class AIBrain : NetworkBehaviour
 {
+    [Header("AI Core")]
     [SerializeField] protected Animator animator;
     [SerializeField] protected NavMeshAgent agent;
 
     [SerializeField] protected AIState[] states;
-
+    [SerializeField] protected LayerMask losBlockingLayers;
     protected string Prefix => $"[AIBrain ({gameObject.name})]";
 
     [field:SerializeField] protected AIState CurrentState { get; private set; }
 
     public NavMeshAgent Agent => agent;
+    public Animator Animator_ => animator;
 
     protected virtual void Awake()
     {
@@ -45,6 +47,13 @@ public class AIBrain : NetworkBehaviour
     {
         if (CurrentState == null) return;
         CurrentState.OnUpdateState(this);
+    }
+
+    protected bool HasLineOfSight(Vector3 target)
+    {
+        Vector3 origin = transform.position + Vector3.up;
+        Vector3 dir = (target + Vector3.up) - origin;
+        return !Physics.Raycast(origin, dir.normalized, dir.magnitude, losBlockingLayers, QueryTriggerInteraction.Ignore);
     }
 
     public void MoveAgent(Vector3 position) => agent.SetDestination(position);

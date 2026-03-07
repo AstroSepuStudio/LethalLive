@@ -17,6 +17,7 @@ public class AIS_StareAtVortex : AIState
     {
         brain.StopAgentMovement();
         stareTimer = Random.Range(minStareDuration, maxStareDuration);
+        brain.Animator_.SetBool("Walk", false);
     }
 
     public override void OnUpdateState(AIBrain brain)

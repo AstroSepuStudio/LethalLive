@@ -24,12 +24,15 @@ public class AIS_WanderBetweenRooms : AIState
 
     public override void OnExitState(AIBrain brain)
     {
-
+        brain.Animator_.SetBool("Walk", false);
     }
 
     public override void OnUpdateState(AIBrain brain)
     {
-        if (brain.IsAgentInMovement()) return;
+        bool mov = brain.IsAgentInMovement();
+
+        brain.Animator_.SetBool("Walk", mov);
+        if (mov) return;
 
         if (moving)
         {
@@ -37,9 +40,9 @@ public class AIS_WanderBetweenRooms : AIState
             OnWanderCompleted?.Invoke();
         }
 
-        sleepTimer = sleepTimer > 0 ? sleepTimer - Time.deltaTime : 0;
+        sleepTimer -= Time.deltaTime;
 
-        if (sleepTimer < 0)
+        if (sleepTimer <= 0)
             MoveAgent(brain);
     }
 

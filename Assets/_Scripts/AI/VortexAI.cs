@@ -22,13 +22,13 @@ public class VortexAI : AIBrain
     int curWanIndex = 0;
 
     [Header("Alpha")]
-    [SerializeField][SyncVar] float alpha = 0f;
+    [SerializeField][SyncVar(hook = nameof(UpdateScale))] int alpha = -1;
     public float Alpha => alpha;
 
-    [Header("Detection")]
-    [SerializeField] float detectionRadius = 8f;
-    [SerializeField] float detectionInterval = 1f;
-    float detectionTimer = 0f;
+    [Header("Vortex Detection")]
+    [SerializeField] float vortexDetectionRadius = 8f;
+    [SerializeField] float vortexDetectionInterval = 1f;
+    float vortexDetectionTimer = 0f;
     readonly HashSet<VortexAI> seenVortexes = new();
 
     [Header("Item Detection")]
@@ -44,15 +44,16 @@ public class VortexAI : AIBrain
 
     #region Lifecycle
 
-    protected override void Awake()
+    public override void OnStartServer()
     {
-        base.Awake();
+        base.OnStartServer();
         alpha = Random.Range(0, 100);
     }
 
     protected override void Start()
     {
         base.Start();
+
         targetWanCycles = Random.Range(minWanderCycles, maxWanderCycles);
 
         if (states != null)
@@ -63,8 +64,16 @@ public class VortexAI : AIBrain
         }
     }
 
+    private void UpdateScale(int oldValue, int newValue)
+    {
+        float multiplier = Mathf.Lerp(0.6f, 1.2f, (float)newValue / 100f);
+        transform.localScale *= multiplier;
+    }
+
     protected override void Update()
     {
+        if (!isServer) return;
+
         base.Update();
         TickDetection();
         TickItemDetection();
@@ -78,9 +87,9 @@ public class VortexAI : AIBrain
     {
         if (!IsInWanderState()) return;
 
-        detectionTimer -= Time.deltaTime;
-        if (detectionTimer > 0f) return;
-        detectionTimer = detectionInterval;
+        vortexDetectionTimer -= Time.deltaTime;
+        if (vortexDetectionTimer > 0f) return;
+        vortexDetectionTimer = vortexDetectionInterval;
 
         VortexAI encountered = FindClosestOtherVortex();
         if (encountered != null && !seenVortexes.Contains(encountered))
@@ -110,12 +119,16 @@ public class VortexAI : AIBrain
         {
             ItemBase item = hit.GetComponent<ItemBase>();
 
-            if (item == null) continue; // not an item
-            if (!item.ItemData.pickable) continue; // not pickable
-            if (item.InUse) continue; // already held by a player
+            if (item == null) continue;
+            if (!item.ItemData.pickable) continue;
+            if (item.HasOwner) continue;
 
             float d = Vector3.Distance(transform.position, item.transform.position);
-            if (d < closestDist) { closestDist = d; closest = item; }
+            if (d < closestDist && HasLineOfSight(item.transform.position)) 
+            { 
+                closestDist = d; 
+                closest = item; 
+            }
         }
 
         return closest;
@@ -137,7 +150,7 @@ public class VortexAI : AIBrain
 
     VortexAI FindClosestOtherVortex()
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
+        Collider[] hits = Physics.OverlapSphere(transform.position, vortexDetectionRadius);
         VortexAI closest = null;
         float closestDist = float.MaxValue;
 
@@ -147,7 +160,11 @@ public class VortexAI : AIBrain
             if (other == null || other == this) continue;
 
             float d = Vector3.Distance(transform.position, other.transform.position);
-            if (d < closestDist) { closestDist = d; closest = other; }
+            if (d < closestDist && HasLineOfSight(other.transform.position)) 
+            { 
+                closestDist = d; 
+                closest = other; 
+            }
         }
 
         return closest;
@@ -222,7 +239,7 @@ public class VortexAI : AIBrain
     void OnDrawGizmosSelected()
     {
         Handles.color = Color.yellow;
-        Handles.DrawWireDisc(transform.position, Vector3.up, detectionRadius);
+        Handles.DrawWireDisc(transform.position, Vector3.up, vortexDetectionRadius);
 
         Handles.color = Color.green;
         Handles.DrawWireDisc(transform.position, Vector3.up, itemDetectionRadius);
