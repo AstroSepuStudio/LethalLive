@@ -4,10 +4,11 @@ using UnityEngine.Events;
 public class AIS_FollowAlpha : AIState
 {
     [SerializeField] float followStopDistance = 2f;
-    [SerializeField] float giveUpDistance = 20f;
     [SerializeField] float recalculateInterval = 0.5f;
     [SerializeField] float separationDistance = 1.5f;
     [SerializeField] float separationPushDistance = 3f;
+    [SerializeField] float searchDispatchTimeout = 45f;
+    float dispatchTimer;
 
     public VortexAI AlphaTarget { get; set; }
     public UnityEvent OnFollowLost;
@@ -18,6 +19,7 @@ public class AIS_FollowAlpha : AIState
     {
         brain.ResumeAgentMovement();
         recalcTimer = 0f;
+        dispatchTimer = searchDispatchTimeout;
 
         brain.Agent.stoppingDistance = followStopDistance;
     }
@@ -30,13 +32,15 @@ public class AIS_FollowAlpha : AIState
             return;
         }
 
-        float dist = Vector3.Distance(brain.transform.position, AlphaTarget.transform.position);
-
-        if (dist > giveUpDistance)
+        dispatchTimer -= Time.deltaTime;
+        if (dispatchTimer <= 0f)
         {
-            OnFollowLost?.Invoke();
+            VortexAI vortex = brain as VortexAI;
+            vortex?.BeginSearch();
             return;
         }
+
+        float dist = Vector3.Distance(brain.transform.position, AlphaTarget.transform.position);
 
         recalcTimer -= Time.deltaTime;
         if (recalcTimer <= 0f)

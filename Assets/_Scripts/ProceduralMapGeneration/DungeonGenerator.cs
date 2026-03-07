@@ -78,6 +78,7 @@ public class DungeonGenerator : NetworkBehaviour
     public Vector3Int StartRoomPos;
 
     [SerializeField] float maxDistance = 0;
+    public float MaxDistance => maxDistance;
 
     private struct OpenPort
     {

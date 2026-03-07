@@ -123,29 +123,40 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   audioSource: {fileID: 1878123820758244030}
-  takeDamageSFX:
-  - {fileID: 11400000, guid: 6d73eb0bec5d005418f9f1c0dddef01f, type: 2}
-  - {fileID: 11400000, guid: e05106129b9fe0f40a116c50e45a4a93, type: 2}
-  - {fileID: 11400000, guid: e5cd3e3d0fbefb0408d8154ea3dd5c0e, type: 2}
-  - {fileID: 11400000, guid: 70ad8fc98154a054baa51ef6cb7a22ab, type: 2}
-  knockedSFX: []
-  diedSFX:
-  - {fileID: 11400000, guid: 641036afcaf8a7945813b50e87d20bc8, type: 2}
-  - {fileID: 11400000, guid: a81e68b9f729a9c43939b6833fc58700, type: 2}
+  sfxGroups:
+  - Event: 0
+    Clips:
+    - {fileID: 11400000, guid: 6d73eb0bec5d005418f9f1c0dddef01f, type: 2}
+    - {fileID: 11400000, guid: e05106129b9fe0f40a116c50e45a4a93, type: 2}
+    - {fileID: 11400000, guid: e5cd3e3d0fbefb0408d8154ea3dd5c0e, type: 2}
+    - {fileID: 11400000, guid: 70ad8fc98154a054baa51ef6cb7a22ab, type: 2}
+  - Event: 2
+    Clips:
+    - {fileID: 11400000, guid: 641036afcaf8a7945813b50e87d20bc8, type: 2}
+  - Event: 3
+    Clips:
+    - {fileID: 11400000, guid: 708f6ea01fb19b64bb00d0c9d4248899, type: 2}
+  - Event: 4
+    Clips:
+    - {fileID: 11400000, guid: a81e68b9f729a9c43939b6833fc58700, type: 2}
   knockRecoveryDelay: 0
   knockRecoveryRate: 0
   ragdollRecoveryValue: 0
   maxHP: 50
-  currentHP: 0
   maxKnock: 100
-  currentKnock: 0
-  strenght: 0
+  strength: 100
   speed: 0
+  currentHP: 0
+  currentKnock: 0
+  OnDeath:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTakeDamage:
+    m_PersistentCalls:
+      m_Calls: []
   furRenderer: {fileID: 1896758767346647573}
   dataSO: {fileID: 11400000, guid: 5ec73b96afe77a740b868e17e16ac691, type: 2}
   rb: {fileID: 3239674297409390666}
-  strongHitSFX:
-  - {fileID: 11400000, guid: 708f6ea01fb19b64bb00d0c9d4248899, type: 2}
   lootPositions:
   - position: {fileID: 2468905640288472950}
     maxOffset: {x: 0, y: 0, z: 0}

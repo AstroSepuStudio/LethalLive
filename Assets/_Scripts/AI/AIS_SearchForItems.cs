@@ -1,0 +1,98 @@
+using UnityEngine;
+using UnityEngine.Events;
+
+public class AIS_SearchForItems : AIState
+{
+    [SerializeField] int maxSearchAttempts = 5;
+    [SerializeField] float waitAtPositionDuration = 3f;
+    [SerializeField] int maxRoomStepsPerMove = 2;
+
+    int attemptsRemaining;
+    float waitTimer;
+    bool waitingAtPosition;
+
+    public UnityEvent OnItemFound;
+    public UnityEvent OnSearchFailed;
+
+    public override void OnEnterState(AIBrain brain)
+    {
+        attemptsRemaining = maxSearchAttempts;
+        waitingAtPosition = false;
+        waitTimer = 0f;
+        MoveToNextSearchPosition(brain);
+    }
+
+    public override void OnUpdateState(AIBrain brain)
+    {
+        VortexAI vortex = brain as VortexAI;
+
+        if (vortex != null && vortex.CarriedItem != null)
+        {
+            OnItemFound?.Invoke();
+            return;
+        }
+
+        if (waitingAtPosition)
+        {
+            waitTimer -= Time.deltaTime;
+            if (waitTimer <= 0f)
+            {
+                waitingAtPosition = false;
+
+                if (attemptsRemaining <= 0)
+                {
+                    OnSearchFailed?.Invoke();
+                    return;
+                }
+
+                MoveToNextSearchPosition(brain);
+            }
+            return;
+        }
+
+        if (!brain.IsAgentInMovement())
+        {
+            brain.Animator_.SetBool("Walk", false);
+            waitingAtPosition = true;
+            waitTimer = waitAtPositionDuration;
+        }
+    }
+
+    public override void OnExitState(AIBrain brain)
+    {
+        brain.Animator_.SetBool("Walk", false);
+        waitingAtPosition = false;
+    }
+
+    void MoveToNextSearchPosition(AIBrain brain)
+    {
+        attemptsRemaining--;
+
+        var gen = DungeonGenerator.Instance;
+        if (gen == null) { OnSearchFailed?.Invoke(); return; }
+
+        RoomData currentRoom = gen.GetRoomDataAtPosition(brain.transform.position);
+        if (currentRoom == null) { OnSearchFailed?.Invoke(); return; }
+
+        int currentId = currentRoom.PlacedRoom.id;
+        int steps = Random.Range(1, maxRoomStepsPerMove + 1);
+
+        for (int i = 0; i < steps; i++)
+        {
+            if (!gen.RoomAdjacency.TryGetValue(currentId, out var neighbors) || neighbors.Count == 0)
+                break;
+
+            var candidates = new System.Collections.Generic.List<int>(neighbors);
+            currentId = candidates[Random.Range(0, candidates.Count)];
+        }
+
+        if (!gen.SpawnedRooms.TryGetValue(currentId, out var targetRoom) || targetRoom == null)
+        {
+            OnSearchFailed?.Invoke();
+            return;
+        }
+
+        brain.MoveAgent(targetRoom.GetRandomPositionInRoom());
+        brain.Animator_.SetBool("Walk", true);
+    }
+}

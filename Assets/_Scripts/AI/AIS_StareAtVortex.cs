@@ -41,7 +41,9 @@ public class AIS_StareAtVortex : AIState
         if (stareTimer <= 0f)
         {
             VortexAI self = brain as VortexAI;
-            bool shouldFollow = self != null && TargetVortex.Alpha > self.Alpha;
+
+            float alphaVal = self.CurrentAlpha != null ? self.CurrentAlpha.Alpha : self.Alpha;
+            bool shouldFollow = self != null && TargetVortex.Alpha > alphaVal;
             OnStareDecisionMade?.Invoke(shouldFollow);
         }
     }

@@ -13,13 +13,11 @@ public class ItemHurtbox : NetworkBehaviour
     [SerializeField] AudioSFX[] hitSFX;
 
     List<GameObject> hitEntities = new();
-
     float lastHitTime;
 
     private void Start()
     {
-        if (!startEnabled)
-            enabled = false;
+        if (!startEnabled) enabled = false;
     }
 
     public void EnableHitbox()
@@ -36,36 +34,24 @@ public class ItemHurtbox : NetworkBehaviour
 
     [ClientRpc]
     void RpcPlayHitSFX(int index)
-    {
-        AudioManager.Instance.PlayOneShot(audioSource, hitSFX[index]);
-    }
+        => AudioManager.Instance.PlayOneShot(audioSource, hitSFX[index]);
 
     private void OnTriggerEnter(Collider other)
     {
         if (!isServer) return;
-
-        if (item == null) return;
-        if (item.pData == null) return;
-
+        if (item?.pData == null) return;
         if (other.gameObject == item.pData.gameObject) return;
-
         if (hitEntities.Contains(other.gameObject)) return;
 
+        if (!other.TryGetComponent(out EntityStats stats)) return;
+
         if ((Time.time - lastHitTime) > 0.5f)
-            RpcPlayHitSFX(Random.Range(0, hitSFX.Length));
-
-        if (other.TryGetComponent(out EntityStats stats))
         {
-            if (stats is PlayerStats pStats)
-            {
-                pStats.ReceiveAttack(item.pData, item.primaryAtkStats);
-            }
-            else
-            {
-                stats.ReceiveAttack(item.pData.Player_Stats, item.primaryAtkStats);
-            }
-
-            hitEntities.Add(other.gameObject);
+            lastHitTime = Time.time;
+            RpcPlayHitSFX(Random.Range(0, hitSFX.Length));
         }
+
+        stats.ReceiveAttack(AttackSource.From(item.pData), item.primaryAtkStats);
+        hitEntities.Add(other.gameObject);
     }
 }

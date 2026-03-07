@@ -1,4 +1,5 @@
 using Mirror;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -102,7 +103,7 @@ public class ItemBase : InteractableObject
 
     #endregion
 
-    #region Canvas / UI
+    #region Visual / Misc
 
     public override void EnableCanvas()
     {
@@ -124,6 +125,35 @@ public class ItemBase : InteractableObject
         }
 
         itemRenderer.enabled = render;
+    }
+
+    public void SetCollider(bool enabled)
+    {
+        coll.enabled = enabled;
+    }
+
+    public void DisableColliderTemporarily(float time)
+    {
+        StartCoroutine(EnableColliderAfterDelay(time));
+    }
+
+    public void AddForce(Vector3 force, ForceMode mode)
+    {
+        rb.AddForce(force, mode);
+    }
+
+    IEnumerator EnableColliderAfterDelay(float time)
+    {
+        coll.enabled = false;
+
+        float timer = 0;
+        while (timer < time)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        coll.enabled = true;
     }
 
     #endregion

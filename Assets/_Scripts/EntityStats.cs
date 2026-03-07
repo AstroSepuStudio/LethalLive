@@ -1,40 +1,52 @@
 using Mirror;
 using UnityEngine;
 using UnityEngine.Events;
-using static Unity.VisualScripting.Member;
+using System.Collections.Generic;
 
 public class EntityStats : NetworkBehaviour
 {
-    [Header("Entity Stats")]
-    [SerializeField] protected AudioSource audioSource;
-    [SerializeField] protected AudioSFX[] takeDamageSFX;
-    [SerializeField] protected AudioSFX[] knockedSFX;
-    [SerializeField] protected AudioSFX[] diedSFX;
+    public enum SFXEvent { TakeDamage, Knocked, Died, StrongHit, PartialBreak }
 
+    [System.Serializable]
+    public struct SFXGroup
+    {
+        public SFXEvent Event;
+        public AudioSFX[] Clips;
+    }
+
+    [Header("Audio")]
+    [SerializeField] protected AudioSource audioSource;
+    [SerializeField] SFXGroup[] sfxGroups;
+
+    protected Dictionary<SFXEvent, AudioSFX[]> sfxMap;
+
+    [Header("Knock Recovery")]
     [SerializeField] protected float knockRecoveryDelay;
     [SerializeField] protected float knockRecoveryRate;
     [SerializeField] protected float ragdollRecoveryValue;
     protected float knockRecoveryTimer;
 
-    public UnityEvent<EntityStats, AttackStat> OnDeathEv;
-
-    [SyncVar]
-    public float maxHP = 100f;
+    [Header("Stats")]
+    [SyncVar] public float maxHP = 100f;
+    [SyncVar] public float maxKnock = 100f;
+    [SyncVar] public float strength = 100f;
+    [SyncVar] public float speed = 100f;
 
     [SyncVar(hook = nameof(OnHPChanged))]
     public float currentHP;
 
-    [SyncVar]
-    public float maxKnock = 100f;
-
     [SyncVar(hook = nameof(OnKnockChanged))]
     public float currentKnock;
 
-    [SyncVar]
-    public float strenght = 100f;
+    public UnityEvent<AttackSource, AttackStat> OnDeath;
+    public UnityEvent<AttackSource, AttackStat> OnTakeDamage;
 
-    [SyncVar]
-    public float speed = 100f;
+    #region Lifecylce
+
+    protected virtual void Awake()
+    {
+        BuildSFXMap();
+    }
 
     public override void OnStartServer()
     {
@@ -45,88 +57,69 @@ public class EntityStats : NetworkBehaviour
     protected virtual void Update()
     {
         if (!isServer) return;
-
-        knockRecoveryTimer = Mathf.Clamp(knockRecoveryTimer + Time.deltaTime, 0, knockRecoveryDelay);
-
-        if (Mathf.Approximately(knockRecoveryTimer, knockRecoveryDelay))
-        {
-            currentKnock = Mathf.Clamp(currentKnock - Time.deltaTime * knockRecoveryRate, 0, maxKnock);
-
-            //if (currentKnock <= ragdollRecoveryValue && pData.Skin_Data.Ragdoll_Manager.IsKnocked)
-            //{
-            //    pData.Skin_Data.Ragdoll_Manager.DisableRagdoll();
-            //}
-        }
+        TickKnockRecovery();
     }
+
+    #endregion
+
+    #region SFX
+
+    void BuildSFXMap()
+    {
+        sfxMap = new Dictionary<SFXEvent, AudioSFX[]>();
+        foreach (var group in sfxGroups)
+            sfxMap[group.Event] = group.Clips;
+    }
+
+    [Server]
+    protected void PlaySFX(SFXEvent sfxEvent)
+    {
+        if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clips.Length == 0) return;
+        int index = Random.Range(0, clips.Length);
+        RpcPlaySFX(sfxEvent, index);
+    }
+
+    [ClientRpc]
+    void RpcPlaySFX(SFXEvent sfxEvent, int clipIndex)
+    {
+        if (audioSource == null) return;
+        if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clipIndex >= clips.Length) return;
+
+        if (sfxEvent == SFXEvent.Died)
+            AudioManager.Instance.PlayOneShotAndDestroy(transform.position, clips[clipIndex]);
+        else
+            AudioManager.Instance.PlayOneShot(audioSource, clips[clipIndex]);
+    }
+
+    #endregion
 
     #region HP
 
     [Server]
-    public virtual void ReceiveAttack(EntityStats src, AttackStat attack)
+    public virtual void ReceiveAttack(AttackSource source, AttackStat attack)
     {
-        RequestPlaySFX(0);
-
-        ModifyHP(src, attack);
-
-        float multiplier = Random.Range(1f, 2f);
-        Vector3 dir = transform.position - src.transform.position;
-
-        float knockAmount = attack.AttackKnock * multiplier * (src.strenght / 100f);
-        Vector3 momentum = multiplier * attack.AttackForce * dir.normalized;
-        ModifyKnock(-knockAmount, momentum);
-    }
-
-    /// <summary> 0=Take Damage , 1=Knocked Out , 2=Died </summary>
-    [Server]
-    protected virtual void RequestPlaySFX(int index)
-    {
-        int sfxIndex = 0;
-        if (index == 0 && takeDamageSFX.Length > 0)
-            sfxIndex = Random.Range(0, takeDamageSFX.Length);
-        else if (index == 1 && knockedSFX.Length > 0)
-            sfxIndex = Random.Range(0, knockedSFX.Length);
-        else if (index == 2 && diedSFX.Length > 0)
-            sfxIndex = Random.Range(0, diedSFX.Length);
-
-        RpcPlaySFX(index, sfxIndex);
-    }
-
-    [ClientRpc]
-    protected virtual void RpcPlaySFX(int index, int sfxIndex)
-    {
-        if (audioSource == null) return;
-
-        if (index == 0 && takeDamageSFX.Length > 0)
-            AudioManager.Instance.PlayOneShot(audioSource, takeDamageSFX[sfxIndex]);
-        else if (index == 1 && knockedSFX.Length > 0)
-            AudioManager.Instance.PlayOneShot(audioSource, knockedSFX[sfxIndex]);
-        else if (index == 2 && diedSFX.Length > 0)
-            AudioManager.Instance.PlayOneShotAndDestroy(transform.position, diedSFX[sfxIndex]);
+        PlaySFX(SFXEvent.TakeDamage);
+        ApplyDamage(source, attack);
+        ApplyKnock(source, attack);
     }
 
     [Server]
-    public virtual void ModifyHP(EntityStats source, AttackStat attack)
+    public virtual void ApplyDamage(AttackSource source, AttackStat attack)
     {
-        Debug.Log($"Receives {attack.AttackDamage} damage");
         currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
-        if (currentHP <= 0)
-        {
-            OnDeath(source, attack);
-        }
+        OnTakeDamage?.Invoke(source, attack);
+
+        if (currentHP <= 0f)
+            HandleDeath(source, attack);
     }
 
-    protected virtual void OnHPChanged(float oldVal, float newVal)
-    {
-    }
+    protected virtual void OnHPChanged(float oldVal, float newVal) { }
 
     [Server]
-    protected virtual void OnDeath(EntityStats source, AttackStat attack)
+    protected virtual void HandleDeath(AttackSource source, AttackStat attack)
     {
-        OnDeathEv?.Invoke(source, attack);
-        RequestPlaySFX(2);
-
-        Debug.Log($"{gameObject.name} died.");
-        // Add ragdoll, respawn, disable movement, etc.
+        OnDeath?.Invoke(source, attack);
+        PlaySFX(SFXEvent.Died);
     }
 
     #endregion
@@ -134,31 +127,46 @@ public class EntityStats : NetworkBehaviour
     #region Knock
 
     [Server]
-    public virtual void ModifyKnock(float amount, Vector3 momentum)
+    public virtual void ApplyKnock(AttackSource source, AttackStat attack)
     {
-        knockRecoveryTimer = 0;
-        currentKnock = Mathf.Clamp(currentKnock + amount, 0f, maxKnock);
-        if (currentKnock >= maxKnock)
-        {
-            OnKnocked(momentum);
-            return;
-        }
+        float srcStrength = source.Stats != null ? source.Stats.strength : 100f;
 
-        //pData.Player_Movement.AddMomentum(momentum);
+        float multiplier = Random.Range(1f, 2f);
+        float knockAmount = attack.AttackKnock * multiplier * (srcStrength / 100f);
+        Vector3 momentum = CalculateMomentum(source.Position, attack.AttackForce, multiplier);
+
+        AddKnock(knockAmount, momentum);
     }
 
-    protected virtual void OnKnockChanged(float oldVal, float newVal)
-    {
+    protected Vector3 CalculateMomentum(Vector3 sourcePos, float force, float multiplier)
+        => multiplier * force * (transform.position - sourcePos).normalized;
 
+    [Server]
+    public virtual void AddKnock(float amount, Vector3 momentum)
+    {
+        knockRecoveryTimer = 0f;
+        currentKnock = Mathf.Clamp(currentKnock + amount, 0f, maxKnock);
+
+        if (currentKnock >= maxKnock)
+            HandleKnocked(momentum);
+    }
+
+    protected virtual void OnKnockChanged(float oldVal, float newVal) { }
+
+    [Server]
+    protected virtual void HandleKnocked(Vector3 momentum)
+    {
+        PlaySFX(SFXEvent.Knocked);
     }
 
     [Server]
-    protected virtual void OnKnocked(Vector3 momentum)
+    protected void TickKnockRecovery()
     {
-        RequestPlaySFX(1);
+        knockRecoveryTimer = Mathf.Clamp(knockRecoveryTimer + Time.deltaTime, 0f, knockRecoveryDelay);
 
-        Debug.Log($"{gameObject.name} was knocked!");
-        //pData.Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
+        if (!Mathf.Approximately(knockRecoveryTimer, knockRecoveryDelay)) return;
+
+        currentKnock = Mathf.Clamp(currentKnock - Time.deltaTime * knockRecoveryRate, 0f, maxKnock);
     }
 
     #endregion

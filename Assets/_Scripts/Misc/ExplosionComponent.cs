@@ -12,7 +12,6 @@ public class ExplosionComponent : NetworkBehaviour
 
     bool _triggered = false;
     bool _onCooldown = false;
-
     WaitForSeconds cooldown;
 
     private void Awake()
@@ -29,28 +28,22 @@ public class ExplosionComponent : NetworkBehaviour
         RPC_TriggerExplosionParticles();
         StartCoroutine(Cooldown());
 
-        Collider[] hitPlayers = Physics.OverlapSphere(transform.position, explosionStat.AttackRadius);
-        foreach (Collider col in hitPlayers)
+        Collider[] hits = Physics.OverlapSphere(transform.position, explosionStat.AttackRadius);
+        foreach (Collider col in hits)
         {
-            for (int i = 0; i < GameManager.Instance.playMod.Players.Count; i++)
-            {
-                if (GameManager.Instance.playMod.Players[i].gameObject != col.gameObject) continue;
+            if (!col.TryGetComponent(out PlayerStats pStats)) continue;
 
-                Vector3 dir = GameManager.Instance.playMod.Players[i].transform.position - transform.position;
-                float distance = dir.magnitude;
+            Vector3 dir = pStats.transform.position - transform.position;
+            float distance = dir.magnitude;
+            float multiplier = Random.Range(0.75f, 1.25f);
+            float effectiveness = Mathf.Lerp(1f, 0.75f, distance / explosionStat.AttackRadius);
 
-                float multiplier = Random.Range(0.75f, 1.25f);
-                float effectiveness = Mathf.Lerp(1f, 0.75f, distance / explosionStat.AttackRadius);
+            AttackStat modifiedAttack = new(explosionStat, explosionStat.AttackDamage * effectiveness * multiplier);
+            float knockAmount = explosionStat.AttackKnock * multiplier * effectiveness;
+            Vector3 momentum = effectiveness * explosionStat.AttackForce * multiplier * dir.normalized;
 
-                float knockAmount = explosionStat.AttackKnock * multiplier * effectiveness;
-                Vector3 momentum = effectiveness * explosionStat.AttackForce * multiplier * dir.normalized;
-
-                AttackStat modifiedAttack = new(explosionStat, explosionStat.AttackDamage * effectiveness * multiplier);
-                //GameManager.Instance.playMod.Players[i].Player_Stats.ReceiveAttack(null, modifiedAttack);
-
-                GameManager.Instance.playMod.Players[i].Player_Stats.ModifyKnock(knockAmount, momentum);
-                GameManager.Instance.playMod.Players[i].Player_Stats.ModifyHP(null, modifiedAttack);
-            }
+            pStats.ApplyDamage(AttackSource.None, modifiedAttack);
+            pStats.AddKnock(knockAmount, momentum);
         }
     }
 
@@ -58,12 +51,7 @@ public class ExplosionComponent : NetworkBehaviour
     public void RPC_TriggerExplosionParticles()
     {
         if (explosionParticles != null)
-        {
-            for (int i = 0; i < explosionParticles.Length; i++)
-            {
-                explosionParticles[i].Play();
-            }
-        }
+            foreach (var p in explosionParticles) p.Play();
 
         AudioManager.Instance.PlayOneShot(audioSource, explosionSFX[Random.Range(0, explosionSFX.Length)]);
     }

@@ -8374,6 +8374,30 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: a9bfa5d8-f2d4-4998-9689-403d1e633f8f
     m_ActionName: 'Tablet/Submit[/Keyboard/enter]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c0a958da-3db3-4301-ae9c-63680bd8d726
+    m_ActionName: 'Player/mapnext[/Keyboard/numpad5]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 51a0ebf5-0f07-4481-9ed4-074870a2fe60
+    m_ActionName: 'Player/mapprevious[/Keyboard/numpad2]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: da5b7760-9af7-4e4d-87fe-07a975f91de9
+    m_ActionName: 'Player/mapfollow[/Keyboard/numpad7]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b1add6b1-64b8-4bd7-91c8-8d0b85c130b1
+    m_ActionName: 'Player/mapnextplayer[/Keyboard/numpad3]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 901e54b0-1b2a-4c8f-ae8a-6a2883086b03
+    m_ActionName: 'Player/mapprevplayer[/Keyboard/numpad1]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1b185424-7ccd-4e3d-81d0-99c3d7069620
+    m_ActionName: 'Player/mapfeatures[/Keyboard/numpad8]'
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -8613,21 +8637,22 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   audioSource: {fileID: 0}
-  takeDamageSFX: []
-  knockedSFX: []
-  diedSFX: []
+  sfxGroups: []
   knockRecoveryDelay: 5
   knockRecoveryRate: 20
   ragdollRecoveryValue: 50
-  OnDeathEv:
+  maxHP: 100
+  maxKnock: 100
+  strength: 100
+  speed: 100
+  currentHP: 0
+  currentKnock: 0
+  OnDeath:
     m_PersistentCalls:
       m_Calls: []
-  maxHP: 100
-  currentHP: 0
-  maxKnock: 100
-  currentKnock: 0
-  strenght: 100
-  speed: 100
+  OnTakeDamage:
+    m_PersistentCalls:
+      m_Calls: []
   pData: {fileID: 1474215364020704457}
   staminaRecoveryDelay: 0.2
   staminaRecoveryRate: 15

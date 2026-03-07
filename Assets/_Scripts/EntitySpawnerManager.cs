@@ -7,6 +7,8 @@ public class EntitySpawnerManager : NetworkBehaviour
 {
     public static EntitySpawnerManager Instance;
 
+    [SerializeField] Transform entityParent;
+
     [SerializeField] float spawnDelay = 20f;
     [SerializeField] float spawnChance = 0.1f;
     [SerializeField] float spawnCooldown = 10f;
@@ -14,6 +16,8 @@ public class EntitySpawnerManager : NetworkBehaviour
 
     readonly List<EntityStats> aliveEntities = new();
     readonly List<EntityStats> deadEntities = new();
+
+    int totalQ => aliveEntities.Count + deadEntities.Count;
 
     Transform[] spawnerPositions;
     Coroutine enemySpawningCoroutine;
@@ -149,7 +153,8 @@ public class EntitySpawnerManager : NetworkBehaviour
             Transform position = spawnerPositions[positionIndex];
             if (roll <= cumulative * DungeonGenerator.Instance.GetDificultyMultiplier(position.position))
             {
-                GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation);
+                GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation, entityParent);
+                entityObj.name = $"{spawn.entityPrefab.name} (ID: {totalQ})";
                 NetworkServer.Spawn(entityObj);
 
                 EntityStats stats = entityObj.GetComponentInChildren<EntityStats>();

@@ -12,18 +12,27 @@ public class VortexAI : AIBrain
     [SerializeField] int stareStateIndex = 2;
     [SerializeField] int followStateIndex = 3;
     [SerializeField] int pickUpStateIndex = 4;
+    [SerializeField] int dropAtHomeStateIndex = 5;
+    [SerializeField] int wanderHomeStateIndex = 6;
+    [SerializeField] int searchStateIndex = 7;
     [SerializeField] int[] wanderIndexes;
 
     [Header("Wander Cycling")]
     [SerializeField] int minWanderCycles = 1;
     [SerializeField] int maxWanderCycles = 4;
+    [SerializeField] int cyclesBeforeHomeVisit = 6;
     int targetWanCycles = 0;
     int curWanCycles = 0;
     int curWanIndex = 0;
+    int totalWanCycles = 0;
 
     [Header("Alpha")]
     [SerializeField][SyncVar(hook = nameof(UpdateScale))] int alpha = -1;
     public float Alpha => alpha;
+    public VortexAI CurrentAlpha => followState.AlphaTarget;
+
+    bool pendingFollowerDispatch = false;
+    List<VortexAI> pendingFollowers = new();
 
     [Header("Vortex Detection")]
     [SerializeField] float vortexDetectionRadius = 8f;
@@ -31,16 +40,32 @@ public class VortexAI : AIBrain
     float vortexDetectionTimer = 0f;
     readonly HashSet<VortexAI> seenVortexes = new();
 
-    [Header("Item Detection")]
+    [Header("Item")]
     [SerializeField] float itemDetectionRadius = 5f;
     [SerializeField] float itemDetectionInterval = 1.5f;
+    [SerializeField] float dropCooldownDuration = 3f;
     float itemDetectionTimer = 0f;
+    float postDropCooldown = 0f;
+
+    [Header("Home")]
+    [SerializeField] float homeDistanceFraction = 0.5f;
+    [SerializeField] float homeDistanceTolerance = 0.2f;
+
+    public RoomData HomeRoom { get; private set; }
+
+    RoomData alphaHomeOverride = null;
+    bool hasAlphaHomeOverride = false;
 
     public ItemBase CarriedItem { get; private set; }
+
+    bool isActingAsAlpha = false;
+    public bool IsActingAsAlpha => isActingAsAlpha;
 
     AIS_StareAtVortex stareState;
     AIS_FollowAlpha followState;
     AIS_PickUpItem pickUpState;
+    AIS_DropItemAtHome dropAtHomeState;
+    AIS_SearchForItems searchState;
 
     #region Lifecycle
 
@@ -61,13 +86,18 @@ public class VortexAI : AIBrain
             if (stareStateIndex < states.Length) stareState = states[stareStateIndex] as AIS_StareAtVortex;
             if (followStateIndex < states.Length) followState = states[followStateIndex] as AIS_FollowAlpha;
             if (pickUpStateIndex < states.Length) pickUpState = states[pickUpStateIndex] as AIS_PickUpItem;
+            if (dropAtHomeStateIndex < states.Length) dropAtHomeState = states[dropAtHomeStateIndex] as AIS_DropItemAtHome;
+            if (searchStateIndex < states.Length) searchState = states[searchStateIndex] as AIS_SearchForItems;
         }
+
+        if (isServer)
+            AssignHomeRoom();
     }
 
-    private void UpdateScale(int oldValue, int newValue)
+    void UpdateScale(int oldValue, int newValue)
     {
-        float multiplier = Mathf.Lerp(0.6f, 1.2f, (float)newValue / 100f);
-        transform.localScale *= multiplier;
+        float scale = Mathf.Lerp(0.6f, 1.2f, (float)newValue / 100f);
+        transform.localScale = new Vector3(scale, scale, scale);
     }
 
     protected override void Update()
@@ -77,6 +107,56 @@ public class VortexAI : AIBrain
         base.Update();
         TickDetection();
         TickItemDetection();
+    }
+
+    #endregion
+
+    #region Home Assignment
+
+    void AssignHomeRoom()
+    {
+        var gen = DungeonGenerator.Instance;
+        if (gen == null || gen.SpawnedRooms == null) return;
+
+        float maxDist = gen.MaxDistance;
+        float prefDist = maxDist * homeDistanceFraction;
+        float minBand = prefDist - maxDist * homeDistanceTolerance;
+        float maxBand = prefDist + maxDist * homeDistanceTolerance;
+
+        Vector3 startPos = gen.StartRoomPos;
+
+        List<RoomData> candidates = new();
+        List<RoomData> fallback = new();
+
+        foreach (var kvp in gen.SpawnedRooms)
+        {
+            RoomData rd = kvp.Value;
+            if (rd == null) continue;
+
+            float dist = Vector3.Distance(startPos, rd.transform.position);
+            if (dist >= minBand && dist <= maxBand)
+                candidates.Add(rd);
+            else
+                fallback.Add(rd);
+        }
+
+        HomeRoom = candidates.Count > 0
+            ? candidates[Random.Range(0, candidates.Count)]
+            : fallback.Count > 0 ? fallback[Random.Range(0, fallback.Count)] : null;
+    }
+
+    public RoomData GetEffectiveHome() => hasAlphaHomeOverride ? alphaHomeOverride : HomeRoom;
+
+    void SetAlphaHomeOverride(RoomData alphaHome)
+    {
+        alphaHomeOverride = alphaHome;
+        hasAlphaHomeOverride = alphaHome != null;
+    }
+
+    void ClearAlphaHomeOverride()
+    {
+        alphaHomeOverride = null;
+        hasAlphaHomeOverride = false;
     }
 
     #endregion
@@ -98,7 +178,13 @@ public class VortexAI : AIBrain
 
     void TickItemDetection()
     {
-        if (CarriedItem != null) return;
+        if (CarriedItem != null || isActingAsAlpha) return;
+
+        if (postDropCooldown > 0f)
+        {
+            postDropCooldown -= Time.deltaTime;
+            return;
+        }
 
         itemDetectionTimer -= Time.deltaTime;
         if (itemDetectionTimer > 0f) return;
@@ -118,21 +204,28 @@ public class VortexAI : AIBrain
         foreach (var hit in hits)
         {
             ItemBase item = hit.GetComponent<ItemBase>();
-
             if (item == null) continue;
             if (!item.ItemData.pickable) continue;
             if (item.HasOwner) continue;
+            if (IsItemAtEffectiveHome(item)) continue;
 
             float d = Vector3.Distance(transform.position, item.transform.position);
-            if (d < closestDist && HasLineOfSight(item.transform.position)) 
-            { 
-                closestDist = d; 
-                closest = item; 
-            }
+            if (d < closestDist && HasLineOfSight(item.transform.position))
+            { closestDist = d; closest = item; }
         }
 
         return closest;
     }
+
+    bool IsItemAtEffectiveHome(ItemBase item)
+    {
+        RoomData home = GetEffectiveHome();
+        if (home == null) return false;
+
+        float threshold = DungeonGenerator.Instance.CellSize;
+        return Vector3.Distance(item.transform.position, home.transform.position) <= threshold;
+    }
+
 
     #endregion
 
@@ -160,11 +253,8 @@ public class VortexAI : AIBrain
             if (other == null || other == this) continue;
 
             float d = Vector3.Distance(transform.position, other.transform.position);
-            if (d < closestDist && HasLineOfSight(other.transform.position)) 
-            { 
-                closestDist = d; 
-                closest = other; 
-            }
+            if (d < closestDist && HasLineOfSight(other.transform.position))
+            { closestDist = d; closest = other; }
         }
 
         return closest;
@@ -183,7 +273,21 @@ public class VortexAI : AIBrain
         if (pickUpState == null) return;
         pickUpState.TargetItem = item;
         SetState(states[pickUpStateIndex]);
+        Debug.Log($"{Prefix} Detected an item", gameObject);
     }
+
+    public void TriggerDropAtHome() => SetState(states[dropAtHomeStateIndex]);
+    void TriggerWanderHome() => SetState(states[wanderHomeStateIndex]);
+    void TriggerSearch()
+    {
+        if (searchState == null) { TriggerDropAtHome(); return; }
+        SetState(states[searchStateIndex]);
+        Debug.Log($"{Prefix} Started new search", gameObject);
+    }
+
+    #endregion
+
+    #region Item Carrying
 
     public void CarryItem(ItemBase item)
     {
@@ -194,18 +298,74 @@ public class VortexAI : AIBrain
         item.transform.localPosition = Vector3.up * 1.5f;
     }
 
+    public void DropCarriedItem()
+    {
+        Debug.Log($"{Prefix} Tries to drop carried item", gameObject);
+        if (CarriedItem == null) return;
+        Debug.Log($"{Prefix} Successfully dropped carried item", gameObject);
+        CarriedItem.OnDrop(null);
+        CarriedItem.transform.SetParent(null);
+        CarriedItem = null;
+        postDropCooldown = dropCooldownDuration;
+    }
+
+    #endregion
+
+    #region Alpha / Follower Role
+
+    void BecomeAlpha(VortexAI follower)
+    {
+        isActingAsAlpha = true;
+        follower.SetAlphaHomeOverride(HomeRoom);
+        pendingFollowers.Add(follower);
+        pendingFollowerDispatch = true;
+
+        if (CurrentState == states[wanderHomeStateIndex])
+        {
+            OnArrivedAtHome();
+            return;
+        }
+
+        TriggerWanderHome();
+    }
+
+    public void BeginSearch() => TriggerSearch();
+
     #endregion
 
     #region Events
 
-    public void OnItemPickedUp() => ResumeWander();
+    public void OnItemPickedUp() => TriggerDropAtHome();
     public void OnItemLost() => ResumeWander();
+
+    public void OnItemDropped()
+    {
+        Debug.Log($"{Prefix} On Item Dropped", gameObject);
+        //DropCarriedItem();
+        if (hasAlphaHomeOverride) TriggerSearch();
+        else ResumeWander();
+    }
+
+    public void OnNoItemToDeliver()
+    {
+        if (hasAlphaHomeOverride) TriggerSearch();
+        else ResumeWander();
+    }
+
+    public void OnSearchFailed() => TriggerDropAtHome();
+    public void OnSearchItemFound() => TriggerDropAtHome();
 
     public void OnStareDecisionMade(bool shouldFollow)
     {
         if (shouldFollow && followState != null && stareState?.TargetVortex != null)
         {
-            followState.AlphaTarget = stareState.TargetVortex;
+            VortexAI target = stareState.TargetVortex;
+            VortexAI actualAlpha = target.hasAlphaHomeOverride && target.followState?.AlphaTarget != null
+            ? target.followState.AlphaTarget
+            : target;
+
+            followState.AlphaTarget = actualAlpha;
+            actualAlpha.BecomeAlpha(this);
             SetState(states[followStateIndex]);
         }
         else
@@ -217,20 +377,51 @@ public class VortexAI : AIBrain
     public void OnWanderCompleted()
     {
         curWanCycles++;
+        totalWanCycles++;
+
         if (curWanCycles < targetWanCycles) return;
 
         curWanCycles = 0;
         targetWanCycles = Random.Range(minWanderCycles, maxWanderCycles);
         curWanIndex = (curWanIndex + 1) % wanderIndexes.Length;
 
+        if (totalWanCycles >= cyclesBeforeHomeVisit)
+        {
+            if (CarriedItem != null)
+            {
+                TriggerDropAtHome();
+                return;
+            }
+
+            if (!isActingAsAlpha && !hasAlphaHomeOverride)
+            {
+                totalWanCycles = 0;
+                TriggerWanderHome();
+                return;
+            }
+        }
+
         SetState(states[wanderIndexes[curWanIndex]]);
     }
 
     public void OnFollowLost()
     {
+        ClearAlphaHomeOverride();
         seenVortexes.Clear();
+        isActingAsAlpha = false;
         ResumeWander();
     }
+
+    public void OnArrivedAtHome()
+    {
+        if (!pendingFollowerDispatch) return;
+        pendingFollowerDispatch = false;
+
+        foreach (var follower in pendingFollowers)
+            follower.BeginSearch();
+        pendingFollowers.Clear();
+    }
+
 
     #endregion
 
@@ -244,9 +435,30 @@ public class VortexAI : AIBrain
         Handles.color = Color.green;
         Handles.DrawWireDisc(transform.position, Vector3.up, itemDetectionRadius);
 
+        RoomData effectiveHome = GetEffectiveHome();
+        if (effectiveHome != null)
+        {
+            Vector3 homePos = effectiveHome.transform.position + Vector3.up * 0.1f;
+            Color homeColor = hasAlphaHomeOverride ? new Color(0.6f, 0f, 1f) : new Color(1f, 0.5f, 0f);
+
+            Handles.color = new Color(homeColor.r, homeColor.g, homeColor.b, 0.35f);
+            Handles.DrawSolidDisc(homePos, Vector3.up, 1.5f);
+            Handles.color = homeColor;
+            Handles.DrawWireDisc(homePos, Vector3.up, 1.5f);
+            Handles.DrawDottedLine(transform.position, homePos, 4f);
+
+            GUIStyle homeStyle = new();
+            homeStyle.alignment = TextAnchor.MiddleCenter;
+            homeStyle.fontSize = 10;
+            homeStyle.normal.textColor = homeColor;
+            Handles.Label(
+                effectiveHome.transform.position + Vector3.up * 2f,
+                hasAlphaHomeOverride ? "a Home (override)" : "Home",
+                homeStyle);
+        }
+
         GUIStyle style = new();
         style.alignment = TextAnchor.MiddleCenter;
-
         Vector3 labelPos = transform.position + Vector3.up * 2.5f;
 
         style.normal.textColor = Color.cyan;
@@ -267,6 +479,13 @@ public class VortexAI : AIBrain
             style.normal.textColor = Color.green;
             style.fontSize = 11;
             Handles.Label(labelPos + Vector3.up * 0.8f, $"[{CarriedItem.ItemData.itemName}]", style);
+        }
+
+        if (isActingAsAlpha)
+        {
+            style.normal.textColor = new Color(1f, 0.5f, 0f);
+            style.fontSize = 11;
+            Handles.Label(labelPos + Vector3.up * 1.2f, "ALPHA", style);
         }
     }
 #endif

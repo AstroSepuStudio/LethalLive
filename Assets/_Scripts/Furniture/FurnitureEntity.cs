@@ -1,143 +1,117 @@
 using Mirror;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static EntityStats;
 
 public class FurnitureEntity : EntityStats
 {
-    [Space]
     [Header("Furniture")]
     [SerializeField] Renderer furRenderer;
     [SerializeField] FurnitureDataSO dataSO;
-
     [SerializeField] Rigidbody rb;
-    [SerializeField] AudioSFX[] strongHitSFX;
 
     public List<LootPosition> lootPositions;
 
-    public void SetRender(bool render)
-    {
-        if (furRenderer == null)
-        {
-            if (furRenderer.TryGetComponent(out Renderer rend))
-                furRenderer = rend;
-            else
-                return;
-        }
+    bool _dying;
 
-        furRenderer.enabled = render;
+    public void SetRender(bool active)
+        => furRenderer.enabled = active;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        
+        dataSO = Instantiate(dataSO);
     }
 
-    public override void ModifyKnock(float amount, Vector3 momentum)
+    [Server]
+    public override void ApplyDamage(AttackSource source, AttackStat attack)
     {
-        base.ModifyKnock(amount, momentum);
+        currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
+        CheckDropThresholds();
 
+        if (currentHP <= 0f) HandleDeath(source, attack);
+        else if (attack.AttackDamage >= 10f) PlaySFX(SFXEvent.StrongHit);
+        else PlaySFX(SFXEvent.TakeDamage);
+    }
+
+    [Server]
+    public override void AddKnock(float amount, Vector3 momentum)
+    {
+        base.AddKnock(amount, momentum);
         rb.AddForce(momentum, ForceMode.Impulse);
     }
 
-    public override void ModifyHP(EntityStats source, AttackStat attack)
+    [Server]
+    protected override void HandleDeath(AttackSource source, AttackStat attack)
     {
-        currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
+        if (_dying) return;
+        _dying = true;
 
+        if (!sfxMap.TryGetValue(SFXEvent.Died, out var clips) || clips.Length == 0) return;
+        RpcFurnitureBreaks(Random.Range(0, clips.Length));
+        foreach (var item in dataSO.lootTable) TryDropItem(item);
+        StartCoroutine(DelayedDestroy());
+    }
+
+    [ClientRpc]
+    void RpcFurnitureBreaks(int clipIndex)
+    {
+        SetRender(false);
+        if (!sfxMap.TryGetValue(SFXEvent.Died, out var clips) || clipIndex >= clips.Length) return;
+        AudioManager.Instance.PlayOneShotAndDestroy(transform.position, clips[clipIndex]);
+    }
+
+    IEnumerator DelayedDestroy()
+    {
+        yield return new WaitForSeconds(0.2f);
+        NetworkServer.Destroy(gameObject);
+    }
+
+    void CheckDropThresholds()
+    {
         for (int i = 0; i < dataSO.dropThresholds.Length; i++)
         {
             if (dataSO.dropThresholds[i].dropped) continue;
 
-            float hpThreshold = maxHP * (dataSO.dropThresholds[i].dropThreshold / 100);
-            if (currentHP <= hpThreshold)
-            {
-                if (TryDropItem(dataSO.dropThresholds[i].Item_Drop))
-                    dataSO.dropThresholds[i].dropped = true;
-            }
+            float hpThreshold = maxHP * (dataSO.dropThresholds[i].dropThreshold / 100f);
+            if (currentHP <= hpThreshold && TryDropItem(dataSO.dropThresholds[i].Item_Drop))
+                dataSO.dropThresholds[i].dropped = true;
         }
-
-        if (currentHP <= 0)
-        {
-            OnDeath(source, attack);
-        }
-        else if (attack.AttackDamage >= 10f)
-        {
-            RequestPlaySFX(3);
-        }
-        else
-        {
-            RequestPlaySFX(0);
-        }
-    }
-
-    protected override void OnDeath(EntityStats source, AttackStat attack)
-    {
-        RequestPlaySFX(2);
-
-        foreach (var item in dataSO.lootTable)
-        {
-            TryDropItem(item);
-        }
-
-        NetworkServer.Destroy(gameObject);
     }
 
     [Server]
-    bool TryDropItem(FurnitureDataSO.ItemDrop ItemDrop)
+    bool TryDropItem(FurnitureDataSO.ItemDrop drop)
     {
         float rand = Random.Range(0f, 100f);
-        if (rand > ItemDrop.dropChance)
-            return false;
+        Debug.Log($"[FurnEnt] Tries to drop item, random: {rand}, chance {drop.dropChance}, should drop: {rand <= drop.dropChance}");
+        if (rand > drop.dropChance) return false;
 
-        int quantity = Random.Range(ItemDrop.minQuantity, ItemDrop.maxQuantity);
-
-        for (int q = 0; q < quantity; q++)
+        int qty = Random.Range(drop.minQuantity, drop.maxQuantity);
+        for (int i = 0; i < qty; i++)
         {
-            Vector2 randomCircle = Random.insideUnitCircle.normalized;
-            float distance = Random.Range(dataSO.minDistance, dataSO.maxDistance);
-            Vector3 offset = new Vector3(randomCircle.x, 1f, randomCircle.y) * distance;
+            Vector2 circle = Random.insideUnitCircle.normalized;
+            float dist = Random.Range(dataSO.horizontalMinDistance, dataSO.horizontalMaxDistance);
+            Vector3 offset = new Vector3(circle.x, 0, circle.y) * dist;
+            offset.y = Random.Range(dataSO.verticalMinDistance, dataSO.verticalMaxDistance);
             Vector3 pos = transform.position + offset;
-            GameObject spawned = Instantiate(ItemDrop.Item.itemPrefab, pos, Quaternion.identity);
+
+            GameObject spawned = Instantiate(drop.Item.itemPrefab, pos, Quaternion.identity);
             NetworkServer.Spawn(spawned);
 
-            Vector3 dir = (pos - transform.position).normalized;
-            if (spawned.TryGetComponent(out Rigidbody rb))
-                rb.AddForce(dir * Random.Range(0.2f, 1f), ForceMode.Impulse);
+            if (spawned.TryGetComponent(out ItemBase item))
+                item.AddForce((pos - transform.position).normalized * Random.Range(1f, 2f), ForceMode.Impulse);
         }
 
+        PlaySFX(SFXEvent.PartialBreak);
         return true;
-    }
-
-    protected override void RequestPlaySFX(int index)
-    {
-        int sfxIndex = 0;
-        if (index == 0 && takeDamageSFX.Length > 0)
-            sfxIndex = Random.Range(0, takeDamageSFX.Length);
-        else if (index == 1 && knockedSFX.Length > 0)
-            sfxIndex = Random.Range(0, knockedSFX.Length);
-        else if (index == 2 && diedSFX.Length > 0)
-            sfxIndex = Random.Range(0, diedSFX.Length);
-        else if (index == 3 && strongHitSFX.Length > 0)
-            sfxIndex = Random.Range(0, strongHitSFX.Length);
-
-        RpcPlaySFX(index, sfxIndex);
-    }
-
-    protected override void RpcPlaySFX(int index, int sfxIndex)
-    {
-        if (audioSource == null) return;
-
-        if (index == 0 && takeDamageSFX.Length > 0)
-            AudioManager.Instance.PlayOneShot(audioSource, takeDamageSFX[sfxIndex]);
-        else if (index == 1 && knockedSFX.Length > 0)
-            AudioManager.Instance.PlayOneShot(audioSource, knockedSFX[sfxIndex]);
-        else if (index == 2 && diedSFX.Length > 0)
-            AudioManager.Instance.PlayOneShotAndDestroy(transform.position, diedSFX[sfxIndex]);
-        else if (index == 3 && strongHitSFX.Length > 0)
-            AudioManager.Instance.PlayOneShot(audioSource, strongHitSFX[sfxIndex]);
     }
 
     private void OnDrawGizmos()
     {
-        if (GameManager.Instance == null) return;
-        if (!GameManager.Instance.debug) return;
-
-        Color color = new(Random.Range(0, 255), Random.Range(0, 255), Random.Range(0, 255));
-        Gizmos.color = color;
+        if (GameManager.Instance == null || !GameManager.Instance.debug) return;
+        Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, 1.5f);
     }
 }
