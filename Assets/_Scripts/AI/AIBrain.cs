@@ -12,12 +12,17 @@ public class AIBrain : NetworkBehaviour
 
     [SerializeField] protected AIState[] states;
     [SerializeField] protected LayerMask losBlockingLayers;
-    protected string Prefix => $"[AIBrain ({gameObject.name})]";
+
+    [SerializeField] protected EntityStats entityStats;
+    [SerializeField] protected AttackStat attackStat;
+    public string Prefix => $"[AIBrain ({gameObject.name})]";
 
     [field:SerializeField] protected AIState CurrentState { get; private set; }
 
     public NavMeshAgent Agent => agent;
     public Animator Animator_ => animator;
+    public EntityStats EntityStats_ => entityStats;
+    public AttackStat AttackStat_ => attackStat;
 
     protected virtual void Awake()
     {

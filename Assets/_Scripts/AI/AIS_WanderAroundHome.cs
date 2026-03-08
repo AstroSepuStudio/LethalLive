@@ -25,11 +25,13 @@ public class AIS_WanderAroundHome : AIState
 
     public override void OnUpdateState(AIBrain brain)
     {
-        if (brain.IsAgentInMovement()) return;
+        bool mov = brain.IsAgentInMovement();
+
+        brain.Animator_.SetBool("Walk", mov);
+        if (mov) return;
 
         if (moving)
         {
-            brain.Animator_.SetBool("Walk", false);
             moving = false;
             wanderCount++;
             OnWanderCompleted?.Invoke();

@@ -6,7 +6,6 @@ using TMPro;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.Events;
-using static UnityEditor.PlayerSettings;
 
 [Serializable]
 public struct LootPosition
@@ -47,6 +46,7 @@ public class DungeonGenerator : NetworkBehaviour
 
     [Header("Debug")]
     [SerializeField] bool generateOnStart = false;
+    [SerializeField] int simMapSize = 10;
     [SerializeField] GameObject seedDisplayCanvas;
     [SerializeField] RectTransform seedDisplayTransform;
     [SerializeField] CanvasGroup seedDisplayGroup;
@@ -70,8 +70,10 @@ public class DungeonGenerator : NetworkBehaviour
     public Dictionary<int, List<ItemBase>> RoomItems = new();
 
     public Cell[,,] Grid => grid;
+    private Vector3Int effectiveGridSize;
+
     public int CellSize => cellSize;
-    public Vector3Int GridSize => gridSize;
+    public Vector3Int GridSize => effectiveGridSize;
     public UnityEvent OnDungeonGenerated;
     public UnityEvent OnDungeonClear;
     public Dictionary<int, HashSet<int>> RoomAdjacency = new();
@@ -124,9 +126,10 @@ public class DungeonGenerator : NetworkBehaviour
         theme = GameManager.Instance.dngMod.ThemeDatas[themeIndex];
 
         int size = LobbySettings.Instance.MapSize;
-        
-        grid = new Cell[gridSize.x * size, gridSize.y * size, gridSize.z * size];
-        
+        effectiveGridSize = new Vector3Int(gridSize.x * size, gridSize.y * size, gridSize.z * size);
+
+        grid = new Cell[effectiveGridSize.x, effectiveGridSize.y, effectiveGridSize.z];
+
         for (int x = 0; x < gridSize.x * size; x++)
             for (int y = 0; y < gridSize.y * size; y++)
                 for (int z = 0; z < gridSize.z * size; z++)
@@ -141,7 +144,12 @@ public class DungeonGenerator : NetworkBehaviour
     private void Generate()
     {
         if (theme == null || theme.startingRoom == null) { Debug.LogError("Theme or startingRoom is missing."); return; }
-        var center = new Vector3Int(gridSize.x / 2, Mathf.Clamp(gridSize.y / 2, 0, gridSize.y - 1), gridSize.z / 2); 
+
+        var center = new Vector3Int(
+            effectiveGridSize.x / 2,
+            Mathf.Clamp(effectiveGridSize.y / 2, 0, effectiveGridSize.y - 1),
+            effectiveGridSize.z / 2 );
+
         var start = Place(theme.startingRoom, center, depth: 0);
         StartRoomPos = center * cellSize;
 
@@ -255,7 +263,7 @@ public class DungeonGenerator : NetworkBehaviour
     #region Fit / bounds / RNG
     public bool InBounds(Vector3Int p) =>
         p.x >= 0 && p.y >= 0 && p.z >= 0 &&
-        p.x < gridSize.x && p.y < gridSize.y && p.z < gridSize.z;
+        p.x < effectiveGridSize.x && p.y < effectiveGridSize.y && p.z < effectiveGridSize.z;
 
     private bool FootprintFits(RoomDataSO data, Vector3Int anchor)
     {
@@ -756,5 +764,17 @@ public class DungeonGenerator : NetworkBehaviour
         bool canSpawn = rand <= balChance;
         //if (debug) Debug.Log($"Evaluating spawn of {prefix} -> max: {maxQuantity}, random: {rand}, chance: {chance}, final chance: {balChance}, can spawn?: {canSpawn}");
         return canSpawn;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        int size = LobbySettings.Instance != null ? LobbySettings.Instance.MapSize : simMapSize;
+        Vector3Int effective = new(gridSize.x * size, gridSize.y * size, gridSize.z * size);
+
+        Vector3 totalSize = new(effective.x * cellSize, effective.y * cellSize, effective.z * cellSize);
+        Vector3 center = totalSize / 2f;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(center, totalSize);
     }
 }

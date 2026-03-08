@@ -103,6 +103,10 @@ Transform:
   - {fileID: 56260779162629118}
   - {fileID: 3814231526723139945}
   - {fileID: 3007012423167136059}
+  - {fileID: 6529992742766248371}
+  - {fileID: 4486039953752972746}
+  - {fileID: 6588167297750537907}
+  - {fileID: 7826627664349605990}
   m_Father: {fileID: 5360604290841652880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1154420825500620997
@@ -150,16 +154,157 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIS_FollowAlpha
   followStopDistance: 2.5
-  giveUpDistance: 30
   recalculateInterval: 1.5
   separationDistance: 1
   separationPushDistance: 2
+  searchDispatchTimeout: 45
   OnFollowLost:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 8538427736269133656}
         m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
         m_MethodName: OnFollowLost
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!1 &1262728172233394261
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4486039953752972746}
+  - component: {fileID: 8809746357602813789}
+  m_Layer: 11
+  m_Name: Attack Furniture
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4486039953752972746
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262728172233394261}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8809746357602813789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262728172233394261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6af0baea9fbe73d41bc4623509cb0e26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_AttackFurniture
+  movementGracePeriod: 0.2
+  stuckTimeout: 10
+  OnFurnitureDestroyed:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnFurnitureDestroyed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnFurnitureLost:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnFurnitureLost
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!1 &3094415198395314792
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6529992742766248371}
+  - component: {fileID: 8395602400308223306}
+  m_Layer: 11
+  m_Name: Follow Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6529992742766248371
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3094415198395314792}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8395602400308223306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3094415198395314792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb569bcd76fb7044383cd7a1ef2a6c2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_FollowPlayer
+  followStopDistance: 5
+  recalculateInterval: 0.5
+  separationDistance: 4
+  separationPushDistance: 6
+  minCuriosityDuration: 10
+  maxCuriosityDuration: 60
+  OnCuriosityExpired:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnCuriosityExpired
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -244,7 +389,7 @@ GameObject:
   - component: {fileID: 56260779162629118}
   - component: {fileID: 7644456220787798302}
   m_Layer: 11
-  m_Name: DropItemAtHome
+  m_Name: Drop Item At Home
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -279,6 +424,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AIS_DropItemAtHome
   recalculateInterval: 0.5
   dropRange: 1.5
+  movementGracePeriod: 1
+  stuckTimeout: 3
   OnItemDropped:
     m_PersistentCalls:
       m_Calls:
@@ -547,9 +694,18 @@ MonoBehaviour:
   - {fileID: 7644456220787798302}
   - {fileID: 6136122223590132774}
   - {fileID: 2217452905688052205}
+  - {fileID: 8395602400308223306}
+  - {fileID: 8809746357602813789}
   losBlockingLayers:
     serializedVersion: 2
-    m_Bits: 2039
+    m_Bits: 951
+  entityStats: {fileID: 3384841598755132090}
+  attackStat:
+    <AttackRadius>k__BackingField: 1.5
+    <AttackKnock>k__BackingField: 10
+    <AttackForce>k__BackingField: 2
+    <AttackDamage>k__BackingField: 10
+    <AttackCooldown>k__BackingField: 1
   <CurrentState>k__BackingField: {fileID: 0}
   stareStateIndex: 2
   followStateIndex: 3
@@ -557,6 +713,10 @@ MonoBehaviour:
   dropAtHomeStateIndex: 5
   wanderHomeStateIndex: 6
   searchStateIndex: 7
+  followPlayerStateIndex: 8
+  attackFurnitureStateIndex: 9
+  backAwayStateIndex: 10
+  stareAtPlayerNearItemStateIndex: 11
   wanderIndexes: 0000000001000000
   minWanderCycles: 1
   maxWanderCycles: 4
@@ -566,6 +726,11 @@ MonoBehaviour:
   vortexDetectionInterval: 2
   itemDetectionRadius: 5
   itemDetectionInterval: 2
+  dropCooldownDuration: 3
+  playerTooCloseDistance: 3
+  playerNearItemDistance: 3
+  playerDetectionRadius: 10
+  playerDetectionInterval: 1
   homeDistanceFraction: 0.5
   homeDistanceTolerance: 0.2
 --- !u!114 &3384841598755132090
@@ -585,21 +750,22 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   audioSource: {fileID: 1536679428694314739}
-  takeDamageSFX: []
-  knockedSFX: []
-  diedSFX: []
+  sfxGroups: []
   knockRecoveryDelay: 0
   knockRecoveryRate: 0
   ragdollRecoveryValue: 0
-  OnDeathEv:
+  maxHP: 100
+  maxKnock: 100
+  strength: 100
+  speed: 100
+  currentHP: 0
+  currentKnock: 0
+  OnDeath:
     m_PersistentCalls:
       m_Calls: []
-  maxHP: 100
-  currentHP: 0
-  maxKnock: 100
-  currentKnock: 0
-  strenght: 100
-  speed: 100
+  OnTakeDamage:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!136 &1768164185552261995
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -623,6 +789,84 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!1 &3695703054165012249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6588167297750537907}
+  - component: {fileID: 4825602395216287569}
+  m_Layer: 11
+  m_Name: Back Away Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6588167297750537907
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3695703054165012249}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4825602395216287569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3695703054165012249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb24c8c7f49c33843a77cda47096f442, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_BackAwayFromPlayer
+  backAwayDistance: 6
+  safeDistance: 5
+  giveUpDuration: 5
+  recalculateInterval: 0.4
+  OnSafe:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnBackAwaySafe
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnGaveUp:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnBackAwayGaveUp
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &5463313185492510547
 GameObject:
   m_ObjectHideFlags: 0
@@ -806,8 +1050,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92f70ddd4682db04a828364b1de79660, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIS_PickUpItem
+  recalculateInterval: 1
   pickUpRange: 1.2
   validationInterval: 0.5
+  movementGracePeriod: 0.2
+  stuckTimeout: 3
+  pickupAttempts: 5
   OnItemPickedUp:
     m_PersistentCalls:
       m_Calls:
@@ -829,6 +1077,98 @@ MonoBehaviour:
       - m_Target: {fileID: 8538427736269133656}
         m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
         m_MethodName: OnItemLost
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnFurnitureBlocking:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnFurnitureBlocking
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!1 &7076022535373266854
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7826627664349605990}
+  - component: {fileID: 8960114066817526046}
+  m_Layer: 11
+  m_Name: Stare at Player For Item
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7826627664349605990
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7076022535373266854}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8960114066817526046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7076022535373266854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6260c9d64ed86f44902ce5f7bf33b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_StareAtPlayerNearItem
+  waitDuration: 12
+  checkInterval: 0.5
+  playerClearDistance: 4
+  OnPlayerLeft:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnPlayerLeftItem
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnGaveUp:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnItemStareGaveUp
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -881,7 +1221,7 @@ GameObject:
   - component: {fileID: 3814231526723139945}
   - component: {fileID: 6136122223590132774}
   m_Layer: 11
-  m_Name: WanderAroundHome
+  m_Name: Wander Around Home
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

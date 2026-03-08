@@ -15,6 +15,10 @@ public class VortexAI : AIBrain
     [SerializeField] int dropAtHomeStateIndex = 5;
     [SerializeField] int wanderHomeStateIndex = 6;
     [SerializeField] int searchStateIndex = 7;
+    [SerializeField] int followPlayerStateIndex = 8;
+    [SerializeField] int attackFurnitureStateIndex = 9;
+    [SerializeField] int backAwayStateIndex = 10;
+    [SerializeField] int stareAtPlayerNearItemStateIndex = 11;
     [SerializeField] int[] wanderIndexes;
 
     [Header("Wander Cycling")]
@@ -44,8 +48,18 @@ public class VortexAI : AIBrain
     [SerializeField] float itemDetectionRadius = 5f;
     [SerializeField] float itemDetectionInterval = 1.5f;
     [SerializeField] float dropCooldownDuration = 3f;
+    [SerializeField] float playerTooCloseDistance = 3f;
+    [SerializeField] float playerNearItemDistance = 3f;
     float itemDetectionTimer = 0f;
     float postDropCooldown = 0f;
+
+    [Header("Player Detection")]
+    [SerializeField] float playerDetectionRadius = 10f;
+    [SerializeField] float playerDetectionInterval = 1f;
+    float playerDetectionTimer = 0f;
+
+    readonly HashSet<PlayerData> seenPlayers = new();
+    readonly List<PlayerData> watchedPlayers = new();
 
     [Header("Home")]
     [SerializeField] float homeDistanceFraction = 0.5f;
@@ -66,6 +80,10 @@ public class VortexAI : AIBrain
     AIS_PickUpItem pickUpState;
     AIS_DropItemAtHome dropAtHomeState;
     AIS_SearchForItems searchState;
+    AIS_FollowPlayer followPlayerState;
+    AIS_AttackFurniture attackFurnitureState;
+    AIS_BackAwayFromPlayer backAwayState;
+    AIS_StareAtPlayerNearItem stareAtPlayerNearItemState;
 
     #region Lifecycle
 
@@ -83,11 +101,32 @@ public class VortexAI : AIBrain
 
         if (states != null)
         {
-            if (stareStateIndex < states.Length) stareState = states[stareStateIndex] as AIS_StareAtVortex;
-            if (followStateIndex < states.Length) followState = states[followStateIndex] as AIS_FollowAlpha;
-            if (pickUpStateIndex < states.Length) pickUpState = states[pickUpStateIndex] as AIS_PickUpItem;
-            if (dropAtHomeStateIndex < states.Length) dropAtHomeState = states[dropAtHomeStateIndex] as AIS_DropItemAtHome;
-            if (searchStateIndex < states.Length) searchState = states[searchStateIndex] as AIS_SearchForItems;
+            if (stareStateIndex < states.Length) 
+                stareState = states[stareStateIndex] as AIS_StareAtVortex;
+
+            if (followStateIndex < states.Length) 
+                followState = states[followStateIndex] as AIS_FollowAlpha;
+
+            if (pickUpStateIndex < states.Length) 
+                pickUpState = states[pickUpStateIndex] as AIS_PickUpItem;
+
+            if (dropAtHomeStateIndex < states.Length) 
+                dropAtHomeState = states[dropAtHomeStateIndex] as AIS_DropItemAtHome;
+
+            if (searchStateIndex < states.Length) 
+                searchState = states[searchStateIndex] as AIS_SearchForItems;
+
+            if (attackFurnitureStateIndex < states.Length) 
+                attackFurnitureState = states[attackFurnitureStateIndex] as AIS_AttackFurniture;
+
+            if (followPlayerStateIndex < states.Length) 
+                followPlayerState = states[followPlayerStateIndex] as AIS_FollowPlayer;
+
+            if (backAwayStateIndex < states.Length) 
+                backAwayState = states[backAwayStateIndex] as AIS_BackAwayFromPlayer;
+
+            if (stareAtPlayerNearItemStateIndex < states.Length) 
+                stareAtPlayerNearItemState = states[stareAtPlayerNearItemStateIndex] as AIS_StareAtPlayerNearItem;
         }
 
         if (isServer)
@@ -107,6 +146,7 @@ public class VortexAI : AIBrain
         base.Update();
         TickDetection();
         TickItemDetection();
+        TickPlayerDetection();
     }
 
     #endregion
@@ -166,6 +206,7 @@ public class VortexAI : AIBrain
     void TickDetection()
     {
         if (!IsInWanderState()) return;
+        if (IsInAttackState()) return;
 
         vortexDetectionTimer -= Time.deltaTime;
         if (vortexDetectionTimer > 0f) return;
@@ -178,7 +219,8 @@ public class VortexAI : AIBrain
 
     void TickItemDetection()
     {
-        if (CarriedItem != null || isActingAsAlpha) return;
+        if (CarriedItem != null) return;
+        if (IsInAttackState()) return;
 
         if (postDropCooldown > 0f)
         {
@@ -193,6 +235,40 @@ public class VortexAI : AIBrain
         ItemBase item = FindClosestAvailableItem();
         if (item != null)
             TriggerPickUp(item);
+    }
+
+    void TickPlayerDetection()
+    {
+        if (CarriedItem != null) return;
+
+        playerDetectionTimer -= Time.deltaTime;
+        if (playerDetectionTimer > 0f) return;
+        playerDetectionTimer = playerDetectionInterval;
+
+        bool foundNew = false;
+        Collider[] hits = Physics.OverlapSphere(transform.position, playerDetectionRadius);
+        foreach (var hit in hits)
+        {
+            PlayerData player = hit.GetComponent<PlayerData>();
+            if (player == null) continue;
+            if (!HasLineOfSight(player.transform.position)) continue;
+
+            float dist = Vector3.Distance(transform.position, player.transform.position);
+            if (dist <= playerTooCloseDistance && IsInWanderState())
+            {
+                TriggerBackAway();
+                return;
+            }
+
+            if (seenPlayers.Contains(player)) continue;
+
+            seenPlayers.Add(player);
+            watchedPlayers.Add(player);
+            foundNew = true;
+        }
+
+        if (foundNew && IsInWanderState())
+            TriggerFollowPlayer();
     }
 
     ItemBase FindClosestAvailableItem()
@@ -226,6 +302,11 @@ public class VortexAI : AIBrain
         return Vector3.Distance(item.transform.position, home.transform.position) <= threshold;
     }
 
+    bool IsInAttackState()
+    {
+        return attackFurnitureState != null &&
+               CurrentState == states[attackFurnitureStateIndex];
+    }
 
     #endregion
 
@@ -233,13 +314,15 @@ public class VortexAI : AIBrain
 
     bool IsInWanderState()
     {
-        if (CurrentState == null || wanderIndexes == null) return false;
+        if (CurrentState == null) return false;
+        if (states[wanderHomeStateIndex] != null && CurrentState == states[wanderHomeStateIndex])
+            return true;
+
+        if (wanderIndexes == null) return false;
         foreach (int idx in wanderIndexes)
             if (idx < states.Length && CurrentState == states[idx]) return true;
         return false;
     }
-
-    void ResumeWander() => SetState(states[wanderIndexes[curWanIndex]]);
 
     VortexAI FindClosestOtherVortex()
     {
@@ -260,6 +343,32 @@ public class VortexAI : AIBrain
         return closest;
     }
 
+    public PlayerData GetClosestPlayer(Vector3 origin)
+    {
+        PlayerData closest = null;
+        float closestDist = float.MaxValue;
+        
+        foreach (var p in seenPlayers)
+        {
+            if (p == null) continue;
+            float d = Vector3.Distance(origin, p.transform.position);
+            if (d < closestDist) { closestDist = d; closest = p; }
+        }
+        return closest;
+    }
+
+    PlayerData GetPlayerNearItem(ItemBase item)
+    {
+        Collider[] hits = Physics.OverlapSphere(item.transform.position, playerNearItemDistance);
+        foreach (var hit in hits)
+        {
+            PlayerData p = hit.GetComponent<PlayerData>();
+            if (p != null) return p;
+        }
+        return null;
+    }
+
+
     void TriggerStare(VortexAI target)
     {
         if (stareState == null) return;
@@ -271,18 +380,47 @@ public class VortexAI : AIBrain
     void TriggerPickUp(ItemBase item)
     {
         if (pickUpState == null) return;
+
+        PlayerData blocker = GetPlayerNearItem(item);
+        if (blocker != null)
+        {
+            TriggerStareAtPlayerNearItem(item, blocker);
+            return;
+        }
+
         pickUpState.TargetItem = item;
         SetState(states[pickUpStateIndex]);
-        Debug.Log($"{Prefix} Detected an item", gameObject);
+    }
+
+    void TriggerFollowPlayer()
+    {
+        if (followPlayerState == null) return;
+        followPlayerState.WatchedPlayers = watchedPlayers;
+        SetState(states[followPlayerStateIndex]);
     }
 
     public void TriggerDropAtHome() => SetState(states[dropAtHomeStateIndex]);
     void TriggerWanderHome() => SetState(states[wanderHomeStateIndex]);
+    void ResumeWander() => SetState(states[wanderIndexes[curWanIndex]]);
+
     void TriggerSearch()
     {
         if (searchState == null) { TriggerDropAtHome(); return; }
         SetState(states[searchStateIndex]);
-        Debug.Log($"{Prefix} Started new search", gameObject);
+    }
+
+    void TriggerBackAway()
+    {
+        if (backAwayState == null) { ResumeWander(); return; }
+        SetState(states[backAwayStateIndex]);
+    }
+
+    void TriggerStareAtPlayerNearItem(ItemBase item, PlayerData blocker)
+    {
+        if (stareAtPlayerNearItemState == null) { ResumeWander(); return; }
+        stareAtPlayerNearItemState.WatchedItem = item;
+        stareAtPlayerNearItemState.BlockingPlayer = blocker;
+        SetState(states[stareAtPlayerNearItemStateIndex]);
     }
 
     #endregion
@@ -291,18 +429,22 @@ public class VortexAI : AIBrain
 
     public void CarryItem(ItemBase item)
     {
-        Debug.Log($"{Prefix} Has picked up an item!", gameObject);
         CarriedItem = item;
         item.OnPickUp();
         item.transform.SetParent(transform);
         item.transform.localPosition = Vector3.up * 1.5f;
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, playerDetectionRadius);
+        foreach (var hit in hits)
+        {
+            if (hit.TryGetComponent<PlayerData>(out var player)) 
+                watchedPlayers.Remove(player);
+        }
     }
 
     public void DropCarriedItem()
     {
-        Debug.Log($"{Prefix} Tries to drop carried item", gameObject);
         if (CarriedItem == null) return;
-        Debug.Log($"{Prefix} Successfully dropped carried item", gameObject);
         CarriedItem.OnDrop(null);
         CarriedItem.transform.SetParent(null);
         CarriedItem = null;
@@ -340,14 +482,14 @@ public class VortexAI : AIBrain
 
     public void OnItemDropped()
     {
-        Debug.Log($"{Prefix} On Item Dropped", gameObject);
-        //DropCarriedItem();
+        if (isActingAsAlpha) { TriggerWanderHome(); return; }
         if (hasAlphaHomeOverride) TriggerSearch();
         else ResumeWander();
     }
 
     public void OnNoItemToDeliver()
     {
+        if (isActingAsAlpha) { TriggerWanderHome(); return; }
         if (hasAlphaHomeOverride) TriggerSearch();
         else ResumeWander();
     }
@@ -422,6 +564,41 @@ public class VortexAI : AIBrain
         pendingFollowers.Clear();
     }
 
+    public void OnCuriosityExpired()
+    {
+        watchedPlayers.Clear();
+        ResumeWander();
+    }
+
+    public void OnFurnitureBlocking()
+    {
+        if (attackFurnitureState == null) { ResumeWander(); return; }
+        attackFurnitureState.Target = pickUpState.BlockingFurniture;
+        attackFurnitureState.ItemToPickUpAfter = pickUpState.TargetItem;
+        SetState(states[attackFurnitureStateIndex]);
+    }
+
+    public void OnFurnitureDestroyed()
+    {
+        if (attackFurnitureState?.ItemToPickUpAfter != null)
+            TriggerPickUp(attackFurnitureState.ItemToPickUpAfter);
+        else
+            ResumeWander();
+    }
+
+    public void OnFurnitureLost() => ResumeWander();
+
+    public void OnBackAwaySafe() => ResumeWander();
+    public void OnBackAwayGaveUp() => ResumeWander();
+
+    public void OnPlayerLeftItem()
+    {
+        if (stareAtPlayerNearItemState?.WatchedItem != null)
+            TriggerPickUp(stareAtPlayerNearItemState.WatchedItem);
+        else
+            ResumeWander();
+    }
+    public void OnItemStareGaveUp() => ResumeWander();
 
     #endregion
 
@@ -434,6 +611,9 @@ public class VortexAI : AIBrain
 
         Handles.color = Color.green;
         Handles.DrawWireDisc(transform.position, Vector3.up, itemDetectionRadius);
+
+        Handles.color = Color.red;
+        Handles.DrawWireDisc(transform.position, Vector3.up, playerDetectionRadius);
 
         RoomData effectiveHome = GetEffectiveHome();
         if (effectiveHome != null)

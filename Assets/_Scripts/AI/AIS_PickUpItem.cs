@@ -8,15 +8,21 @@ public class AIS_PickUpItem : AIState
     [SerializeField] float validationInterval = 0.5f;
     [SerializeField] float movementGracePeriod = 0.2f;
     [SerializeField] float stuckTimeout = 3f;
+    [SerializeField] int pickupAttempts = 5;
 
     public ItemBase TargetItem { get; set; }
+    public FurnitureEntity BlockingFurniture => blockingFurniture;
+
     public UnityEvent OnItemPickedUp;
     public UnityEvent OnItemLost;
+    public UnityEvent OnFurnitureBlocking;
 
+    int attemptsRemaining;
     float stuckTimer;
     float graceTimer;
     float recalcTimer;
     float validationTimer;
+    FurnitureEntity blockingFurniture;
 
     public override void OnEnterState(AIBrain brain)
     {
@@ -27,6 +33,7 @@ public class AIS_PickUpItem : AIState
         validationTimer = validationInterval;
         graceTimer = movementGracePeriod;
         stuckTimer = stuckTimeout;
+        attemptsRemaining = pickupAttempts;
     }
 
     public override void OnUpdateState(AIBrain brain)
@@ -72,8 +79,20 @@ public class AIS_PickUpItem : AIState
                 ? Vector3.Distance(brain.transform.position, TargetItem.transform.position)
                 : float.MaxValue;
 
-        if (dist <= pickUpRange)
+        if (dist <= GetEffectivePickUpRange(brain))
+        {
             TryPickUp(brain);
+        }
+        else if (attemptsRemaining <= 0)
+        {
+            blockingFurniture = FindBlockingFurniture();
+            if (blockingFurniture != null)
+                OnFurnitureBlocking?.Invoke();
+            else
+                OnItemLost?.Invoke();
+        }
+
+        attemptsRemaining --;
     }
 
     public override void OnExitState(AIBrain brain) { }
@@ -81,7 +100,7 @@ public class AIS_PickUpItem : AIState
     bool IsItemAvailable() =>
         TargetItem != null &&
         TargetItem.ItemData.pickable &&
-        !TargetItem.InUse;
+        !TargetItem.HasOwner;
 
     void TryPickUp(AIBrain brain)
     {
@@ -96,5 +115,27 @@ public class AIS_PickUpItem : AIState
 
         vortex.CarryItem(TargetItem);
         OnItemPickedUp?.Invoke();
+    }
+
+    FurnitureEntity FindBlockingFurniture()
+    {
+        if (TargetItem == null) return null;
+
+        Collider[] hits = Physics.OverlapSphere(
+            TargetItem.transform.position, 1f);
+
+        foreach (var hit in hits)
+        {
+            if (hit.TryGetComponent<FurnitureEntity>(out var f)) 
+                return f;
+        }
+        return null;
+    }
+
+    float GetEffectivePickUpRange(AIBrain brain)
+    {
+        VortexAI vortex = brain as VortexAI;
+        if (vortex == null) return pickUpRange;
+        return pickUpRange * vortex.transform.localScale.x;
     }
 }

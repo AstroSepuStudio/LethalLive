@@ -2,7 +2,6 @@ using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static EntityStats;
 
 public class FurnitureEntity : EntityStats
 {
@@ -14,6 +13,7 @@ public class FurnitureEntity : EntityStats
     public List<LootPosition> lootPositions;
 
     bool _dying;
+    public bool IsDying => _dying;
 
     public void SetRender(bool active)
         => furRenderer.enabled = active;
