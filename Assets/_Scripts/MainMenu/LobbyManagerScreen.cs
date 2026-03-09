@@ -270,7 +270,7 @@ public class LobbyManagerScreen : UIManagerNetwork
         if (!identity.isServer) return;
 
         if (int.TryParse(value, out int size))
-            LobbySettings.Instance.SetMapSize(size);
+            LobbySettings.Instance.SetMapSize(Mathf.Max(1, size));
     }
 
     public void TeamDamage(bool value)

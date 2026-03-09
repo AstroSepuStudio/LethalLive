@@ -125,7 +125,7 @@ public class DungeonGenerator : NetworkBehaviour
 
         theme = GameManager.Instance.dngMod.ThemeDatas[themeIndex];
 
-        int size = LobbySettings.Instance.MapSize;
+        int size = Mathf.Max(1, LobbySettings.Instance.MapSize);
         effectiveGridSize = new Vector3Int(gridSize.x * size, gridSize.y * size, gridSize.z * size);
 
         grid = new Cell[effectiveGridSize.x, effectiveGridSize.y, effectiveGridSize.z];
@@ -151,16 +151,23 @@ public class DungeonGenerator : NetworkBehaviour
             effectiveGridSize.z / 2 );
 
         var start = Place(theme.startingRoom, center, depth: 0);
-        StartRoomPos = center * cellSize;
-
-        if (GameManager.Instance.isServer)
-            GameManager.Instance.dngMod.startRoomPos = center * cellSize;
-
+       
         if (start == null) 
-        { 
-            Debug.LogError("Failed to place starting room at center."); 
-            return; 
+        {
+            center = new Vector3Int(1, 0, 0);
+            start = Place(theme.startingRoom, center, depth: 0);
+            Debug.Log("Tried to place start room in default position."); 
         }
+
+        if (start == null)
+        {
+            Debug.LogError("Failed to place starting room at center.");
+            return;
+        }
+
+        StartRoomPos = center * cellSize;
+        if (GameManager.Instance.isServer)
+            GameManager.Instance.dngMod.startRoomPos = StartRoomPos;
 
         var frontier = BuildOpenPorts(start); 
         while (frontier.Count > 0 && placed.Count < maxRooms * LobbySettings.Instance.MapSize) 

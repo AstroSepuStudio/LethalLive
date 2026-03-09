@@ -273,11 +273,17 @@ public class DNG_MapModule : MonoBehaviour
         if (!mapLayers.ContainsKey(layer)) return;
 
         if (mapLayers.TryGetValue(currentLayer, out var prev))
+        {
             foreach (var cell in prev)
+            {
+                if (cell == null) continue;
                 cell.SetActive(false);
+            }
+        }
 
         foreach (var cell in mapLayers[layer])
         {
+            if (cell == null) continue;
             if (!displayFeatures && trackedIconObjects.Contains(cell))
                 continue;
 

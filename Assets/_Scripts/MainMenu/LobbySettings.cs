@@ -42,7 +42,7 @@ public class LobbySettings : NetworkBehaviour
     [Server]
     public void SetMapSize(int mapSize)
     {
-        this.mapSize = mapSize;
+        this.mapSize = Mathf.Max(1, mapSize);
         Rpc_LobbySettingsChanged();
     }
 
