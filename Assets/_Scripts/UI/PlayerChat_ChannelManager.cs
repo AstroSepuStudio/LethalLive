@@ -72,9 +72,9 @@ public class PlayerChat_ChannelManager : NetworkBehaviour
         HideAllMessages();
     }
 
-    public override void OnStartClient()
+    private void Start()
     {
-        base.OnStartClient();
+        if (!isLocalPlayer) return;
 
         GameManager.Instance.playMod.LocalPlayer.OnReceiveChatMessage.AddListener(OnReceiveChatMessage);
         GameManager.Instance.playMod.LocalPlayer.OnPlayerTeamChanged.AddListener(UpdateTeamChannels);
@@ -83,6 +83,8 @@ public class PlayerChat_ChannelManager : NetworkBehaviour
 
     private void OnDestroy()
     {
+        if (!isLocalPlayer) return;
+
         GameManager.Instance.playMod.LocalPlayer.OnReceiveChatMessage.RemoveListener(OnReceiveChatMessage);
         GameManager.Instance.playMod.LocalPlayer.OnPlayerTeamChanged.RemoveListener(UpdateTeamChannels);
     }
