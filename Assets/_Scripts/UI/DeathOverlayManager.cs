@@ -29,8 +29,13 @@ public class DeathOverlayManager : NetworkBehaviour
 
         for (var i = 0; i < members.Length; i++)
         {
+            PlayerData pData = Instance.playMod.GetPlayerBySteamId(members[i].SteamID);
+            if (pData == null)
+                continue;
+
+            bool dead = pData.Player_Stats.dead;
             playerBanners[i].SetPlayer(members[i]);
-            playerBanners[i].gameObject.SetActive(true);
+            playerBanners[i].gameObject.SetActive(dead);
         }
     }
 
