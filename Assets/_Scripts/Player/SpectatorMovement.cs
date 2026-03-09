@@ -26,13 +26,13 @@ public class SpectatorMovement : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
 
-        playerData.PlayerCamera.enabled = true;
-        playerData.PlayerAudio.enabled = true;
-
         currentPlayer.PlayerCamera.enabled = false;
         currentPlayer.PlayerAudio.enabled = false;
 
         currentPlayer = null;
+
+        playerData.PlayerCamera.enabled = true;
+        playerData.PlayerAudio.enabled = true;
     }
 
     public void PrimaryAction(InputAction.CallbackContext context)
