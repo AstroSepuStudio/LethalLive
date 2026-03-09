@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using static GameManager;
-using static UnityEngine.Rendering.DebugUI;
 
 public class LobbyManagerScreen : UIManagerNetwork
 {
@@ -17,12 +16,9 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] NetworkIdentity identity;
     [SerializeField] Canvas worldCanvas;
     [SerializeField] RectTransform refRectTransform;
-    //[SerializeField] TextMeshProUGUI lobbyNameTxt;
-    [SerializeField] Camera povCamera;
-    //[SerializeField] LobbyMemberUI[] lobbyMemberUIs;
-    //[SerializeField] GameObject pregameWindow;
-    //[SerializeField] GameObject gameWindow;
+    [SerializeField] Transform cameraPosition;
     [SerializeField] GameObject loadingWindow;
+    [SerializeField] GameObject interactableCanvas;
     [SerializeField] Transform loadingThing;
     [SerializeField] Transform playerTargetPos;
     public Transform rightHCIKTarget;
@@ -30,7 +26,6 @@ public class LobbyManagerScreen : UIManagerNetwork
     [SerializeField] TextMeshProUGUI dayText;
     [SerializeField] TextMeshProUGUI timeText;
     [SerializeField] TextMeshProUGUI levelText;
-    //[SerializeField] GameObject deadlineObj;
     [SerializeField] TeamBalancePair teamWhiteBalance;
     [SerializeField] TeamBalancePair teamRedBalance;
     [SerializeField] TeamBalancePair teamBlueBalance;
@@ -124,16 +119,22 @@ public class LobbyManagerScreen : UIManagerNetwork
     void RpcOpenLMS(int index)
     {
         if (Instance.playMod.LocalPlayer.Index != index) return;
+
+        worldCanvas.worldCamera = Instance.playMod.LocalPlayer.PlayerCamera;
+        interactableCanvas.SetActive(false);
+
         Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started += OnEscapePressed;
-
-        //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = false;
         Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(false);
-
-        povCamera.gameObject.SetActive(true);
-        Instance.playMod.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
+        Instance.playMod.LocalPlayer.TakeCameraControl(cameraPosition);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        RefreshLevelName(Instance.dngMod.selectedTheme);
+        RefreshDay(Instance.dayMod.currentDay);
+        RefreshDayTime();
+        RefreshLobbySettings();
+        RefreshTeamBalances();
 
         StartCoroutine(RHCIKTPosHandler());
     }
@@ -157,14 +158,13 @@ public class LobbyManagerScreen : UIManagerNetwork
     public void RpcCloseLMS(int index)
     {
         if (Instance.playMod.LocalPlayer.Index != index) return;
+
         Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started -= OnEscapePressed;
-
-        //GameManager.Instance.LocalPlayer.Skin_Data.SkinRenderer.enabled = true;
         Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(true);
-        
-        Instance.playMod.LocalPlayer.PlayerCamera.gameObject.SetActive(true);
-        povCamera.gameObject.SetActive(false);
+        Instance.playMod.LocalPlayer.DropCameraControl();
 
+        interactableCanvas.SetActive(true);
+        
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -220,6 +220,18 @@ public class LobbyManagerScreen : UIManagerNetwork
     }
 
     public void RefreshTeamBalances(PlayerTeam t, float v)
+    {
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.White], teamWhiteBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Red], teamRedBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Blue], teamBlueBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Yellow], teamYellowBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Green], teamGreenBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Pink], teamPinkBalance);
+
+        totalBalanceText.SetText($"{Instance.ecoMod.TotalBalance}");
+    }
+
+    public void RefreshTeamBalances()
     {
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.White], teamWhiteBalance);
         SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Red], teamRedBalance);

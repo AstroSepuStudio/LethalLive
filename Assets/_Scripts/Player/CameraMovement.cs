@@ -56,6 +56,8 @@ public class CameraMovement : MonoBehaviour
             ref velocity,
             smoothTime);
 
+        pCamera.transform.localRotation = Quaternion.identity;
+
         if (pData._LockPlayer || Cursor.lockState == CursorLockMode.None) return;
         if (!pData.isLocalPlayer || _stop || pData.HUDManager.OpenedWindow) return;
 

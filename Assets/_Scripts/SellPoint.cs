@@ -17,18 +17,26 @@ public class SellPoint : NetworkBehaviour
     {
         if (totalValue <= 0) return;
 
-        totalValue = 0;
+        Debug.Log($"Selling {itemsInside.Count} items, totalValue: {totalValue}");
 
         for (int i = itemsInside.Count - 1; i >= 0; i--)
         {
-            if (itemsInside[i].pData != null)
+            Debug.Log($"Item: {itemsInside[i].name}, pData: {itemsInside[i].lastPlayer?.PlayerName ?? "NULL"}, value: {itemsInside[i].ItemValue}");
+
+            if (itemsInside[i].lastPlayer != null)
             {
-                GameManager.Instance.ecoMod.teamsBalance[itemsInside[i].pData.Team] += itemsInside[i].ItemValue;
+                PlayerTeam team = itemsInside[i].lastPlayer.Team;
+                float current = GameManager.Instance.ecoMod.teamsBalance[team];
+                float newBalance = current + itemsInside[i].ItemValue;
+                Debug.Log($"Team {team}: {current} -> {newBalance}");
+
+                GameManager.Instance.ecoMod.teamsBalance[team] = newBalance;    
             }
 
             NetworkServer.Destroy(itemsInside[i].gameObject);
         }
         
+        totalValue = 0;
         itemsInside.Clear();
     }
 

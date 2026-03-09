@@ -22,6 +22,7 @@ public class ItemBase : InteractableObject
     [SyncVar] public bool HasOwner = false;
 
     public PlayerData pData { get; private set; }
+    public PlayerData lastPlayer { get; private set; }
 
     public AttackStat primaryAtkStats = new();
     public AttackStat secondaryAtkStats = new();
@@ -98,6 +99,7 @@ public class ItemBase : InteractableObject
         transform.SetParent(null);
         rb.isKinematic = false;
 
+        lastPlayer = pData;
         pData = null;
     }
 

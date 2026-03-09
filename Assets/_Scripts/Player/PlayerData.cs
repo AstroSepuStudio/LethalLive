@@ -349,4 +349,19 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
         SocialPlayList.PlayerTalked(steamD);
         Skin_Data.PlayerTalked(steamD);
     }
+
+    bool cameraControlled = false;
+    public void TakeCameraControl(Transform target)
+    {
+        if (cameraControlled) return;
+        cameraControlled = true;
+        Camera_Movement.enabled = false;
+        PlayerCamera.transform.SetPositionAndRotation(target.position, target.rotation);
+    }
+
+    public void DropCameraControl()
+    {
+        cameraControlled = false;
+        Camera_Movement.enabled = true;
+    }
 }
