@@ -39,4 +39,9 @@ public class MainMenuManager : UIManager
         gameObject.SetActive(true);
         cameraParent.SetActive(true);
     }
+
+    public void QuitApplication()
+    {
+        Application.Quit();
+    }
 }
