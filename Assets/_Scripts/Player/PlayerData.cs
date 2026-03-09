@@ -153,8 +153,9 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
         int avatar_id;
         float timeout = 5f;
         float timer = 0f;
+        SteamID = SteamUser.GetSteamID();
 
-        while ((avatar_id = SteamFriends.GetMediumFriendAvatar(SteamUser.GetSteamID())) == -1 && timer < timeout)
+        while ((avatar_id = SteamFriends.GetMediumFriendAvatar(SteamID)) == -1 && timer < timeout)
         {
             timer += Time.deltaTime;
             yield return null;
@@ -202,7 +203,7 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
         }
         else Debug.LogWarning("Failed to get avatar image data within timeout.");
 
-        CmdSendSteamInfo(SteamUser.GetSteamID(), name, avatarData);
+        CmdSendSteamInfo(SteamID, name, avatarData);
     }
 
     [Command]

@@ -1,10 +1,11 @@
+using Mirror;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class PlayerChat_ChannelManager : MonoBehaviour
+public class PlayerChat_ChannelManager : NetworkBehaviour
 {
     [SerializeField] TMP_InputField chatMessageIF;
     [SerializeField] Transform chatMessageParent;
@@ -71,8 +72,10 @@ public class PlayerChat_ChannelManager : MonoBehaviour
         HideAllMessages();
     }
 
-    private void Start()
+    public override void OnStartClient()
     {
+        base.OnStartClient();
+
         GameManager.Instance.playMod.LocalPlayer.OnReceiveChatMessage.AddListener(OnReceiveChatMessage);
         GameManager.Instance.playMod.LocalPlayer.OnPlayerTeamChanged.AddListener(UpdateTeamChannels);
         UpdateTeamChannels(GameManager.Instance.playMod.LocalPlayer.Team);

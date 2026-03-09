@@ -189,6 +189,7 @@ public class GM_PlayerModule : NetworkBehaviour
                 if (identity.TryGetComponent(out PlayerData pData))
                 {
                     players.Add(pData);
+                    pData.SteamID = member.SteamID;
                     pData.AvatarData = member.AvatarData;
                 }
         }
