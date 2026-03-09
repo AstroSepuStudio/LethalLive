@@ -341,11 +341,11 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
         Character_Controller.enabled = true;
     }
 
-    public void PlayerTalked()
+    public void PlayerTalked(CSteamID steamD)
     {
         if (Player_Stats.dead)
-            DeathOvManager.PlayerTalked(SteamID);
-        SocialPlayList.PlayerTalked(SteamID);
-        Skin_Data.PlayerTalked(SteamID);
+            DeathOvManager.PlayerTalked(steamD);
+        SocialPlayList.PlayerTalked(steamD);
+        Skin_Data.PlayerTalked(steamD);
     }
 }

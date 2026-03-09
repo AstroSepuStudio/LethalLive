@@ -54,12 +54,7 @@ public class VoiceChatHandler : NetworkBehaviour
 
     void OnLocalVoiceCaptured(byte[] voiceData)
     {
-        bool speakerIsDead = pData.Player_Stats.dead;
-
-        if (speakerIsDead)
-            pData.DeathOvManager.PlayerTalked(pData.SteamID);
-
-        Cmd_SendVoiceToServer(voiceData, speakerIsDead);
+        Cmd_SendVoiceToServer(voiceData);
     }
 
     void Update()
@@ -69,26 +64,25 @@ public class VoiceChatHandler : NetworkBehaviour
     }
 
     [Command]
-    void Cmd_SendVoiceToServer(byte[] voiceData, bool speakerIsDead)
+    void Cmd_SendVoiceToServer(byte[] voiceData)
     {
-        Rpc_SendVoice(voiceData, speakerIsDead);
+        Rpc_SendVoice(voiceData);
     }
 
     [ClientRpc]
-    void Rpc_SendVoice(byte[] voiceData, bool speakerIsDead)
+    void Rpc_SendVoice(byte[] voiceData)
     {
-        pData.PlayerTalked();
+        //pData.PlayerTalked();
+        GameManager.Instance.playMod.LocalPlayer.PlayerTalked(pData.SteamID);
 
         if (isLocalPlayer && !hearYS) return;
 
         // Alive listeners never hear dead players
-        if (!pData.Player_Stats.dead && speakerIsDead)
+        if (!pData.Player_Stats.dead && GameManager.Instance.playMod.LocalPlayer.Player_Stats.dead)
             return;
 
-        speaker.ConfigureSpatialMode(speakerIsDead);
-
+        speaker.ConfigureSpatialMode(pData.Player_Stats.dead);
         speaker.ProcessVoiceData(voiceData);
-
         ShowSpeakingIconAboveHead();
     }
 

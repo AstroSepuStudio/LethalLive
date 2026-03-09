@@ -101,7 +101,7 @@ public class GameManager : NetworkBehaviour
         dngMod.CloseDungeon();
         dngMod.ResetCooldown();
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(6f);
 
         playMod.ReviveAllPlayers();
     }
@@ -113,7 +113,7 @@ public class GameManager : NetworkBehaviour
         dngMod.CloseDungeon();
         dngMod.ResetCooldown();
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(6f);
 
         playMod.ReviveAllPlayers();
     }
