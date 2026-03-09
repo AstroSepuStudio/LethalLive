@@ -38,28 +38,21 @@ public class VortexAI : AIBrain
     bool pendingFollowerDispatch = false;
     List<VortexAI> pendingFollowers = new();
 
-    [Header("Vortex Detection")]
-    [SerializeField] float vortexDetectionRadius = 8f;
-    [SerializeField] float vortexDetectionInterval = 1f;
-    float vortexDetectionTimer = 0f;
+    [Header("Detection")]
+    [SerializeField] float detectionRadius = 10f;
+    [SerializeField] float detectionInterval = 1f;
+    float detectionTimer = 0f;
+
     readonly HashSet<VortexAI> seenVortexes = new();
+    readonly HashSet<PlayerData> seenPlayers = new();
+    readonly List<PlayerData> watchedPlayers = new();
 
     [Header("Item")]
-    [SerializeField] float itemDetectionRadius = 5f;
-    [SerializeField] float itemDetectionInterval = 1.5f;
     [SerializeField] float dropCooldownDuration = 3f;
     [SerializeField] float playerTooCloseDistance = 3f;
     [SerializeField] float playerNearItemDistance = 3f;
-    float itemDetectionTimer = 0f;
     float postDropCooldown = 0f;
 
-    [Header("Player Detection")]
-    [SerializeField] float playerDetectionRadius = 10f;
-    [SerializeField] float playerDetectionInterval = 1f;
-    float playerDetectionTimer = 0f;
-
-    readonly HashSet<PlayerData> seenPlayers = new();
-    readonly List<PlayerData> watchedPlayers = new();
 
     [Header("Home")]
     [SerializeField] float homeDistanceFraction = 0.5f;
@@ -142,11 +135,15 @@ public class VortexAI : AIBrain
     protected override void Update()
     {
         if (!isServer) return;
-
         base.Update();
-        TickDetection();
-        TickItemDetection();
-        TickPlayerDetection();
+
+        if (postDropCooldown > 0f) postDropCooldown -= Time.deltaTime;
+
+        detectionTimer -= Time.deltaTime;
+        if (detectionTimer > 0f) return;
+        detectionTimer = detectionInterval;
+
+        RunDetection();
     }
 
     #endregion
@@ -203,94 +200,86 @@ public class VortexAI : AIBrain
 
     #region Detection
 
-    void TickDetection()
-    {
-        if (!IsInWanderState()) return;
-        if (IsInAttackState()) return;
-
-        vortexDetectionTimer -= Time.deltaTime;
-        if (vortexDetectionTimer > 0f) return;
-        vortexDetectionTimer = vortexDetectionInterval;
-
-        VortexAI encountered = FindClosestOtherVortex();
-        if (encountered != null && !seenVortexes.Contains(encountered))
-            TriggerStare(encountered);
-    }
-
-    void TickItemDetection()
+    void RunDetection()
     {
         if (CarriedItem != null) return;
         if (IsInAttackState()) return;
 
-        if (postDropCooldown > 0f)
+        Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
+
+        VortexAI closestVortex = null;
+        ItemBase closestItem = null;
+        PlayerData closestPlayer = null;
+        PlayerData tooClosePlayer = null;
+
+        float closestVortexDist = float.MaxValue;
+        float closestItemDist = float.MaxValue;
+        float closestPlayerDist = float.MaxValue;
+
+        foreach (var hit in hits)
         {
-            postDropCooldown -= Time.deltaTime;
+            string tag = hit.tag;
+
+            if (tag == "Vortex")
+            {
+                if (!IsInWanderState()) continue;
+                VortexAI other = hit.GetComponent<VortexAI>();
+                if (other == null || other == this) continue;
+                float d = Vector3.Distance(transform.position, other.transform.position);
+                if (d < closestVortexDist && HasLineOfSight(other.transform.position))
+                { closestVortexDist = d; closestVortex = other; }
+            }
+            else if (tag == "Item")
+            {
+                if (postDropCooldown > 0f) continue;
+                ItemBase item = hit.GetComponent<ItemBase>();
+                if (item == null || !item.ItemData.pickable || item.HasOwner) continue;
+                if (IsItemAtEffectiveHome(item)) continue;
+                float d = Vector3.Distance(transform.position, item.transform.position);
+                if (d < closestItemDist && HasLineOfSight(item.transform.position))
+                { closestItemDist = d; closestItem = item; }
+            }
+            else if (tag == "Player")
+            {
+                PlayerData player = hit.GetComponent<PlayerData>();
+                if (player == null) continue;
+                if (!HasLineOfSight(player.transform.position)) continue;
+                float d = Vector3.Distance(transform.position, player.transform.position);
+                if (d <= playerTooCloseDistance)
+                    tooClosePlayer = player;
+                if (d < closestPlayerDist)
+                { closestPlayerDist = d; closestPlayer = player; }
+            }
+        }
+
+        // Priority order: back away > vortex stare > item pickup > player follow
+        if (tooClosePlayer != null && IsInWanderState())
+        {
+            TriggerBackAway();
             return;
         }
 
-        itemDetectionTimer -= Time.deltaTime;
-        if (itemDetectionTimer > 0f) return;
-        itemDetectionTimer = itemDetectionInterval;
-
-        ItemBase item = FindClosestAvailableItem();
-        if (item != null)
-            TriggerPickUp(item);
-    }
-
-    void TickPlayerDetection()
-    {
-        if (CarriedItem != null) return;
-
-        playerDetectionTimer -= Time.deltaTime;
-        if (playerDetectionTimer > 0f) return;
-        playerDetectionTimer = playerDetectionInterval;
-
-        bool foundNew = false;
-        Collider[] hits = Physics.OverlapSphere(transform.position, playerDetectionRadius);
-        foreach (var hit in hits)
+        if (closestVortex != null && !seenVortexes.Contains(closestVortex))
         {
-            PlayerData player = hit.GetComponent<PlayerData>();
-            if (player == null) continue;
-            if (!HasLineOfSight(player.transform.position)) continue;
+            TriggerStare(closestVortex);
+            return;
+        }
 
-            float dist = Vector3.Distance(transform.position, player.transform.position);
-            if (dist <= playerTooCloseDistance && IsInWanderState())
+        if (closestItem != null)
+        {
+            TriggerPickUp(closestItem);
+            return;
+        }
+
+        if (closestPlayer != null && IsInWanderState())
+        {
+            if (!seenPlayers.Contains(closestPlayer))
             {
-                TriggerBackAway();
-                return;
+                seenPlayers.Add(closestPlayer);
+                watchedPlayers.Add(closestPlayer);
+                TriggerFollowPlayer();
             }
-
-            if (seenPlayers.Contains(player)) continue;
-
-            seenPlayers.Add(player);
-            watchedPlayers.Add(player);
-            foundNew = true;
         }
-
-        if (foundNew && IsInWanderState())
-            TriggerFollowPlayer();
-    }
-
-    ItemBase FindClosestAvailableItem()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, itemDetectionRadius);
-        ItemBase closest = null;
-        float closestDist = float.MaxValue;
-
-        foreach (var hit in hits)
-        {
-            ItemBase item = hit.GetComponent<ItemBase>();
-            if (item == null) continue;
-            if (!item.ItemData.pickable) continue;
-            if (item.HasOwner) continue;
-            if (IsItemAtEffectiveHome(item)) continue;
-
-            float d = Vector3.Distance(transform.position, item.transform.position);
-            if (d < closestDist && HasLineOfSight(item.transform.position))
-            { closestDist = d; closest = item; }
-        }
-
-        return closest;
     }
 
     bool IsItemAtEffectiveHome(ItemBase item)
@@ -324,25 +313,6 @@ public class VortexAI : AIBrain
         return false;
     }
 
-    VortexAI FindClosestOtherVortex()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, vortexDetectionRadius);
-        VortexAI closest = null;
-        float closestDist = float.MaxValue;
-
-        foreach (var hit in hits)
-        {
-            VortexAI other = hit.GetComponent<VortexAI>();
-            if (other == null || other == this) continue;
-
-            float d = Vector3.Distance(transform.position, other.transform.position);
-            if (d < closestDist && HasLineOfSight(other.transform.position))
-            { closestDist = d; closest = other; }
-        }
-
-        return closest;
-    }
-
     public PlayerData GetClosestPlayer(Vector3 origin)
     {
         PlayerData closest = null;
@@ -362,12 +332,12 @@ public class VortexAI : AIBrain
         Collider[] hits = Physics.OverlapSphere(item.transform.position, playerNearItemDistance);
         foreach (var hit in hits)
         {
+            if (!hit.CompareTag("Player")) continue;
             PlayerData p = hit.GetComponent<PlayerData>();
             if (p != null) return p;
         }
         return null;
     }
-
 
     void TriggerStare(VortexAI target)
     {
@@ -434,9 +404,10 @@ public class VortexAI : AIBrain
         item.transform.SetParent(transform);
         item.transform.localPosition = Vector3.up * 1.5f;
 
-        Collider[] hits = Physics.OverlapSphere(transform.position, playerDetectionRadius);
+        Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
         foreach (var hit in hits)
         {
+            if (!hit.CompareTag("Player")) continue;
             if (hit.TryGetComponent<PlayerData>(out var player)) 
                 watchedPlayers.Remove(player);
         }
@@ -607,13 +578,7 @@ public class VortexAI : AIBrain
     void OnDrawGizmosSelected()
     {
         Handles.color = Color.yellow;
-        Handles.DrawWireDisc(transform.position, Vector3.up, vortexDetectionRadius);
-
-        Handles.color = Color.green;
-        Handles.DrawWireDisc(transform.position, Vector3.up, itemDetectionRadius);
-
-        Handles.color = Color.red;
-        Handles.DrawWireDisc(transform.position, Vector3.up, playerDetectionRadius);
+        Handles.DrawWireDisc(transform.position, Vector3.up, detectionRadius);
 
         RoomData effectiveHome = GetEffectiveHome();
         if (effectiveHome != null)

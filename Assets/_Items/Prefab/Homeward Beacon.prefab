@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 7710087211643541705}
   m_Layer: 9
   m_Name: Homeward Beacon
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -207,8 +207,9 @@ MonoBehaviour:
   itemRenderer: {fileID: 6700893344611773982}
   itemNameTxt: {fileID: 2066419903514472862}
   itemPriceTxt: {fileID: 4432833690088768844}
-  Index: 0
   ItemValue: 0
+  InUse: 0
+  HasOwner: 0
   primaryAtkStats:
     <AttackRadius>k__BackingField: 0
     <AttackKnock>k__BackingField: 0
@@ -221,7 +222,6 @@ MonoBehaviour:
     <AttackForce>k__BackingField: 0
     <AttackDamage>k__BackingField: 0
     <AttackCooldown>k__BackingField: 0
-  InUse: 0
   placedCanvas: {fileID: 225458853992323769}
   higlightImgPlaced: {fileID: 3949492280191401466}
   interactionDuration: 1

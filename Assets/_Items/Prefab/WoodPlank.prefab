@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1686463099793843899}
   m_Layer: 9
   m_Name: WoodPlank
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -124,8 +124,9 @@ MonoBehaviour:
   itemRenderer: {fileID: 3701267918323151737}
   itemNameTxt: {fileID: 7077026687615622699}
   itemPriceTxt: {fileID: 4836678479958190841}
-  Index: 0
   ItemValue: 0
+  InUse: 0
+  HasOwner: 0
   primaryAtkStats:
     <AttackRadius>k__BackingField: 0
     <AttackKnock>k__BackingField: 0
@@ -138,7 +139,6 @@ MonoBehaviour:
     <AttackForce>k__BackingField: 0
     <AttackDamage>k__BackingField: 0
     <AttackCooldown>k__BackingField: 0
-  InUse: 0
 --- !u!54 &576611126069032534
 Rigidbody:
   m_ObjectHideFlags: 0

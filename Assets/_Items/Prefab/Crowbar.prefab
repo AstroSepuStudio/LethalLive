@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2545860507069542307}
   m_Layer: 9
   m_Name: Crowbar
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -124,8 +124,9 @@ MonoBehaviour:
   itemRenderer: {fileID: 8832228895478999914}
   itemNameTxt: {fileID: 9102689919361804620}
   itemPriceTxt: {fileID: 6880008698537713054}
-  Index: 0
   ItemValue: 0
+  InUse: 0
+  HasOwner: 0
   primaryAtkStats:
     <AttackRadius>k__BackingField: 0
     <AttackKnock>k__BackingField: 25
@@ -138,7 +139,6 @@ MonoBehaviour:
     <AttackForce>k__BackingField: 0
     <AttackDamage>k__BackingField: 0
     <AttackCooldown>k__BackingField: 0
-  InUse: 0
   hurtBox: {fileID: 6977979795673349589}
 --- !u!54 &2342669760519003277
 Rigidbody:
