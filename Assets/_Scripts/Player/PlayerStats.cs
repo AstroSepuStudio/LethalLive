@@ -1,5 +1,6 @@
 using Mirror;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerStats : EntityStats
 {
@@ -13,6 +14,8 @@ public class PlayerStats : EntityStats
     [SyncVar] public float maxStamina = 100f;
     [SyncVar(hook = nameof(OnStaminaChanged))] public float currentStamina;
     [SyncVar] public bool dead = false;
+
+    public UnityEvent OnPlayerKnocked;
 
     #region Lifecycle
 
@@ -134,7 +137,11 @@ public class PlayerStats : EntityStats
 
     [Server]
     protected override void HandleKnocked(Vector3 momentum)
-        => pData.Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
+    {
+        Debug.Log($"[{pData.PlayerName}] Player knocked");
+        pData.Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
+        OnPlayerKnocked?.Invoke();
+    }
 
     #endregion
 }

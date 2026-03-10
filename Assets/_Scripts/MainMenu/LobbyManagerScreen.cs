@@ -104,6 +104,8 @@ public class LobbyManagerScreen : UIManagerNetwork
     {
         if (open) return;
 
+        playerData.Player_Stats.OnPlayerKnocked.AddListener(OnPlayerKnocked);
+
         open = true;
         playerOnLMS = playerData.Index;
         playerData._LockPlayer = true;
@@ -113,6 +115,13 @@ public class LobbyManagerScreen : UIManagerNetwork
         playerData.Skin_Data.Rigging_Manager.RpcEnableRightHandChainRig();
 
         RpcOpenLMS(playerData.Index);
+    }
+
+    [Server]
+    private void OnPlayerKnocked()
+    {
+        Debug.Log("[LMScreen] Player knocked");
+        CmdCloseLMS(currentPlayer.Index);
     }
 
     [ClientRpc]
@@ -143,6 +152,8 @@ public class LobbyManagerScreen : UIManagerNetwork
     void CmdCloseLMS(int index)
     {
         if (!open || index != playerOnLMS) return;
+
+        currentPlayer.Player_Stats.OnPlayerKnocked.RemoveListener(OnPlayerKnocked);
 
         currentPlayer.Skin_Data.Rigging_Manager.RpcDisableRightHandChainRig();
         currentPlayer._LockPlayer = false;
@@ -187,7 +198,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void RefreshDayTime()
     {
-        if (Instance.dayMod.currentDayTime == -1)
+        if (Instance.dayMod.currentDayTime == -1 || !Instance.dayMod.dayStarted)
         {
             timeText.SetText("--:--");
         }

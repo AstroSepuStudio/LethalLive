@@ -1,14 +1,23 @@
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class FPS_Displayer : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI fpsDisplay;
-    [SerializeField] bool lockFPS;
-    [SerializeField] int targetFPS;
+    [SerializeField] bool displayFPS;
+    [SerializeField] bool displayAv;
 
-    List<float> fpsPtick = new();
+    public bool DisplayFPS => displayFPS;
+    public bool DisplayAv => displayAv;
+
+    readonly float[] fpsPtick = new float[20];
+    int index = 0;
+
+    private void Start()
+    {
+        if (!displayFPS && !displayAv) 
+            fpsDisplay.enabled = false;
+    }
 
     float GetAverage()
     {
@@ -17,32 +26,46 @@ public class FPS_Displayer : MonoBehaviour
         {
             av += fps;
         }
+        av /= fpsPtick.Length;
+        av = Mathf.Round(av * 100) / 100;
 
-        return av / fpsPtick.Count;
+        return av;
     }
 
-    private void Start()
+    public void SetDisplayFPS(bool display)
     {
-        GameTick.OnTick += OnTick;
+        displayFPS = display;
+        if (displayFPS) OnTick();
+        if (displayAv) return;
 
-        if (lockFPS)
-        {
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = targetFPS;
-        }
+        fpsDisplay.enabled = display;
+        if (display) GameTick.OnTick += OnTick;
+        else GameTick.OnTick -= OnTick;
     }
 
-    private void OnDestroy()
+    public void SetDisplayAverageFPS(bool display)
     {
-        GameTick.OnTick -= OnTick;
+        displayAv = display;
+        if (displayAv) OnTick();
+        if (displayFPS) return;
+
+        fpsDisplay.enabled = display;
+        if (display) GameTick.OnTick += OnTick;
+        else GameTick.OnTick -= OnTick;
     }
 
     private void OnTick()
     {
         float fps = 1 / Time.deltaTime;
-        fpsPtick.Add(fps);
+        fpsPtick[index] = fps;
+        index++;
+        if (index >= fpsPtick.Length) index = 0;
 
-        fpsDisplay.SetText($"{Mathf.Round(fps)} FPS \n" +
-            $"{GetAverage()} Av.");
+        string display = "";
+
+        if (displayFPS) display += $"{Mathf.Round(fps)}\n";
+        if (displayAv) display += $"~{GetAverage()}";
+
+        fpsDisplay.SetText(display);
     }
 }

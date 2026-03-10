@@ -13,7 +13,7 @@ public class UIButton : MonoBehaviour
 
     Image graphic;
 
-    private void Start()
+    private void Awake()
     {
         graphic = GetComponent<Image>();
     }

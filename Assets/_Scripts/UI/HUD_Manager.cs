@@ -45,7 +45,12 @@ public class HUD_Manager : MonoBehaviour
     public void UpdateHUD()
     {
         healthValueTxt.SetText($"{Mathf.Round(pData.Player_Stats.currentHP)}/{Mathf.Round(pData.Player_Stats.maxHP)}");
+        healthMeter.fillAmount = pData.Player_Stats.currentHP / pData.Player_Stats.maxHP;
+
         staminaValueTxt.SetText($"{Mathf.Round(pData.Player_Stats.currentStamina)}/{Mathf.Round(pData.Player_Stats.maxStamina)}");
+        staminaMeter.fillAmount = pData.Player_Stats.currentStamina / pData.Player_Stats.maxStamina;
+
         knockValueTxt.SetText($"{Mathf.Round(pData.Player_Stats.currentKnock)}/{Mathf.Round(pData.Player_Stats.maxKnock)}");
+        knockMeter.fillAmount = pData.Player_Stats.currentKnock / pData.Player_Stats.maxKnock;
     }
 }

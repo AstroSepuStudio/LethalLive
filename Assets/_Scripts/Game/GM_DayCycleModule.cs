@@ -21,9 +21,9 @@ public class GM_DayCycleModule : NetworkBehaviour
     [SerializeField] float letterDelay = 0.35f;
 
     [SyncVar]
-    public int currentDay = 0;
+    public int currentDay = 1;
     [SyncVar]
-    public float currentDayTime;
+    public float currentDayTime = -1;
     [SyncVar]
     public bool dayStarted = false;
 
@@ -79,7 +79,7 @@ public class GM_DayCycleModule : NetworkBehaviour
     [Server]
     public void ResetDays()
     {
-        currentDay = 0;
+        currentDay = 1;
         dayStarted = false;
     }
 
