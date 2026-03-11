@@ -592,9 +592,9 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 20
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 1
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -627,7 +627,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -706,6 +706,13 @@ MonoBehaviour:
     <AttackForce>k__BackingField: 2
     <AttackDamage>k__BackingField: 10
     <AttackCooldown>k__BackingField: 1
+  audioSrc: {fileID: 1536679428694314739}
+  LivingSFX:
+  - {fileID: 11400000, guid: 24ccbe882f96858438769acb1eaa0ce6, type: 2}
+  - {fileID: 11400000, guid: 2dc033aa4907e1b4ab7c2ac5b957f0b7, type: 2}
+  - {fileID: 11400000, guid: 3d2223400dafa1e4aafbd7d51ce4be24, type: 2}
+  minLivingSFXInterval: 7
+  maxLivingSFXInterval: 30
   <CurrentState>k__BackingField: {fileID: 0}
   stareStateIndex: 2
   followStateIndex: 3
@@ -722,15 +729,11 @@ MonoBehaviour:
   maxWanderCycles: 4
   cyclesBeforeHomeVisit: 6
   alpha: 0
-  vortexDetectionRadius: 8
-  vortexDetectionInterval: 2
-  itemDetectionRadius: 5
-  itemDetectionInterval: 2
+  detectionRadius: 10
+  detectionInterval: 1
   dropCooldownDuration: 3
   playerTooCloseDistance: 3
   playerNearItemDistance: 3
-  playerDetectionRadius: 10
-  playerDetectionInterval: 1
   homeDistanceFraction: 0.5
   homeDistanceTolerance: 0.2
 --- !u!114 &3384841598755132090
@@ -750,7 +753,13 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   audioSource: {fileID: 1536679428694314739}
-  sfxGroups: []
+  sfxGroups:
+  - Event: 0
+    Clips:
+    - {fileID: 11400000, guid: c461dc5697803ab4bbdbf29e6d5a9685, type: 2}
+  - Event: 2
+    Clips:
+    - {fileID: 11400000, guid: e2d5a126ae584044785803b4c21d831c, type: 2}
   knockRecoveryDelay: 0
   knockRecoveryRate: 0
   ragdollRecoveryValue: 0
