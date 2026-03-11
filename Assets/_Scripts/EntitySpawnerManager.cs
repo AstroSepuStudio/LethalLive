@@ -21,6 +21,7 @@ public class EntitySpawnerManager : NetworkBehaviour
 
     Transform[] spawnerPositions;
     Coroutine enemySpawningCoroutine;
+    System.Random rng;
 
     private void Awake()
     {
@@ -70,6 +71,7 @@ public class EntitySpawnerManager : NetworkBehaviour
 
     private void OnDungeonOpens()
     {
+        rng = DungeonGenerator.Instance.RNG;
         enemySpawningCoroutine = StartCoroutine(EnemySpawning());
     }
 
@@ -106,7 +108,8 @@ public class EntitySpawnerManager : NetworkBehaviour
 
             if (timer >= 5f)
             {
-                float rand = Random.Range(0f, 100f);
+                float rand = (float)(rng.NextDouble() * 100f);
+
                 if (rand <= spawnChance)
                 {
                     if (TrySpawnEnemy())
@@ -144,12 +147,13 @@ public class EntitySpawnerManager : NetworkBehaviour
             totalWeight += spawn.spawnWeight;
         }
 
-        float roll = Random.Range(0f, totalWeight);
+        float roll = (float)(rng.NextDouble() * totalWeight);
         float cumulative = 0f;
         foreach (var spawn in entitySpawn)
         {
             cumulative += spawn.spawnWeight;
-            int positionIndex = Random.Range(0, spawnerPositions.Length);
+            int positionIndex = (int)(rng.NextDouble() * spawnerPositions.Length);
+
             Transform position = spawnerPositions[positionIndex];
             if (roll <= cumulative * DungeonGenerator.Instance.GetDificultyMultiplier(position.position))
             {

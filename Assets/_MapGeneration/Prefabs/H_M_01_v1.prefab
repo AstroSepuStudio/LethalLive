@@ -1020,8 +1020,8 @@ MonoBehaviour:
   - {fileID: 4330618398688748270}
   - {fileID: 2120008446952747503}
   roomLights:
-  - {fileID: 8519136818527237511}
-  - {fileID: 7757263442122821856}
+  - {fileID: 5672858960485230816}
+  - {fileID: 5991846785746963847}
   beingRendered: 1
   showItemSpawnAreas: 0
   showFootprint: 0
@@ -1611,6 +1611,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6220782909311238575, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 8008735890470198561}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5672858960485230816 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 8008735890470198561}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!23 &6791794522903162608 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -1619,11 +1630,6 @@ MeshRenderer:
 --- !u!23 &7629113571145736744 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
-  m_PrefabInstance: {fileID: 8008735890470198561}
-  m_PrefabAsset: {fileID: 0}
---- !u!108 &8519136818527237511 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 8008735890470198561}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8266890451504298054
@@ -1693,11 +1699,17 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 8266890451504298054}
   m_PrefabAsset: {fileID: 0}
---- !u!108 &7757263442122821856 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!114 &5991846785746963847 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 8266890451504298054}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!23 &8393959373203720015 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}

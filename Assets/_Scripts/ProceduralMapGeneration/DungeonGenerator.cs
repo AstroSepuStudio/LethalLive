@@ -52,7 +52,8 @@ public class DungeonGenerator : NetworkBehaviour
     [SerializeField] CanvasGroup seedDisplayGroup;
     [SerializeField] TextMeshProUGUI seedDisplayTxt;
 
-    System.Random rng;
+    public System.Random RNG { get; private set; }
+
     Cell[,,] grid;
     readonly List<PlacedRoom> placed = new();
     readonly Dictionary<int, RoomData> spawned = new();
@@ -107,6 +108,9 @@ public class DungeonGenerator : NetworkBehaviour
         public Vector3Int local;
     }
 
+    private float RandomRange(float min, float max) =>
+    (float)(RNG.NextDouble() * (max - min)) + min;
+
     private void Awake()
     {
         Instance = this;
@@ -136,7 +140,7 @@ public class DungeonGenerator : NetworkBehaviour
                     grid[x, y, z] = new Cell();
 
         seed = setSeed;
-        rng = new System.Random(seed);
+        RNG = new System.Random(seed);
 
         StartCoroutine(GenerationCoroutine(setSeed, 5f));
     }
@@ -172,7 +176,7 @@ public class DungeonGenerator : NetworkBehaviour
         var frontier = BuildOpenPorts(start); 
         while (frontier.Count > 0 && placed.Count < maxRooms * LobbySettings.Instance.MapSize) 
         { 
-            int idx = rng.Next(frontier.Count); 
+            int idx = RNG.Next(frontier.Count); 
             var open = frontier[idx]; frontier.RemoveAt(idx); 
 
             if (open.depth >= maxDepth * LobbySettings.Instance.MapSize) continue;
@@ -302,20 +306,22 @@ public class DungeonGenerator : NetworkBehaviour
     {
         for (int i = list.Count - 1; i > 0; i--)    
         {
-            int j = rng.Next(0, i + 1);
+            int j = RNG.Next(0, i + 1);
             (list[i], list[j]) = (list[j], list[i]);
         }
     }
 
     private RoomDataSO[] GetWeightedCandidates(RoomDataSO[] candidates, Biome neighborBiome)
     {
+        LL_Tier.Tier rolledTier = RollTier(LL_Tier.BaseTierWeights);
+
         List<RoomDataSO> weighted = new();
         foreach (var cand in candidates)
         {
             if (cand == null) continue;
+            if (cand.RoomTier != rolledTier) continue;
 
             weighted.Add(cand);
-
             if (cand.biome == neighborBiome)
             {
                 weighted.Add(cand);
@@ -323,8 +329,37 @@ public class DungeonGenerator : NetworkBehaviour
             }
         }
 
+        if (weighted.Count == 0)
+        {
+            foreach (var cand in candidates)
+            {
+                if (cand == null) continue;
+                weighted.Add(cand);
+                if (cand.biome == neighborBiome)
+                {
+                    weighted.Add(cand);
+                    weighted.Add(cand);
+                }
+            }
+        }
+
         Shuffle(weighted);
         return weighted.ToArray();
+    }
+
+    private LL_Tier.Tier RollTier(Dictionary<LL_Tier.Tier, float> weights)
+    {
+        float total = 0f;
+        foreach (var kvp in weights) total += kvp.Value;
+
+        float roll = (float)(RNG.NextDouble() * total);
+        foreach (var kvp in weights)
+        {
+            roll -= kvp.Value;
+            if (roll <= 0f) return kvp.Key;
+        }
+
+        return LL_Tier.Tier.Common;
     }
 
     void BuildRoomAdjacency()
@@ -426,9 +461,7 @@ public class DungeonGenerator : NetworkBehaviour
         int q = 0;
         foreach (var pos in furniturePositions)
         {
-            if (!EvaluateSpawn(pos.chance, pos.position.position
-            //, true, "Furniture"
-                )) continue;
+            if (!EvaluateSpawn(pos.chance, pos.position.position)) continue;
 
             float distance = Vector3.Distance(initialRoomPos, pos.position.position);
             if (distance < maxDistance / 3) inner++;
@@ -437,12 +470,13 @@ public class DungeonGenerator : NetworkBehaviour
 
             q++;
 
-            Quaternion rot = pos.position.rotation * Quaternion.Euler(0f, UnityEngine.Random.Range(-pos.maxRotation, pos.maxRotation), 0f);
-            Vector3 offset = new (UnityEngine.Random.Range(-pos.maxOffset.x, pos.maxOffset.x), 
-                UnityEngine.Random.Range(-pos.maxOffset.y, pos.maxOffset.y),
-                UnityEngine.Random.Range(-pos.maxOffset.z, pos.maxOffset.z));
+            Quaternion rot = pos.position.rotation * Quaternion.Euler(0f, RandomRange(-pos.maxRotation, pos.maxRotation), 0f);
+            Vector3 offset = new(
+                RandomRange(-pos.maxOffset.x, pos.maxOffset.x),
+                RandomRange(-pos.maxOffset.y, pos.maxOffset.y),
+                RandomRange(-pos.maxOffset.z, pos.maxOffset.z));
 
-            FurnitureDataSO data = theme.GetWeigthedFurniture(pos.position.position);
+            FurnitureDataSO data = theme.GetWeigthedFurniture(pos.position.position, RNG);
             GameObject furnObj = Instantiate(data.Prefab, pos.position.position + offset, rot, furnitureParent);
             NetworkServer.Spawn(furnObj);
 
@@ -474,9 +508,7 @@ public class DungeonGenerator : NetworkBehaviour
         int q = 0;
         foreach (var pos in lootPositions)
         {
-            if (!EvaluateSpawn(pos.chance, pos.position.position
-                //, true, "Loot"
-                )) continue;
+            if (!EvaluateSpawn(pos.chance, pos.position.position)) continue;
 
             float distance = Vector3.Distance(initialRoomPos, pos.position.position);
             if (distance < maxDistance / 3) inner++;
@@ -486,15 +518,15 @@ public class DungeonGenerator : NetworkBehaviour
             q++;
 
             Quaternion rot = pos.position.rotation * Quaternion.Euler(
-                UnityEngine.Random.Range(-180, 180), 
-                UnityEngine.Random.Range(-180, 180),
-                UnityEngine.Random.Range(-180, 180));
+                RandomRange(-180, 180),
+                RandomRange(-180, 180),
+                RandomRange(-180, 180));
             Vector3 offset = new(
-                UnityEngine.Random.Range(-pos.maxOffset.x, pos.maxOffset.x),
-                UnityEngine.Random.Range(-pos.maxOffset.y, pos.maxOffset.y),
-                UnityEngine.Random.Range(-pos.maxOffset.z, pos.maxOffset.z));
+                RandomRange(-pos.maxOffset.x, pos.maxOffset.x),
+                RandomRange(-pos.maxOffset.y, pos.maxOffset.y),
+                RandomRange(-pos.maxOffset.z, pos.maxOffset.z));
 
-            ItemSO item = theme.GetWeightedItem(pos.position.position);
+            ItemSO item = theme.GetWeightedItem(pos.position.position, RNG);
             GameObject itemObj = Instantiate(item.itemPrefab, pos.position.position + offset, rot, itemsParent);
             NetworkServer.Spawn(itemObj);
 
@@ -527,9 +559,7 @@ public class DungeonGenerator : NetworkBehaviour
         List<Transform> spawnedPos = new();
         foreach (var pos in entitySpawnerPositions)
         {
-            if (!EvaluateSpawn(acChance, pos.position
-                //, true, "Entity Spawner"
-                ))
+            if (!EvaluateSpawn(acChance, pos.position))
             {
                 acChance += chance;
                 continue;
@@ -734,7 +764,7 @@ public class DungeonGenerator : NetworkBehaviour
         grid = null;
         nextRoomId = 1;
         _generated = false;
-        rng = null;
+        RNG = null;
 
         if (surface != null)
             surface.RemoveData();
@@ -757,20 +787,14 @@ public class DungeonGenerator : NetworkBehaviour
 
         float gridDistance = Vector3.Distance(initialRoomPos, targetPos) / 5f;
         float multiplier = difficultyCurve.Evaluate(gridDistance);
-        //Debug.Log($"Distance: {gridDistance}, multiplier: {multiplier}");
         return multiplier;
     }
 
-    private bool EvaluateSpawn(float chance, Vector3 position
-        //, bool debug = false, string prefix = ""
-        )
+    private bool EvaluateSpawn(float chance, Vector3 position)
     {
-        float rand = UnityEngine.Random.Range(0, 100f);
-
+        float rand = RandomRange(0, 100f);
         float balChance = chance * GetDificultyMultiplier(position);
-        bool canSpawn = rand <= balChance;
-        //if (debug) Debug.Log($"Evaluating spawn of {prefix} -> max: {maxQuantity}, random: {rand}, chance: {chance}, final chance: {balChance}, can spawn?: {canSpawn}");
-        return canSpawn;
+        return rand <= balChance;
     }
 
     private void OnDrawGizmosSelected()

@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Prefab: {fileID: 6859338258297046723, guid: 0e6cb0dcd5b3e5146ab8250f1b379962, type: 3}
   biome: 0
+  RoomTier: 2
+  roomColor: {r: 1, g: 1, b: 1, a: 1}
   RoomFootprint:
   - Footprint: {x: 0, y: 0, z: 0}
     MapSprite: {fileID: 21300000, guid: 6469faaddb26a904dbf09a9d892ea2f6, type: 3}
@@ -22,7 +24,7 @@ MonoBehaviour:
   - Footprint: {x: 0, y: 0, z: 1}
     MapSprite: {fileID: 21300000, guid: 8cae911f60ba2cd44b7bb7a1681a5a76, type: 3}
   - Footprint: {x: 1, y: 0, z: 1}
-    MapSprite: {fileID: 21300000, guid: 364fe8144c2123049b4eb6a41583cce6, type: 3}
+    MapSprite: {fileID: 21300000, guid: d33cf1ea08d4c154b99e405db9ee90d2, type: 3}
   - Footprint: {x: 0, y: -1, z: 0}
     MapSprite: {fileID: 21300000, guid: 6469faaddb26a904dbf09a9d892ea2f6, type: 3}
   - Footprint: {x: 1, y: -1, z: 0}
@@ -30,7 +32,7 @@ MonoBehaviour:
   - Footprint: {x: 0, y: -1, z: 1}
     MapSprite: {fileID: 21300000, guid: 8cae911f60ba2cd44b7bb7a1681a5a76, type: 3}
   - Footprint: {x: 1, y: -1, z: 1}
-    MapSprite: {fileID: 21300000, guid: 65b2d5431a17fd54186c2fe088de619a, type: 3}
+    MapSprite: {fileID: 21300000, guid: f863ab5e7e358884cb38fe788ef68013, type: 3}
   Ports:
   - localCell: {x: 0, y: 0, z: 1}
     face: 0

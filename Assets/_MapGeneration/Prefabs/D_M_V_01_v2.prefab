@@ -9524,10 +9524,6 @@ MonoBehaviour:
     chance: 5
   entitySpawnerPositions: []
   roomRenderers:
-  - {fileID: 1322337548692907532}
-  - {fileID: 6160677754533482163}
-  - {fileID: 4317726310744779416}
-  - {fileID: 6497399088755651266}
   - {fileID: 3556907236214366768}
   - {fileID: 503821740686978792}
   - {fileID: 8957349157414482296}
@@ -9558,12 +9554,12 @@ MonoBehaviour:
   - {fileID: 7738045718108276492}
   - {fileID: 1823000842155686623}
   roomLights:
-  - {fileID: 1812677580160022855}
-  - {fileID: 6067938004553951759}
-  - {fileID: 7866897941781003082}
-  - {fileID: 5005589169161770647}
-  - {fileID: 2512780271792769902}
-  - {fileID: 8028550882497308930}
+  - {fileID: 2425164486237873184}
+  - {fileID: 7833346968794347368}
+  - {fileID: 6173541292166014509}
+  - {fileID: 9076840345202281456}
+  - {fileID: 1900297766019012105}
+  - {fileID: 6335195347287012453}
   beingRendered: 1
   showItemSpawnAreas: 0
   showFootprint: 0
@@ -9573,7 +9569,7 @@ MonoBehaviour:
   fontSize: 25
   spriteSize: 150
   useLayers: 1
-  currentLayer: -1
+  currentLayer: 0
 --- !u!1 &7084079333164567929
 GameObject:
   m_ObjectHideFlags: 0
@@ -14031,11 +14027,17 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 16149314730529249}
   m_PrefabAsset: {fileID: 0}
---- !u!108 &1812677580160022855 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!114 &2425164486237873184 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 16149314730529249}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!23 &3556907236214366768 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -14108,11 +14110,17 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 4305867067844781000}
   m_PrefabAsset: {fileID: 0}
---- !u!108 &2512780271792769902 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!114 &1900297766019012105 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 4305867067844781000}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!23 &4396977560732687553 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -14190,11 +14198,17 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 5560562799486583465}
   m_PrefabAsset: {fileID: 0}
---- !u!108 &6067938004553951759 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!114 &7833346968794347368 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 5560562799486583465}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!23 &8957349157414482296 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -14262,11 +14276,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6220782909311238575, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 6659099560999108145}
   m_PrefabAsset: {fileID: 0}
---- !u!108 &5005589169161770647 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
-  m_PrefabInstance: {fileID: 6659099560999108145}
-  m_PrefabAsset: {fileID: 0}
 --- !u!23 &6534000987490386232 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -14277,6 +14286,17 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 6659099560999108145}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &9076840345202281456 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 6659099560999108145}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!1001 &8372867836975649772
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14344,11 +14364,17 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 8372867836975649772}
   m_PrefabAsset: {fileID: 0}
---- !u!108 &7866897941781003082 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!114 &6173541292166014509 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 8372867836975649772}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!23 &8284044327330458853 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -14421,11 +14447,17 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 8535895165209346468}
   m_PrefabAsset: {fileID: 0}
---- !u!108 &8028550882497308930 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+--- !u!114 &6335195347287012453 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 8535895165209346468}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!23 &8120315506388516525 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}

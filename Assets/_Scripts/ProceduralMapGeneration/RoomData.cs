@@ -21,7 +21,7 @@ public class RoomData : MonoBehaviour
     public List<FurnitureDataSO.FurniturePosition> furnitureSpawnPositions;
     public List<Transform> entitySpawnerPositions;
     public Renderer[] roomRenderers;
-    public Light[] roomLights;
+    public LED_Light[] roomLights;
 
     [SerializeField] bool beingRendered = true;
 
@@ -76,9 +76,19 @@ public class RoomData : MonoBehaviour
             renderer.enabled = shouldRender;
         }
 
-        foreach (Light light in roomLights)
+        foreach (LED_Light light in roomLights)
         {
-            light.enabled = shouldRender;
+            light.RenderLight(shouldRender);
+        }
+    }
+
+    public void SetLightRender(bool shouldRender)
+    {
+        if (beingRendered == shouldRender) return;
+
+        foreach (LED_Light light in roomLights)
+        {
+            light.RenderLight(shouldRender);
         }
     }
 

@@ -23,8 +23,8 @@ public class RoomDataSO : ScriptableObject
 
     public GameObject Prefab;
     public Biome biome = Biome.Default;
+    public LL_Tier.Tier RoomTier;
 
-    //public Vector3Int[] Footprint = new Vector3Int[] { Vector3Int.zero };
     public Color roomColor = Color.white;
     public FootprintStr[] RoomFootprint = Array.Empty<FootprintStr>();
 

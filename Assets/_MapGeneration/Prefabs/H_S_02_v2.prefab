@@ -1169,7 +1169,7 @@ MonoBehaviour:
   - {fileID: 4330618398688748270}
   - {fileID: 2120008446952747503}
   roomLights:
-  - {fileID: 8648060448303176598}
+  - {fileID: 4648862497228326641}
   beingRendered: 1
   showItemSpawnAreas: 0
   showFootprint: 0
@@ -1537,6 +1537,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6220782909311238575, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 6997087732251423536}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4648862497228326641 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2422573722502755777, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 6997087732251423536}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 828fdda0ce79e4244a029f5fc3b0c0f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LED_Light
 --- !u!23 &5800449154125988065 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3559519354606580689, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
@@ -1545,10 +1556,5 @@ MeshRenderer:
 --- !u!23 &7484444623607417913 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 487708738432876297, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
-  m_PrefabInstance: {fileID: 6997087732251423536}
-  m_PrefabAsset: {fileID: 0}
---- !u!108 &8648060448303176598 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
   m_PrefabInstance: {fileID: 6997087732251423536}
   m_PrefabAsset: {fileID: 0}

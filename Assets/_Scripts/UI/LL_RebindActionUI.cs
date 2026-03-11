@@ -202,6 +202,8 @@ public class LL_RebindActionUI : MonoBehaviour
 
         // Give listeners a chance to configure UI in response.
         m_UpdateBindingUIEvent?.Invoke(this, displayString, deviceLayoutName, controlPath);
+
+        TabletManager.OnKeyRebindCompletedEvent?.Invoke();
     }
 
     /// <summary>
@@ -223,6 +225,7 @@ public class LL_RebindActionUI : MonoBehaviour
             action.RemoveBindingOverride(bindingIndex);
         }
         UpdateBindingDisplay();
+        TabletManager.OnKeyRebindCompletedEvent?.Invoke();
     }
 
     /// <summary>

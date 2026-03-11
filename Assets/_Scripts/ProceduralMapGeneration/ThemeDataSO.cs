@@ -41,7 +41,7 @@ public class ThemeDataSO : ScriptableObject
     public int MinItems = 3;
     public int MaxItems = 12;
 
-    private Tier RollTier(Vector3 position)
+    private Tier RollTier(Vector3 position, System.Random rng)
     {
         float multiplier = DungeonGenerator.Instance.GetDificultyMultiplier(position);
         Dictionary<Tier, float> modified = GetWeightedTiers(multiplier);
@@ -50,7 +50,7 @@ public class ThemeDataSO : ScriptableObject
         foreach (var w in modified.Values)
             totalWeight += w;
 
-        float roll = Random.value * totalWeight;
+        float roll = (float)(rng.NextDouble() * totalWeight);
 
         Tier selectedTier = Tier.Common;
         foreach (var kvp in modified)
@@ -66,9 +66,9 @@ public class ThemeDataSO : ScriptableObject
         return selectedTier;
     }
 
-    public FurnitureDataSO GetWeigthedFurniture(Vector3 position)
+    public FurnitureDataSO GetWeigthedFurniture(Vector3 position, System.Random rng)
     {
-        Tier selectedTier = RollTier(position);
+        Tier selectedTier = RollTier(position, rng);
 
         List<FurnitureDataSO> candidates = new();
         foreach (var f in spawnableFurniture)
@@ -78,14 +78,14 @@ public class ThemeDataSO : ScriptableObject
         }
 
         if (candidates.Count == 0)
-            return spawnableFurniture[Random.Range(0, spawnableFurniture.Length)];
+            return spawnableFurniture[(int)(rng.NextDouble() * spawnableFurniture.Length)];
 
-        return candidates[Random.Range(0, candidates.Count)];
+        return candidates[(int)(rng.NextDouble() * candidates.Count)];
     }
 
-    public ItemSO GetWeightedItem(Vector3 position)
+    public ItemSO GetWeightedItem(Vector3 position, System.Random rng)
     {
-        Tier selectedTier = RollTier(position);
+        Tier selectedTier = RollTier(position, rng);
 
         List<ItemSO> candidates = new();
         foreach (var f in spawnableItems)
@@ -95,8 +95,8 @@ public class ThemeDataSO : ScriptableObject
         }
 
         if (candidates.Count == 0)
-            return spawnableItems[Random.Range(0, spawnableFurniture.Length)];
+            return spawnableItems[(int)(rng.NextDouble() * spawnableItems.Length)];
 
-        return candidates[Random.Range(0, candidates.Count)];
+        return candidates[(int)(rng.NextDouble() * candidates.Count)];
     }
 }

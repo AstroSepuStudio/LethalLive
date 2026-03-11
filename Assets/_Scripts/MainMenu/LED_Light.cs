@@ -4,6 +4,7 @@ public class LED_Light : MonoBehaviour
 {
     [SerializeField] Light ledLight;
     [SerializeField] Renderer lightRenderer;
+    [SerializeField] Renderer borderRenderer;
 
     Material lMat;
 
@@ -31,5 +32,12 @@ public class LED_Light : MonoBehaviour
             lMat.EnableKeyword("_EMISSION");
         else
             lMat.DisableKeyword("_EMISSION");
+    }
+
+    public void RenderLight(bool enable)
+    {
+        ledLight.enabled = enable;
+        borderRenderer.enabled = enable;
+        lightRenderer.enabled = enable;
     }
 }

@@ -2,12 +2,15 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using LethalLive;
+using UnityEngine.Events;
 
 public class TabletManager : MonoBehaviour
 {
     [SerializeField] GameObject tabletObj;
     [SerializeField] GameObject rebindOverlay;
     [SerializeField] TextMeshProUGUI rebindText;
+
+    public static UnityEvent OnKeyRebindCompletedEvent = new();
 
     public GameObject RebindOverlay => rebindOverlay;
     public TextMeshProUGUI RebindText => rebindText;
@@ -21,6 +24,11 @@ public class TabletManager : MonoBehaviour
     public void RemoveActivity() => currentActivities--;
 
     bool esc;
+
+    private void OnDestroy()
+    {
+        OnKeyRebindCompletedEvent.RemoveAllListeners();
+    }
 
     public bool TrySwitchState()
     {
@@ -46,4 +54,6 @@ public class TabletManager : MonoBehaviour
         yield return null;
         esc = false;
     }
+
+    public void OnKeyRebindCompleted() => OnKeyRebindCompletedEvent?.Invoke();
 }
