@@ -739,19 +739,14 @@ public class DungeonGenerator : NetworkBehaviour
         return rd;
     }
 
-
     public void ClearMap()
     {
         OnDungeonClear?.Invoke();
 
-        DestroyChildren(roomsParent);
-        DestroyChildren(furnitureParent);
-        DestroyChildren(itemsParent);
-
-        for (int i = entitySpawnerPositions.Count - 1; i >= 0; i--)
-        {
-            Destroy(entitySpawnerPositions[i].gameObject);
-        }
+        DestroyChildren(roomsParent, false);
+        DestroyChildren(furnitureParent, true);
+        DestroyChildren(itemsParent, true);
+        DestroyChildren(entSpawnParent, true);
 
         placed.Clear();
         spawned.Clear();
@@ -770,14 +765,18 @@ public class DungeonGenerator : NetworkBehaviour
             surface.RemoveData();
     }
 
-    private void DestroyChildren(Transform parent)
+    private void DestroyChildren(Transform parent, bool hasNetID)
     {
         if (parent == null) return;
+        if (hasNetID && !isServer) return;
 
         for (int i = parent.childCount - 1; i >= 0; i--)
         {
             var child = parent.GetChild(i).gameObject;
-            Destroy(child);
+            if (hasNetID)
+                NetworkServer.Destroy(child);
+            else
+                Destroy(child);
         }
     }
 

@@ -147,13 +147,7 @@ public class ItemInventory : NetworkBehaviour
     public void DropEverything()
     {
         foreach (var slot in inventorySlots)
-        {
-            if (slot != null)
-                slot.HasOwner = false;
-        }
-        
-        for (int i = 0; i < inventorySlots.Length; i++)
-            inventorySlots[i] = null;
+            if (slot != null) slot.HasOwner = false;
 
         RpcDropAllItems();
     }
@@ -162,9 +156,21 @@ public class ItemInventory : NetworkBehaviour
     public void DestroyAllItems()
     {
         for (int i = 0; i < inventorySlots.Length; i++)
-            inventorySlots[i] = null;
+        {
+            if (inventorySlots[i] == null) continue;
 
-        RpcDestroyAllItems();
+            ItemBase item = inventorySlots[i];
+            inventorySlots[i] = null;
+            NetworkServer.Destroy(item.gameObject);
+        }
+
+        if (equippedItem != null)
+        {
+            NetworkServer.Destroy(equippedItem.gameObject);
+            equippedItem = null;
+        }
+
+        RpcOnAllItemsDestroyed();
     }
 
     #endregion
@@ -179,14 +185,25 @@ public class ItemInventory : NetworkBehaviour
 
         equippedItem.HasOwner = false;
         inventorySlots[selectedSlotIndex] = null;
-        //hotbarSlots[selectedSlotIndex].RemoveItem();
 
         RpcDropItem();
     }
 
+    [ClientRpc]
+    void RpcOnAllItemsDestroyed()
+    {
+        for (int i = 0; i < inventorySlots.Length; i++)
+        {
+            hotbarSlots[i].RemoveItem();
+            inventorySlots[i] = null;
+        }
+
+        equippedItem = null;
+        SetEquipAnimState(null);
+    }
+
     [ClientRpc] void RpcDropItem() => LocalDropItem();
     [ClientRpc] void RpcDropAllItems() => LocalDropAllItems();
-    [ClientRpc] void RpcDestroyAllItems() => LocalDestroyAllItems();
 
     void LocalDropItem(bool drop = true)
     {
@@ -216,27 +233,6 @@ public class ItemInventory : NetworkBehaviour
         }
 
         equippedItem = null;
-        SetEquipAnimState(null);
-    }
-
-    void LocalDestroyAllItems()
-    {
-        for (int i = 0; i < inventorySlots.Length; i++)
-        {
-            if (inventorySlots[i] == null) continue;
-
-            hotbarSlots[i].RemoveItem();
-            if (inventorySlots[i] != equippedItem)
-                Destroy(inventorySlots[i].gameObject);
-            inventorySlots[i] = null;
-        }
-
-        if (equippedItem != null)
-        {
-            Destroy(equippedItem.gameObject);
-            equippedItem = null;
-        }
-
         SetEquipAnimState(null);
     }
 

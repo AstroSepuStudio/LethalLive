@@ -105,8 +105,10 @@ public class GM_DungeonModule : NetworkBehaviour
             return;
         }
 
-        CloseDungeon();
-        OpenDungeon();
+        if (dungeonOpen)
+            CloseDungeon();
+        else
+            OpenDungeon();
     }
 
     [ClientRpc]

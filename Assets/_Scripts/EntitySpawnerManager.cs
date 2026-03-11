@@ -108,6 +108,7 @@ public class EntitySpawnerManager : NetworkBehaviour
 
             if (timer >= 5f)
             {
+                rng ??= DungeonGenerator.Instance.RNG;
                 float rand = (float)(rng.NextDouble() * 100f);
 
                 if (rand <= spawnChance)
@@ -155,6 +156,8 @@ public class EntitySpawnerManager : NetworkBehaviour
             int positionIndex = (int)(rng.NextDouble() * spawnerPositions.Length);
 
             Transform position = spawnerPositions[positionIndex];
+            if (position == null) continue;
+
             if (roll <= cumulative * DungeonGenerator.Instance.GetDificultyMultiplier(position.position))
             {
                 GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation, entityParent);

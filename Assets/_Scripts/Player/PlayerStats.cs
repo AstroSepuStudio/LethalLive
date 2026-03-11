@@ -88,14 +88,26 @@ public class PlayerStats : EntityStats
             : Vector3.zero;
 
         dead = true;
-        pData.OnPlayerDeath(attack, momentum);
+        pData.OnPlayerDeath(attack, momentum, false);
+    }
+
+    [Server]
+    protected void HandleDeath(AttackSource source, AttackStat attack, bool executed)
+    {
+        float multiplier = Random.Range(1f, 2f);
+        Vector3 momentum = source.Stats != null
+            ? CalculateMomentum(source.Position, attack.AttackForce, multiplier)
+            : Vector3.zero;
+
+        dead = true;
+        pData.OnPlayerDeath(attack, momentum, executed);
     }
 
     [Server]
     public void ExecutePlayer()
     {
         currentHP = 0f;
-        HandleDeath(default, null);
+        HandleDeath(default, null, true);
     }
 
     #endregion

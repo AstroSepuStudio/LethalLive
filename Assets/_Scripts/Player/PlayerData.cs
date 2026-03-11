@@ -284,11 +284,16 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
     }
 
     [Server]
-    public void OnPlayerDeath(AttackStat stat, Vector3 momentum)
+    public void OnPlayerDeath(AttackStat stat, Vector3 momentum, bool executed)
     {
         GameManager.Instance.playMod.PlayerDies(netId);
         Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
-        PlayerInventory.DropEverything();
+
+        if (executed)
+            PlayerInventory.DestroyAllItems();
+        else 
+            PlayerInventory.DropEverything();
+
         Rpc_OnPlayerDeath();
     }
 
