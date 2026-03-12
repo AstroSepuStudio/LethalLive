@@ -26,11 +26,14 @@ public class DungeonGenerator : NetworkBehaviour
     [SerializeField] Transform furnitureParent;
     [SerializeField] Transform itemsParent;
     [SerializeField] Transform entSpawnParent;
-
     [SerializeField] NavMeshSurface surface;
-
     [SerializeField]
     private AnimationCurve difficultyCurve = AnimationCurve.EaseInOut(0, 1, 20, 3);
+
+    [Header("Audio")]
+    [SerializeField] AudioReverbZone reverbZone;
+    [SerializeField] float reverbMinDistanceMultiplier = 0.5f;
+    [SerializeField] float reverbMaxDistanceMultiplier = 1.5f;
 
     [Header("Seed")]
     [SerializeField] string gameSeed = "Default";
@@ -438,6 +441,14 @@ public class DungeonGenerator : NetworkBehaviour
         }
 
         BuildRoomAdjacency();
+
+        if (reverbZone != null)
+        {
+            reverbZone.transform.position = spawned[placed[0].id].transform.position;
+            reverbZone.minDistance = maxDistance * reverbMinDistanceMultiplier;
+            reverbZone.maxDistance = maxDistance * reverbMaxDistanceMultiplier;
+            reverbZone.reverbPreset = theme.reverbPreset;
+        }
 
         if (isServer)
         {

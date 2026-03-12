@@ -86,6 +86,7 @@ public class GameManager : NetworkBehaviour
         dngMod.CloseDungeon();
         dngMod.ResetCooldown();
         playMod.ReviveAllPlayers();
+        StopMusic();
 
         dayMod.currentDay++;
     }
@@ -103,20 +104,27 @@ public class GameManager : NetworkBehaviour
 
         yield return new WaitForSeconds(6f);
 
+        StopMusic();
         playMod.ReviveAllPlayers();
     }
 
     IEnumerator ResetGameSequence()
     {
+        yield return new WaitForSeconds(5f);
+
         dayMod.ResetDays();
         ecoMod.ResetEconomy();
         dngMod.CloseDungeon();
         dngMod.ResetCooldown();
 
-        yield return new WaitForSeconds(6f);
+        yield return new WaitForSeconds(5f);
 
+        StopMusic();
         playMod.ReviveAllPlayers();
     }
+
+    [ClientRpc]
+    private void StopMusic() => AudioManager.Instance.StopMusic();
 
     public void SetUpNewDay()
     {

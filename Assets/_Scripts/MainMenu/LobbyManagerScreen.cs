@@ -362,7 +362,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
             timer = 0;
 
-            Vector2 mousePos = Input.mousePosition;
+            Vector2 mousePos = Mouse.current.position.ReadValue();
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle (
                 refRectTransform, mousePos, worldCanvas.worldCamera, out Vector2 localPoint))
             {

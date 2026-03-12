@@ -107,6 +107,7 @@ Transform:
   - {fileID: 4486039953752972746}
   - {fileID: 6588167297750537907}
   - {fileID: 7826627664349605990}
+  - {fileID: 6698399995323232420}
   m_Father: {fileID: 5360604290841652880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1154420825500620997
@@ -219,6 +220,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AIS_AttackFurniture
   movementGracePeriod: 0.2
   stuckTimeout: 10
+  attackHitDelay: 0.2
+  dodgeDistance: 0.5
   OnFurnitureDestroyed:
     m_PersistentCalls:
       m_Calls:
@@ -490,7 +493,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -298, y: 0, z: -295}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6789960467342715894}
   - {fileID: 7840453941938593944}
@@ -696,6 +699,9 @@ MonoBehaviour:
   - {fileID: 2217452905688052205}
   - {fileID: 8395602400308223306}
   - {fileID: 8809746357602813789}
+  - {fileID: 4825602395216287569}
+  - {fileID: 8960114066817526046}
+  - {fileID: 5170523247180239437}
   losBlockingLayers:
     serializedVersion: 2
     m_Bits: 951
@@ -713,15 +719,29 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 24ccbe882f96858438769acb1eaa0ce6, type: 2}
     - {fileID: 11400000, guid: 2dc033aa4907e1b4ab7c2ac5b957f0b7, type: 2}
     - {fileID: 11400000, guid: 3d2223400dafa1e4aafbd7d51ce4be24, type: 2}
+    - {fileID: 11400000, guid: f738a77a602c2b540a0e5539260a50c6, type: 2}
   - Event: 1
     Clips:
     - {fileID: 11400000, guid: 3d1d899d94dd19040a51dd26f7aa5b00, type: 2}
   - Event: 4
     Clips:
     - {fileID: 11400000, guid: 7fda72791951dcd4ea709da4089ae774, type: 2}
+  - Event: 5
+    Clips:
+    - {fileID: 11400000, guid: 33111f7a4faec594fae34f4b718ed09a, type: 2}
+  - Event: 6
+    Clips:
+    - {fileID: 11400000, guid: 99be42d21bc0ef040bc6af5afb154d2a, type: 2}
+  - Event: 7
+    Clips:
+    - {fileID: 11400000, guid: 063dbdd94749b374bba124060ad9826b, type: 2}
   minLivingSFXInterval: 7
   maxLivingSFXInterval: 30
+  footstepDelay: 0.5
+  footstepMinPitch: 0.8
+  footstepMaxPitch: 1.2
   <CurrentState>k__BackingField: {fileID: 0}
+  wanderIndexes: 0000000001000000
   stareStateIndex: 2
   followStateIndex: 3
   pickUpStateIndex: 4
@@ -732,7 +752,7 @@ MonoBehaviour:
   attackFurnitureStateIndex: 9
   backAwayStateIndex: 10
   stareAtPlayerNearItemStateIndex: 11
-  wanderIndexes: 0000000001000000
+  attackPlayerStateIndex: 12
   minWanderCycles: 1
   maxWanderCycles: 4
   cyclesBeforeHomeVisit: 6
@@ -744,6 +764,10 @@ MonoBehaviour:
   playerNearItemDistance: 3
   homeDistanceFraction: 0.5
   homeDistanceTolerance: 0.2
+  patienceDecayDistance: 4
+  patienceDecay: 2
+  patienceDecayOnBackAway: 5
+  patienceDecayOnItemStolen: 25
 --- !u!114 &3384841598755132090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -777,12 +801,38 @@ MonoBehaviour:
   speed: 100
   currentHP: 0
   currentKnock: 0
+  dead: 0
+  knocked: 0
   OnDeath:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnAgentDeath
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   OnTakeDamage:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnAgentHurt
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!136 &1768164185552261995
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -875,6 +925,87 @@ MonoBehaviour:
       - m_Target: {fileID: 8538427736269133656}
         m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
         m_MethodName: OnBackAwayGaveUp
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!1 &3957618740927006159
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6698399995323232420}
+  - component: {fileID: 5170523247180239437}
+  m_Layer: 11
+  m_Name: Attack Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6698399995323232420
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3957618740927006159}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5170523247180239437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3957618740927006159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ba454d4ef75381488342aba8232e51d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_AttackPlayer
+  movementGracePeriod: 0.2
+  stuckTimeout: 4
+  recalculateInterval: 0.3
+  giveUpDistance: 10
+  calmDownDuration: 3
+  attackHitDelay: 0.2
+  dodgeDistance: 1.5
+  OnTargetLost:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnAttackPlayerLost
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnCalmedDown:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: OnAttackPlayerCalmedDown
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1165,6 +1296,9 @@ MonoBehaviour:
   waitDuration: 12
   checkInterval: 0.5
   playerClearDistance: 4
+  patienceDecayRate: 4
+  minWarningInterval: 2
+  maxWarningInterval: 4
   OnPlayerLeft:
     m_PersistentCalls:
       m_Calls:
@@ -1186,6 +1320,21 @@ MonoBehaviour:
       - m_Target: {fileID: 8538427736269133656}
         m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
         m_MethodName: OnItemStareGaveUp
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnItemStolen:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8538427736269133656}
+        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
+        m_MethodName: DrainPatienceOnItemStolen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

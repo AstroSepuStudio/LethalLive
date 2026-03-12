@@ -37,6 +37,7 @@ public class ThemeDataSO : ScriptableObject
     [Header("Ambient")]
     public AudioSFX loopingMusic;
     public EerySFX[] eerySFX;
+    public AudioReverbPreset reverbPreset = AudioReverbPreset.Cave;
 
     public int MinItems = 3;
     public int MaxItems = 12;

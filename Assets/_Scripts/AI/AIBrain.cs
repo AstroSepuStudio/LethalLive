@@ -8,7 +8,7 @@ using UnityEngine.Audio;
 [RequireComponent(typeof(NavMeshAgent))]
 public class AIBrain : NetworkBehaviour
 {
-    public enum SFXEvent { Living, Attack, CallForHelp, AlphaCall, Happy }
+    public enum SFXEvent { Living, Attack, CallForHelp, AlphaCall, Happy, Footstep, Aggressive, Warning }
 
     [System.Serializable]
     public struct SFXGroup
@@ -30,10 +30,16 @@ public class AIBrain : NetworkBehaviour
     [Header("AI Audio")]
     [SerializeField] protected AudioSource audioSrc;
     [SerializeField] SFXGroup[] sfxGroups;
+
     [SerializeField] float minLivingSFXInterval = 7f;
     [SerializeField] float maxLivingSFXInterval = 30f;
+    [SerializeField] float footstepDelay = 0.5f;
+    [SerializeField] float footstepMinPitch = 0.9f;
+    [SerializeField] float footstepMaxPitch = 1.1f;
+
     protected Dictionary<SFXEvent, AudioSFX[]> sfxMap;
     float livingSFXTimer;
+    float footstepTimer;
 
     public string Prefix => $"[AIBrain ({gameObject.name})]";
 
@@ -77,9 +83,10 @@ public class AIBrain : NetworkBehaviour
         if (CurrentState == null) return;
         CurrentState.OnUpdateState(this);
         TickLivingSFX();
+        TickFootstep();
     }
 
-    void TickLivingSFX()
+    protected virtual void TickLivingSFX()
     {
         if (sfxMap == null) return;
 
@@ -87,7 +94,23 @@ public class AIBrain : NetworkBehaviour
         if (livingSFXTimer > 0f) return;
 
         livingSFXTimer = Random.Range(minLivingSFXInterval, maxLivingSFXInterval);
-        PlaySFX(SFXEvent.Living);
+        PlaySFX(SFXEvent.Living, 1f);
+    }
+
+    protected virtual void TickFootstep()
+    {
+        if (!IsAgentInMovement())
+        {
+            footstepTimer = 0f;
+            return;
+        }
+
+        footstepTimer -= Time.deltaTime;
+        if (footstepTimer > 0f) return;
+
+        footstepTimer = footstepDelay;
+        float pitch = Random.Range(footstepMinPitch, footstepMaxPitch);
+        PlaySFX(SFXEvent.Footstep, pitch);
     }
 
     #endregion
@@ -102,19 +125,20 @@ public class AIBrain : NetworkBehaviour
     }
 
     [Server]
-    public void PlaySFX(SFXEvent sfxEvent)
+    public virtual void PlaySFX(SFXEvent sfxEvent, float pitch)
     {
         if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clips.Length == 0) return;
         int index = Random.Range(0, clips.Length);
-        RpcPlaySFX(sfxEvent, index);
+        RpcPlaySFX(sfxEvent, index, pitch);
     }
 
     [ClientRpc]
-    void RpcPlaySFX(SFXEvent sfxEvent, int clipIndex)
+    void RpcPlaySFX(SFXEvent sfxEvent, int clipIndex, float pitch)
     {
         if (audioSrc == null) return;
         if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clipIndex >= clips.Length) return;
 
+        audioSrc.pitch = pitch;
         AudioManager.Instance.PlayOneShot(audioSrc, clips[clipIndex]);
     }
 
@@ -127,12 +151,12 @@ public class AIBrain : NetworkBehaviour
         return !Physics.Raycast(origin, dir.normalized, dir.magnitude, losBlockingLayers, QueryTriggerInteraction.Ignore);
     }
 
-    protected void OnAgentHurt(AttackSource source, AttackStat attack)
+    public virtual void OnAgentHurt(AttackSource source, AttackStat attack)
     {
 
     }
 
-    protected void OnAgentDeath(AttackSource source, AttackStat attack)
+    public virtual void OnAgentDeath(AttackSource source, AttackStat attack)
     {
 
     }
@@ -145,4 +169,11 @@ public class AIBrain : NetworkBehaviour
         !agent.isStopped && agent.hasPath && 
         agent.remainingDistance > agent.stoppingDistance && 
         agent.velocity.sqrMagnitude > 0.01f;
+
+    protected virtual void OnDrawGizmosSelected()
+    {
+        if (attackStat == null) return;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackStat.AttackRadius);
+    }
 }

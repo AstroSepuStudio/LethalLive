@@ -9,6 +9,7 @@ using UnityEditor;
 public class VortexAI : AIBrain
 {
     [Header("State Indexes")]
+    [SerializeField] int[] wanderIndexes;
     [SerializeField] int stareStateIndex = 2;
     [SerializeField] int followStateIndex = 3;
     [SerializeField] int pickUpStateIndex = 4;
@@ -19,7 +20,7 @@ public class VortexAI : AIBrain
     [SerializeField] int attackFurnitureStateIndex = 9;
     [SerializeField] int backAwayStateIndex = 10;
     [SerializeField] int stareAtPlayerNearItemStateIndex = 11;
-    [SerializeField] int[] wanderIndexes;
+    [SerializeField] int attackPlayerStateIndex = 12;
 
     [Header("Wander Cycling")]
     [SerializeField] int minWanderCycles = 1;
@@ -32,11 +33,13 @@ public class VortexAI : AIBrain
 
     [Header("Alpha")]
     [SerializeField][SyncVar(hook = nameof(UpdateScale))] int alpha = -1;
-    public float Alpha => alpha;
-    public VortexAI CurrentAlpha => followState.AlphaTarget;
-
+    bool isActingAsAlpha = false;
     bool pendingFollowerDispatch = false;
     List<VortexAI> pendingFollowers = new();
+
+    public float Alpha => alpha;
+    public bool IsActingAsAlpha => isActingAsAlpha;
+    public VortexAI CurrentAlpha => followState.AlphaTarget;
 
     [Header("Detection")]
     [SerializeField] float detectionRadius = 10f;
@@ -53,19 +56,27 @@ public class VortexAI : AIBrain
     [SerializeField] float playerNearItemDistance = 3f;
     float postDropCooldown = 0f;
 
+    public ItemBase CarriedItem { get; private set; }
+
     [Header("Home")]
     [SerializeField] float homeDistanceFraction = 0.5f;
     [SerializeField] float homeDistanceTolerance = 0.2f;
+    bool hasAlphaHomeOverride = false;
+    RoomData alphaHomeOverride = null;
 
     public RoomData HomeRoom { get; private set; }
 
-    RoomData alphaHomeOverride = null;
-    bool hasAlphaHomeOverride = false;
+    [Header("Patience")]
+    [SerializeField] float patienceDecayDistance = 4;
+    [SerializeField] float patienceDecay = 2f;
+    [SerializeField] float patienceDecayOnBackAway = 5f;
+    [SerializeField] float patienceDecayOnItemStolen = 25f;
+    float patience;
+    float maxPatience;
 
-    public ItemBase CarriedItem { get; private set; }
-
-    bool isActingAsAlpha = false;
-    public bool IsActingAsAlpha => isActingAsAlpha;
+    public enum Personality { Passive, Cautious, Neutral, Irritated, Hostile }
+    public Personality CurrentPersonality { get; private set; }
+    public float Patience => patience;
 
     AIS_StareAtVortex stareState;
     AIS_FollowAlpha followState;
@@ -76,53 +87,82 @@ public class VortexAI : AIBrain
     AIS_AttackFurniture attackFurnitureState;
     AIS_BackAwayFromPlayer backAwayState;
     AIS_StareAtPlayerNearItem stareAtPlayerNearItemState;
+    AIS_AttackPlayer attackPlayerState;
+
+    public float GetAlphaPitch() => (2f - GetAlphaMultiplier());
+
+    public override void PlaySFX(SFXEvent sfxEvent, float pitch)
+    {
+        pitch *= GetAlphaPitch();
+        base.PlaySFX(sfxEvent, pitch);
+    }
 
     #region Lifecycle
 
     public override void OnStartServer()
     {
         base.OnStartServer();
+
         alpha = Random.Range(0, 100);
+        AssignPersonality();
+
+        float am = GetAlphaMultiplier();
+        entityStats.OverrideMaxHP(entityStats.maxHP * am, true);
+
+        attackStat = new(
+            Mathf.Clamp(attackStat.AttackRadius * am, 1.1f, 2f),
+            attackStat.AttackKnock,
+            attackStat.AttackForce * am,
+            attackStat.AttackDamage * am,
+            attackStat.AttackCooldown);
     }
 
     protected override void Start()
     {
         base.Start();
 
+        SetStates();
+
+        if (isServer)
+            AssignHomeRoom();
+    }
+
+    void SetStates()
+    {
         targetWanCycles = Random.Range(minWanderCycles, maxWanderCycles);
 
         if (states != null)
         {
-            if (stareStateIndex < states.Length) 
+            if (stareStateIndex < states.Length)
                 stareState = states[stareStateIndex] as AIS_StareAtVortex;
 
-            if (followStateIndex < states.Length) 
+            if (followStateIndex < states.Length)
                 followState = states[followStateIndex] as AIS_FollowAlpha;
 
-            if (pickUpStateIndex < states.Length) 
+            if (pickUpStateIndex < states.Length)
                 pickUpState = states[pickUpStateIndex] as AIS_PickUpItem;
 
-            if (dropAtHomeStateIndex < states.Length) 
+            if (dropAtHomeStateIndex < states.Length)
                 dropAtHomeState = states[dropAtHomeStateIndex] as AIS_DropItemAtHome;
 
-            if (searchStateIndex < states.Length) 
+            if (searchStateIndex < states.Length)
                 searchState = states[searchStateIndex] as AIS_SearchForItems;
 
-            if (attackFurnitureStateIndex < states.Length) 
+            if (attackFurnitureStateIndex < states.Length)
                 attackFurnitureState = states[attackFurnitureStateIndex] as AIS_AttackFurniture;
 
-            if (followPlayerStateIndex < states.Length) 
+            if (followPlayerStateIndex < states.Length)
                 followPlayerState = states[followPlayerStateIndex] as AIS_FollowPlayer;
 
-            if (backAwayStateIndex < states.Length) 
+            if (backAwayStateIndex < states.Length)
                 backAwayState = states[backAwayStateIndex] as AIS_BackAwayFromPlayer;
 
-            if (stareAtPlayerNearItemStateIndex < states.Length) 
+            if (stareAtPlayerNearItemStateIndex < states.Length)
                 stareAtPlayerNearItemState = states[stareAtPlayerNearItemStateIndex] as AIS_StareAtPlayerNearItem;
-        }
 
-        if (isServer)
-            AssignHomeRoom();
+            if (attackPlayerStateIndex < states.Length)
+                attackPlayerState = states[attackPlayerStateIndex] as AIS_AttackPlayer;
+        }
     }
 
     void UpdateScale(int oldValue, int newValue)
@@ -131,10 +171,33 @@ public class VortexAI : AIBrain
         transform.localScale = new Vector3(scale, scale, scale);
     }
 
+    void AssignPersonality()
+    {
+        if (alpha < 15) CurrentPersonality = Personality.Passive;
+        else if (alpha < 35) CurrentPersonality = Personality.Cautious;
+        else if (alpha < 60) CurrentPersonality = Personality.Neutral;
+        else if (alpha < 80) CurrentPersonality = Personality.Irritated;
+        else CurrentPersonality = Personality.Hostile;
+
+        maxPatience = CurrentPersonality switch
+        {
+            Personality.Passive => Random.Range(120f, 180f),
+            Personality.Cautious => Random.Range(70f, 120f),
+            Personality.Neutral => Random.Range(35f, 70f),
+            Personality.Irritated => Random.Range(12f, 35f),
+            Personality.Hostile => Random.Range(2f, 12f),
+            _ => 60f
+        };
+
+        patience = maxPatience;
+    }
+
+
     protected override void Update()
     {
         if (!isServer) return;
         base.Update();
+        TickPatience();
 
         if (postDropCooldown > 0f) postDropCooldown -= Time.deltaTime;
 
@@ -143,6 +206,25 @@ public class VortexAI : AIBrain
         detectionTimer = detectionInterval;
 
         RunDetection();
+    }
+
+    void TickPatience()
+    {
+        if (patience <= 0f) return;
+        if (followPlayerState != null && CurrentState == followPlayerState) return;
+
+        PlayerData closest = GetClosestSeenPlayer();
+        if (closest == null)
+        {
+            closest = GetClosestPlayer();
+            if (closest == null) return;
+        }
+
+        float dist = Vector3.Distance(transform.position, closest.transform.position);
+        float proximity = 1f - Mathf.Clamp01(dist / patienceDecayDistance);
+        patience -= patienceDecay * proximity * Time.deltaTime;
+
+        if (patience <= 0f) TriggerAttackPlayer();
     }
 
     #endregion
@@ -252,7 +334,7 @@ public class VortexAI : AIBrain
         }
 
         // Priority order: back away > vortex stare > item pickup > player follow
-        if (tooClosePlayer != null && IsInWanderState())
+        if (tooClosePlayer != null)
         {
             TriggerBackAway();
             return;
@@ -292,8 +374,9 @@ public class VortexAI : AIBrain
 
     bool IsInAttackState()
     {
-        return attackFurnitureState != null &&
-               CurrentState == states[attackFurnitureStateIndex];
+        if (attackFurnitureState != null && CurrentState == states[attackFurnitureStateIndex]) return true;
+        if (attackPlayerState != null && CurrentState == states[attackPlayerStateIndex]) return true;
+        return false;
     }
 
     #endregion
@@ -312,7 +395,30 @@ public class VortexAI : AIBrain
         return false;
     }
 
-    public PlayerData GetClosestPlayer(Vector3 origin)
+    PlayerData GetClosestPlayer()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, patienceDecayDistance);
+        PlayerData closest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (var hit in hits)
+        {
+            if (!hit.CompareTag("Player")) continue;
+            if (!hit.TryGetComponent<PlayerData>(out var p)) continue;
+            if (!HasLineOfSight(p.transform.position)) continue;
+            float d = Vector3.Distance(transform.position, p.transform.position);
+            if (d < closestDist) { closestDist = d; closest = p; }
+        }
+
+        if (closest != null) 
+        { 
+            seenPlayers.Add(closest); 
+            watchedPlayers.Add(closest);
+        }
+        return closest;
+    }
+
+    public PlayerData GetClosestSeenPlayer()
     {
         PlayerData closest = null;
         float closestDist = float.MaxValue;
@@ -320,7 +426,7 @@ public class VortexAI : AIBrain
         foreach (var p in seenPlayers)
         {
             if (p == null) continue;
-            float d = Vector3.Distance(origin, p.transform.position);
+            float d = Vector3.Distance(transform.position, p.transform.position);
             if (d < closestDist) { closestDist = d; closest = p; }
         }
         return closest;
@@ -336,6 +442,12 @@ public class VortexAI : AIBrain
             if (p != null) return p;
         }
         return null;
+    }
+
+    public void DrainPatience(float amount)
+    {
+        patience -= amount;
+        if (patience <= 0f) TriggerAttackPlayer();
     }
 
     void TriggerStare(VortexAI target)
@@ -381,7 +493,9 @@ public class VortexAI : AIBrain
     void TriggerBackAway()
     {
         if (backAwayState == null) { ResumeWander(); return; }
-        SetState(states[backAwayStateIndex]);
+        DrainPatienceOnBackAway();
+        if (patience > 0f)
+            SetState(states[backAwayStateIndex]);
     }
 
     void TriggerStareAtPlayerNearItem(ItemBase item, PlayerData blocker)
@@ -392,14 +506,31 @@ public class VortexAI : AIBrain
         SetState(states[stareAtPlayerNearItemStateIndex]);
     }
 
+    void TriggerAttackPlayer()
+    {
+        patience = 0f;
+        if (attackPlayerState == null) { ResumeWander(); return; }
+
+        PlayerData target = GetClosestSeenPlayer();
+        if (target == null) { ResumeWander(); return; }
+
+        ItemBase droppedItem = CarriedItem;
+        if (CarriedItem != null) DropCarriedItem();
+
+        attackPlayerState.Target = target;
+        attackPlayerState.ItemToRecoverAfter = droppedItem;
+        SetState(states[attackPlayerStateIndex]);
+    }
+
     #endregion
 
     #region Item Carrying
 
     public void CarryItem(ItemBase item)
     {
-        PlaySFX(SFXEvent.Happy);
+        PlaySFX(SFXEvent.Happy, 1);
 
+        if (stareAtPlayerNearItemState != null) stareAtPlayerNearItemState.WatchedItem = null;
         CarriedItem = item;
         item.OnPickUp();
         item.transform.SetParent(transform);
@@ -444,6 +575,11 @@ public class VortexAI : AIBrain
     }
 
     public void BeginSearch() => TriggerSearch();
+
+    float GetAlphaMultiplier()
+    {
+        return Mathf.Lerp(0.5f, 1.5f, (float)alpha / 100f);
+    }
 
     #endregion
 
@@ -572,12 +708,34 @@ public class VortexAI : AIBrain
     }
     public void OnItemStareGaveUp() => ResumeWander();
 
+    public void OnAttackPlayerLost() => ResumeWander();
+
+    public void OnAttackPlayerCalmedDown()
+    {
+        patience = maxPatience * 0.3f;
+
+        ItemBase itemToRecover = attackPlayerState != null ? attackPlayerState.ItemToRecoverAfter : null;
+        if (itemToRecover != null && itemToRecover.ItemData.pickable && !itemToRecover.HasOwner)
+        {
+            attackPlayerState.ItemToRecoverAfter = null;
+            TriggerPickUp(itemToRecover);
+            return;
+        }
+
+        ResumeWander();
+    }
+
+    public void DrainPatienceOnItemStolen() => DrainPatience(patienceDecayOnItemStolen);
+    public void DrainPatienceOnBackAway() => DrainPatience(patienceDecayOnBackAway);
+
     #endregion
 
     #region Gizmos
 #if UNITY_EDITOR
-    void OnDrawGizmosSelected()
+    protected override void OnDrawGizmosSelected()
     {
+        base.OnDrawGizmosSelected();
+
         Handles.color = Color.yellow;
         Handles.DrawWireDisc(transform.position, Vector3.up, detectionRadius);
 
@@ -633,6 +791,11 @@ public class VortexAI : AIBrain
             style.fontSize = 11;
             Handles.Label(labelPos + Vector3.up * 1.2f, "ALPHA", style);
         }
+
+        style.normal.textColor = Color.Lerp(Color.red, Color.green, patience / maxPatience);
+        style.fontSize = 10;
+        Handles.Label(labelPos + Vector3.up * 1.6f,
+            $"{CurrentPersonality} [{patience:F0}/{maxPatience:F0}]", style);
     }
 #endif
     #endregion

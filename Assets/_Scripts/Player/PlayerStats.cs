@@ -13,7 +13,6 @@ public class PlayerStats : EntityStats
 
     [SyncVar] public float maxStamina = 100f;
     [SyncVar(hook = nameof(OnStaminaChanged))] public float currentStamina;
-    [SyncVar] public bool dead = false;
 
     public UnityEvent OnPlayerKnocked;
 
@@ -28,6 +27,7 @@ public class PlayerStats : EntityStats
         currentStamina = maxStamina;
         currentKnock = 0f;
         dead = false;
+        knocked = false;
     }
 
     protected override void Update()
@@ -38,7 +38,10 @@ public class PlayerStats : EntityStats
         TickKnockRecovery();
 
         if (currentKnock <= ragdollRecoveryValue && pData.Skin_Data.Ragdoll_Manager.IsKnocked)
+        {
             pData.Skin_Data.Ragdoll_Manager.DisableRagdoll();
+            knocked = false;
+        }
     }
 
     #endregion
@@ -151,6 +154,8 @@ public class PlayerStats : EntityStats
     protected override void HandleKnocked(Vector3 momentum)
     {
         Debug.Log($"[{pData.PlayerName}] Player knocked");
+        knocked = true;
+        pData.PlayerInventory.DropEverything();
         pData.Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);
         OnPlayerKnocked?.Invoke();
     }

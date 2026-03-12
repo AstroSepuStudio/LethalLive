@@ -23,6 +23,15 @@ public class AttackStat
         AttackCooldown = 0;
     }
 
+    public AttackStat(float attackRadius, float attackKnock, float attackForce, float attackDamage, float attackCooldown)
+    {
+        AttackRadius = attackRadius;
+        AttackKnock = attackKnock;
+        AttackForce = attackForce;
+        AttackDamage = attackDamage;
+        AttackCooldown = attackCooldown;
+    }
+
     public AttackStat(AttackStat stat, float attackDamage)
     {
         AttackRadius = stat.AttackRadius;

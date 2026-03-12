@@ -26,7 +26,7 @@ public class AIS_BackAwayFromPlayer : AIState
         VortexAI vortex = brain as VortexAI;
         if (vortex == null) { OnSafe?.Invoke(); return; }
 
-        PlayerData closest = vortex.GetClosestPlayer(brain.transform.position);
+        PlayerData closest = vortex.GetClosestSeenPlayer();
 
         if (closest == null) { OnSafe?.Invoke(); return; }
 
@@ -38,7 +38,6 @@ public class AIS_BackAwayFromPlayer : AIState
             return;
         }
 
-        // Face the player
         Vector3 lookDir = (closest.transform.position - brain.transform.position).normalized;
         lookDir.y = 0f;
         if (lookDir != Vector3.zero)

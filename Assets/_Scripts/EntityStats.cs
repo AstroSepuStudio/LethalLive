@@ -38,6 +38,9 @@ public class EntityStats : NetworkBehaviour
     [SyncVar(hook = nameof(OnKnockChanged))]
     public float currentKnock;
 
+    [SyncVar] public bool dead;
+    [SyncVar] public bool knocked;
+
     public UnityEvent<AttackSource, AttackStat> OnDeath;
     public UnityEvent<AttackSource, AttackStat> OnTakeDamage;
 
@@ -96,6 +99,14 @@ public class EntityStats : NetworkBehaviour
     #region HP
 
     [Server]
+    public virtual void OverrideMaxHP(float maxHP, bool restore)
+    {
+        this.maxHP = maxHP;
+        if (restore)
+            currentHP = maxHP;
+    }
+
+    [Server]
     public virtual void ReceiveAttack(AttackSource source, AttackStat attack)
     {
         PlaySFX(SFXEvent.TakeDamage);
@@ -118,6 +129,7 @@ public class EntityStats : NetworkBehaviour
     [Server]
     protected virtual void HandleDeath(AttackSource source, AttackStat attack)
     {
+        dead = true;
         OnDeath?.Invoke(source, attack);
         PlaySFX(SFXEvent.Died);
     }
@@ -156,6 +168,7 @@ public class EntityStats : NetworkBehaviour
     [Server]
     protected virtual void HandleKnocked(Vector3 momentum)
     {
+        knocked = true;
         PlaySFX(SFXEvent.Knocked);
     }
 
