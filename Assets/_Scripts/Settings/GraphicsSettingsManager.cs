@@ -20,7 +20,7 @@ public class GraphicsSettingsManager : MonoBehaviour
     {
         public int width;
         public int height;
-        public int refreshRate;
+        public RefreshRate refreshRateRatio;
     }
     #endregion
 
@@ -56,7 +56,6 @@ public class GraphicsSettingsManager : MonoBehaviour
     {
         availableResolutions = new List<ResolutionOption>();
         resolutionsDropdown.ClearOptions();
-
         var dropdownOptions = new List<string>();
         var seen = new HashSet<string>();
 
@@ -72,8 +71,10 @@ public class GraphicsSettingsManager : MonoBehaviour
             {
                 width = res.width,
                 height = res.height,
-                refreshRate = refreshRate
+                refreshRateRatio = res.refreshRateRatio
             });
+
+            dropdownOptions.Add($"{res.width} x {res.height} @ {refreshRate}Hz");
         }
 
         if (availableResolutions.Count == 0)
@@ -82,8 +83,9 @@ public class GraphicsSettingsManager : MonoBehaviour
             {
                 width = Screen.currentResolution.width,
                 height = Screen.currentResolution.height,
-                refreshRate = Screen.currentResolution.refreshRate
+                refreshRateRatio = Screen.currentResolution.refreshRateRatio
             });
+            dropdownOptions.Add($"{Screen.currentResolution.width} x {Screen.currentResolution.height} @ {Mathf.RoundToInt((float)Screen.currentResolution.refreshRateRatio.value)}Hz");
         }
 
         availableResolutions.Sort((a, b) =>
@@ -94,11 +96,8 @@ public class GraphicsSettingsManager : MonoBehaviour
             int h = b.height.CompareTo(a.height);
             if (h != 0) return h;
 
-            return b.refreshRate.CompareTo(a.refreshRate);
+            return b.refreshRateRatio.value.CompareTo(a.refreshRateRatio.value);
         });
-
-        foreach (var res in availableResolutions)
-            dropdownOptions.Add($"{res.width} x {res.height} @ {res.refreshRate}Hz");
 
         resolutionsDropdown.AddOptions(dropdownOptions);
         resolutionsDropdown.value = GetDefaultResolutionIndex();
@@ -163,13 +162,7 @@ public class GraphicsSettingsManager : MonoBehaviour
     void ApplyResolution()
     {
         var res = availableResolutions[currentResolutionIndex];
-
-        Screen.SetResolution(
-            res.width,
-            res.height,
-            ConvertScreenMode(currentScreenMode),
-            res.refreshRate
-        );
+        Screen.SetResolution(res.width, res.height, ConvertScreenMode(currentScreenMode), res.refreshRateRatio);
     }
 
     void ApplyVSyncAndFPS()

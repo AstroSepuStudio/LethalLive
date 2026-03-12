@@ -1,11 +1,22 @@
 using Mirror;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Audio;
 
 [RequireComponent(typeof(NetworkIdentity))]
 [RequireComponent(typeof(NavMeshAgent))]
 public class AIBrain : NetworkBehaviour
 {
+    public enum SFXEvent { Living, Attack, CallForHelp, AlphaCall, Happy }
+
+    [System.Serializable]
+    public struct SFXGroup
+    {
+        public SFXEvent Event;
+        public AudioSFX[] Clips;
+    }
+
     [Header("AI Core")]
     [SerializeField] protected Animator animator;
     [SerializeField] protected NavMeshAgent agent;
@@ -18,9 +29,10 @@ public class AIBrain : NetworkBehaviour
 
     [Header("AI Audio")]
     [SerializeField] protected AudioSource audioSrc;
-    [SerializeField] protected AudioSFX[] LivingSFX;
+    [SerializeField] SFXGroup[] sfxGroups;
     [SerializeField] float minLivingSFXInterval = 7f;
     [SerializeField] float maxLivingSFXInterval = 30f;
+    protected Dictionary<SFXEvent, AudioSFX[]> sfxMap;
     float livingSFXTimer;
 
     public string Prefix => $"[AIBrain ({gameObject.name})]";
@@ -38,6 +50,7 @@ public class AIBrain : NetworkBehaviour
     {
         if (animator == null) animator = GetComponent<Animator>();
         if (agent == null) agent = GetComponent<NavMeshAgent>();
+        BuildSFXMap();
     }
 
     protected virtual void Start()
@@ -68,14 +81,41 @@ public class AIBrain : NetworkBehaviour
 
     void TickLivingSFX()
     {
-        if (LivingSFX == null || LivingSFX.Length == 0) return;
+        if (sfxMap == null) return;
 
         livingSFXTimer -= Time.deltaTime;
         if (livingSFXTimer > 0f) return;
 
         livingSFXTimer = Random.Range(minLivingSFXInterval, maxLivingSFXInterval);
-        AudioSFX clip = LivingSFX[Random.Range(0, LivingSFX.Length)];
-        AudioManager.Instance.PlayOneShot(audioSrc, clip);
+        PlaySFX(SFXEvent.Living);
+    }
+
+    #endregion
+
+    #region SFX
+
+    void BuildSFXMap()
+    {
+        sfxMap = new Dictionary<SFXEvent, AudioSFX[]>();
+        foreach (var group in sfxGroups)
+            sfxMap[group.Event] = group.Clips;
+    }
+
+    [Server]
+    public void PlaySFX(SFXEvent sfxEvent)
+    {
+        if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clips.Length == 0) return;
+        int index = Random.Range(0, clips.Length);
+        RpcPlaySFX(sfxEvent, index);
+    }
+
+    [ClientRpc]
+    void RpcPlaySFX(SFXEvent sfxEvent, int clipIndex)
+    {
+        if (audioSrc == null) return;
+        if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clipIndex >= clips.Length) return;
+
+        AudioManager.Instance.PlayOneShot(audioSrc, clips[clipIndex]);
     }
 
     #endregion

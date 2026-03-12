@@ -13,7 +13,7 @@ namespace SimpleVoiceChat.Mirror_Example_3d {
         [Header("Refs")]
         [SerializeField] private Speaker speaker;
         [SerializeField] private GameObject speakingIcon;
-        [SerializeField] private Camera camera;
+        [SerializeField] private Camera camera_;
 
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed;
@@ -25,7 +25,7 @@ namespace SimpleVoiceChat.Mirror_Example_3d {
             base.OnStartLocalPlayer();
             localPlayer = this;
             Recorder.OnSendDataToNetwork += Cmd_SendVoiceToServer;
-            camera.gameObject.SetActive(true);
+            camera_.gameObject.SetActive(true);
         }
 
         void Update() {

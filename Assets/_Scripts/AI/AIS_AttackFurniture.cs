@@ -55,6 +55,8 @@ public class AIS_AttackFurniture : AIState
         if (!brain.AttackStat_.OnCooldown)
         {
             Debug.Log($"{brain.Prefix} is attacking furniture!");
+            brain.PlaySFX(AIBrain.SFXEvent.Attack);
+
             AttackSource source = AttackSource.From(brain.EntityStats_);
             Target.ApplyDamage(source, brain.AttackStat_);
             brain.StartCoroutine(brain.AttackStat_.CountdownCooldown());

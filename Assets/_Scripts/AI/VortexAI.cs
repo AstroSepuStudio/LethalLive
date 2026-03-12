@@ -53,7 +53,6 @@ public class VortexAI : AIBrain
     [SerializeField] float playerNearItemDistance = 3f;
     float postDropCooldown = 0f;
 
-
     [Header("Home")]
     [SerializeField] float homeDistanceFraction = 0.5f;
     [SerializeField] float homeDistanceTolerance = 0.2f;
@@ -399,6 +398,8 @@ public class VortexAI : AIBrain
 
     public void CarryItem(ItemBase item)
     {
+        PlaySFX(SFXEvent.Happy);
+
         CarriedItem = item;
         item.OnPickUp();
         item.transform.SetParent(transform);

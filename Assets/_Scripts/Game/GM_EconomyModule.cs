@@ -14,7 +14,7 @@ public class GM_EconomyModule : NetworkBehaviour
     [SerializeField] float exponentialRate = 1.15f;
     [SerializeField] float exponentialFactor = 0.3f;
 
-    public SyncDictionary<PlayerTeam, float> teamsBalance = new()
+    public readonly SyncDictionary<PlayerTeam, float> teamsBalance = new()
     {
         { PlayerTeam.White, 0 }, { PlayerTeam.Red, 0 }, { PlayerTeam.Blue, 0 },
         { PlayerTeam.Yellow, 0 }, { PlayerTeam.Green, 0 }, { PlayerTeam.Pink, 0 }

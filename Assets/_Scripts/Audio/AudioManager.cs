@@ -1,5 +1,6 @@
 using UnityEngine;
 using LethalLive;
+using System.Collections;
 
 public class AudioManager : MonoBehaviour
 {
@@ -77,6 +78,15 @@ public class AudioManager : MonoBehaviour
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
 
         AudioSource.PlayClipAtPoint(sfx.clip, position, finalVolume);
+    }
+
+    public void PlayOneShotAndDestroy(AudioSource src, AudioSFX sfx)
+    {
+        float typeVolume = GetTypeVolume(sfx.audioType);
+        float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
+
+        src.PlayOneShot(sfx.clip, finalVolume);
+        Destroy(src.gameObject, sfx.clip.length + 0.1f);
     }
 
     public void PlayOneShot(AudioSource source, AudioSFX sfx)

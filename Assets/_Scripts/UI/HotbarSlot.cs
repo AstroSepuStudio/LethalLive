@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,7 @@ public class HotbarSlot : MonoBehaviour
     [SerializeField] Sprite selectedSlot;
     [SerializeField] Sprite deselectedSlot;
     [SerializeField] Image iconImg;
+    [SerializeField] TextMeshProUGUI valueTxt;
 
     ItemBase slotItem;
 
@@ -22,6 +24,8 @@ public class HotbarSlot : MonoBehaviour
         slotItem = item;
         iconImg.sprite = slotItem.ItemData.icon;
         iconImg.enabled = iconImg.sprite != null;
+        valueTxt.enabled = true;
+        valueTxt.SetText($"${item.ItemValue}");
     }
 
     public void RemoveItem()
@@ -29,6 +33,7 @@ public class HotbarSlot : MonoBehaviour
         slotItem = null;
         iconImg.enabled = false;
         iconImg.sprite = null;
+        valueTxt.enabled = false;
         Debug.Log("[HotbarSlot] Removed item from slot.", gameObject);
     }
 

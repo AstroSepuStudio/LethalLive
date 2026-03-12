@@ -707,10 +707,18 @@ MonoBehaviour:
     <AttackDamage>k__BackingField: 10
     <AttackCooldown>k__BackingField: 1
   audioSrc: {fileID: 1536679428694314739}
-  LivingSFX:
-  - {fileID: 11400000, guid: 24ccbe882f96858438769acb1eaa0ce6, type: 2}
-  - {fileID: 11400000, guid: 2dc033aa4907e1b4ab7c2ac5b957f0b7, type: 2}
-  - {fileID: 11400000, guid: 3d2223400dafa1e4aafbd7d51ce4be24, type: 2}
+  sfxGroups:
+  - Event: 0
+    Clips:
+    - {fileID: 11400000, guid: 24ccbe882f96858438769acb1eaa0ce6, type: 2}
+    - {fileID: 11400000, guid: 2dc033aa4907e1b4ab7c2ac5b957f0b7, type: 2}
+    - {fileID: 11400000, guid: 3d2223400dafa1e4aafbd7d51ce4be24, type: 2}
+  - Event: 1
+    Clips:
+    - {fileID: 11400000, guid: 3d1d899d94dd19040a51dd26f7aa5b00, type: 2}
+  - Event: 4
+    Clips:
+    - {fileID: 11400000, guid: 7fda72791951dcd4ea709da4089ae774, type: 2}
   minLivingSFXInterval: 7
   maxLivingSFXInterval: 30
   <CurrentState>k__BackingField: {fileID: 0}

@@ -15,7 +15,6 @@ public class MainMenuManager : UIManager
     [SerializeField] Transform initialPosition;
     [SerializeField] Transform resetPosition;
     [SerializeField] float menuCamSpd = 4f;
-    [SerializeField] float distanceToReset = 1f;
 
     Coroutine menuCamCor;
 
