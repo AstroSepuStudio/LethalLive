@@ -1,6 +1,7 @@
 using UnityEngine;
 using LethalLive;
 using System.Collections;
+using UnityEngine.UIElements;
 
 public class AudioManager : MonoBehaviour
 {
@@ -64,6 +65,14 @@ public class AudioManager : MonoBehaviour
         };
     }
 
+    private void BroadcastToHearing(Vector3 position, GameObject source, AudioSFX sfx, SoundLoudness category)
+    {
+        if (HearingEventBroadcaster.Instance == null) return;
+
+        var soundEvent = new AudioSoundEvent(position, source, sfx, category);
+        HearingEventBroadcaster.Instance.Broadcast(soundEvent);
+    }
+
     public void PlayOneShot(AudioSFX sfx)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
@@ -72,37 +81,49 @@ public class AudioManager : MonoBehaviour
         sfxSource.PlayOneShot(sfx.clip, finalVolume);
     }
 
-    public void PlayOneShotAndDestroy(Vector3 position, AudioSFX sfx)
+    public void PlayOneShotAndDestroy(Vector3 position, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
 
         AudioSource.PlayClipAtPoint(sfx.clip, position, finalVolume);
+
+        GameObject go = goSrc ? goSrc : null;
+        BroadcastToHearing(position, go, sfx, category);
     }
 
-    public void PlayOneShotAndDestroy(AudioSource src, AudioSFX sfx)
+    public void PlayOneShotAndDestroy(AudioSource src, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
 
         src.PlayOneShot(sfx.clip, finalVolume);
         Destroy(src.gameObject, sfx.clip.length + 0.1f);
+
+        GameObject go = goSrc ? goSrc : src.gameObject;
+        BroadcastToHearing(src.transform.position, go, sfx, category);
     }
 
-    public void PlayOneShot(AudioSource source, AudioSFX sfx)
+    public void PlayOneShot(AudioSource src, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
 
-        source.PlayOneShot(sfx.clip, finalVolume);
+        src.PlayOneShot(sfx.clip, finalVolume);
+
+        GameObject go = goSrc ? goSrc : src.gameObject;
+        BroadcastToHearing(src.transform.position, go, sfx, category);
     }
 
-    public void PlayOneShot(AudioSource source, AudioSFX sfx, float multiplier)
+    public void PlayOneShot(AudioSource src, AudioSFX sfx, float multiplier, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume * multiplier;
 
-        source.PlayOneShot(sfx.clip, finalVolume);
+        src.PlayOneShot(sfx.clip, finalVolume);
+
+        GameObject go = goSrc ? goSrc : src.gameObject;
+        BroadcastToHearing(src.transform.position, go, sfx, category);
     }
 
     public void PlayMusic(AudioSFX song)

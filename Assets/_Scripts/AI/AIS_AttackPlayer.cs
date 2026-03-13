@@ -161,8 +161,8 @@ public class AIS_AttackPlayer : AIState
                     float movedDist = Vector3.Distance(Target.transform.position, targetPosAtSwing);
                     if (movedDist <= dodgeDistance)
                     {
-                        AttackSource source = AttackSource.From(brain.EntityStats_);
-                        Target.Player_Stats.ReceiveAttack(source, brain.AttackStat_);
+                        AttackEvent source = AttackEvent.From(brain.EntityStats_, Target.Player_Stats, brain.AttackStat_);
+                        Target.Player_Stats.ReceiveAttack(source);
                     }
                 }
             }

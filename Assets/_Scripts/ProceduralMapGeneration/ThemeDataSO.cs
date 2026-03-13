@@ -33,6 +33,7 @@ public class ThemeDataSO : ScriptableObject
     public ItemSO[] spawnableItems;
     public FurnitureDataSO[] spawnableFurniture;
     public EntitySpawn[] entitySpawns;
+    public int maxEntities;
 
     [Header("Ambient")]
     public AudioSFX loopingMusic;

@@ -1,6 +1,7 @@
 using Mirror;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EntitySpawnerManager : NetworkBehaviour
@@ -72,6 +73,7 @@ public class EntitySpawnerManager : NetworkBehaviour
     private void OnDungeonOpens()
     {
         rng = DungeonGenerator.Instance.RNG;
+        maxEntities = DungeonGenerator.Instance.Theme.maxEntities;
         enemySpawningCoroutine = StartCoroutine(EnemySpawning());
     }
 
@@ -165,6 +167,7 @@ public class EntitySpawnerManager : NetworkBehaviour
                 NetworkServer.Spawn(entityObj);
 
                 EntityStats stats = entityObj.GetComponentInChildren<EntityStats>();
+                stats.OnDeath.AddListener(OnEntityDeath);
                 aliveEntities.Add(stats);
                 return true;
             }
@@ -174,10 +177,13 @@ public class EntitySpawnerManager : NetworkBehaviour
     }
 
     [Server]
-    void OnEntityDeath(EntityStats stats)
+    void OnEntityDeath(AttackEvent source)
     {
-        if (aliveEntities.Contains(stats))
-            aliveEntities.Remove(stats);
-        deadEntities.Add(stats);
+        Debug.Log("On Entity Death", source.TargetStats);
+        if (!aliveEntities.Contains(source.TargetStats)) return;
+        Debug.Log("Entity was spawned by the manager", source.TargetStats);
+        source.TargetStats.OnDeath.RemoveListener(OnEntityDeath);
+        aliveEntities.Remove(source.TargetStats);
+        deadEntities.Add(source.TargetStats);
     }
 }

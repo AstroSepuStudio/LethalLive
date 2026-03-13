@@ -8,7 +8,7 @@ using System.Collections;
 using UnityEditor;
 #endif
 
-public class VortexAI : AIBrain
+public class VortexAI : AIBrain, IHearingListener
 {
     [SerializeField] Transform pickUpPos;
     [SerializeField] ParticleSystem deathParticles;
@@ -107,8 +107,8 @@ public class VortexAI : AIBrain
 
     public void PlayAlphaCall(float pitch)
     {
-        if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var clips) || clips.Length == 0) return;
-        int index = Random.Range(0, clips.Length);
+        if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var group) || group.Clips.Length == 0) return;
+        int index = Random.Range(0, group.Clips.Length);
         RpcPlaySFX(index, pitch);
     }
 
@@ -116,10 +116,10 @@ public class VortexAI : AIBrain
     void RpcPlaySFX(int clipIndex, float pitch)
     {
         if (alphaCallSrc == null) return;
-        if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var clips) || clipIndex >= clips.Length) return;
+        if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var group) || group.Clips.Length == 0) return;
 
         audioSrc.pitch = pitch;
-        AudioManager.Instance.PlayOneShot(alphaCallSrc, clips[clipIndex]);
+        AudioManager.Instance.PlayOneShot(alphaCallSrc, group.Clips[clipIndex], gameObject, group.Loudness);
     }
 
     #region Lifecycle
@@ -147,9 +147,15 @@ public class VortexAI : AIBrain
         base.Start();
 
         SetStates();
+        HearingEventBroadcaster.Instance.AddListener(this);
 
         if (isServer)
             AssignHomeRoom();
+    }
+
+    public void OnSoundHeard(AudioSoundEvent soundEvent)
+    {
+
     }
 
     void SetStates()
@@ -861,7 +867,7 @@ public class VortexAI : AIBrain
     public void DrainPatienceOnItemStolen() => DrainPatience(patienceDecayOnItemStolen);
     public void DrainPatienceOnBackAway() => DrainPatience(patienceDecayOnBackAway);
 
-    public override void OnAgentHurt(AttackSource source, AttackStat attack)
+    public override void OnAgentHurt(AttackEvent source)
     {
         if (isActingAsAlpha && packMembers.Count > 0) OnAlphaHurt();
 
@@ -903,7 +909,7 @@ public class VortexAI : AIBrain
         }
     }
 
-    public override void OnAgentDeath(AttackSource source, AttackStat attack)
+    public override void OnAgentDeath(AttackEvent source)
     {
         DropCarriedItem();
         isDying = true;

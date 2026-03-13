@@ -526,9 +526,11 @@ public class PlayerMovement : NetworkBehaviour
 
     void FootstepUpdate()
     {
-        if (!_isGrounded) return;
-
-        if (movementInput.magnitude < 0.1f || IsCrouching) return;
+        if (!_isGrounded || movementInput.magnitude < 0.1f || IsCrouching)
+        {
+            timer = _isSprinting ? sprintDelay : walkDelay;
+            return;
+        }
 
         timer -= Time.deltaTime;
         if (timer > 0f) return;
@@ -547,9 +549,21 @@ public class PlayerMovement : NetworkBehaviour
     [ClientRpc]
     void RPC_PlayFootstep(int srcindex, int sfxindex)
     {
-        float volMult = srcindex == 1? walkVolMult : sprintVolMult;
+        float volMult;
+        SoundLoudness loudness;
 
-        AudioManager.Instance.PlayOneShot(GetAudioSourceByIndex(srcindex), footsteps[sfxindex], volMult);
+        if (srcindex == 1)
+        {
+            volMult = walkVolMult;
+            loudness = SoundLoudness.Average;
+        }
+        else
+        {
+            volMult = sprintVolMult;
+            loudness = SoundLoudness.Loud;
+        }
+
+        AudioManager.Instance.PlayOneShot(GetAudioSourceByIndex(srcindex), footsteps[sfxindex], volMult, gameObject, loudness);
     }
 
     AudioSource GetAudioSourceByIndex(int index)

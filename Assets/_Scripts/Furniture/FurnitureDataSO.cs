@@ -32,7 +32,7 @@ public class FurnitureDataSO : ScriptableObject, IHaveTier
     {
         public ItemDrop Item_Drop;
         public float dropThreshold; // Ex: 50% (currentHP)
-        public bool dropped;
+        public bool triggered;
     }
 
     [Serializable]

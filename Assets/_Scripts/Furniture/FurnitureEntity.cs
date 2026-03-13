@@ -26,14 +26,23 @@ public class FurnitureEntity : EntityStats
     }
 
     [Server]
-    public override void ApplyDamage(AttackSource source, AttackStat attack)
+    public override void ApplyDamage(AttackEvent source)
     {
-        currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
-        CheckDropThresholds();
+        currentHP = Mathf.Clamp(currentHP - source.AttackStat_.AttackDamage, 0f, maxHP);
 
-        if (currentHP <= 0f) HandleDeath(source, attack);
-        else if (attack.AttackDamage >= 10f) PlaySFX(SFXEvent.StrongHit);
-        else PlaySFX(SFXEvent.TakeDamage);
+        if (currentHP <= 0f)
+        {
+            CheckDropThresholds(false);
+            HandleDeath(source);
+            return;
+        }
+
+        CheckDropThresholds(true);
+
+        if (source.AttackStat_.AttackDamage >= 10f) 
+            PlaySFX(SFXEvent.StrongHit);
+        else 
+            PlaySFX(SFXEvent.TakeDamage);
     }
 
     [Server]
@@ -44,13 +53,13 @@ public class FurnitureEntity : EntityStats
     }
 
     [Server]
-    protected override void HandleDeath(AttackSource source, AttackStat attack)
+    protected override void HandleDeath(AttackEvent source)
     {
         if (_dying) return;
         _dying = true;
 
-        if (!sfxMap.TryGetValue(SFXEvent.Died, out var clips) || clips.Length == 0) return;
-        RpcFurnitureBreaks(Random.Range(0, clips.Length));
+        if (!sfxMap.TryGetValue(SFXEvent.Died, out var group) || group.Clips.Length == 0) return;
+        RpcFurnitureBreaks(Random.Range(0, group.Clips.Length));
         foreach (var item in dataSO.lootTable) TryDropItem(item);
         StartCoroutine(DelayedDestroy());
     }
@@ -59,8 +68,8 @@ public class FurnitureEntity : EntityStats
     void RpcFurnitureBreaks(int clipIndex)
     {
         SetRender(false);
-        if (!sfxMap.TryGetValue(SFXEvent.Died, out var clips) || clipIndex >= clips.Length) return;
-        AudioManager.Instance.PlayOneShotAndDestroy(transform.position, clips[clipIndex]);
+        if (!sfxMap.TryGetValue(SFXEvent.Died, out var group) || clipIndex >= group.Clips.Length) return;
+        AudioManager.Instance.PlayOneShotAndDestroy(transform.position, group.Clips[clipIndex], gameObject, SoundLoudness.Average);
     }
 
     IEnumerator DelayedDestroy()
@@ -69,23 +78,30 @@ public class FurnitureEntity : EntityStats
         NetworkServer.Destroy(gameObject);
     }
 
-    void CheckDropThresholds()
+    void CheckDropThresholds(bool playSFX)
     {
+        bool anyDropped = false;
+
         for (int i = 0; i < dataSO.dropThresholds.Length; i++)
         {
-            if (dataSO.dropThresholds[i].dropped) continue;
+            if (dataSO.dropThresholds[i].triggered) continue;
 
             float hpThreshold = maxHP * (dataSO.dropThresholds[i].dropThreshold / 100f);
-            if (currentHP <= hpThreshold && TryDropItem(dataSO.dropThresholds[i].Item_Drop))
-                dataSO.dropThresholds[i].dropped = true;
+            if (currentHP > hpThreshold) continue;
+
+            if (TryDropItem(dataSO.dropThresholds[i].Item_Drop))
+                anyDropped = true;
+
+            dataSO.dropThresholds[i].triggered = true;
         }
+
+        if (anyDropped && playSFX) PlaySFX(SFXEvent.PartialBreak);
     }
 
     [Server]
     bool TryDropItem(FurnitureDataSO.ItemDrop drop)
     {
         float rand = Random.Range(0f, 100f);
-        Debug.Log($"[FurnEnt] Tries to drop item, random: {rand}, chance {drop.dropChance}, should drop: {rand <= drop.dropChance}");
         if (rand > drop.dropChance) return false;
 
         int qty = Random.Range(drop.minQuantity, drop.maxQuantity);
@@ -103,8 +119,6 @@ public class FurnitureEntity : EntityStats
             if (spawned.TryGetComponent(out ItemBase item))
                 item.AddForce((pos - transform.position).normalized * Random.Range(1f, 2f), ForceMode.Impulse);
         }
-
-        PlaySFX(SFXEvent.PartialBreak);
         return true;
     }
 

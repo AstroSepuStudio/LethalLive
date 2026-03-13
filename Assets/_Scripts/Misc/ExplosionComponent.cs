@@ -31,9 +31,9 @@ public class ExplosionComponent : NetworkBehaviour
         Collider[] hits = Physics.OverlapSphere(transform.position, explosionStat.AttackRadius);
         foreach (Collider col in hits)
         {
-            if (!col.TryGetComponent(out EntityStats stats)) continue;
+            if (!col.TryGetComponent(out EntityStats target)) continue;
 
-            Vector3 dir = stats.transform.position - transform.position;
+            Vector3 dir = target.transform.position - transform.position;
             float distance = dir.magnitude;
             float multiplier = Random.Range(0.75f, 1.25f);
             float effectiveness = Mathf.Lerp(1f, 0.75f, distance / explosionStat.AttackRadius);
@@ -42,8 +42,9 @@ public class ExplosionComponent : NetworkBehaviour
             float knockAmount = explosionStat.AttackKnock * multiplier * effectiveness;
             Vector3 momentum = effectiveness * explosionStat.AttackForce * multiplier * dir.normalized;
 
-            stats.ApplyDamage(AttackSource.None, modifiedAttack);
-            stats.AddKnock(knockAmount, momentum);
+            AttackEvent attackSource = AttackEvent.From(null, null, modifiedAttack);
+            target.ApplyDamage(attackSource);
+            target.AddKnock(knockAmount, momentum);
         }
     }
 
@@ -53,7 +54,7 @@ public class ExplosionComponent : NetworkBehaviour
         if (explosionParticles != null)
             foreach (var p in explosionParticles) p.Play();
 
-        AudioManager.Instance.PlayOneShot(audioSource, explosionSFX[Random.Range(0, explosionSFX.Length)]);
+        AudioManager.Instance.PlayOneShot(audioSource, explosionSFX[Random.Range(0, explosionSFX.Length)], gameObject, SoundLoudness.Loud);
     }
 
     IEnumerator Cooldown()

@@ -84,9 +84,9 @@ public class PunchManager : NetworkBehaviour
         Collider[] hits = Physics.OverlapSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius, entityLayer);
         foreach (Collider col in hits)
         {
-            if (!col.TryGetComponent(out EntityStats entity)) continue;
+            if (!col.TryGetComponent(out EntityStats target)) continue;
 
-            entity.ReceiveAttack(AttackSource.From(pData), punchStats);
+            target.ReceiveAttack(AttackEvent.From(pData, target, punchStats));
         }
     }
 

@@ -49,20 +49,20 @@ public class PlayerStats : EntityStats
     #region Attack
 
     [Server]
-    public override void ReceiveAttack(AttackSource source, AttackStat attack)
+    public override void ReceiveAttack(AttackEvent source)
     {
         bool sameTeam = source.TeamID != -1 && source.TeamID == (int)pData.Team;
 
         if (sameTeam)
         {
-            if (LobbySettings.Instance.TeamDamage) ApplyDamage(source, attack);
-            if (LobbySettings.Instance.TeamKnock) ApplyKnock(source, attack);
+            if (LobbySettings.Instance.TeamDamage) ApplyDamage(source);
+            if (LobbySettings.Instance.TeamKnock) ApplyKnock(source);
         }
         else
         {
             PlaySFX(SFXEvent.TakeDamage);
-            ApplyDamage(source, attack);
-            ApplyKnock(source, attack);
+            ApplyDamage(source);
+            ApplyKnock(source);
         }
     }
 
@@ -71,48 +71,48 @@ public class PlayerStats : EntityStats
     #region HP
 
     [Server]
-    public override void ApplyDamage(AttackSource source, AttackStat attack)
+    public override void ApplyDamage(AttackEvent source)
     {
         if (!GameManager.Instance.gameStarted || !GameManager.Instance.dayMod.dayStarted)
             return;
 
-        base.ApplyDamage(source, attack);
+        base.ApplyDamage(source);
     }
 
     protected override void OnHPChanged(float oldVal, float newVal)
         => pData.HUDmanager.UpdateHUD();
 
     [Server]
-    protected override void HandleDeath(AttackSource source, AttackStat attack)
+    protected override void HandleDeath(AttackEvent source)
     {
         if (dead) return;
         float multiplier = Random.Range(1f, 2f);
-        Vector3 momentum = source.Stats != null
-            ? CalculateMomentum(source.Position, attack.AttackForce, multiplier)
+        Vector3 momentum = source.SourceStats != null
+            ? CalculateMomentum(source.Position, source.AttackStat_.AttackForce, multiplier)
             : Vector3.zero;
 
         dead = true;
-        pData.OnPlayerDeath(attack, momentum, false);
+        pData.OnPlayerDeath(source.AttackStat_, momentum, false);
     }
 
     [Server]
-    protected void HandleDeath(AttackSource source, AttackStat attack, bool executed)
+    protected void HandleDeath(AttackEvent source, bool executed)
     {
         if (dead) return;
         float multiplier = Random.Range(1f, 2f);
-        Vector3 momentum = source.Stats != null
-            ? CalculateMomentum(source.Position, attack.AttackForce, multiplier)
+        Vector3 momentum = source.SourceStats != null
+            ? CalculateMomentum(source.Position, source.AttackStat_.AttackForce, multiplier)
             : Vector3.zero;
 
         dead = true;
-        pData.OnPlayerDeath(attack, momentum, executed);
+        pData.OnPlayerDeath(source.AttackStat_, momentum, executed);
     }
 
     [Server]
     public void ExecutePlayer()
     {
         currentHP = 0f;
-        HandleDeath(default, null, true);
+        HandleDeath(default, true);
     }
 
     #endregion

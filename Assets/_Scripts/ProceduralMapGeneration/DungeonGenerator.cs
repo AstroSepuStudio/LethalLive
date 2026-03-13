@@ -74,6 +74,7 @@ public class DungeonGenerator : NetworkBehaviour
     public Dictionary<int, List<FurnitureEntity>> RoomFurniture = new();
     public Dictionary<int, List<ItemBase>> RoomItems = new();
 
+    public ThemeDataSO Theme => theme;
     public Cell[,,] Grid => grid;
     private Vector3Int effectiveGridSize;
 

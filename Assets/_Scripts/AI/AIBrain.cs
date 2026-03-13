@@ -13,6 +13,7 @@ public class AIBrain : NetworkBehaviour
     public struct SFXGroup
     {
         public SFXEvent Event;
+        public SoundLoudness Loudness;
         public AudioSFX[] Clips;
     }
 
@@ -37,7 +38,7 @@ public class AIBrain : NetworkBehaviour
     [SerializeField] float footstepMinPitch = 0.9f;
     [SerializeField] float footstepMaxPitch = 1.1f;
 
-    protected Dictionary<SFXEvent, AudioSFX[]> sfxMap;
+    protected Dictionary<SFXEvent, SFXGroup> sfxMap;
     float livingSFXTimer;
     float footstepTimer;
 
@@ -121,16 +122,16 @@ public class AIBrain : NetworkBehaviour
 
     void BuildSFXMap()
     {
-        sfxMap = new Dictionary<SFXEvent, AudioSFX[]>();
+        sfxMap = new Dictionary<SFXEvent, SFXGroup>();
         foreach (var group in sfxGroups)
-            sfxMap[group.Event] = group.Clips;
+            sfxMap[group.Event] = group;
     }
 
     [Server]
     public virtual void PlaySFX(SFXEvent sfxEvent, float pitch)
     {
-        if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clips.Length == 0) return;
-        int index = Random.Range(0, clips.Length);
+        if (!sfxMap.TryGetValue(sfxEvent, out var group) || group.Clips.Length == 0) return;
+        int index = Random.Range(0, group.Clips.Length);
         RpcPlaySFX(sfxEvent, index, pitch);
     }
 
@@ -138,10 +139,10 @@ public class AIBrain : NetworkBehaviour
     void RpcPlaySFX(SFXEvent sfxEvent, int clipIndex, float pitch)
     {
         if (audioSrc == null) return;
-        if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clipIndex >= clips.Length) return;
+        if (!sfxMap.TryGetValue(sfxEvent, out var group) || clipIndex >= group.Clips.Length) return;
 
         audioSrc.pitch = pitch;
-        AudioManager.Instance.PlayOneShot(audioSrc, clips[clipIndex]);
+        AudioManager.Instance.PlayOneShot(audioSrc, group.Clips[clipIndex], gameObject, group.Loudness);
     }
 
     #endregion
@@ -153,12 +154,12 @@ public class AIBrain : NetworkBehaviour
         return !Physics.Raycast(origin, dir.normalized, dir.magnitude, losBlockingLayers, QueryTriggerInteraction.Ignore);
     }
 
-    public virtual void OnAgentHurt(AttackSource source, AttackStat attack)
+    public virtual void OnAgentHurt(AttackEvent source)
     {
 
     }
 
-    public virtual void OnAgentDeath(AttackSource source, AttackStat attack)
+    public virtual void OnAgentDeath(AttackEvent source)
     {
 
     }

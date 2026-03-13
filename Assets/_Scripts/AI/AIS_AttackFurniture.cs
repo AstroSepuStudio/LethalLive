@@ -83,8 +83,8 @@ public class AIS_AttackFurniture : AIState
                     float movedDist = Vector3.Distance(Target.transform.position, targetPosAtSwing);
                     if (movedDist <= dodgeDistance)
                     {
-                        AttackSource source = AttackSource.From(brain.EntityStats_);
-                        Target.ApplyDamage(source, brain.AttackStat_);
+                        AttackEvent source = AttackEvent.From(brain.EntityStats_, Target, brain.AttackStat_);
+                        Target.ApplyDamage(source);
                     }
 
                     if (Target == null || Target.IsDying)

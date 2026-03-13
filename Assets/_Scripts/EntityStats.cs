@@ -12,13 +12,14 @@ public class EntityStats : NetworkBehaviour
     {
         public SFXEvent Event;
         public AudioSFX[] Clips;
+        public SoundLoudness Loudness;
     }
 
     [Header("Audio")]
     [SerializeField] protected AudioSource audioSource;
     [SerializeField] SFXGroup[] sfxGroups;
 
-    protected Dictionary<SFXEvent, AudioSFX[]> sfxMap;
+    protected Dictionary<SFXEvent, SFXGroup> sfxMap;
 
     [Header("Knock Recovery")]
     [SerializeField] protected float knockRecoveryDelay;
@@ -41,8 +42,8 @@ public class EntityStats : NetworkBehaviour
     [SyncVar] public bool dead;
     [SyncVar] public bool knocked;
 
-    public UnityEvent<AttackSource, AttackStat> OnDeath;
-    public UnityEvent<AttackSource, AttackStat> OnTakeDamage;
+    public UnityEvent<AttackEvent> OnDeath;
+    public UnityEvent<AttackEvent> OnTakeDamage;
 
     #region Lifecylce
 
@@ -69,16 +70,16 @@ public class EntityStats : NetworkBehaviour
 
     void BuildSFXMap()
     {
-        sfxMap = new Dictionary<SFXEvent, AudioSFX[]>();
+        sfxMap = new Dictionary<SFXEvent, SFXGroup>();
         foreach (var group in sfxGroups)
-            sfxMap[group.Event] = group.Clips;
+            sfxMap[group.Event] = group;
     }
 
     [Server]
     protected void PlaySFX(SFXEvent sfxEvent)
     {
-        if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clips.Length == 0) return;
-        int index = Random.Range(0, clips.Length);
+        if (!sfxMap.TryGetValue(sfxEvent, out var group) || group.Clips.Length == 0) return;
+        int index = Random.Range(0, group.Clips.Length);
         RpcPlaySFX(sfxEvent, index);
     }
 
@@ -86,12 +87,12 @@ public class EntityStats : NetworkBehaviour
     void RpcPlaySFX(SFXEvent sfxEvent, int clipIndex)
     {
         if (audioSource == null) return;
-        if (!sfxMap.TryGetValue(sfxEvent, out var clips) || clipIndex >= clips.Length) return;
+        if (!sfxMap.TryGetValue(sfxEvent, out var group) || clipIndex >= group.Clips.Length) return;
 
         if (sfxEvent == SFXEvent.Died)
-            AudioManager.Instance.PlayOneShotAndDestroy(transform.position, clips[clipIndex]);
+            AudioManager.Instance.PlayOneShotAndDestroy(transform.position, group.Clips[clipIndex], gameObject, group.Loudness);
         else
-            AudioManager.Instance.PlayOneShot(audioSource, clips[clipIndex]);
+            AudioManager.Instance.PlayOneShot(audioSource, group.Clips[clipIndex], gameObject, group.Loudness);
     }
 
     #endregion
@@ -107,30 +108,30 @@ public class EntityStats : NetworkBehaviour
     }
 
     [Server]
-    public virtual void ReceiveAttack(AttackSource source, AttackStat attack)
+    public virtual void ReceiveAttack(AttackEvent source)
     {
         PlaySFX(SFXEvent.TakeDamage);
-        ApplyDamage(source, attack);
-        ApplyKnock(source, attack);
+        ApplyDamage(source);
+        ApplyKnock(source);
     }
 
     [Server]
-    public virtual void ApplyDamage(AttackSource source, AttackStat attack)
+    public virtual void ApplyDamage(AttackEvent source)
     {
-        currentHP = Mathf.Clamp(currentHP - attack.AttackDamage, 0f, maxHP);
-        OnTakeDamage?.Invoke(source, attack);
+        currentHP = Mathf.Clamp(currentHP - source.AttackStat_.AttackDamage, 0f, maxHP);
+        OnTakeDamage?.Invoke(source);
 
         if (currentHP <= 0f)
-            HandleDeath(source, attack);
+            HandleDeath(source);
     }
 
     protected virtual void OnHPChanged(float oldVal, float newVal) { }
 
     [Server]
-    protected virtual void HandleDeath(AttackSource source, AttackStat attack)
+    protected virtual void HandleDeath(AttackEvent source)
     {
         dead = true;
-        OnDeath?.Invoke(source, attack);
+        OnDeath?.Invoke(source);
         PlaySFX(SFXEvent.Died);
     }
 
@@ -139,13 +140,13 @@ public class EntityStats : NetworkBehaviour
     #region Knock
 
     [Server]
-    public virtual void ApplyKnock(AttackSource source, AttackStat attack)
+    public virtual void ApplyKnock(AttackEvent source)
     {
-        float srcStrength = source.Stats != null ? source.Stats.strength : 100f;
+        float srcStrength = source.SourceStats != null ? source.SourceStats.strength : 100f;
 
         float multiplier = Random.Range(1f, 2f);
-        float knockAmount = attack.AttackKnock * multiplier * (srcStrength / 100f);
-        Vector3 momentum = CalculateMomentum(source.Position, attack.AttackForce, multiplier);
+        float knockAmount = source.AttackStat_.AttackKnock * multiplier * (srcStrength / 100f);
+        Vector3 momentum = CalculateMomentum(source.Position, source.AttackStat_.AttackForce, multiplier);
 
         AddKnock(knockAmount, momentum);
     }
