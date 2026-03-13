@@ -10,16 +10,19 @@ public class AIS_WanderAroundHome : AIState
 
     float sleepTimer;
     bool moving;
+    bool arrived;
 
     public UnityEvent OnWanderStart;
     public UnityEvent OnWanderCompleted;
     public UnityEvent OnHomeVisitComplete;
+    public UnityEvent OnArrivedAtHome;
 
     public override void OnEnterState(AIBrain brain)
     {
         wanderCount = 0;
-        moving = false;
         sleepTimer = 0f;
+        moving = false;
+        arrived = false;
         MoveToRandomHomePosition(brain);
     }
 
@@ -46,6 +49,12 @@ public class AIS_WanderAroundHome : AIState
         sleepTimer -= Time.deltaTime;
         if (sleepTimer <= 0f)
         {
+            if (!arrived)
+            {
+                arrived = true;
+                OnArrivedAtHome?.Invoke();
+            }
+
             VortexAI vortex = brain as VortexAI;
             if (vortex.CarriedItem != null)
             {

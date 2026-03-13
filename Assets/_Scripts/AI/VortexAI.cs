@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
+using System.Collections;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -8,6 +10,9 @@ using UnityEditor;
 
 public class VortexAI : AIBrain
 {
+    [SerializeField] Transform pickUpPos;
+    [SerializeField] ParticleSystem deathParticles;
+
     [Header("State Indexes")]
     [SerializeField] int[] wanderIndexes;
     [SerializeField] int stareStateIndex = 2;
@@ -32,10 +37,12 @@ public class VortexAI : AIBrain
     int totalWanCycles = 0;
 
     [Header("Alpha")]
+    [SerializeField] AudioSource alphaCallSrc;
     [SerializeField][SyncVar(hook = nameof(UpdateScale))] int alpha = -1;
     bool isActingAsAlpha = false;
     bool pendingFollowerDispatch = false;
-    List<VortexAI> pendingFollowers = new();
+    readonly List<VortexAI> pendingFollowers = new();
+    readonly List<VortexAI> packMembers = new();
 
     public float Alpha => alpha;
     public bool IsActingAsAlpha => isActingAsAlpha;
@@ -55,6 +62,7 @@ public class VortexAI : AIBrain
     [SerializeField] float playerTooCloseDistance = 3f;
     [SerializeField] float playerNearItemDistance = 3f;
     float postDropCooldown = 0f;
+    readonly HashSet<ItemBase> homeItems = new();
 
     public ItemBase CarriedItem { get; private set; }
 
@@ -95,6 +103,23 @@ public class VortexAI : AIBrain
     {
         pitch *= GetAlphaPitch();
         base.PlaySFX(sfxEvent, pitch);
+    }
+
+    public void PlayAlphaCall(float pitch)
+    {
+        if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var clips) || clips.Length == 0) return;
+        int index = Random.Range(0, clips.Length);
+        RpcPlaySFX(index, pitch);
+    }
+
+    [ClientRpc]
+    void RpcPlaySFX(int clipIndex, float pitch)
+    {
+        if (alphaCallSrc == null) return;
+        if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var clips) || clipIndex >= clips.Length) return;
+
+        audioSrc.pitch = pitch;
+        AudioManager.Instance.PlayOneShot(alphaCallSrc, clips[clipIndex]);
     }
 
     #region Lifecycle
@@ -195,6 +220,7 @@ public class VortexAI : AIBrain
 
     protected override void Update()
     {
+        if (isDying) return;
         if (!isServer) return;
         base.Update();
         TickPatience();
@@ -205,6 +231,7 @@ public class VortexAI : AIBrain
         if (detectionTimer > 0f) return;
         detectionTimer = detectionInterval;
 
+        CheckHomeItems();
         RunDetection();
     }
 
@@ -250,6 +277,7 @@ public class VortexAI : AIBrain
         {
             RoomData rd = kvp.Value;
             if (rd == null) continue;
+            if (rd.Data.biome == Biome.Hallway || !rd.Data.ValidVortexHome) continue;
 
             float dist = Vector3.Distance(startPos, rd.transform.position);
             if (dist >= minBand && dist <= maxBand)
@@ -360,6 +388,27 @@ public class VortexAI : AIBrain
                 watchedPlayers.Add(closestPlayer);
                 TriggerFollowPlayer();
             }
+        }
+    }
+
+    void CheckHomeItems()
+    {
+        if (homeItems.Count == 0) return;
+
+        RoomData home = GetEffectiveHome();
+        if (home == null) return;
+
+        float distFromHome = Vector3.Distance(transform.position, home.transform.position);
+        if (distFromHome > detectionRadius) return;
+
+        homeItems.RemoveWhere(item => item == null);
+
+        foreach (var item in homeItems)
+        {
+            if (!item.HasOwner) continue;
+            homeItems.Remove(item);
+            DrainPatience(patienceDecayOnItemStolen);
+            break;
         }
     }
 
@@ -524,7 +573,7 @@ public class VortexAI : AIBrain
 
     #endregion
 
-    #region Item Carrying
+    #region Item
 
     public void CarryItem(ItemBase item)
     {
@@ -533,8 +582,8 @@ public class VortexAI : AIBrain
         if (stareAtPlayerNearItemState != null) stareAtPlayerNearItemState.WatchedItem = null;
         CarriedItem = item;
         item.OnPickUp();
-        item.transform.SetParent(transform);
-        item.transform.localPosition = Vector3.up * 1.5f;
+        item.transform.SetParent(pickUpPos);
+        item.transform.localPosition = Vector3.zero;
 
         Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
         foreach (var hit in hits)
@@ -554,6 +603,23 @@ public class VortexAI : AIBrain
         postDropCooldown = dropCooldownDuration;
     }
 
+    void ScanHomeItems()
+    {
+        homeItems.Clear();
+        RoomData home = GetEffectiveHome();
+        if (home == null) return;
+
+        Collider[] hits = Physics.OverlapSphere(home.transform.position,
+            DungeonGenerator.Instance.CellSize);
+        foreach (var hit in hits)
+        {
+            if (!hit.CompareTag("Item")) continue;
+            ItemBase item = hit.GetComponent<ItemBase>();
+            if (item != null && !item.HasOwner)
+                homeItems.Add(item);
+        }
+    }
+
     #endregion
 
     #region Alpha / Follower Role
@@ -563,6 +629,7 @@ public class VortexAI : AIBrain
         isActingAsAlpha = true;
         follower.SetAlphaHomeOverride(HomeRoom);
         pendingFollowers.Add(follower);
+        packMembers.Add(follower);
         pendingFollowerDispatch = true;
 
         if (CurrentState == states[wanderHomeStateIndex])
@@ -572,6 +639,64 @@ public class VortexAI : AIBrain
         }
 
         TriggerWanderHome();
+    }
+
+    public void RespondToAlphaCall(VortexAI alpha)
+    {
+        if (IsInAttackState()) return;
+        if (CarriedItem != null) DropCarriedItem();
+
+        PlayerData alphaTarget = alpha.attackPlayerState != null ? alpha.attackPlayerState.Target : alpha.GetClosestSeenPlayer();
+
+        if (alphaTarget != null && !seenPlayers.Contains(alphaTarget))
+        {
+            seenPlayers.Add(alphaTarget);
+            watchedPlayers.Add(alphaTarget);
+        }
+
+        if (alphaTarget != null)
+        {
+            float dist = Vector3.Distance(transform.position, alphaTarget.transform.position);
+            if (dist <= detectionRadius)
+            {
+                if (attackPlayerState == null) return;
+                attackPlayerState.Target = alphaTarget;
+                attackPlayerState.ItemToRecoverAfter = null;
+                patience = 0f;
+                SetState(states[attackPlayerStateIndex]);
+                return;
+            }
+        }
+
+        TriggerWanderHome();
+    }
+
+    public void RespondToHelpCall(VortexAI caller)
+    {
+        if (IsInAttackState()) return;
+        if (CarriedItem != null) DropCarriedItem();
+
+        PlaySFX(SFXEvent.CallForHelp, 1f);
+
+        PlayerData target = caller.attackPlayerState.Target != null ? caller.attackPlayerState.Target : caller.GetClosestSeenPlayer();
+
+        if (target == null) return;
+
+        if (!seenPlayers.Contains(target))
+        {
+            seenPlayers.Add(target);
+            watchedPlayers.Add(target);
+        }
+
+        float dist = Vector3.Distance(transform.position, target.transform.position);
+        if (dist <= detectionRadius)
+        {
+            if (attackPlayerState == null) return;
+            attackPlayerState.Target = target;
+            attackPlayerState.ItemToRecoverAfter = null;
+            patience = 0f;
+            SetState(states[attackPlayerStateIndex]);
+        }
     }
 
     public void BeginSearch() => TriggerSearch();
@@ -659,11 +784,19 @@ public class VortexAI : AIBrain
         ClearAlphaHomeOverride();
         seenVortexes.Clear();
         isActingAsAlpha = false;
+
+        if (followState?.AlphaTarget != null)
+            followState.AlphaTarget.RemoveFromPack(this);
+
         ResumeWander();
     }
 
+    public void RemoveFromPack(VortexAI follower) => packMembers.Remove(follower);
+
     public void OnArrivedAtHome()
     {
+        ScanHomeItems();
+
         if (!pendingFollowerDispatch) return;
         pendingFollowerDispatch = false;
 
@@ -728,6 +861,79 @@ public class VortexAI : AIBrain
     public void DrainPatienceOnItemStolen() => DrainPatience(patienceDecayOnItemStolen);
     public void DrainPatienceOnBackAway() => DrainPatience(patienceDecayOnBackAway);
 
+    public override void OnAgentHurt(AttackSource source, AttackStat attack)
+    {
+        if (isActingAsAlpha && packMembers.Count > 0) OnAlphaHurt();
+
+        OnVortexHurt();
+    }
+
+    private void OnAlphaHurt()
+    {
+        if (!isActingAsAlpha || packMembers.Count == 0) return;
+
+        PlaySFX(SFXEvent.AlphaCall, 1f);
+
+        TriggerAttackPlayer();
+
+        foreach (var follower in packMembers)
+        {
+            if (follower == null) continue;
+            float dist = Vector3.Distance(transform.position, follower.transform.position);
+            if (dist > detectionRadius * 2f) continue;
+            follower.RespondToAlphaCall(this);
+        }
+    }
+
+    private void OnVortexHurt()
+    {
+        PlaySFX(SFXEvent.CallForHelp, 1f);
+
+        TriggerAttackPlayer();
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
+        foreach (var hit in hits)
+        {
+            if (!hit.CompareTag("Vortex")) continue;
+            VortexAI other = hit.GetComponent<VortexAI>();
+            if (other == null || other == this) continue;
+            if (other.IsInAttackState()) continue;
+
+            other.RespondToHelpCall(this);
+        }
+    }
+
+    public override void OnAgentDeath(AttackSource source, AttackStat attack)
+    {
+        DropCarriedItem();
+        isDying = true;
+        StopAgentMovement();
+        DisableCollider();
+        DisableAgent();
+        animator.SetTrigger("Death");
+
+        StartCoroutine(DespawnVortex());
+        RPC_PlayDeathParticles();
+    }
+
+    IEnumerator DespawnVortex()
+    {
+        yield return new WaitForSeconds(8f);
+
+        NetworkServer.Destroy(gameObject);
+    }
+
+    [ClientRpc]
+    private void RPC_PlayDeathParticles() => StartCoroutine(PlayDeathParticles());
+
+    IEnumerator PlayDeathParticles()
+    {
+        deathParticles.Play();
+        yield return new WaitForSeconds(2f);
+
+        deathParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+    }
+
     #endregion
 
     #region Gizmos
@@ -763,7 +969,7 @@ public class VortexAI : AIBrain
 
         GUIStyle style = new();
         style.alignment = TextAnchor.MiddleCenter;
-        Vector3 labelPos = transform.position + Vector3.up * 2.5f;
+        Vector3 labelPos = transform.position + Vector3.up;
 
         style.normal.textColor = Color.cyan;
         style.fontSize = 14;
@@ -775,26 +981,26 @@ public class VortexAI : AIBrain
             style.normal.textColor = Color.white;
             style.fontSize = 11;
             style.fontStyle = FontStyle.Normal;
-            Handles.Label(labelPos + Vector3.up * 0.4f, CurrentState.GetType().Name, style);
+            Handles.Label(labelPos, CurrentState.GetType().Name, style);
         }
 
         if (CarriedItem != null)
         {
             style.normal.textColor = Color.green;
             style.fontSize = 11;
-            Handles.Label(labelPos + Vector3.up * 0.8f, $"[{CarriedItem.ItemData.itemName}]", style);
+            Handles.Label(labelPos + Vector3.up * 0.2f, $"[{CarriedItem.ItemData.itemName}]", style);
         }
 
         if (isActingAsAlpha)
         {
             style.normal.textColor = new Color(1f, 0.5f, 0f);
             style.fontSize = 11;
-            Handles.Label(labelPos + Vector3.up * 1.2f, "ALPHA", style);
+            Handles.Label(labelPos + Vector3.up * 0.4f, "ALPHA", style);
         }
 
         style.normal.textColor = Color.Lerp(Color.red, Color.green, patience / maxPatience);
         style.fontSize = 10;
-        Handles.Label(labelPos + Vector3.up * 1.6f,
+        Handles.Label(labelPos + Vector3.up * 0.6f,
             $"{CurrentPersonality} [{patience:F0}/{maxPatience:F0}]", style);
     }
 #endif

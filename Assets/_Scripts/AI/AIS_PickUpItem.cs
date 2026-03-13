@@ -62,7 +62,9 @@ public class AIS_PickUpItem : AIState
             recalcTimer -= Time.deltaTime;
         }
 
-        if (brain.IsAgentInMovement())
+        bool mov = brain.IsAgentInMovement();
+        brain.Animator_.SetBool("Walk", mov);
+        if (mov)
         {
             stuckTimer = stuckTimeout;
             return;

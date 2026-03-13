@@ -8793,6 +8793,8 @@ MonoBehaviour:
   speed: 100
   currentHP: 0
   currentKnock: 0
+  dead: 0
+  knocked: 0
   OnDeath:
     m_PersistentCalls:
       m_Calls: []
@@ -8804,7 +8806,6 @@ MonoBehaviour:
   staminaRecoveryRate: 15
   maxStamina: 100
   currentStamina: 0
-  dead: 0
   OnPlayerKnocked:
     m_PersistentCalls:
       m_Calls: []

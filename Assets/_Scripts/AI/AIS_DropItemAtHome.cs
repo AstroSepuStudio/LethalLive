@@ -16,6 +16,7 @@ public class AIS_DropItemAtHome : AIState
 
     public UnityEvent OnItemDropped;
     public UnityEvent OnNoItemToDeliver;
+    public UnityEvent OnArrivedAtHome;
 
     public override void OnEnterState(AIBrain brain)
     {
@@ -67,7 +68,9 @@ public class AIS_DropItemAtHome : AIState
             brain.MoveAgent(targetPosition);
         }
 
-        if (brain.IsAgentInMovement())
+        bool mov = brain.IsAgentInMovement();
+        brain.Animator_.SetBool("Walk", mov);
+        if (mov)
         {
             stuckTimer = stuckTimeout;
             return;
@@ -82,7 +85,10 @@ public class AIS_DropItemAtHome : AIState
 
         float dist = Vector3.Distance(brain.transform.position, targetPosition);
         if (dist <= dropRange)
+        {
             DropItem(brain as VortexAI);
+            OnArrivedAtHome?.Invoke();
+        }
     }
 
     public override void OnExitState(AIBrain brain)

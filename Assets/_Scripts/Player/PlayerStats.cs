@@ -85,6 +85,7 @@ public class PlayerStats : EntityStats
     [Server]
     protected override void HandleDeath(AttackSource source, AttackStat attack)
     {
+        if (dead) return;
         float multiplier = Random.Range(1f, 2f);
         Vector3 momentum = source.Stats != null
             ? CalculateMomentum(source.Position, attack.AttackForce, multiplier)
@@ -97,6 +98,7 @@ public class PlayerStats : EntityStats
     [Server]
     protected void HandleDeath(AttackSource source, AttackStat attack, bool executed)
     {
+        if (dead) return;
         float multiplier = Random.Range(1f, 2f);
         Vector3 momentum = source.Stats != null
             ? CalculateMomentum(source.Position, attack.AttackForce, multiplier)
@@ -153,7 +155,7 @@ public class PlayerStats : EntityStats
     [Server]
     protected override void HandleKnocked(Vector3 momentum)
     {
-        Debug.Log($"[{pData.PlayerName}] Player knocked");
+        if (knocked) return;
         knocked = true;
         pData.PlayerInventory.DropEverything();
         pData.Skin_Data.Ragdoll_Manager.EnableRagdoll(momentum);

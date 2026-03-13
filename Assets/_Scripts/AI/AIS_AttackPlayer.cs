@@ -10,6 +10,8 @@ public class AIS_AttackPlayer : AIState
     [SerializeField] float calmDownDuration = 10f;
     [SerializeField] float attackHitDelay = 0.2f;
     [SerializeField] float dodgeDistance = 1.5f;
+    [SerializeField] float losCheckInterval = 0.5f;
+    [SerializeField] float losGiveUpDuration = 3f;
 
     public PlayerData Target { get; set; }
     public ItemBase ItemToRecoverAfter { get; set; }
@@ -18,6 +20,9 @@ public class AIS_AttackPlayer : AIState
     float stuckTimer;
     float recalcTimer;
     float calmDownTimer;
+    float losCheckTimer;
+    float losLostTimer;
+    bool hasLOS;
     bool calmingDown;
 
     bool attackPending;
@@ -38,6 +43,9 @@ public class AIS_AttackPlayer : AIState
         stuckTimer = stuckTimeout;
         recalcTimer = 0f;
         attackTimer = 0f;
+        losCheckTimer = 0f;
+        losLostTimer = 0f;
+        hasLOS = true;
         calmingDown = false;
         attackPending = false;
     }
@@ -53,9 +61,7 @@ public class AIS_AttackPlayer : AIState
 
         if (Target == null || Target.Player_Stats.dead || Target.Player_Stats.knocked)
         {
-            brain.Animator_.SetBool("Walk", false);
-            brain.Animator_.SetBool("Aggresive", false);
-            EnterCalmDown();
+            EnterCalmDown(brain);
             return;
         }
 
@@ -63,14 +69,33 @@ public class AIS_AttackPlayer : AIState
 
         if (dist > giveUpDistance)
         {
-            brain.Animator_.SetBool("Walk", false);
-            brain.Animator_.SetBool("Aggresive", false);
-            EnterCalmDown();
+            EnterCalmDown(brain);
             return;
         }
 
         if (graceTimer > 0f) { graceTimer -= Time.deltaTime; return; }
 
+        losCheckTimer -= Time.deltaTime;
+        if (losCheckTimer <= 0f)
+        {
+            losCheckTimer = losCheckInterval;
+            hasLOS = brain.HasLineOfSight(Target.transform.position);
+        }
+
+        if (!hasLOS)
+        {
+            losLostTimer += Time.deltaTime;
+            if (losLostTimer >= losGiveUpDuration)
+            {
+                EnterCalmDown(brain);
+                return;
+            }
+        }
+        else
+        {
+            losLostTimer = 0f;
+        }
+        
         Vector3 dir = (Target.transform.position - brain.transform.position).normalized;
         dir.y = 0f;
         if (dir != Vector3.zero)
@@ -92,9 +117,7 @@ public class AIS_AttackPlayer : AIState
                 stuckTimer -= Time.deltaTime;
                 if (stuckTimer <= 0f)
                 {
-                    brain.Animator_.SetBool("Walk", false);
-                    brain.Animator_.SetBool("Aggresive", false);
-                    EnterCalmDown();
+                    EnterCalmDown(brain);
                     return;
                 }
             }
@@ -148,6 +171,7 @@ public class AIS_AttackPlayer : AIState
 
     public override void OnExitState(AIBrain brain)
     {
+        brain.ResumeAgentMovement();
         brain.Agent.stoppingDistance = 0;
         brain.Animator_.SetBool("Aggresive", false);
         brain.Animator_.SetBool("Walk", false);
@@ -155,8 +179,11 @@ public class AIS_AttackPlayer : AIState
         calmingDown = false;
     }
 
-    void EnterCalmDown()
+    void EnterCalmDown(AIBrain brain)
     {
+        brain.Animator_.SetBool("Walk", false);
+        brain.Animator_.SetBool("Aggresive", false);
+        brain.StopAgentMovement();
         calmingDown = true;
         calmDownTimer = calmDownDuration;
     }

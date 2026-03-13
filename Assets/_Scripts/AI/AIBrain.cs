@@ -2,7 +2,6 @@ using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Audio;
 
 [RequireComponent(typeof(NetworkIdentity))]
 [RequireComponent(typeof(NavMeshAgent))]
@@ -19,6 +18,7 @@ public class AIBrain : NetworkBehaviour
 
     [Header("AI Core")]
     [SerializeField] protected Animator animator;
+    [SerializeField] protected Collider collider_;
     [SerializeField] protected NavMeshAgent agent;
 
     [SerializeField] protected AIState[] states;
@@ -44,6 +44,7 @@ public class AIBrain : NetworkBehaviour
     public string Prefix => $"[AIBrain ({gameObject.name})]";
 
     [field:SerializeField] protected AIState CurrentState { get; private set; }
+    protected bool isDying;
 
     public NavMeshAgent Agent => agent;
     public Animator Animator_ => animator;
@@ -80,6 +81,7 @@ public class AIBrain : NetworkBehaviour
 
     protected virtual void Update()
     {
+        if (isDying) return;
         if (CurrentState == null) return;
         CurrentState.OnUpdateState(this);
         TickLivingSFX();
@@ -144,7 +146,7 @@ public class AIBrain : NetworkBehaviour
 
     #endregion
 
-    protected bool HasLineOfSight(Vector3 target)
+    public bool HasLineOfSight(Vector3 target)
     {
         Vector3 origin = transform.position + Vector3.up;
         Vector3 dir = (target + Vector3.up) - origin;
@@ -165,6 +167,7 @@ public class AIBrain : NetworkBehaviour
     public void StopAgentMovement() => agent.isStopped = true;
     public void ResumeAgentMovement() => agent.isStopped = false;
     public void DisableAgent() => agent.enabled = false;
+    public void DisableCollider() => collider_.enabled = false;
     public bool IsAgentInMovement() =>  
         !agent.isStopped && agent.hasPath && 
         agent.remainingDistance > agent.stoppingDistance && 

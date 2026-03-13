@@ -31,9 +31,9 @@ public class ExplosionComponent : NetworkBehaviour
         Collider[] hits = Physics.OverlapSphere(transform.position, explosionStat.AttackRadius);
         foreach (Collider col in hits)
         {
-            if (!col.TryGetComponent(out PlayerStats pStats)) continue;
+            if (!col.TryGetComponent(out EntityStats stats)) continue;
 
-            Vector3 dir = pStats.transform.position - transform.position;
+            Vector3 dir = stats.transform.position - transform.position;
             float distance = dir.magnitude;
             float multiplier = Random.Range(0.75f, 1.25f);
             float effectiveness = Mathf.Lerp(1f, 0.75f, distance / explosionStat.AttackRadius);
@@ -42,8 +42,8 @@ public class ExplosionComponent : NetworkBehaviour
             float knockAmount = explosionStat.AttackKnock * multiplier * effectiveness;
             Vector3 momentum = effectiveness * explosionStat.AttackForce * multiplier * dir.normalized;
 
-            pStats.ApplyDamage(AttackSource.None, modifiedAttack);
-            pStats.AddKnock(knockAmount, momentum);
+            stats.ApplyDamage(AttackSource.None, modifiedAttack);
+            stats.AddKnock(knockAmount, momentum);
         }
     }
 

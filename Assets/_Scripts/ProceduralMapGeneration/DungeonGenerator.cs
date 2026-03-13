@@ -26,6 +26,7 @@ public class DungeonGenerator : NetworkBehaviour
     [SerializeField] Transform furnitureParent;
     [SerializeField] Transform itemsParent;
     [SerializeField] Transform entSpawnParent;
+    [SerializeField] Transform voidDestroyerParent;
     [SerializeField] NavMeshSurface surface;
     [SerializeField]
     private AnimationCurve difficultyCurve = AnimationCurve.EaseInOut(0, 1, 20, 3);
@@ -134,6 +135,7 @@ public class DungeonGenerator : NetworkBehaviour
 
         int size = Mathf.Max(1, LobbySettings.Instance.MapSize);
         effectiveGridSize = new Vector3Int(gridSize.x * size, gridSize.y * size, gridSize.z * size);
+        voidDestroyerParent.localScale = new Vector3(size + 2, 1, size + 2);
 
         grid = new Cell[effectiveGridSize.x, effectiveGridSize.y, effectiveGridSize.z];
 

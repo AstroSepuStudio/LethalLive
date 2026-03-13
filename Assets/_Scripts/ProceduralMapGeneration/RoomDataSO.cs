@@ -24,6 +24,7 @@ public class RoomDataSO : ScriptableObject
     public GameObject Prefab;
     public Biome biome = Biome.Default;
     public LL_Tier.Tier RoomTier;
+    public bool ValidVortexHome = true;
 
     public Color roomColor = Color.white;
     public FootprintStr[] RoomFootprint = Array.Empty<FootprintStr>();
