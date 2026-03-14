@@ -20,6 +20,7 @@ public class AIBrain : NetworkBehaviour
     [Header("AI Core")]
     [SerializeField] protected Animator animator;
     [SerializeField] protected Collider collider_;
+    [SerializeField] protected SkinnedMeshRenderer renderer_;
     [SerializeField] protected NavMeshAgent agent;
 
     [SerializeField] protected AIState[] states;

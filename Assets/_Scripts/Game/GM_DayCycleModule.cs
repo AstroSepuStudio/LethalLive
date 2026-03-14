@@ -1,5 +1,4 @@
 using Mirror;
-using Mirror.BouncyCastle.Tls.Crypto;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -9,7 +8,8 @@ using static GameManager;
 public class GM_DayCycleModule : NetworkBehaviour
 {
     [SerializeField] GameObject dayCycleCanvas;
-    [SerializeField] CanvasGroup dayGroup;
+    [SerializeField] CanvasGroup dayGroupStart;
+    [SerializeField] CanvasGroup dayGroupAb2End;
     [SerializeField] TextMeshProUGUI dayTxt;
     [SerializeField] TextMeshProUGUI dayNum;
 
@@ -20,15 +20,17 @@ public class GM_DayCycleModule : NetworkBehaviour
     [SerializeField] float dayDuration = 900;
     [SerializeField] float letterDelay = 0.35f;
 
-    [SyncVar]
-    public int currentDay = 1;
-    [SyncVar]
-    public float currentDayTime = -1;
-    [SyncVar]
-    public bool dayStarted = false;
+    [SyncVar] public int currentDay = 1;
+    [SyncVar] public float currentDayTime = -1;
+    [SyncVar] public bool dayStarted = false;
 
     public UnityEvent<int> OnDayStarted = new();
     public UnityEvent<int> OnDayEnded = new();
+
+    private const int DAY_START_HOUR = 8;
+    private const int DAY_END_HOUR = 24;
+    private const float TOTAL_IN_GAME_HOURS = DAY_END_HOUR - DAY_START_HOUR; // 24 - 8 = 16 hours dayyum
+    private const float TOTAL_IN_GAME_MINUTES = TOTAL_IN_GAME_HOURS * 60;
 
     [Server]
     public void StartDay()
@@ -87,7 +89,7 @@ public class GM_DayCycleModule : NetworkBehaviour
     {
         yield return null;
 
-        dayGroup.alpha = 1;
+        dayGroupStart.alpha = 1;
         dayCycleCanvas.SetActive(true);
 
         dayTxt.text = "";
@@ -98,6 +100,7 @@ public class GM_DayCycleModule : NetworkBehaviour
         string numberPart = currentDay.ToString();
         WaitForSeconds letterDelay = new(this.letterDelay);
         int sfxIndex = 0;
+
         foreach (char c in prefix)
         {
             dayTxt.text += c;
@@ -115,8 +118,8 @@ public class GM_DayCycleModule : NetworkBehaviour
 
         dayNum.text = numberPart;
         AudioManager.Instance.PlayOneShot(audioSource, numberSfx);
-
         StartCoroutine(ChangeTextColor(dayNum, Color.white, Color.red, 5));
+
         float timer = 0;
         while (timer < 3)
         {
@@ -127,12 +130,12 @@ public class GM_DayCycleModule : NetworkBehaviour
         timer = 2;
         while (timer > 0)
         {
-            dayGroup.alpha = timer / 2;
+            dayGroupStart.alpha = timer / 2;
             timer -= Time.deltaTime;
             yield return null;
         }
-        dayGroup.alpha = 0;
 
+        dayGroupStart.alpha = 0;
         dayCycleCanvas.SetActive(false);
     }
 
@@ -146,5 +149,22 @@ public class GM_DayCycleModule : NetworkBehaviour
             yield return null;
         }
         text.color = to;
+    }
+
+    public string GetFormatedTime()
+    {
+        if (Instance.dayMod.currentDayTime == -1 || !Instance.dayMod.dayStarted)
+            return "--:--";
+
+        float inGameMinutesElapsed = currentDayTime * (TOTAL_IN_GAME_MINUTES / dayDuration);
+        int totalMinutes = DAY_START_HOUR * 60 + Mathf.RoundToInt(inGameMinutesElapsed);
+
+        // Roll over midnight
+        totalMinutes %= 1440;
+
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
+
+        return $"{hours:00}:{minutes:00}";
     }
 }

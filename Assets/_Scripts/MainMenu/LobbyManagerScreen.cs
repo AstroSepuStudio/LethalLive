@@ -196,23 +196,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     public void RefreshDay(int day) => dayText.SetText($"Day {day}");
 
-    public void RefreshDayTime()
-    {
-        if (Instance.dayMod.currentDayTime == -1 || !Instance.dayMod.dayStarted)
-        {
-            timeText.SetText("--:--");
-        }
-        else
-        {
-            float minutesSinceStart = Instance.dayMod.currentDayTime * (960f / 900f);
-            int totalMinutes = 8 * 60 + Mathf.RoundToInt(minutesSinceStart);
-
-            int hours = totalMinutes / 60;
-            int minutes = totalMinutes % 60;
-
-            timeText.SetText($"{hours:00}:{minutes:00}");
-        }
-    }
+    public void RefreshDayTime() => timeText.SetText(Instance.dayMod.GetFormatedTime());
 
     public void RefreshLobbySettings()
     {

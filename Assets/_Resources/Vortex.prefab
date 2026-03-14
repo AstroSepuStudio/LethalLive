@@ -5630,6 +5630,7 @@ MonoBehaviour:
   syncInterval: 0
   animator: {fileID: 1600236974782805844}
   collider_: {fileID: 1768164185552261995}
+  renderer_: {fileID: 3260861798315986402}
   agent: {fileID: 7835215223755380179}
   states:
   - {fileID: 4665471481818912242}
@@ -5651,37 +5652,45 @@ MonoBehaviour:
   entityStats: {fileID: 3384841598755132090}
   attackStat:
     <AttackRadius>k__BackingField: 1.5
-    <AttackKnock>k__BackingField: 10
+    <AttackKnock>k__BackingField: 12
     <AttackForce>k__BackingField: 2
     <AttackDamage>k__BackingField: 10
     <AttackCooldown>k__BackingField: 1
   audioSrc: {fileID: 1536679428694314739}
   sfxGroups:
   - Event: 0
+    Loudness: 0
     Clips:
     - {fileID: 11400000, guid: 24ccbe882f96858438769acb1eaa0ce6, type: 2}
     - {fileID: 11400000, guid: 2dc033aa4907e1b4ab7c2ac5b957f0b7, type: 2}
     - {fileID: 11400000, guid: 3d2223400dafa1e4aafbd7d51ce4be24, type: 2}
     - {fileID: 11400000, guid: f738a77a602c2b540a0e5539260a50c6, type: 2}
   - Event: 1
+    Loudness: 0
     Clips:
     - {fileID: 11400000, guid: 3d1d899d94dd19040a51dd26f7aa5b00, type: 2}
   - Event: 4
+    Loudness: 0
     Clips:
     - {fileID: 11400000, guid: 7fda72791951dcd4ea709da4089ae774, type: 2}
   - Event: 5
+    Loudness: 0
     Clips:
     - {fileID: 11400000, guid: 33111f7a4faec594fae34f4b718ed09a, type: 2}
   - Event: 6
+    Loudness: 0
     Clips:
     - {fileID: 11400000, guid: 99be42d21bc0ef040bc6af5afb154d2a, type: 2}
   - Event: 7
+    Loudness: 0
     Clips:
     - {fileID: 11400000, guid: 063dbdd94749b374bba124060ad9826b, type: 2}
   - Event: 3
+    Loudness: 0
     Clips:
     - {fileID: 11400000, guid: 8b295f39f162a9a4c981b65d93f6ddff, type: 2}
   - Event: 2
+    Loudness: 0
     Clips:
     - {fileID: 11400000, guid: efcd2e7a465b481408ebafa0f04bba04, type: 2}
   minLivingSFXInterval: 7
@@ -5741,9 +5750,11 @@ MonoBehaviour:
   - Event: 0
     Clips:
     - {fileID: 11400000, guid: c461dc5697803ab4bbdbf29e6d5a9685, type: 2}
+    Loudness: 0
   - Event: 2
     Clips:
     - {fileID: 11400000, guid: e2d5a126ae584044785803b4c21d831c, type: 2}
+    Loudness: 0
   knockRecoveryDelay: 0
   knockRecoveryRate: 0
   ragdollRecoveryValue: 0
@@ -6804,6 +6815,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1600236974782805844}
   m_SourcePrefab: {fileID: 100100000, guid: 7ab8a74eb4eb3b644bc7ca41f00db164, type: 3}
+--- !u!137 &3260861798315986402 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6261964947908924168, guid: 7ab8a74eb4eb3b644bc7ca41f00db164, type: 3}
+  m_PrefabInstance: {fileID: 8909843504504184554}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8603976076609594299 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7ab8a74eb4eb3b644bc7ca41f00db164, type: 3}

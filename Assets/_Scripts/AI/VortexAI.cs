@@ -712,6 +712,12 @@ public class VortexAI : AIBrain, IHearingListener
         return Mathf.Lerp(0.5f, 1.5f, (float)alpha / 100f);
     }
 
+    public void SetAggressive(bool aggressive)
+    {
+        Animator_.SetBool("Aggresive", aggressive);
+        renderer_.SetBlendShapeWeight(0, aggressive ? 0 : 100);
+    }
+
     #endregion
 
     #region Events
