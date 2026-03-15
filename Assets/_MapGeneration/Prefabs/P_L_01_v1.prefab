@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7822658006959983117}
+  - component: {fileID: 3777777103230606915}
   m_Layer: 0
   m_Name: Pos (0)
   m_TagString: Untagged
@@ -25,12 +26,28 @@ Transform:
   m_GameObject: {fileID: 728176907877698829}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.38268256, z: -0, w: 0.9238799}
-  m_LocalPosition: {x: 5, y: 0, z: 0}
+  m_LocalPosition: {x: 5.53, y: 1.49, z: -0.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8937092673735842111}
   m_LocalEulerAnglesHint: {x: 0, y: -45, z: 0}
+--- !u!114 &3777777103230606915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728176907877698829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 834b9901bf5ed8447b77315d6e5de338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureSpawnPosition
+  maxOffset: {x: 1, y: 0, z: 1}
+  maxRotation: 180
+  chance: 5
+  tries: 1
 --- !u!1 &1539686368599852699
 GameObject:
   m_ObjectHideFlags: 0
@@ -40,6 +57,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8777439902341124453}
+  - component: {fileID: 4379654039735641159}
   m_Layer: 0
   m_Name: Pos (3)
   m_TagString: Untagged
@@ -56,12 +74,28 @@ Transform:
   m_GameObject: {fileID: 1539686368599852699}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: -5, y: 0, z: 0}
+  m_LocalPosition: {x: -5.72, y: 1.49, z: -0.34}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8937092673735842111}
   m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
+--- !u!114 &4379654039735641159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1539686368599852699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 834b9901bf5ed8447b77315d6e5de338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureSpawnPosition
+  maxOffset: {x: 1, y: 0, z: 1}
+  maxRotation: 180
+  chance: 5
+  tries: 1
 --- !u!1 &2000127563776109086
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,6 +126,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7822658006959983117}
+  - {fileID: 2668305032760456155}
+  - {fileID: 1355580267242053763}
   - {fileID: 8777439902341124453}
   m_Father: {fileID: 7325073415844980117}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -620,6 +656,54 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!1 &3800585042724039738
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2668305032760456155}
+  - component: {fileID: 8787822665105192543}
+  m_Layer: 0
+  m_Name: Pos (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 4162164826716764455, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2668305032760456155
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3800585042724039738}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.38268256, z: -0, w: 0.9238799}
+  m_LocalPosition: {x: -5.67, y: 1.49, z: 10.03}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8937092673735842111}
+  m_LocalEulerAnglesHint: {x: 0, y: -45, z: 0}
+--- !u!114 &8787822665105192543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3800585042724039738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 834b9901bf5ed8447b77315d6e5de338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureSpawnPosition
+  maxOffset: {x: 1, y: 0, z: 1}
+  maxRotation: 180
+  chance: 5
+  tries: 1
 --- !u!1 &4533870998069743954
 GameObject:
   m_ObjectHideFlags: 0
@@ -673,6 +757,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 611283413982775202}
+  - component: {fileID: 3275526752658434058}
   m_Layer: 0
   m_Name: Pos (1)
   m_TagString: Untagged
@@ -689,43 +774,27 @@ Transform:
   m_GameObject: {fileID: 4896768294469758074}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 5}
+  m_LocalPosition: {x: -5.5, y: 1, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2037253281875346185}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &4920461289063021765
-GameObject:
+--- !u!114 &3275526752658434058
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2000625332476194191}
-  m_Layer: 0
-  m_Name: Pos (3)
-  m_TagString: Untagged
-  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2000625332476194191
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4920461289063021765}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2037253281875346185}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_GameObject: {fileID: 4896768294469758074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  maxOffset: {x: 1, y: 0, z: 6.5}
+  chance: 5
+  tries: 1
 --- !u!1 &5948817709783917510
 GameObject:
   m_ObjectHideFlags: 0
@@ -735,6 +804,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7743397186000003418}
+  - component: {fileID: 3196348030175545587}
   m_Layer: 0
   m_Name: Pos (0)
   m_TagString: Untagged
@@ -757,6 +827,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2037253281875346185}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3196348030175545587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5948817709783917510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  maxOffset: {x: 2.5, y: 0, z: 6.5}
+  chance: 5
+  tries: 1
 --- !u!1 &6206648285403080147
 GameObject:
   m_ObjectHideFlags: 0
@@ -3939,7 +4024,6 @@ Transform:
   - {fileID: 7743397186000003418}
   - {fileID: 611283413982775202}
   - {fileID: 5180682189455216969}
-  - {fileID: 2000625332476194191}
   m_Father: {fileID: 7325073415844980117}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6732148616021619663
@@ -4476,6 +4560,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5180682189455216969}
+  - component: {fileID: 5906513661064174013}
   m_Layer: 0
   m_Name: Pos (2)
   m_TagString: Untagged
@@ -4492,12 +4577,27 @@ Transform:
   m_GameObject: {fileID: 6782203724530134495}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 5}
+  m_LocalPosition: {x: 5.75, y: 1, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2037253281875346185}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5906513661064174013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6782203724530134495}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  maxOffset: {x: 1, y: 0, z: 6.5}
+  chance: 5
+  tries: 1
 --- !u!1 &6859338258297046723
 GameObject:
   m_ObjectHideFlags: 0
@@ -4567,28 +4667,14 @@ MonoBehaviour:
     wall: {fileID: 7902075461504336613}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: 3121ef64459027b4f859a1186ec6c830, type: 2}
-  itemSpawnPositions:
-  - position: {fileID: 7743397186000003418}
-    maxOffset: {x: 2.5, y: 0, z: 6.5}
-    chance: 5
-  - position: {fileID: 611283413982775202}
-    maxOffset: {x: 2.5, y: 0, z: 6.5}
-    chance: 5
-  - position: {fileID: 5180682189455216969}
-    maxOffset: {x: 2.5, y: 0, z: 6.5}
-    chance: 5
-  - position: {fileID: 2000625332476194191}
-    maxOffset: {x: 2.5, y: 0, z: 6.5}
-    chance: 5
-  furnitureSpawnPositions:
-  - position: {fileID: 7822658006959983117}
-    maxOffset: {x: 0, y: 0, z: 0}
-    maxRotation: 0
-    chance: 5
-  - position: {fileID: 8777439902341124453}
-    maxOffset: {x: 0, y: 0, z: 0}
-    maxRotation: 0
-    chance: 5
+  ItemSpawnPositions:
+  - {fileID: 3196348030175545587}
+  - {fileID: 3275526752658434058}
+  - {fileID: 5906513661064174013}
+  - {fileID: 0}
+  FurnitureSpawnPositions:
+  - {fileID: 3777777103230606915}
+  - {fileID: 4379654039735641159}
   entitySpawnerPositions: []
   roomRenderers:
   - {fileID: 1322337548692907532}
@@ -4628,8 +4714,8 @@ MonoBehaviour:
   - {fileID: 8908252471667415366}
   - {fileID: 777620052983793161}
   beingRendered: 1
-  showItemSpawnAreas: 0
   showFootprint: 0
+  showFootprintCorners: 0
   showFootprintCoords: 0
   showFootprintSprites: 0
   fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
@@ -6094,6 +6180,54 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!1 &8991116297112205632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1355580267242053763}
+  - component: {fileID: 8040063615972244681}
+  m_Layer: 0
+  m_Name: Pos (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 4162164826716764455, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1355580267242053763
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8991116297112205632}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.38268256, z: -0, w: 0.9238799}
+  m_LocalPosition: {x: 5.9, y: 1.49, z: 10.41}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8937092673735842111}
+  m_LocalEulerAnglesHint: {x: 0, y: -45, z: 0}
+--- !u!114 &8040063615972244681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8991116297112205632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 834b9901bf5ed8447b77315d6e5de338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureSpawnPosition
+  maxOffset: {x: 1, y: 0, z: 1}
+  maxRotation: 180
+  chance: 5
+  tries: 1
 --- !u!1001 &1451704998349365747
 PrefabInstance:
   m_ObjectHideFlags: 0

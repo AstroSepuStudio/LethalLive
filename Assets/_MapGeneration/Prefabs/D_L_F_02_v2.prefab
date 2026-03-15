@@ -104,6 +104,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3887598594474781048}
+  - component: {fileID: 8749361839032341069}
   m_Layer: 0
   m_Name: Pos (2)
   m_TagString: Untagged
@@ -126,6 +127,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3757657869010314196}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8749361839032341069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2375234765385676392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  maxOffset: {x: 2, y: 0, z: 2}
+  chance: 5
+  tries: 1
 --- !u!1 &2414394851781951946
 GameObject:
   m_ObjectHideFlags: 0
@@ -820,6 +836,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4272181988035961236}
+  - component: {fileID: 7066839268000749830}
   m_Layer: 0
   m_Name: Pos (1)
   m_TagString: Untagged
@@ -842,6 +859,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3757657869010314196}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7066839268000749830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3288519154385050578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  maxOffset: {x: 2, y: 0, z: 2}
+  chance: 5
+  tries: 1
 --- !u!1 &4533870998069743954
 GameObject:
   m_ObjectHideFlags: 0
@@ -885,6 +917,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 966753672010881581}
+  - component: {fileID: 7329661256188501714}
   m_Layer: 0
   m_Name: Pos (0)
   m_TagString: Untagged
@@ -907,6 +940,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3757657869010314196}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7329661256188501714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5029322849057976545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  maxOffset: {x: 2, y: 0, z: 2}
+  chance: 5
+  tries: 1
 --- !u!1 &6206648285403080147
 GameObject:
   m_ObjectHideFlags: 0
@@ -2322,17 +2370,11 @@ MonoBehaviour:
     wall: {fileID: 7902075461504336613}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: d1dc947ea053de54ca1648fb0d564d9d, type: 2}
-  itemSpawnPositions:
-  - position: {fileID: 966753672010881581}
-    maxOffset: {x: 2, y: 0, z: 2}
-    chance: 5
-  - position: {fileID: 4272181988035961236}
-    maxOffset: {x: 2, y: 0, z: 2}
-    chance: 5
-  - position: {fileID: 3887598594474781048}
-    maxOffset: {x: 2, y: 0, z: 2}
-    chance: 5
-  furnitureSpawnPositions: []
+  ItemSpawnPositions:
+  - {fileID: 7329661256188501714}
+  - {fileID: 7066839268000749830}
+  - {fileID: 8749361839032341069}
+  FurnitureSpawnPositions: []
   entitySpawnerPositions:
   - {fileID: 6951258652335892712}
   - {fileID: 3954478634201259841}
@@ -2373,8 +2415,9 @@ MonoBehaviour:
   - {fileID: 4376769174883733581}
   - {fileID: 7747763557866773648}
   beingRendered: 1
-  showItemSpawnAreas: 0
   showFootprint: 1
+  showPorts: 0
+  showFootprintCorners: 0
   showFootprintCoords: 0
   showFootprintSprites: 0
   fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}

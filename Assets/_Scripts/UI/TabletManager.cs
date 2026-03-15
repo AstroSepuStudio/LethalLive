@@ -9,6 +9,7 @@ public class TabletManager : MonoBehaviour
     [SerializeField] GameObject tabletObj;
     [SerializeField] GameObject rebindOverlay;
     [SerializeField] TextMeshProUGUI rebindText;
+    [SerializeField] TextMeshProUGUI timeText;
 
     public static UnityEvent OnKeyRebindCompletedEvent = new();
 
@@ -25,10 +26,22 @@ public class TabletManager : MonoBehaviour
 
     bool esc;
 
+    private void OnEnable()
+    {
+        GameTick.OnSecond += OnSecond;
+    }
+
+    private void OnDisable()
+    {
+        GameTick.OnSecond -= OnSecond;
+    }
+
     private void OnDestroy()
     {
         OnKeyRebindCompletedEvent.RemoveAllListeners();
     }
+
+    private void OnSecond() => timeText.SetText(GameManager.Instance.dayMod.GetFormatedTime());
 
     public bool TrySwitchState()
     {

@@ -1,19 +1,11 @@
 using Mirror;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.AI.Navigation;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-
-[Serializable]
-public struct LootPosition
-{
-    public Transform position;
-    public Vector3 maxOffset;
-    public float chance;
-}
 
 public class DungeonGenerator : NetworkBehaviour
 {
@@ -64,8 +56,8 @@ public class DungeonGenerator : NetworkBehaviour
     int nextRoomId = 1;
     bool _generated;
 
-    readonly List<LootPosition> lootPositions = new();
-    readonly List<FurnitureDataSO.FurniturePosition> furniturePositions = new();
+    readonly List<ItemSpawnPosition> lootPositions = new();
+    readonly List<FurnitureSpawnPosition> furniturePositions = new();
     readonly List<Transform> entitySpawnerPositions = new();
 
     public IReadOnlyDictionary<int, RoomData> SpawnedRooms => spawned;
@@ -438,8 +430,9 @@ public class DungeonGenerator : NetworkBehaviour
             float distance = Vector3.Distance(initialRoomPos, go.transform.position);
             maxDistance = distance > maxDistance ? distance : maxDistance;
 
-            furniturePositions.AddRange(rd.furnitureSpawnPositions);
-            lootPositions.AddRange(rd.itemSpawnPositions);
+            furniturePositions.AddRange(rd.FurnitureSpawnPositions);
+            lootPositions.AddRange(rd.ItemSpawnPositions);
+
             entitySpawnerPositions.AddRange(rd.entitySpawnerPositions);
         }
 
@@ -475,35 +468,38 @@ public class DungeonGenerator : NetworkBehaviour
         int q = 0;
         foreach (var pos in furniturePositions)
         {
-            if (!EvaluateSpawn(pos.chance, pos.position.position)) continue;
-
-            float distance = Vector3.Distance(initialRoomPos, pos.position.position);
-            if (distance < maxDistance / 3) inner++;
-            else if (distance < maxDistance / 3 * 2) mid++;
-            else outer++;
-
-            q++;
-
-            Quaternion rot = pos.position.rotation * Quaternion.Euler(0f, RandomRange(-pos.maxRotation, pos.maxRotation), 0f);
-            Vector3 offset = new(
-                RandomRange(-pos.maxOffset.x, pos.maxOffset.x),
-                RandomRange(-pos.maxOffset.y, pos.maxOffset.y),
-                RandomRange(-pos.maxOffset.z, pos.maxOffset.z));
-
-            FurnitureDataSO data = theme.GetWeigthedFurniture(pos.position.position, RNG);
-            GameObject furnObj = Instantiate(data.Prefab, pos.position.position + offset, rot, furnitureParent);
-            NetworkServer.Spawn(furnObj);
-
-            if (!furnObj.TryGetComponent(out FurnitureEntity furnEnt)) continue;
-
-            lootPositions.AddRange(furnEnt.lootPositions);
-
-            int roomId = GetRoomIdAtPosition(pos.position.position);
-            if (roomId != -1)
+            for (int i = 0; i < pos.tries; i++)
             {
-                if (!RoomFurniture.ContainsKey(roomId))
-                    RoomFurniture[roomId] = new();
-                RoomFurniture[roomId].Add(furnEnt);
+                if (!EvaluateSpawn(pos.chance, pos.transform.position)) continue;
+
+                float distance = Vector3.Distance(initialRoomPos, pos.transform.position);
+                if (distance < maxDistance / 3) inner++;
+                else if (distance < maxDistance / 3 * 2) mid++;
+                else outer++;
+
+                q++;
+
+                Quaternion rot = pos.transform.rotation * Quaternion.Euler(0f, RandomRange(-pos.maxRotation, pos.maxRotation), 0f);
+                Vector3 offset = new(
+                    RandomRange(-pos.maxOffset.x, pos.maxOffset.x),
+                    RandomRange(-pos.maxOffset.y, pos.maxOffset.y),
+                    RandomRange(-pos.maxOffset.z, pos.maxOffset.z));
+
+                FurnitureDataSO data = theme.GetWeigthedFurniture(pos.transform.position, RNG);
+                GameObject furnObj = Instantiate(data.Prefab, pos.transform.position + offset, rot, furnitureParent);
+                NetworkServer.Spawn(furnObj);
+
+                if (!furnObj.TryGetComponent(out FurnitureEntity furnEnt)) continue;
+
+                lootPositions.AddRange(furnEnt.lootPositions);
+
+                int roomId = GetRoomIdAtPosition(pos.transform.position);
+                if (roomId != -1)
+                {
+                    if (!RoomFurniture.ContainsKey(roomId))
+                        RoomFurniture[roomId] = new();
+                    RoomFurniture[roomId].Add(furnEnt);
+                }
             }
         }
 
@@ -522,36 +518,39 @@ public class DungeonGenerator : NetworkBehaviour
         int q = 0;
         foreach (var pos in lootPositions)
         {
-            if (!EvaluateSpawn(pos.chance, pos.position.position)) continue;
-
-            float distance = Vector3.Distance(initialRoomPos, pos.position.position);
-            if (distance < maxDistance / 3) inner++;
-            else if (distance < maxDistance / 3 * 2) mid++;
-            else outer++;
-
-            q++;
-
-            Quaternion rot = pos.position.rotation * Quaternion.Euler(
-                RandomRange(-180, 180),
-                RandomRange(-180, 180),
-                RandomRange(-180, 180));
-            Vector3 offset = new(
-                RandomRange(-pos.maxOffset.x, pos.maxOffset.x),
-                RandomRange(-pos.maxOffset.y, pos.maxOffset.y),
-                RandomRange(-pos.maxOffset.z, pos.maxOffset.z));
-
-            ItemSO item = theme.GetWeightedItem(pos.position.position, RNG);
-            GameObject itemObj = Instantiate(item.itemPrefab, pos.position.position + offset, rot, itemsParent);
-            NetworkServer.Spawn(itemObj);
-
-            if (!itemObj.TryGetComponent<ItemBase>(out var itemBase)) continue;
-            
-            int roomId = GetRoomIdAtPosition(pos.position.position);
-            if (roomId != -1)
+            for (int i = 0; i < pos.tries; i++)
             {
-                if (!RoomItems.ContainsKey(roomId))
-                    RoomItems[roomId] = new();
-                RoomItems[roomId].Add(itemBase);
+                if (!EvaluateSpawn(pos.chance, pos.transform.position)) continue;
+
+                float distance = Vector3.Distance(initialRoomPos, pos.transform.position);
+                if (distance < maxDistance / 3) inner++;
+                else if (distance < maxDistance / 3 * 2) mid++;
+                else outer++;
+
+                q++;
+
+                Quaternion rot = pos.transform.rotation * Quaternion.Euler(
+                    RandomRange(-180, 180),
+                    RandomRange(-180, 180),
+                    RandomRange(-180, 180));
+                Vector3 offset = new(
+                    RandomRange(-pos.maxOffset.x, pos.maxOffset.x),
+                    RandomRange(-pos.maxOffset.y, pos.maxOffset.y),
+                    RandomRange(-pos.maxOffset.z, pos.maxOffset.z));
+
+                ItemSO item = theme.GetWeightedItem(pos.transform.position, RNG);
+                GameObject itemObj = Instantiate(item.itemPrefab, pos.transform.position + offset, rot, itemsParent);
+                NetworkServer.Spawn(itemObj);
+
+                if (!itemObj.TryGetComponent<ItemBase>(out var itemBase)) continue;
+
+                int roomId = GetRoomIdAtPosition(pos.transform.position);
+                if (roomId != -1)
+                {
+                    if (!RoomItems.ContainsKey(roomId))
+                        RoomItems[roomId] = new();
+                    RoomItems[roomId].Add(itemBase);
+                }
             }
         }
 

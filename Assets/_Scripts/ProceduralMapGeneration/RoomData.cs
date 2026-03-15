@@ -17,8 +17,10 @@ public class RoomData : MonoBehaviour
     [SerializeField] private WallPortKey[] ports = System.Array.Empty<WallPortKey>();
     public RoomDataSO Data;
     public DungeonGenerator.PlacedRoom PlacedRoom;
-    public List<LootPosition> itemSpawnPositions;
-    public List<FurnitureDataSO.FurniturePosition> furnitureSpawnPositions;
+
+    public List<ItemSpawnPosition> ItemSpawnPositions;
+    public List<FurnitureSpawnPosition> FurnitureSpawnPositions;
+
     public List<Transform> entitySpawnerPositions;
     public Renderer[] roomRenderers;
     public LED_Light[] roomLights;
@@ -26,8 +28,9 @@ public class RoomData : MonoBehaviour
     [SerializeField] bool beingRendered = true;
 
     [Header("Gizmo Settings")]
-    [SerializeField] bool showItemSpawnAreas = false;
     [SerializeField] bool showFootprint = false;
+    [SerializeField] bool showPorts = false;
+    [SerializeField] bool showFootprintCorners = false;
     [SerializeField] bool showFootprintCoords = false;
     [SerializeField] bool showFootprintSprites = false;
 
@@ -117,22 +120,64 @@ public class RoomData : MonoBehaviour
         return candidate;
     }
 
+#if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (showItemSpawnAreas)
-        {
-            Gizmos.color = Color.yellow;
-            foreach (var pos in itemSpawnPositions)
-            {
-                if (pos.position == null) continue;
-                Gizmos.DrawWireCube(pos.position.position, pos.maxOffset * 2f);
-            }
-        }
-
         if (Data == null || Data.RoomFootprint == null) return;
 
         Vector3 origin = transform.position;
         const float cellSize = 5f;
+
+        if (showPorts)
+        {
+            foreach (var port in Data.Ports)
+            {
+                if (useLayers && port.localCell.y != currentLayer) continue;
+
+                Vector3 dir = (Vector3)DirectionUtils.DirectionVector(port.face);
+                Vector3 cellCenter = origin + new Vector3(
+                    port.localCell.x * cellSize,
+                    port.localCell.y * cellSize + cellSize * 0.45f,
+                    port.localCell.z * cellSize);
+
+                Vector3 faceCentre = cellCenter + dir * (cellSize * 0.5f);
+
+                Gizmos.color = DirectionColor(port.face);
+
+                Vector3 right = Vector3.Cross(dir, Vector3.up);
+                if (right == Vector3.zero) right = Vector3.right;
+                Vector3 up = Vector3.Cross(right, dir);
+
+                float half = cellSize * 0.45f;
+                Vector3 tl = faceCentre + (-right + up) * half;
+                Vector3 tr = faceCentre + (right + up) * half;
+                Vector3 br = faceCentre + (right - up) * half;
+                Vector3 bl = faceCentre + (-right - up) * half;
+
+                Gizmos.DrawLine(tl, tr);
+                Gizmos.DrawLine(tr, br);
+                Gizmos.DrawLine(br, bl);
+                Gizmos.DrawLine(bl, tl);
+
+                UnityEditor.Handles.color = Gizmos.color;
+                UnityEditor.Handles.ArrowHandleCap(
+                    0,
+                    faceCentre,
+                    Quaternion.LookRotation(dir),
+                    cellSize * 0.35f,
+                    EventType.Repaint);
+
+                UnityEditor.Handles.Label(
+                    faceCentre + dir * (cellSize * 0.4f) + Vector3.up * 0.3f,
+                    $"{port.face} {port.localCell}",
+                    new GUIStyle
+                    {
+                        normal = { textColor = DirectionColor(port.face) },
+                        fontSize = 11,
+                        alignment = TextAnchor.MiddleCenter
+                    });
+            }
+        }
 
         foreach (var entry in Data.RoomFootprint)
         {
@@ -150,7 +195,6 @@ public class RoomData : MonoBehaviour
                 Gizmos.DrawWireCube(worldCenter, new Vector3(cellSize, cellSize, cellSize));
             }
 
-#if UNITY_EDITOR
             if (showFootprintSprites && entry.MapSprite != null)
             {
                 Texture2D tex = UnityEditor.AssetPreview.GetAssetPreview(entry.MapSprite);
@@ -185,7 +229,38 @@ public class RoomData : MonoBehaviour
                     new GUIStyle { normal = { textColor = fontColor }, fontSize = fontSize, alignment = TextAnchor.MiddleCenter }
                 );
             }
-#endif
+        }
+
+        if (showFootprintCorners)
+        {
+            if (Data.FootprintCorners != null)
+            {
+                foreach (var entry in Data.FootprintCorners)
+                {
+                    if (useLayers && entry.Footprint.y != currentLayer)
+                        continue;
+
+                    Vector3 worldCenter = origin + new Vector3(
+                        entry.Footprint.x * cellSize,
+                        entry.Footprint.y * cellSize + (cellSize / 2),
+                        entry.Footprint.z * cellSize);
+
+                    Gizmos.color = Color.cyan;
+                    Gizmos.DrawWireCube(worldCenter, new Vector3(cellSize * 0.4f, cellSize * 0.4f, cellSize * 0.4f));
+                }
+            }
         }
     }
+
+    private static Color DirectionColor(Direction d) => d switch
+    {
+        Direction.North => Color.blue,
+        Direction.South => Color.red,
+        Direction.East => Color.green,
+        Direction.West => Color.yellow,
+        Direction.Up => Color.cyan,
+        Direction.Down => Color.magenta,
+        _ => Color.white
+    };
+#endif
 }

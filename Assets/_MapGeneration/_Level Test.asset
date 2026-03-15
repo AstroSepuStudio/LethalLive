@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1976320c8433c7b4ba26890fb2382bee, type: 3}
+  m_Name: _Level Test
+  m_EditorClassIdentifier: 
+  levelName: Level Flat
+  startingRoom: {fileID: 11400000, guid: d3dc14e7f8c7d8e4c985085d4830fecb, type: 2}
+  spawnableRooms:
+  - {fileID: 11400000, guid: 74a8d1cf0b6ce7a4d856fa8094da36ce, type: 2}
+  - {fileID: 11400000, guid: 757ebc56406bd074db367e05b2787e96, type: 2}
+  - {fileID: 11400000, guid: 3121ef64459027b4f859a1186ec6c830, type: 2}
+  - {fileID: 11400000, guid: 90ea55d32cf56114d86026758025b491, type: 2}
+  - {fileID: 11400000, guid: f1de1758d57b0c047b4392570f83dddb, type: 2}
+  - {fileID: 11400000, guid: a930a9255d3dec743a7f39fbf44b7f8e, type: 2}
+  - {fileID: 11400000, guid: dff69ab9d792dde4a8d35ccd3aeefebf, type: 2}
+  deadEndRooms: []
+  spawnableItems:
+  - {fileID: 11400000, guid: d6015b7736f8f8c49b4af775dd7ff787, type: 2}
+  - {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
+  - {fileID: 11400000, guid: 3c30ba55c7604f4498556a7791c247f0, type: 2}
+  - {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+  spawnableFurniture:
+  - {fileID: 11400000, guid: 5ec73b96afe77a740b868e17e16ac691, type: 2}
+  entitySpawns:
+  - entityPrefab: {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
+    spawnWeight: 100
+    minSpawnCount: 1
+    maxSpawnCount: 1
+  maxEntities: 15
+  loopingMusic: {fileID: 0}
+  eerySFX: []
+  reverbPreset: 12
+  MinItems: 3
+  MaxItems: 12

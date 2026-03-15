@@ -10,7 +10,7 @@ public class FurnitureEntity : EntityStats
     [SerializeField] FurnitureDataSO dataSO;
     [SerializeField] Rigidbody rb;
 
-    public List<LootPosition> lootPositions;
+    public List<ItemSpawnPosition> lootPositions;
 
     bool _dying;
     public bool IsDying => _dying;

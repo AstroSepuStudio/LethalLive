@@ -838,37 +838,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!1 &3553585392027397068
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4956327692580666020}
-  m_Layer: 0
-  m_Name: Pos (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4956327692580666020
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3553585392027397068}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.5, y: 1, z: 2.5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5064388315382160473}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4171013545510099590
 GameObject:
   m_ObjectHideFlags: 0
@@ -878,6 +847,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9104708864310632345}
+  - component: {fileID: 5829017105556549555}
   m_Layer: 0
   m_Name: Pos (1)
   m_TagString: Untagged
@@ -900,6 +870,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4869216445786588487}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &5829017105556549555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4171013545510099590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 834b9901bf5ed8447b77315d6e5de338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureSpawnPosition
+  maxOffset: {x: 0.5, y: 0, z: 0.5}
+  maxRotation: 180
+  chance: 5
+  tries: 1
 --- !u!1 &4233892184055594311
 GameObject:
   m_ObjectHideFlags: 0
@@ -1925,25 +1911,13 @@ MonoBehaviour:
     wall: {fileID: 1139905599493019200}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: cc8bb3da76d675e41810e1b49db2b3f0, type: 2}
-  itemSpawnPositions:
-  - position: {fileID: 3665227010199735901}
-    maxOffset: {x: 0.5, y: 0, z: 3}
-    chance: 5
-  - position: {fileID: 4956327692580666020}
-    maxOffset: {x: 0.5, y: 0, z: 3}
-    chance: 5
-  - position: {fileID: 242401553820205752}
-    maxOffset: {x: 0.5, y: 0, z: 3}
-    chance: 5
-  furnitureSpawnPositions:
-  - position: {fileID: 1829402941987308958}
-    maxOffset: {x: 0, y: 0, z: 0}
-    maxRotation: 0
-    chance: 5
-  - position: {fileID: 9104708864310632345}
-    maxOffset: {x: 0, y: 0, z: 0}
-    maxRotation: 0
-    chance: 5
+  ItemSpawnPositions:
+  - {fileID: 3530857578733103030}
+  - {fileID: 0}
+  - {fileID: 0}
+  FurnitureSpawnPositions:
+  - {fileID: 8186681207948885661}
+  - {fileID: 5829017105556549555}
   entitySpawnerPositions:
   - {fileID: 4189389293954038105}
   - {fileID: 7643479108568843626}
@@ -1964,8 +1938,8 @@ MonoBehaviour:
   - {fileID: 1652125449537191918}
   - {fileID: 1110300951396025495}
   beingRendered: 1
-  showItemSpawnAreas: 0
   showFootprint: 0
+  showFootprintCorners: 0
   showFootprintCoords: 0
   showFootprintSprites: 0
   fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
@@ -1973,37 +1947,6 @@ MonoBehaviour:
   spriteSize: 150
   useLayers: 0
   currentLayer: 0
---- !u!1 &7326344540596269561
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 242401553820205752}
-  m_Layer: 0
-  m_Name: Pos (2)
-  m_TagString: Untagged
-  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &242401553820205752
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7326344540596269561}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.5, y: 1, z: 2.5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5064388315382160473}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7800871569329841003
 GameObject:
   m_ObjectHideFlags: 0
@@ -2047,6 +1990,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1829402941987308958}
+  - component: {fileID: 8186681207948885661}
   m_Layer: 0
   m_Name: Pos (0)
   m_TagString: Untagged
@@ -2069,6 +2013,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4869216445786588487}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+--- !u!114 &8186681207948885661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8072318131354280443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 834b9901bf5ed8447b77315d6e5de338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureSpawnPosition
+  maxOffset: {x: 0.5, y: 0, z: 0.5}
+  maxRotation: 180
+  chance: 5
+  tries: 1
 --- !u!1 &8711279814293829366
 GameObject:
   m_ObjectHideFlags: 0
@@ -2078,6 +2038,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3665227010199735901}
+  - component: {fileID: 3530857578733103030}
   m_Layer: 0
   m_Name: Pos (0)
   m_TagString: Untagged
@@ -2100,6 +2061,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5064388315382160473}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3530857578733103030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8711279814293829366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  maxOffset: {x: 0.5, y: 0, z: 3}
+  chance: 5
+  tries: 3
 --- !u!1 &9211307280511385106
 GameObject:
   m_ObjectHideFlags: 0
@@ -2130,8 +2106,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3665227010199735901}
-  - {fileID: 4956327692580666020}
-  - {fileID: 242401553820205752}
   m_Father: {fileID: 7325073415844980117}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3383928600771555670

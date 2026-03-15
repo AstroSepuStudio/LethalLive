@@ -34,13 +34,4 @@ public class FurnitureDataSO : ScriptableObject, IHaveTier
         public float dropThreshold; // Ex: 50% (currentHP)
         public bool triggered;
     }
-
-    [Serializable]
-    public struct FurniturePosition
-    {
-        public Transform position;
-        public Vector3 maxOffset;
-        public float maxRotation;
-        public float chance;
-    }
 }

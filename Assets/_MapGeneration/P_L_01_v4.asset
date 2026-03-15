@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Prefab: {fileID: 6859338258297046723, guid: 075aed08248c7284d823743afd91bfbf, type: 3}
   biome: 1
-  RoomTier: 1
+  RoomTier: 2
+  ValidVortexHome: 1
   roomColor: {r: 1, g: 1, b: 1, a: 1}
   RoomFootprint:
   - Footprint: {x: 0, y: 0, z: 0}
@@ -48,3 +49,4 @@ MonoBehaviour:
   - localCell: {x: -1, y: 0, z: 1}
     face: 3
     type: 0
+  footprintCorners: []
