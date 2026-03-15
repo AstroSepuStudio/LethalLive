@@ -518,6 +518,12 @@ public class DungeonGenerator : NetworkBehaviour
         int q = 0;
         foreach (var pos in lootPositions)
         {
+            if (pos == null)
+            {
+                Debug.LogWarning($"Found null loot position");
+                continue;
+            }
+
             for (int i = 0; i < pos.tries; i++)
             {
                 if (!EvaluateSpawn(pos.chance, pos.transform.position)) continue;

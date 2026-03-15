@@ -55,6 +55,18 @@ public class DNG_MapModule : MonoBehaviour
     Vector3Int _mapMin;
     Coroutine _w84PlayerCor;
 
+    private void Start()
+    {
+        DungeonGenerator.Instance.OnDungeonGenerated.AddListener(OnDungeonOpens);
+        DungeonGenerator.Instance.OnDungeonClear.AddListener(OnDungeonCloses);
+    }
+
+    private void OnDestroy()
+    {
+        DungeonGenerator.Instance.OnDungeonGenerated.RemoveListener(OnDungeonOpens);
+        DungeonGenerator.Instance.OnDungeonClear.RemoveListener(OnDungeonCloses);
+    }
+
     #region Life Cycle
     public void OnDungeonOpens()
     {
@@ -360,6 +372,7 @@ public class DNG_MapModule : MonoBehaviour
         GameObject go = Instantiate(mapCellPrefab, cellParent);
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchoredPosition = new Vector2((x - _mapMin.x) * cellSize, (z - _mapMin.z) * cellSize);
+        rt.sizeDelta = new Vector2(cellSize, cellSize);
         rt.localRotation = Quaternion.identity;
 
         if (go.TryGetComponent(out Image img))
@@ -391,6 +404,7 @@ public class DNG_MapModule : MonoBehaviour
         GameObject go = Instantiate(deadEndPrefab, parent.transform);
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = new Vector2(cellSize, cellSize);
         rt.localRotation = Quaternion.identity;
 
         if (go.TryGetComponent(out Image img))
@@ -425,6 +439,7 @@ public class DNG_MapModule : MonoBehaviour
         rt.anchoredPosition = new Vector2(
             (worldPos.x / gen.CellSize - _mapMin.x) * cellSize,
             (worldPos.z / gen.CellSize - _mapMin.z) * cellSize);
+        rt.sizeDelta = new Vector2(cellSize * 0.25f, cellSize * 0.25f);
         rt.localRotation = Quaternion.identity;
 
         if (go.TryGetComponent(out Image img))
@@ -458,6 +473,7 @@ public class DNG_MapModule : MonoBehaviour
         rt.anchoredPosition = new Vector2(
             (worldPos.x / gen.CellSize - _mapMin.x) * cellSize,
             (worldPos.z / gen.CellSize - _mapMin.z) * cellSize);
+        rt.sizeDelta = new Vector2(cellSize * 0.375f, cellSize * 0.375f);
         rt.localRotation = Quaternion.identity;
 
         if (go.TryGetComponent(out Map_PlayerDot pDot))

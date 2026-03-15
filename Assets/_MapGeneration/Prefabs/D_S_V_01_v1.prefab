@@ -4814,21 +4814,8 @@ MonoBehaviour:
     wall: {fileID: 7822300199010848368}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: bc1c49022445f3946a2c9bad29e97fd8, type: 2}
-  itemSpawnPositions:
-  - position: {fileID: 2801137769513246857}
-    maxOffset: {x: 1.5, y: 0, z: 1.5}
-    chance: 5
-  - position: {fileID: 0}
-    maxOffset: {x: 1.5, y: 0, z: 1.5}
-    chance: 5
-  - position: {fileID: 0}
-    maxOffset: {x: 1.5, y: 0, z: 1.5}
-    chance: 5
-  furnitureSpawnPositions: []
   ItemSpawnPositions:
   - {fileID: 1114968014040754408}
-  - {fileID: 0}
-  - {fileID: 0}
   FurnitureSpawnPositions: []
   entitySpawnerPositions: []
   roomRenderers:
@@ -4845,6 +4832,7 @@ MonoBehaviour:
   - {fileID: 8783346670147549924}
   beingRendered: 1
   showFootprint: 0
+  showPorts: 0
   showFootprintCorners: 0
   showFootprintCoords: 0
   showFootprintSprites: 0
