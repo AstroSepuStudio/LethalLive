@@ -19,11 +19,21 @@ public struct AttackEvent
 
     public static AttackEvent From(PlayerData pData, EntityStats target, AttackStat attack)
         => new() { 
-            SourceStats = pData.Player_Stats, 
+            SourceStats = pData != null ? pData.Player_Stats : null, 
             TargetStats = target, 
-            Position = pData.transform.position, 
+            Position = pData != null ? pData.transform.position : Vector3.zero, 
             AttackStat_ = attack, 
             TeamID = (int)pData.Team };
+
+    public static AttackEvent From(Vector3 position, EntityStats target, AttackStat attack)
+        => new()
+        {
+            SourceStats = null,
+            TargetStats = target,
+            Position = position,
+            AttackStat_ = attack,
+            TeamID = -1
+        };
 
     public static AttackEvent None => new() {
         SourceStats = null,

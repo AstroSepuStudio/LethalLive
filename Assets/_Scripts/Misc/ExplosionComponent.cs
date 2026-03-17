@@ -42,7 +42,7 @@ public class ExplosionComponent : NetworkBehaviour
             float knockAmount = explosionStat.AttackKnock * multiplier * effectiveness;
             Vector3 momentum = effectiveness * explosionStat.AttackForce * multiplier * dir.normalized;
 
-            AttackEvent attackSource = AttackEvent.From(null, null, modifiedAttack);
+            AttackEvent attackSource = AttackEvent.From(transform.position, target, modifiedAttack);
             target.ApplyDamage(attackSource);
             target.AddKnock(knockAmount, momentum);
         }
