@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,7 +6,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class DNG_MapModule : MonoBehaviour
+public class DNG_MapModule : NetworkBehaviour
 {
     [System.Serializable] 
     struct DirectionalSprite 
@@ -40,6 +41,18 @@ public class DNG_MapModule : MonoBehaviour
     public bool IsFollowingPlayer => followPlayer;
     bool followPlayer = true;
     bool displayFeatures = true;
+
+    [SyncVar(hook = nameof(OnFollowPlayerChanged))]
+    bool _syncFollowPlayer = true;
+
+    [SyncVar(hook = nameof(OnDisplayFeaturesChanged))]
+    bool _syncDisplayFeatures = true;
+
+    [SyncVar(hook = nameof(OnFollowTargetChanged))]
+    int _syncFollowTargetIdx = 0;
+
+    [SyncVar(hook = nameof(OnMapAnchorChanged))]
+    Vector2 _syncMapAnchor;
 
     readonly Dictionary<int, List<GameObject>> mapLayers = new();
     readonly Dictionary<Vector3Int, GameObject> cellObjects = new();
@@ -130,7 +143,10 @@ public class DNG_MapModule : MonoBehaviour
         float uiY = (focusPos.z / gen.CellSize - _mapMin.z) * cellSize;
 
         if (followPlayer)
+        {
             mapAnchor.anchoredPosition = -new Vector2(uiX, uiY);
+            //if (isClient) CmdSetMapAnchor(mapAnchor.anchoredPosition);
+        }
 
         foreach (var kvp in playerIcons)
         {
@@ -228,6 +244,47 @@ public class DNG_MapModule : MonoBehaviour
     #endregion
 
     #region Managment
+
+    [Command(requiresAuthority = false)]
+    void CmdSetFollowPlayer(bool value) => _syncFollowPlayer = value;
+
+    [Command(requiresAuthority = false)]
+    void CmdSetDisplayFeatures(bool value) => _syncDisplayFeatures = value;
+
+    [Command(requiresAuthority = false)]
+    void CmdSetFollowTarget(int idx) => _syncFollowTargetIdx = idx;
+
+    [Command(requiresAuthority = false)]
+    public void CmdSetMapAnchor(Vector2 position) => _syncMapAnchor = position;
+
+    void OnFollowPlayerChanged(bool oldVal, bool newVal)
+    {
+        if (isOwned) return;
+        followPlayer = newVal;
+        UpdateFollowPlayerVisual();
+    }
+
+    void OnDisplayFeaturesChanged(bool oldVal, bool newVal)
+    {
+        if (isOwned) return;
+        displayFeatures = newVal;
+        ToggleFeatures();
+        ToggleFeatures();
+    }
+
+    void OnFollowTargetChanged(int oldIdx, int newIdx)
+    {
+        if (isOwned) return;
+        if (newIdx < 0 || newIdx >= followTargets.Count) { followTarget = null; return; }
+        followTarget = followTargets[newIdx];
+    }
+
+    void OnMapAnchorChanged(Vector2 oldVal, Vector2 newVal)
+    {
+        if (isOwned) return;
+        mapAnchor.anchoredPosition = newVal;
+    }
+
     public void SetNextLayer() { if (followPlayer) ToggleFollowPlayer(); SetRenderLayer(currentLayer + 1); }
 
     public void SetPreviousLayer() { if (followPlayer) ToggleFollowPlayer();  SetRenderLayer(currentLayer - 1); }
@@ -235,14 +292,18 @@ public class DNG_MapModule : MonoBehaviour
     public void ToggleFollowPlayer()
     {
         followPlayer = !followPlayer;
-        if (followPlayerImg == null) return;
+        UpdateFollowPlayerVisual();
+        if (isClient) CmdSetFollowPlayer(followPlayer);
+    }
 
+    private void UpdateFollowPlayerVisual()
+    {
+        if (followPlayerImg == null) return;
         Color target;
         if (followPlayer)
             ColorUtility.TryParseHtmlString("#DC9632", out target);
         else
             ColorUtility.TryParseHtmlString("#4D4D4D", out target);
-
         followPlayerImg.color = target;
     }
 
@@ -266,6 +327,7 @@ public class DNG_MapModule : MonoBehaviour
         }
 
         followTarget = followTargets[nextIdx];
+        if (isClient) CmdSetFollowTarget(nextIdx);
     }
 
     public void ToggleFeatures()
@@ -275,9 +337,9 @@ public class DNG_MapModule : MonoBehaviour
         {
             if (!trackedIconLayers.ContainsKey(kv.Key)) continue;
             if (trackedIconLayers[kv.Key] != currentLayer) continue;
-
             kv.Value.gameObject.SetActive(displayFeatures);
         }
+        if (isClient) CmdSetDisplayFeatures(displayFeatures);
     }
 
     private void SetRenderLayer(int layer)
@@ -328,10 +390,27 @@ public class DNG_MapModule : MonoBehaviour
                 Sprite deadEndSprite = GetDeadEnd(port.face);
                 if (deadEndSprite == null) continue;
 
-                Vector3Int worldCell = pr.anchor + port.localCell;
-                if (!cellObjects.TryGetValue(worldCell, out var parent)) continue;
+                Vector3Int portWorld = pr.anchor + port.localCell;
 
-                SpawnDeadEnd(parent, deadEndSprite, pr.data.roomColor);
+                if (port.type == RoomDataSO.PortType.Doorway)
+                {
+                    if (!cellObjects.TryGetValue(portWorld, out var parent)) continue;
+                    SpawnDeadEnd(parent, deadEndSprite, pr.data.roomColor);
+                }
+                else
+                {
+                    Vector3Int dir = DirectionUtils.DirectionVector(port.face);
+                    Vector3Int offset = DirectionUtils.RightOf(port.face);
+
+                    if (!cellObjects.TryGetValue(portWorld, out var parent1)) continue;
+                    SpawnDeadEnd(parent1, deadEndSprite, pr.data.roomColor);
+
+                    if (!cellObjects.TryGetValue(portWorld + offset, out var parent2)) continue;
+                    SpawnDeadEnd(parent2, deadEndSprite, pr.data.roomColor);
+
+                    if (!cellObjects.TryGetValue(portWorld - offset, out var parent3)) continue;
+                    SpawnDeadEnd(parent3, deadEndSprite, pr.data.roomColor);
+                }
             }
 
             if (gen.RoomItems.TryGetValue(sr.Key, out var items))

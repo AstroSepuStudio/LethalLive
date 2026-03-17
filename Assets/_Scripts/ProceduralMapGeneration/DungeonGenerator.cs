@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.AI.Navigation;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -654,7 +653,7 @@ public class DungeonGenerator : NetworkBehaviour
                     }
                 }
 
-                rd.SetPort(port.localCell, port.face, open);
+                rd.SetPort(port.localCell, port.face, port.type, open);
             }
         }
     }

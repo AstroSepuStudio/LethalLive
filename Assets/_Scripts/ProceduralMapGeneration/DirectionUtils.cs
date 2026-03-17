@@ -28,4 +28,17 @@ public static class DirectionUtils
         Direction.Down => Direction.Up,
         _ => Direction.North
     };
+
+    public static Vector3Int RightOf(Direction d) => d switch
+    {
+        Direction.North => new Vector3Int(1, 0, 0),
+        Direction.South => new Vector3Int(-1, 0, 0),
+        Direction.East => new Vector3Int(0, 0, -1),
+        Direction.West => new Vector3Int(0, 0, 1),
+        Direction.Up => new Vector3Int(1, 0, 0),
+        Direction.Down => new Vector3Int(-1, 0, 0),
+        _ => Vector3Int.zero
+    };
+
+    public static Vector3Int LeftOf(Direction d) => -RightOf(d);
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,11 +11,12 @@ public class RoomData : MonoBehaviour
     {
         public Vector3Int localCell;
         public Direction face;
+        public RoomDataSO.PortType type;
         public GameObject wall;
         public GameObject door;
     }
 
-    [SerializeField] private WallPortKey[] ports = System.Array.Empty<WallPortKey>();
+    [SerializeField] private WallPortKey[] ports = Array.Empty<WallPortKey>();
     public RoomDataSO Data;
     public DungeonGenerator.PlacedRoom PlacedRoom;
 
@@ -48,11 +50,11 @@ public class RoomData : MonoBehaviour
         roomRenderers = roomRenderers.Where(r => r != null && r.enabled).ToArray();
     }
 
-    public void SetPort(Vector3Int localCell, Direction face, bool open)
+    public void SetPort(Vector3Int localCell, Direction face, RoomDataSO.PortType type, bool open)
     {
         if (!open)
         {
-            WallPortKey key = new() { localCell = localCell, face = face };
+            WallPortKey key = new() { localCell = localCell, face = face, type = type };
 
             closedPorts.Add(key);
         }
@@ -98,7 +100,7 @@ public class RoomData : MonoBehaviour
     public Vector3 GetRandomPositionInRoom(float yOffset = 0f)
     {
         var footprint = PlacedRoom.data.RoomFootprint;
-        var entry = footprint[Random.Range(0, footprint.Length)];
+        var entry = footprint[UnityEngine.Random.Range(0, footprint.Length)];
         float cellSize = DungeonGenerator.Instance.CellSize;
 
         Vector3 cellOrigin = transform.position + new Vector3(
@@ -107,8 +109,8 @@ public class RoomData : MonoBehaviour
             entry.Footprint.z * cellSize);
 
         cellSize *= 0.8f;
-        float x = Random.Range(-cellSize, cellSize);
-        float z = Random.Range(-cellSize, cellSize);
+        float x = UnityEngine.Random.Range(-cellSize, cellSize);
+        float z = UnityEngine.Random.Range(-cellSize, cellSize);
         Vector3 candidate = cellOrigin + new Vector3(x, 0f, z);
 
         if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, cellSize, NavMesh.AllAreas))
@@ -169,13 +171,49 @@ public class RoomData : MonoBehaviour
 
                 UnityEditor.Handles.Label(
                     faceCentre + dir * (cellSize * 0.4f) + Vector3.up * 0.3f,
-                    $"{port.face} {port.localCell}",
+                    $"({Array.IndexOf(Data.Ports, port)}) {port.face} {port.localCell}",
                     new GUIStyle
                     {
                         normal = { textColor = DirectionColor(port.face) },
-                        fontSize = 11,
+                        fontSize = 25,
                         alignment = TextAnchor.MiddleCenter
                     });
+
+                foreach (var wpk in ports)
+                {
+                    if (wpk.localCell != port.localCell || wpk.face != port.face) continue;
+
+                    string wallFootprint = "null";
+                    string doorFootprint = "null";
+
+                    if (wpk.wall != null)
+                    {
+                        Vector3 wallLocal = (wpk.wall.transform.position - origin) / cellSize;
+                        Vector3Int closest = FindClosestFootprint(wallLocal);
+                        wallFootprint = $"{closest}";
+                    }
+
+                    if (wpk.door != null)
+                    {
+                        Vector3 doorLocal = (wpk.door.transform.position - origin) / cellSize;
+                        Vector3Int closest = FindClosestFootprint(doorLocal);
+                        doorFootprint = $"{closest}";
+                    }
+
+                    string wallStr = wallFootprint != "null" ? $"W: {wpk.wall.name}({wallFootprint})" : "-";
+                    string doorStr = doorFootprint != "null" ? $"D: {wpk.door.name}({doorFootprint})" : "-";
+
+                    UnityEditor.Handles.Label(
+                        faceCentre + dir * (cellSize * 0.4f) + Vector3.up * -0.5f,
+                        $"{wallStr} | {doorStr}",
+                        new GUIStyle
+                        {
+                            normal = { textColor = Color.red },
+                            fontSize = 20,
+                            alignment = TextAnchor.MiddleCenter
+                        });
+                    break;
+                }
             }
         }
 
@@ -262,5 +300,23 @@ public class RoomData : MonoBehaviour
         Direction.Down => Color.magenta,
         _ => Color.white
     };
+
+    private Vector3Int FindClosestFootprint(Vector3 localPos)
+    {
+        Vector3Int closest = Data.RoomFootprint[0].Footprint;
+        float bestDist = float.MaxValue;
+
+        foreach (var entry in Data.RoomFootprint)
+        {
+            float dist = Vector3.Distance(localPos, (Vector3)entry.Footprint);
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                closest = entry.Footprint;
+            }
+        }
+
+        return closest;
+    }
 #endif
 }
