@@ -32629,11 +32629,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4858851096374592254}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d7695c04894221841bd3c42c4ec34680, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DNG_MapModule
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  lobbyScreen: {fileID: 0}
   mapCellPrefab: {fileID: 146048809741521510, guid: 11f6475ef5e950e46825d6f5882aea8f, type: 3}
   deadEndPrefab: {fileID: 146048809741521510, guid: e7f132022e18be342b9e08e8f34453aa, type: 3}
   mapFeaturePrefab: {fileID: 146048809741521510, guid: cc4efa55bd2a55a49978888aa55fc95b, type: 3}
@@ -35437,7 +35442,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5282196884565303618}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 940f4dfc24c55c14f8d3ed41b8554ea8, type: 3}
   m_Name: 

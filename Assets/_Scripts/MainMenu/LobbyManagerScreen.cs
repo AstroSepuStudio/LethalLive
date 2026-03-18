@@ -14,6 +14,7 @@ public class LobbyManagerScreen : UIManagerNetwork
 
     [Header("References")]
     [SerializeField] NetworkIdentity identity;
+    [SerializeField] DNG_MapModule mapModule;
     [SerializeField] Canvas worldCanvas;
     [SerializeField] RectTransform refRectTransform;
     [SerializeField] Transform cameraPosition;
@@ -173,9 +174,9 @@ public class LobbyManagerScreen : UIManagerNetwork
         Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started -= OnEscapePressed;
         Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(true);
         Instance.playMod.LocalPlayer.DropCameraControl();
-
         interactableCanvas.SetActive(true);
-        
+        mapModule.CmdSnapshotMapAnchor(Instance.playMod.LocalPlayer.Index, mapModule.MapAnchorPosition);
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

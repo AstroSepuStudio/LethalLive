@@ -13,6 +13,7 @@ public class DNG_MapModule : NetworkBehaviour
     { public Sprite sprite; public Direction direction; }
 
     [Header("References")]
+    [SerializeField] LobbyManagerScreen lobbyScreen;
     [SerializeField] GameObject mapCellPrefab;
     [SerializeField] GameObject deadEndPrefab;
     [SerializeField] GameObject mapFeaturePrefab;
@@ -39,6 +40,9 @@ public class DNG_MapModule : NetworkBehaviour
     [SerializeField] Color mapColor = new Color(0, 150, 0);
 
     public bool IsFollowingPlayer => followPlayer;
+    public Vector2 MapAnchorPosition => mapAnchor.anchoredPosition;
+    public bool IsLocalPlayerController => lobbyScreen.playerOnLMS == GameManager.Instance.playMod.LocalPlayer.Index;
+
     bool followPlayer = true;
     bool displayFeatures = true;
 
@@ -94,8 +98,27 @@ public class DNG_MapModule : NetworkBehaviour
         followTarget = followTargets.Find(t => t.IsAvailable);
         _w84PlayerCor = StartCoroutine(WaitForFirstPlayer());
 
+        StartCoroutine(GenerateMapDelayed());
+    }
+
+    private IEnumerator GenerateMapDelayed()
+    {
+        var gen = DungeonGenerator.Instance;
+        float timeout = 5f;
+        float timer = 0f;
+
+        while (timer < timeout)
+        {
+            if (gen.RoomItems.Count > 0 || gen.RoomFurniture.Count > 0)
+                break;
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        yield return null;
         GenerateMap();
     }
+
 
     public void OnDungeonCloses()
     {
@@ -256,6 +279,13 @@ public class DNG_MapModule : NetworkBehaviour
 
     [Command(requiresAuthority = false)]
     public void CmdSetMapAnchor(Vector2 position) => _syncMapAnchor = position;
+
+    [Command(requiresAuthority = false)]
+    public void CmdSnapshotMapAnchor(int senderIndex, Vector2 position)
+    {
+        if (lobbyScreen.playerOnLMS != senderIndex) return;
+        _syncMapAnchor = position;
+    }
 
     void OnFollowPlayerChanged(bool oldVal, bool newVal)
     {

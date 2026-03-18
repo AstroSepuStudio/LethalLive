@@ -6,23 +6,29 @@ public class MapDragHandler : MonoBehaviour, IDragHandler, IPointerDownHandler
     [SerializeField] RectTransform mapTarget;
     [SerializeField] DNG_MapModule mapModule;
 
-    Vector2 _lastSentPos;
-    const float SendThreshold = 2f;
+    float _snapshotTimer;
+    const float SnapshotInterval = 0.2f;
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!mapModule.IsLocalPlayerController) return;
+
         if (mapModule.IsFollowingPlayer)
             mapModule.ToggleFollowPlayer();
     }
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!mapModule.IsLocalPlayerController) return;
+
         mapTarget.anchoredPosition += eventData.delta;
 
-        if (Vector2.Distance(mapTarget.anchoredPosition, _lastSentPos) > SendThreshold)
+        _snapshotTimer += Time.deltaTime;
+        if (_snapshotTimer >= SnapshotInterval)
         {
-            _lastSentPos = mapTarget.anchoredPosition;
-            mapModule.CmdSetMapAnchor(mapTarget.anchoredPosition);
+            _snapshotTimer = 0f;
+            mapModule.CmdSnapshotMapAnchor(GameManager.Instance.playMod.LocalPlayer.Index, mapTarget.anchoredPosition);
         }
     }
+
 }
