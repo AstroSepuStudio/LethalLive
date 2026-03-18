@@ -443,20 +443,12 @@ public class DNG_MapModule : NetworkBehaviour
                 }
             }
 
-            //if (gen.RoomItems.TryGetValue(sr.Key, out var items))
-            //    foreach (var item in items)
-            //        if (item != null) SpawnDynamicIcon(item.transform, itemSprite, itemColor, itemParent, sr.Value.PlacedRoom.anchor.y);
-
             foreach (var entry in gen.RoomItemNetIds)
             {
                 if (!NetworkClient.spawned.TryGetValue(entry.netId, out var ni)) continue;
                 if (!ni.TryGetComponent<ItemBase>(out var item)) continue;
                 SpawnDynamicIcon(item.transform, itemSprite, itemColor, itemParent, GetLayerFromNetId(ni));
             }
-
-            //if (gen.RoomFurniture.TryGetValue(sr.Key, out var furniture))
-            //    foreach (var furn in furniture)
-            //        if (furn != null) SpawnDynamicIcon(furn.transform, furnSprite, furnColor, furnParent, sr.Value.PlacedRoom.anchor.y);
 
             foreach (var entry in gen.RoomFurnitureNetIds)
             {
