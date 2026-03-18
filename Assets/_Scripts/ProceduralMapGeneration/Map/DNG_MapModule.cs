@@ -104,18 +104,12 @@ public class DNG_MapModule : NetworkBehaviour
     private IEnumerator GenerateMapDelayed()
     {
         var gen = DungeonGenerator.Instance;
-        float timeout = 5f;
-        float timer = 0f;
 
-        while (timer < timeout)
-        {
-            if (gen.RoomItems.Count > 0 || gen.RoomFurniture.Count > 0)
-                break;
-            timer += Time.deltaTime;
-            yield return null;
-        }
+        yield return new WaitUntil(() =>
+            gen.RoomItemNetIds.Count > 0 || gen.RoomFurnitureNetIds.Count > 0);
 
         yield return null;
+
         GenerateMap();
     }
 
@@ -254,6 +248,12 @@ public class DNG_MapModule : NetworkBehaviour
         }
 
         _w84PlayerCor = null;
+    }
+
+    private int GetLayerFromNetId(NetworkIdentity ni)
+    {
+        var gen = DungeonGenerator.Instance;
+        return Mathf.RoundToInt(ni.transform.position.y / gen.CellSize);
     }
     #endregion
 
@@ -443,13 +443,27 @@ public class DNG_MapModule : NetworkBehaviour
                 }
             }
 
-            if (gen.RoomItems.TryGetValue(sr.Key, out var items))
-                foreach (var item in items)
-                    if (item != null) SpawnDynamicIcon(item.transform, itemSprite, itemColor, itemParent, sr.Value.PlacedRoom.anchor.y);
+            //if (gen.RoomItems.TryGetValue(sr.Key, out var items))
+            //    foreach (var item in items)
+            //        if (item != null) SpawnDynamicIcon(item.transform, itemSprite, itemColor, itemParent, sr.Value.PlacedRoom.anchor.y);
 
-            if (gen.RoomFurniture.TryGetValue(sr.Key, out var furniture))
-                foreach (var furn in furniture)
-                    if (furn != null) SpawnDynamicIcon(furn.transform, furnSprite, furnColor, furnParent, sr.Value.PlacedRoom.anchor.y);
+            foreach (var entry in gen.RoomItemNetIds)
+            {
+                if (!NetworkClient.spawned.TryGetValue(entry.netId, out var ni)) continue;
+                if (!ni.TryGetComponent<ItemBase>(out var item)) continue;
+                SpawnDynamicIcon(item.transform, itemSprite, itemColor, itemParent, GetLayerFromNetId(ni));
+            }
+
+            //if (gen.RoomFurniture.TryGetValue(sr.Key, out var furniture))
+            //    foreach (var furn in furniture)
+            //        if (furn != null) SpawnDynamicIcon(furn.transform, furnSprite, furnColor, furnParent, sr.Value.PlacedRoom.anchor.y);
+
+            foreach (var entry in gen.RoomFurnitureNetIds)
+            {
+                if (!NetworkClient.spawned.TryGetValue(entry.netId, out var ni)) continue;
+                if (!ni.TryGetComponent<FurnitureEntity>(out var furn)) continue;
+                SpawnDynamicIcon(furn.transform, furnSprite, furnColor, furnParent, GetLayerFromNetId(ni));
+            }
         }
 
         followTargets.Clear();

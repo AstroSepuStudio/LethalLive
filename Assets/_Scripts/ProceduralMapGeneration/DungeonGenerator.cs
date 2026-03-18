@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -9,6 +10,9 @@ using UnityEngine.Events;
 public class DungeonGenerator : NetworkBehaviour
 {
     public static DungeonGenerator Instance;
+
+    [Serializable]
+    public struct RoomNetIdEntry { public int roomId; public uint netId; }
 
     [Header("Content")]
     [SerializeField] ThemeDataSO theme;
@@ -48,6 +52,8 @@ public class DungeonGenerator : NetworkBehaviour
     [SerializeField] TextMeshProUGUI seedDisplayTxt;
 
     public System.Random RNG { get; private set; }
+    public readonly SyncList<RoomNetIdEntry> RoomItemNetIds = new();
+    public readonly SyncList<RoomNetIdEntry> RoomFurnitureNetIds = new();
 
     Cell[,,] grid;
     readonly List<PlacedRoom> placed = new();
@@ -489,6 +495,7 @@ public class DungeonGenerator : NetworkBehaviour
                 NetworkServer.Spawn(furnObj);
 
                 if (!furnObj.TryGetComponent(out FurnitureEntity furnEnt)) continue;
+                if (!furnObj.TryGetComponent<NetworkIdentity>(out var fni)) continue;
 
                 lootPositions.AddRange(furnEnt.lootPositions);
 
@@ -498,6 +505,8 @@ public class DungeonGenerator : NetworkBehaviour
                     if (!RoomFurniture.ContainsKey(roomId))
                         RoomFurniture[roomId] = new();
                     RoomFurniture[roomId].Add(furnEnt);
+
+                    RoomFurnitureNetIds.Add(new RoomNetIdEntry { roomId = roomId, netId = fni.netId });
                 }
             }
         }
@@ -548,6 +557,7 @@ public class DungeonGenerator : NetworkBehaviour
                 NetworkServer.Spawn(itemObj);
 
                 if (!itemObj.TryGetComponent<ItemBase>(out var itemBase)) continue;
+                if (!itemObj.TryGetComponent<NetworkIdentity>(out var ni)) continue;
 
                 int roomId = GetRoomIdAtPosition(pos.transform.position);
                 if (roomId != -1)
@@ -555,6 +565,8 @@ public class DungeonGenerator : NetworkBehaviour
                     if (!RoomItems.ContainsKey(roomId))
                         RoomItems[roomId] = new();
                     RoomItems[roomId].Add(itemBase);
+
+                    RoomItemNetIds.Add(new RoomNetIdEntry { roomId = roomId, netId = ni.netId });
                 }
             }
         }
@@ -773,6 +785,12 @@ public class DungeonGenerator : NetworkBehaviour
         entitySpawnerPositions.Clear();
         RoomFurniture.Clear();
         RoomItems.Clear();
+
+        if (isServer)
+        {
+            RoomItemNetIds.Clear();
+            RoomFurnitureNetIds.Clear();
+        }
 
         grid = null;
         nextRoomId = 1;
