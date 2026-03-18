@@ -54,6 +54,7 @@ public class DungeonGenerator : NetworkBehaviour
     public System.Random RNG { get; private set; }
     public readonly SyncList<RoomNetIdEntry> RoomItemNetIds = new();
     public readonly SyncList<RoomNetIdEntry> RoomFurnitureNetIds = new();
+    public readonly SyncList<uint> EntityNetIds = new();
 
     Cell[,,] grid;
     readonly List<PlacedRoom> placed = new();

@@ -93,6 +93,7 @@ public class ItemInventory : NetworkBehaviour
     [Server]
     public bool AddItem(ItemBase item)
     {
+        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return false; 
         if (pData._LockPlayer) return false;
         if (item == null) return false;
         if (IsFull()) return false;

@@ -34,6 +34,8 @@ public class DNG_MapModule : NetworkBehaviour
     [SerializeField] Color furnColor = Color.rosyBrown;
     [SerializeField] Sprite beaconSprite;
     [SerializeField] Color beaconColor = Color.cyan;
+    [SerializeField] Sprite entitySprite;
+    [SerializeField] Color entityColor = Color.red;
 
     [Header("Config")]
     [SerializeField] float cellSize = 200;
@@ -64,6 +66,7 @@ public class DNG_MapModule : NetworkBehaviour
     readonly Dictionary<Transform, int> trackedIconLayers = new();
     readonly HashSet<GameObject> trackedIconObjects = new();
     readonly Dictionary<PlayerData, RectTransform> playerIcons = new();
+    readonly Dictionary<uint, RectTransform> entityIcons = new();
 
     IMapFollowTarget followTarget;
     readonly List<IMapFollowTarget> followTargets = new();
@@ -315,6 +318,24 @@ public class DNG_MapModule : NetworkBehaviour
         mapAnchor.anchoredPosition = newVal;
     }
 
+    private void OnEntityNetIdsChanged(SyncList<uint>.Operation op, int index, uint oldNetId, uint newNetId)
+    {
+        switch (op)
+        {
+            case SyncList<uint>.Operation.OP_ADD:
+                StartCoroutine(SpawnEntityIconDelayed(newNetId));
+                break;
+            case SyncList<uint>.Operation.OP_REMOVEAT:
+                RemoveEntityIcon(oldNetId);
+                break;
+            case SyncList<uint>.Operation.OP_CLEAR:
+                var keys = new List<uint>(entityIcons.Keys);
+                foreach (var netId in keys)
+                    RemoveEntityIcon(netId);
+                break;
+        }
+    }
+
     public void SetNextLayer() { if (followPlayer) ToggleFollowPlayer(); SetRenderLayer(currentLayer + 1); }
 
     public void SetPreviousLayer() { if (followPlayer) ToggleFollowPlayer();  SetRenderLayer(currentLayer - 1); }
@@ -478,6 +499,10 @@ public class DNG_MapModule : NetworkBehaviour
 
         int startLayer = gen.StartRoomPos.y / gen.CellSize;
         SetRenderLayer(startLayer);
+
+        DungeonGenerator.Instance.EntityNetIds.Callback += OnEntityNetIdsChanged;
+        foreach (var netId in DungeonGenerator.Instance.EntityNetIds)
+            SpawnEntityIcon(netId);
     }
 
     private GameObject SpawnCell(int x, int y, int z, Sprite sprite, Color color)
@@ -606,6 +631,70 @@ public class DNG_MapModule : NetworkBehaviour
         else Destroy(go);
     }
 
+    private IEnumerator SpawnEntityIconDelayed(uint netId)
+    {
+        yield return new WaitUntil(() => NetworkClient.spawned.ContainsKey(netId));
+        SpawnEntityIcon(netId);
+    }
+
+    private void SpawnEntityIcon(uint netId)
+    {
+        if (!NetworkClient.spawned.TryGetValue(netId, out var ni)) return;
+
+        var gen = DungeonGenerator.Instance;
+        Vector3 worldPos = ni.transform.position;
+        int layer = Mathf.RoundToInt(worldPos.y / gen.CellSize);
+
+        GameObject go = Instantiate(mapFeaturePrefab, extraParent);
+        RectTransform rt = go.GetComponent<RectTransform>();
+        rt.anchoredPosition = new Vector2(
+            (worldPos.x / gen.CellSize - _mapMin.x) * cellSize,
+            (worldPos.z / gen.CellSize - _mapMin.z) * cellSize);
+        rt.sizeDelta = new Vector2(cellSize * 0.25f, cellSize * 0.25f);
+        rt.localRotation = Quaternion.identity;
+
+        if (go.TryGetComponent(out Image img))
+        {
+            img.sprite = entitySprite;
+            img.color = entityColor;
+
+            if (!mapLayers.ContainsKey(layer))
+                mapLayers[layer] = new();
+            mapLayers[layer].Add(go);
+
+            trackedIcons[ni.transform] = rt;
+            trackedIconLayers[ni.transform] = layer;
+            trackedIconObjects.Add(go);
+
+            entityIcons[netId] = rt;
+            go.SetActive(layer == currentLayer && displayFeatures);
+        }
+        else Destroy(go);
+    }
+
+    private void RemoveEntityIcon(uint netId)
+    {
+        if (!entityIcons.TryGetValue(netId, out var rt)) return;
+
+        foreach (var layer in mapLayers.Values)
+            layer.Remove(rt.gameObject);
+
+        Transform toRemove = null;
+        foreach (var kvp in trackedIcons)
+            if (kvp.Value == rt) { toRemove = kvp.Key; break; }
+
+        if (toRemove != null)
+        {
+            trackedIcons.Remove(toRemove);
+            trackedIconLayers.Remove(toRemove);
+            trackedIconObjects.Remove(rt.gameObject);
+        }
+
+        entityIcons.Remove(netId);
+        Destroy(rt.gameObject);
+    }
+
+
     private void ClearMap()
     {
         foreach (var layer in mapLayers.Values)
@@ -615,6 +704,10 @@ public class DNG_MapModule : NetworkBehaviour
         foreach (var icon in playerIcons.Values)
             if (icon) Destroy(icon.gameObject);
 
+        if (DungeonGenerator.Instance != null)
+            DungeonGenerator.Instance.EntityNetIds.Callback -= OnEntityNetIdsChanged;
+
+        entityIcons.Clear();
         playerIcons.Clear();
         followTargets.Clear();
         followTarget = null;

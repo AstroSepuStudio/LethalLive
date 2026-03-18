@@ -1,7 +1,6 @@
 using Mirror;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class EntitySpawnerManager : NetworkBehaviour
@@ -13,12 +12,12 @@ public class EntitySpawnerManager : NetworkBehaviour
     [SerializeField] float spawnDelay = 20f;
     [SerializeField] float spawnChance = 0.1f;
     [SerializeField] float spawnCooldown = 10f;
-    [SerializeField] int maxEntities = 10;
 
     readonly List<EntityStats> aliveEntities = new();
     readonly List<EntityStats> deadEntities = new();
 
-    int totalQ => aliveEntities.Count + deadEntities.Count;
+    int TotalQ => aliveEntities.Count + deadEntities.Count;
+    int MaxEntities => DungeonGenerator.Instance.Theme.maxEntities;
 
     Transform[] spawnerPositions;
     Coroutine enemySpawningCoroutine;
@@ -68,12 +67,12 @@ public class EntitySpawnerManager : NetworkBehaviour
         }
 
         StopCoroutine(enemySpawningCoroutine);
+        if (isServer) DungeonGenerator.Instance.EntityNetIds.Clear();
     }
 
     private void OnDungeonOpens()
     {
         rng = DungeonGenerator.Instance.RNG;
-        maxEntities = DungeonGenerator.Instance.Theme.maxEntities;
         enemySpawningCoroutine = StartCoroutine(EnemySpawning());
     }
 
@@ -103,7 +102,7 @@ public class EntitySpawnerManager : NetworkBehaviour
                 yield return null;
             }
 
-            while (aliveEntities.Count >= maxEntities)
+            while (aliveEntities.Count >= MaxEntities)
             {
                 yield return null;
             }
@@ -130,6 +129,8 @@ public class EntitySpawnerManager : NetworkBehaviour
     [Server]
     bool TrySpawnEnemy()
     {
+        if (aliveEntities.Count >= MaxEntities) return false;
+
         if (spawnerPositions == null)
         {
             Debug.LogWarning("Spawner positions array is null");
@@ -163,12 +164,16 @@ public class EntitySpawnerManager : NetworkBehaviour
             if (roll <= cumulative * DungeonGenerator.Instance.GetDificultyMultiplier(position.position))
             {
                 GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation, entityParent);
-                entityObj.name = $"{spawn.entityPrefab.name} (ID: {totalQ})";
+                entityObj.name = $"{spawn.entityPrefab.name} (ID: {TotalQ})";
                 NetworkServer.Spawn(entityObj);
 
                 EntityStats stats = entityObj.GetComponentInChildren<EntityStats>();
                 stats.OnDeath.AddListener(OnEntityDeath);
                 aliveEntities.Add(stats);
+
+                if (entityObj.TryGetComponent<NetworkIdentity>(out var ni))
+                    DungeonGenerator.Instance.EntityNetIds.Add(ni.netId);
+
                 return true;
             }
         }
@@ -179,11 +184,13 @@ public class EntitySpawnerManager : NetworkBehaviour
     [Server]
     void OnEntityDeath(AttackEvent source)
     {
-        Debug.Log("On Entity Death", source.TargetStats);
         if (!aliveEntities.Contains(source.TargetStats)) return;
-        Debug.Log("Entity was spawned by the manager", source.TargetStats);
+        
         source.TargetStats.OnDeath.RemoveListener(OnEntityDeath);
         aliveEntities.Remove(source.TargetStats);
         deadEntities.Add(source.TargetStats);
+
+        if (source.TargetStats.TryGetComponent<NetworkIdentity>(out var ni))
+            DungeonGenerator.Instance.EntityNetIds.Remove(ni.netId);
     }
 }

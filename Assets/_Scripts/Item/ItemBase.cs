@@ -27,15 +27,10 @@ public class ItemBase : InteractableObject
     public AttackStat primaryAtkStats = new();
     public AttackStat secondaryAtkStats = new();
 
-    Color _gizmoColor;
-
-    protected virtual void Awake()
+    public override void OnStartServer()
     {
-        _gizmoColor = new Color(Random.value, Random.value, Random.value);
-    }
+        base.OnStartServer();
 
-    protected virtual void Start()
-    {
         if (ItemData == null)
         {
             Debug.LogError($"[ItemBase] ItemData is not assigned on '{gameObject.name}'!", this);
@@ -46,13 +41,26 @@ public class ItemBase : InteractableObject
             ItemValue = Random.Range(ItemData.minValue, ItemData.maxValue);
     }
 
+    [Server]
+    public void MultiplyValue(float multiplier)
+    {
+        ItemValue = Mathf.RoundToInt(ItemValue * multiplier);
+    }
+
+    [Server]
+    public void SetScale(Vector3 scale)
+    {
+        transform.localScale = scale;
+        RpcSetScale(scale);
+    }
+
     #region Interaction
 
     [Server]
     public override void OnInteract(PlayerData sourceData)
     {
         if (!ItemData.pickable) return;
-
+        
         if (sourceData.PlayerInventory.AddItem(this))
         {
             pData = sourceData;
@@ -118,6 +126,18 @@ public class ItemBase : InteractableObject
             itemPriceTxt.SetText($"${ItemValue}");
     }
 
+    [Server]
+    public void SetKinematic(bool kinematic)
+    {
+        rb.isKinematic = kinematic;
+    }
+
+    public void DisplayItem(bool visible)
+    {
+        SetRender(visible);
+        SetCollider(visible);
+    }
+
     public void SetRender(bool render)
     {
         if (itemRenderer == null)
@@ -158,6 +178,12 @@ public class ItemBase : InteractableObject
         coll.enabled = true;
     }
 
+    [ClientRpc]
+    void RpcSetScale(Vector3 scale)
+    {
+        transform.localScale = scale;
+    }
+
     #endregion
 
     #region Item Actions
@@ -170,18 +196,6 @@ public class ItemBase : InteractableObject
     public virtual void PrimaryAnimationFinish() { }
     public virtual void SecondaryAnimationTrigger() { }
     public virtual void SecondaryAnimationFinish() { }
-
-    #endregion
-
-    #region Gizmos
-
-    private void OnDrawGizmos()
-    {
-        if (GameManager.Instance == null || !GameManager.Instance.debug) return;
-
-        Gizmos.color = _gizmoColor;
-        Gizmos.DrawWireSphere(transform.position, 0.5f);
-    }
 
     #endregion
 }

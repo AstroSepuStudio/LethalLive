@@ -3,7 +3,6 @@ using UnityEngine;
 using Mirror;
 using System.Collections;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -140,6 +139,13 @@ public class VortexAI : AIBrain, IHearingListener
             attackStat.AttackForce * am,
             attackStat.AttackDamage * am,
             attackStat.AttackCooldown);
+
+        lootDropper.OnLootSpawned = (item) =>
+        {
+            float am = GetAlphaMultiplier();
+            item.MultiplyValue(am);
+            item.SetScale(Vector3.one * Mathf.Lerp(0.6f, 1.2f, (float)alpha / 100f));
+        };
     }
 
     protected override void Start()
@@ -917,6 +923,8 @@ public class VortexAI : AIBrain, IHearingListener
 
     public override void OnAgentDeath(AttackEvent source)
     {
+        base.OnAgentDeath(source);
+
         DropCarriedItem();
         isDying = true;
         StopAgentMovement();

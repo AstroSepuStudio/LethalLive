@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,10 +14,12 @@ public class CusElementUI : MonoBehaviour
     [SerializeField] Slider glowSlider;
 
     [Header("Config")]
+    [SerializeField] SkinData.BodyHeight cameraHeight;
     [SerializeField] MaterialType matType;
     [SerializeField] SkinData.AccessoryType accesoryType;
 
     public Color GetColor(ColorType type) => skinData.GetColor(accesoryType, type, matType);
+    public SkinData.BodyHeight GetCameraHeight => cameraHeight;
 
     private void OnEnable()
     {

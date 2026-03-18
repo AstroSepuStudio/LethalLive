@@ -12,6 +12,7 @@ public class SkinData : NetworkBehaviour
 {
     public readonly static string CustomizationSaveDataLocation = "customization.json";
 
+    public enum BodyHeight { Head, Upper, Lower, Feet}
     public enum AccessoryType { None, Upper, Legs, Feet, Extra, Hair }
     [System.Serializable]
     public struct Accessory
@@ -33,6 +34,10 @@ public class SkinData : NetworkBehaviour
     public SkinnedMeshRenderer[] FacialRenderers;
     public Accessory[] Accesories;
     public MatColPair defaultPair;
+    public Transform HeadCustomPoint;
+    public Transform UpperCustomPoint;
+    public Transform LowerCustomPoint;
+    public Transform BootCustomPoint;
 
     Material BodyMaterial;
     Material FacialMaterial;
@@ -274,6 +279,22 @@ public class SkinData : NetworkBehaviour
     #endregion
 
     #region Customization
+
+    public void TakeCameraControl(BodyHeight height)
+    {
+        Transform target = height switch
+        {
+            BodyHeight.Head => HeadCustomPoint,
+            BodyHeight.Upper => UpperCustomPoint,
+            BodyHeight.Lower => LowerCustomPoint,
+            BodyHeight.Feet => BootCustomPoint,
+            _ => null
+        };
+
+        pData.DropCameraControl();
+        if (target != null)
+            pData.TakeCameraControl(target);
+    }
 
     public void SetBodyColor(string param, Color color) => BodyMaterial.SetColor(param, ClampColorNoFullChannels(color));
 

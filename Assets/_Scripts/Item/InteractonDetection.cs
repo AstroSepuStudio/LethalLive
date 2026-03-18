@@ -126,6 +126,7 @@ public class InteractonDetection : NetworkBehaviour
     void CmdRequestInteraction()
     {
         if (currentInteractable != null) return;
+        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return;
 
         Transform cam = pData.PlayerCamera.transform;
         if (Physics.Linecast(cam.position, cam.forward * raycastDistance + cam.position, out RaycastHit rayHit, pData.IgnorePlayer))
@@ -171,9 +172,9 @@ public class InteractonDetection : NetworkBehaviour
     [Command]
     void CmdRequestStopInteraction()
     {
+        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return; 
         if (currentInteractable != null)
         {
-            //Debug.Log($"Stop interaction {currentInteractable.gameObject.name}");
             currentInteractable.OnStopInteract(pData);
             currentInteractable = null;
 

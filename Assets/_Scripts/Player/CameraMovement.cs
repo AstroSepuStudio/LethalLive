@@ -43,6 +43,18 @@ public class CameraMovement : MonoBehaviour
         LobbyManager.Instance.OnLobbyKickedEvent.RemoveListener(DestroyGameobject);
     }
 
+    private void OnEnable()
+    {
+        Vector3 back = -pData.CameraPivot.forward;
+        pData.PlayerCamera.transform.position = pData.CameraPivot.position + back * distanceToTarget;
+
+        if (Physics.Linecast(pData.CameraPivot.position, pData.PlayerCamera.transform.position + back * 0.12f, out RaycastHit hit, pData.IgnorePlayer))
+        {
+            Vector3 safePos = pData.CameraPivot.position + back * (hit.distance - 0.12f);
+            pData.PlayerCamera.transform.position = safePos;
+        }
+    }
+
     void DestroyGameobject() => Destroy(gameObject);
     void DestroyGameobject(LobbyKicked_t arg0) => Destroy(gameObject);
 

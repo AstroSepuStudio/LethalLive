@@ -41,6 +41,8 @@ public class ColorPickerControl : MonoBehaviour
 
         skinData.SaveToJson(SkinData.CustomizationSaveDataLocation);
         skinData.SyncSkinData();
+
+        skinData.pData.DropCameraControl();
     }
 
     void CreateHueImage()
@@ -159,8 +161,9 @@ public class ColorPickerControl : MonoBehaviour
         UpdateOutputImage();
     }
 
-    public void SetCurrentMatColPair(MatColPair pair)
+    public void SetCurrentMatColPair(MatColPair pair, CusElementUI elementUI)
     {
+        skinData.TakeCameraControl(elementUI.GetCameraHeight);
         currentPair = pair;
         SetHSV(pair.GetColor());
     }

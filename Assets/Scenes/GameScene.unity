@@ -27964,6 +27964,7 @@ MonoBehaviour:
   - {fileID: 3160449891824070426, guid: 8a08752c27a910f4898451a15e2576df, type: 3}
   - {fileID: 8414626633250624720, guid: e5b4d0428e1ff70498c8b0b6062503e3, type: 3}
   - {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
+  - {fileID: 9084241017591515198, guid: 3cb58240750ed7c4ab94cf993bf0f4cf, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
     bufferLimit: 32
@@ -29908,6 +29909,7 @@ MonoBehaviour:
   - {fileID: 3160449891824070426, guid: 8a08752c27a910f4898451a15e2576df, type: 3}
   - {fileID: 8414626633250624720, guid: e5b4d0428e1ff70498c8b0b6062503e3, type: 3}
   - {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
+  - {fileID: 9084241017591515198, guid: 3cb58240750ed7c4ab94cf993bf0f4cf, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
     bufferLimit: 32
@@ -69641,6 +69643,8 @@ MonoBehaviour:
   furnColor: {r: 0.7169812, g: 0.568627, b: 0.32805273, a: 1}
   beaconSprite: {fileID: 21300000, guid: bcf5c4d9bb69089418a10e3a919f4b5e, type: 3}
   beaconColor: {r: 0, g: 1, b: 1, a: 1}
+  entitySprite: {fileID: 21300000, guid: 549d240573348f348805441c3b29efb0, type: 3}
+  entityColor: {r: 1, g: 0, b: 0, a: 1}
   cellSize: 200
   mapColor: {r: 0, g: 0.5882353, b: 0, a: 1}
 --- !u!1 &1655043648
@@ -70296,7 +70300,6 @@ MonoBehaviour:
   spawnDelay: 0
   spawnChance: 100
   spawnCooldown: 2
-  maxEntities: 10
 --- !u!114 &1679809404
 MonoBehaviour:
   m_ObjectHideFlags: 0

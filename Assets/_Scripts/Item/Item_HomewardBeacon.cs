@@ -16,10 +16,8 @@ public class Item_HomewardBeacon : ItemBase
     bool _placing = false;
     bool _placed = false;
 
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
-
         if (_startActivated)
         {
             PlaceBeacon();

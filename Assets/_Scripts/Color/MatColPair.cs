@@ -14,7 +14,10 @@ public class MatColPair : MonoBehaviour
         btnImage.color = elementUI.GetColor(colorType);
     }
 
-    public void SelectPair() => colorPC.SetCurrentMatColPair(this);
+    public void SelectPair()
+    {
+        colorPC.SetCurrentMatColPair(this, elementUI);
+    }
 
     public void SetColor(Color color)
     {

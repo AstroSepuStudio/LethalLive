@@ -17,17 +17,29 @@ public class AIBrain : NetworkBehaviour
         public AudioSFX[] Clips;
     }
 
+    [System.Serializable]
+    public struct LootDrop
+    {
+        public ItemSO lootData;
+        [Range(0f, 100f)] public float dropChance;
+        [Range(1, 5)] public int minQuantity;
+        [Range(1, 5)] public int maxQuantity;
+    }
+
     [Header("AI Core")]
     [SerializeField] protected Animator animator;
     [SerializeField] protected Collider collider_;
     [SerializeField] protected SkinnedMeshRenderer renderer_;
     [SerializeField] protected NavMeshAgent agent;
+    [SerializeField] protected AILootDropper lootDropper;
 
     [SerializeField] protected AIState[] states;
     [SerializeField] protected LayerMask losBlockingLayers;
 
     [SerializeField] protected EntityStats entityStats;
     [SerializeField] protected AttackStat attackStat;
+
+    [SerializeField] protected LootDrop[] lootPool;
 
     [Header("AI Audio")]
     [SerializeField] protected AudioSource audioSrc;
@@ -44,6 +56,7 @@ public class AIBrain : NetworkBehaviour
     float footstepTimer;
 
     public string Prefix => $"[AIBrain ({gameObject.name})]";
+    public LootDrop[] GetLootPool() => lootPool;
 
     [field:SerializeField] protected AIState CurrentState { get; private set; }
     protected bool isDying;
@@ -162,7 +175,12 @@ public class AIBrain : NetworkBehaviour
 
     public virtual void OnAgentDeath(AttackEvent source)
     {
-
+        if (lootDropper == null)
+        {
+            if (!TryGetComponent(out lootDropper))
+                return;
+        }
+        lootDropper.OnOwnerDeath(source);
     }
 
     public void MoveAgent(Vector3 position) => agent.SetDestination(position);

@@ -22,7 +22,13 @@ public class ItemSO : ScriptableObject, IHaveTier
     public bool hasSecondaryAction = false;
     public bool pickable = true;
     public bool droppable = true;
+    public bool stackable = false;
 
     public Vector3 gOffset;
     public Vector3 gRotation;
+}
+
+public interface IStackable
+{
+    void SetQuantity(int amount);
 }
