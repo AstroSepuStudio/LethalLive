@@ -2,6 +2,7 @@ using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Multiplayer.PlayMode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -59,6 +60,7 @@ public class DNG_MapModule : NetworkBehaviour
     [SyncVar(hook = nameof(OnDisplayFeaturesChanged))] bool _syncDisplayFeatures = true;
     [SyncVar(hook = nameof(OnFollowTargetChanged))] int _syncFollowTargetIdx = 0;
     [SyncVar(hook = nameof(OnMapAnchorChanged))] Vector2 _syncMapAnchor;
+    [SyncVar(hook = nameof(OnCurrentLayerChanged))] int _syncCurrentLayer = 0;
 
     readonly Dictionary<Vector2Int, MapChunk> chunks = new();
     readonly Dictionary<int, List<MapChunk>> layerChunks = new();
@@ -257,6 +259,7 @@ public class DNG_MapModule : NetworkBehaviour
     [Command(requiresAuthority = false)] void CmdSetDisplayFeatures(bool value) => _syncDisplayFeatures = value;
     [Command(requiresAuthority = false)] void CmdSetFollowTarget(int idx) => _syncFollowTargetIdx = idx;
     [Command(requiresAuthority = false)] public void CmdSetMapAnchor(Vector2 p) => _syncMapAnchor = p;
+    [Command(requiresAuthority = false)] void CmdSetCurrentLayer(int layer) => _syncCurrentLayer = layer;
 
     [Command(requiresAuthority = false)]
     public void CmdSnapshotMapAnchor(int senderIndex, Vector2 position)
@@ -289,6 +292,12 @@ public class DNG_MapModule : NetworkBehaviour
     {
         if (isOwned) return;
         mapAnchor.anchoredPosition = n;
+    }
+
+    void OnCurrentLayerChanged(int o, int n)
+    {
+        if (isOwned) return;
+        SetRenderLayer(n);
     }
 
     public void SetNextLayer() { if (followPlayer) ToggleFollowPlayer(); SetRenderLayer(currentLayer + 1); }
@@ -364,6 +373,7 @@ public class DNG_MapModule : NetworkBehaviour
                 if (go) go.SetActive(displayFeatures);
 
         currentLayer = layer;
+        if (isClient) CmdSetCurrentLayer(layer);
 
         UpdateVisibleChunks();
     }
