@@ -1229,15 +1229,17 @@ MonoBehaviour:
   ports:
   - localCell: {x: 0, y: 0, z: 0}
     face: 1
+    type: 0
     wall: {fileID: 1328147825472747187}
     door: {fileID: 0}
   - localCell: {x: 0, y: 1, z: 1}
     face: 0
+    type: 0
     wall: {fileID: 1139905599493019200}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: da19610f5a325994480c008648ec7bd3, type: 2}
-  itemSpawnPositions: []
-  furnitureSpawnPositions: []
+  ItemSpawnPositions: []
+  FurnitureSpawnPositions: []
   entitySpawnerPositions: []
   roomRenderers:
   - {fileID: 2097591600667780241}
@@ -1253,15 +1255,16 @@ MonoBehaviour:
   - {fileID: 1001877726630404737}
   - {fileID: 4229577537236540685}
   beingRendered: 1
-  showItemSpawnAreas: 0
   showFootprint: 0
+  showPorts: 0
+  showFootprintCorners: 0
   showFootprintCoords: 0
   showFootprintSprites: 0
   fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
   fontSize: 25
   spriteSize: 150
-  useLayers: 0
-  currentLayer: 0
+  useLayers: 1
+  currentLayer: 1
 --- !u!1 &8955281576470855834
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,16 +15,17 @@ MonoBehaviour:
   Prefab: {fileID: 6859338258297046723, guid: e33c0be5c013e9a4eba1c76660b2df67, type: 3}
   biome: 3
   RoomTier: 2
+  ValidVortexHome: 1
   roomColor: {r: 1, g: 1, b: 1, a: 1}
   RoomFootprint:
   - Footprint: {x: 0, y: 0, z: 0}
-    MapSprite: {fileID: 21300000, guid: fb2d7bd311c75ab44965c20c94a51065, type: 3}
+    MapSprite: {fileID: -234670152, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
   - Footprint: {x: 0, y: 1, z: 0}
-    MapSprite: {fileID: 0}
+    MapSprite: {fileID: -637396849, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
   - Footprint: {x: 0, y: 0, z: -1}
-    MapSprite: {fileID: 0}
+    MapSprite: {fileID: -1479516048, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
   - Footprint: {x: 0, y: 1, z: -1}
-    MapSprite: {fileID: 21300000, guid: b3a52fe63c4f4494eb5e831c08e3ae20, type: 3}
+    MapSprite: {fileID: 604337067, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
   Ports:
   - localCell: {x: 0, y: 0, z: 0}
     face: 3
@@ -32,3 +33,4 @@ MonoBehaviour:
   - localCell: {x: 0, y: 1, z: -1}
     face: 3
     type: 0
+  FootprintCorners: []

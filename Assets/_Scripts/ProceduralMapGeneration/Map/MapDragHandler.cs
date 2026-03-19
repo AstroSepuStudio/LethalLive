@@ -30,5 +30,4 @@ public class MapDragHandler : MonoBehaviour, IDragHandler, IPointerDownHandler
             mapModule.CmdSnapshotMapAnchor(GameManager.Instance.playMod.LocalPlayer.Index, mapTarget.anchoredPosition);
         }
     }
-
 }

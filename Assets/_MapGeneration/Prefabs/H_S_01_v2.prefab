@@ -777,15 +777,17 @@ MonoBehaviour:
   ports:
   - localCell: {x: 0, y: 0, z: 0}
     face: 2
+    type: 0
     wall: {fileID: 1328147825472747187}
     door: {fileID: 0}
   - localCell: {x: 0, y: 0, z: 0}
     face: 3
+    type: 0
     wall: {fileID: 1139905599493019200}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: 7a0cb0ce971a8e24eaf1c91ab9da0f07, type: 2}
-  itemSpawnPositions: []
-  furnitureSpawnPositions: []
+  ItemSpawnPositions: []
+  FurnitureSpawnPositions: []
   entitySpawnerPositions: []
   roomRenderers:
   - {fileID: 7955635236948304041}
@@ -798,8 +800,9 @@ MonoBehaviour:
   roomLights:
   - {fileID: 9120737099902445241}
   beingRendered: 1
-  showItemSpawnAreas: 0
   showFootprint: 0
+  showPorts: 0
+  showFootprintCorners: 0
   showFootprintCoords: 0
   showFootprintSprites: 0
   fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}

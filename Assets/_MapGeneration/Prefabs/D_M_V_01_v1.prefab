@@ -9341,38 +9341,47 @@ MonoBehaviour:
   ports:
   - localCell: {x: 0, y: 0, z: 1}
     face: 0
+    type: 0
     wall: {fileID: 4092866981239424300}
     door: {fileID: 0}
   - localCell: {x: 0, y: 0, z: 0}
     face: 1
+    type: 0
     wall: {fileID: 7910161231268772985}
     door: {fileID: 0}
   - localCell: {x: 0, y: 0, z: 0}
     face: 3
+    type: 0
     wall: {fileID: 7822300199010848368}
     door: {fileID: 0}
   - localCell: {x: 0, y: 0, z: 1}
     face: 3
+    type: 0
     wall: {fileID: 984948357651999499}
     door: {fileID: 0}
   - localCell: {x: 0, y: -1, z: 0}
     face: 3
+    type: 0
     wall: {fileID: 9005115460885604063}
     door: {fileID: 0}
   - localCell: {x: 0, y: -1, z: 1}
     face: 3
+    type: 0
     wall: {fileID: 9022576413921093112}
     door: {fileID: 0}
   - localCell: {x: 0, y: -1, z: 1}
     face: 0
+    type: 0
     wall: {fileID: 2428833065916697424}
     door: {fileID: 0}
   - localCell: {x: 0, y: -1, z: 0}
     face: 1
+    type: 0
     wall: {fileID: 2177248842274676801}
     door: {fileID: 0}
   - localCell: {x: 1, y: 0, z: 0}
     face: 2
+    type: 0
     wall: {fileID: 2283331789332331965}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: b9cf2cf32ed402044ad5519bb675c21d, type: 2}
@@ -9426,7 +9435,7 @@ MonoBehaviour:
   fontSize: 25
   spriteSize: 200
   useLayers: 1
-  currentLayer: 0
+  currentLayer: -1
 --- !u!1 &7810057937278208449
 GameObject:
   m_ObjectHideFlags: 0
