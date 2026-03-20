@@ -49,8 +49,7 @@ public class DynamicOcclusionCulling : MonoBehaviour
         Vector3Int cellPosition = new(
             Mathf.RoundToInt(playerPos.x / Instance.CellSize),
             Mathf.RoundToInt(playerPos.y / Instance.CellSize),
-            Mathf.RoundToInt(playerPos.z / Instance.CellSize)
-        );
+            Mathf.RoundToInt(playerPos.z / Instance.CellSize) );
 
         if (!Instance.InBounds(cellPosition) || GameManager.Instance.playMod.LocalPlayer._PlayerInOffice)
         {
@@ -115,14 +114,6 @@ public class DynamicOcclusionCulling : MonoBehaviour
             bool shouldRender = expanded.Contains(r.Key);
             r.Value.SetRender(shouldRender);
 
-            if (Instance.RoomFurniture.TryGetValue(r.Key, out var furniture))
-                foreach (var f in furniture)
-                    if (f != null) f.SetRender(shouldRender);
-
-            if (Instance.RoomItems.TryGetValue(r.Key, out var items))
-                foreach (var item in items)
-                    if (item != null) item.SetRender(shouldRender);
-
             if (shouldRender)
             {
                 var pr = Instance.PlacedRooms.FirstOrDefault(p => p.id == r.Key);
@@ -133,6 +124,30 @@ public class DynamicOcclusionCulling : MonoBehaviour
                     float roomRadius = pr.data.RoomFootprint.Length * Instance.CellSize;
                     maxWorldDist = Mathf.Max(maxWorldDist, dist + roomRadius);
                 }
+            }
+        }
+
+        foreach (var kvp in Instance.RoomFurniture)
+        {
+            foreach (var furniture in kvp.Value)
+            {
+                if (furniture == null) continue;
+
+                int currentRoomId = Instance.GetRoomIdAtPosition(furniture.transform.position);
+                bool furnitureVisible = currentRoomId != -1 && expanded.Contains(currentRoomId);
+                furniture.SetRender(furnitureVisible);
+            }
+        }
+
+        foreach (var kvp in Instance.RoomItems)
+        {
+            foreach (var item in kvp.Value)
+            {
+                if (item == null) continue;
+
+                int currentRoomId = Instance.GetRoomIdAtPosition(item.transform.position);
+                bool itemVisible = currentRoomId != -1 && expanded.Contains(currentRoomId);
+                item.SetRender(itemVisible);
             }
         }
 

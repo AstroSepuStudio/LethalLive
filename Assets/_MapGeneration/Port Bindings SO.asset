@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fa64ce7a5ca3a043a0b97eb4dce04a6, type: 3}
+  m_Name: Port Bindings SO
+  m_EditorClassIdentifier: Assembly-CSharp::PortWallBindingsSO
+  Bindings:
+  - direction: 0
+    portType: 0
+    wallPrefab: {fileID: 3324424362661180418, guid: 0ff77a49f41825942bf9b3b0d71efc9b, type: 3}
+    doorPrefab: {fileID: 0}
+  - direction: 1
+    portType: 0
+    wallPrefab: {fileID: 3060799061294124341, guid: 1c72bc08a3dddf246a51ac2359b37288, type: 3}
+    doorPrefab: {fileID: 0}
+  - direction: 2
+    portType: 0
+    wallPrefab: {fileID: 4400163199399763137, guid: 734510969ad1e5d4a8a6637d9a0ddd93, type: 3}
+    doorPrefab: {fileID: 0}
+  - direction: 3
+    portType: 0
+    wallPrefab: {fileID: 6828581216324831414, guid: fbc05f616bb4a314a91d89aa2e0f2830, type: 3}
+    doorPrefab: {fileID: 0}
+  - direction: 0
+    portType: 1
+    wallPrefab: {fileID: 952055619204945318, guid: 64f4341f97d10964bab4bcf7295df456, type: 3}
+    doorPrefab: {fileID: 0}
+  - direction: 1
+    portType: 1
+    wallPrefab: {fileID: 952055619204945318, guid: 053d58779d8bd3c48a4e62f58f843334, type: 3}
+    doorPrefab: {fileID: 0}
+  - direction: 2
+    portType: 1
+    wallPrefab: {fileID: 952055619204945318, guid: d49b63eacd694964c92e4499309d5635, type: 3}
+    doorPrefab: {fileID: 0}
+  - direction: 3
+    portType: 1
+    wallPrefab: {fileID: 952055619204945318, guid: 679b42cded136e345a1c66c97361ea4b, type: 3}
+    doorPrefab: {fileID: 0}

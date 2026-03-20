@@ -640,8 +640,9 @@ public class DungeonGenerator : NetworkBehaviour
         {
             if (!spawned.TryGetValue(pr.id, out var rd) || rd == null) continue;
 
-            foreach (var port in pr.data.Ports)
+            for (int i = 0; i < pr.data.Ports.Length; i++)
             {
+                var port = pr.data.Ports[i];
                 var worldCell = pr.anchor + port.localCell;
                 var nb = worldCell + DirectionUtils.DirectionVector(port.face);
 
@@ -651,7 +652,6 @@ public class DungeonGenerator : NetworkBehaviour
                     var nOcc = grid[nb.x, nb.y, nb.z].placedRoom;
                     if (nOcc != null)
                     {
-                        // Verify neighbor exposes matching port at its corresponding local cell/face
                         var neighborLocal = nb - nOcc.anchor;
                         foreach (var np in nOcc.data.Ports)
                         {
@@ -666,7 +666,7 @@ public class DungeonGenerator : NetworkBehaviour
                     }
                 }
 
-                rd.SetPort(port.localCell, port.face, port.type, open);
+                rd.SetPort(i, open);
             }
         }
     }

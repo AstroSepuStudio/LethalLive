@@ -81,6 +81,15 @@ public class AudioManager : MonoBehaviour
         sfxSource.PlayOneShot(sfx.clip, finalVolume);
     }
 
+    public void PlayOneShot(AudioSource src, AudioSFX sfx, Vector3 position)
+    {
+        float typeVolume = GetTypeVolume(sfx.audioType);
+        float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
+
+        src.transform.position = position;
+        src.PlayOneShot(sfx.clip, finalVolume);
+    }
+
     public void PlayOneShotAndDestroy(Vector3 position, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);

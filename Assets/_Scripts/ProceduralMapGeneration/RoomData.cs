@@ -6,12 +6,10 @@ using UnityEngine.AI;
 
 public class RoomData : MonoBehaviour
 {
-    [System.Serializable]
+    [Serializable]
     public struct WallPortKey
     {
-        public Vector3Int localCell;
-        public Direction face;
-        public RoomDataSO.PortType type;
+        public int portIndex;
         public GameObject wall;
         public GameObject door;
     }
@@ -43,31 +41,20 @@ public class RoomData : MonoBehaviour
     [SerializeField] bool useLayers = false;
     [SerializeField] int currentLayer = 0;
 
-    public readonly List<WallPortKey> closedPorts = new();
+    public readonly List<int> closedPorts = new();
 
     private void Start()
     {
         roomRenderers = roomRenderers.Where(r => r != null && r.enabled).ToArray();
     }
 
-    public void SetPort(Vector3Int localCell, Direction face, RoomDataSO.PortType type, bool open)
+    public void SetPort(int portIndex, bool open)
     {
-        if (!open)
-        {
-            WallPortKey key = new() { localCell = localCell, face = face, type = type };
+        if (!open) closedPorts.Add(portIndex);
 
-            closedPorts.Add(key);
-        }
-
-        for (int i = 0; i < ports.Length; i++)
-        {
-            if (ports[i].localCell == localCell && ports[i].face == face)
-            {
-                if (ports[i].wall) ports[i].wall.SetActive(!open);
-                if (ports[i].door) ports[i].door.SetActive(open);
-                return;
-            }
-        }
+        if (portIndex < 0 || portIndex >= ports.Length) return;
+        if (ports[portIndex].wall) ports[portIndex].wall.SetActive(!open);
+        if (ports[portIndex].door) ports[portIndex].door.SetActive(open);
     }
 
     public void SetRender(bool shouldRender)
@@ -132,8 +119,10 @@ public class RoomData : MonoBehaviour
 
         if (showPorts)
         {
-            foreach (var port in Data.Ports)
+            for (int pi = 0; pi < Data.Ports.Length; pi++)
             {
+                var port = Data.Ports[pi];
+
                 if (useLayers && port.localCell.y != currentLayer) continue;
 
                 Vector3 dir = (Vector3)DirectionUtils.DirectionVector(port.face);
@@ -171,7 +160,7 @@ public class RoomData : MonoBehaviour
 
                 UnityEditor.Handles.Label(
                     faceCentre + dir * (cellSize * 0.4f) + Vector3.up * 0.3f,
-                    $"({Array.IndexOf(Data.Ports, port)}) {port.face} {port.localCell}",
+                    $"[{pi}] {port.face} {port.localCell}",
                     new GUIStyle
                     {
                         normal = { textColor = DirectionColor(port.face) },
@@ -179,40 +168,39 @@ public class RoomData : MonoBehaviour
                         alignment = TextAnchor.MiddleCenter
                     });
 
+                bool wired = false;
                 foreach (var wpk in ports)
                 {
-                    if (wpk.localCell != port.localCell || wpk.face != port.face) continue;
+                    if (wpk.portIndex != pi) continue;
+                    wired = true;
 
-                    string wallFootprint = "null";
-                    string doorFootprint = "null";
-
-                    if (wpk.wall != null)
-                    {
-                        Vector3 wallLocal = (wpk.wall.transform.position - origin) / cellSize;
-                        Vector3Int closest = FindClosestFootprint(wallLocal);
-                        wallFootprint = $"{closest}";
-                    }
-
-                    if (wpk.door != null)
-                    {
-                        Vector3 doorLocal = (wpk.door.transform.position - origin) / cellSize;
-                        Vector3Int closest = FindClosestFootprint(doorLocal);
-                        doorFootprint = $"{closest}";
-                    }
-
-                    string wallStr = wallFootprint != "null" ? $"W: {wpk.wall.name}({wallFootprint})" : "-";
-                    string doorStr = doorFootprint != "null" ? $"D: {wpk.door.name}({doorFootprint})" : "-";
+                    string wallStr = wpk.wall != null ? $"W: {wpk.wall.name}" : "W: -";
+                    string doorStr = wpk.door != null ? $"D: {wpk.door.name}" : "D: -";
+                    bool incomplete = wpk.wall == null || wpk.door == null;
 
                     UnityEditor.Handles.Label(
                         faceCentre + dir * (cellSize * 0.4f) + Vector3.up * -0.5f,
                         $"{wallStr} | {doorStr}",
                         new GUIStyle
                         {
-                            normal = { textColor = Color.red },
+                            normal = { textColor = incomplete ? Color.yellow : Color.green },
                             fontSize = 20,
                             alignment = TextAnchor.MiddleCenter
                         });
                     break;
+                }
+
+                if (!wired)
+                {
+                    UnityEditor.Handles.Label(
+                        faceCentre + dir * (cellSize * 0.4f) + Vector3.up * -0.5f,
+                        "NOT WIRED",
+                        new GUIStyle
+                        {
+                            normal = { textColor = Color.red },
+                            fontSize = 20,
+                            alignment = TextAnchor.MiddleCenter
+                        });
                 }
             }
         }
@@ -240,16 +228,6 @@ public class RoomData : MonoBehaviour
                 
                 if (tex != null)
                 {
-                    float worldSize = spriteSize / 100f;
-
-                    Vector3 right = UnityEditor.SceneView.lastActiveSceneView?.camera.transform.right ?? Vector3.right;
-                    Vector3 up = UnityEditor.SceneView.lastActiveSceneView?.camera.transform.up ?? Vector3.up;
-
-                    Vector3 tl = worldCenter + (-right + up) * worldSize * 0.5f;
-                    Vector3 tr = worldCenter + (right + up) * worldSize * 0.5f;
-                    Vector3 br = worldCenter + (right - up) * worldSize * 0.5f;
-                    Vector3 bl = worldCenter + (-right - up) * worldSize * 0.5f;
-
                     UnityEditor.Handles.BeginGUI();
                     Vector2 guiCenter = UnityEditor.HandleUtility.WorldToGUIPoint(worldCenter);
                     float guiSize = spriteSize;

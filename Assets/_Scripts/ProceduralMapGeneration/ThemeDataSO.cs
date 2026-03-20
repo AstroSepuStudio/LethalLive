@@ -15,13 +15,6 @@ public class ThemeDataSO : ScriptableObject
         public int maxSpawnCount;
     }
 
-    [System.Serializable]
-    public struct EerySFX
-    {
-        public AudioSFX clip;
-        public float weight;
-    }
-
     public string levelName;
 
     [Header("Room Generation")]
@@ -37,7 +30,7 @@ public class ThemeDataSO : ScriptableObject
 
     [Header("Ambient")]
     public AudioSFX loopingMusic;
-    public EerySFX[] eerySFX;
+    public AudioSFX[] eerySFX;
     public AudioReverbPreset reverbPreset = AudioReverbPreset.Cave;
 
     public int MinItems = 3;

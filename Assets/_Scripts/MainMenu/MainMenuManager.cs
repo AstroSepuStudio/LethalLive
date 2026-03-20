@@ -10,6 +10,7 @@ public class MainMenuManager : UIManager
     [SerializeField] GameObject menuScene;
     [SerializeField] GameObject office;
     [SerializeField] Transform menuCam;
+    [SerializeField] AudioSFX mainMenuMusic;
 
     [Header("Animation")]
     [SerializeField] Transform initialPosition;
@@ -29,25 +30,24 @@ public class MainMenuManager : UIManager
         LobbyManager.Instance.OnLobbyKickedEvent.AddListener(DisplayMainMenu);
 
         SwitchCameraAnimation(true);
+
+        AudioManager.Instance.PlayMusic(mainMenuMusic);
     }
 
-    private void HideMainMenu(LobbyEnter_t arg0)
+    private void HideMainMenu(LobbyCreated_t arg0) => HideMainMenu();
+    private void HideMainMenu(LobbyEnter_t arg0) => HideMainMenu();
+
+    private void HideMainMenu()
     {
         gameObject.SetActive(false);
         cameraParent.SetActive(false);
         if (menuScene != null) menuScene.SetActive(false);
         if (office != null) office.SetActive(true);
         SwitchCameraAnimation(false);
+        AudioManager.Instance.StopMusic();
     }
 
-    private void HideMainMenu(LobbyCreated_t arg0)
-    {
-        gameObject.SetActive(false);
-        cameraParent.SetActive(false);
-        if (menuScene != null) menuScene.SetActive(false);
-        if (office != null) office.SetActive(true);
-        SwitchCameraAnimation(false);
-    }
+    private void DisplayMainMenu(LobbyKicked_t arg0) => DisplayMainMenu();
 
     private void DisplayMainMenu()
     {
@@ -58,17 +58,7 @@ public class MainMenuManager : UIManager
 
         SettingsManager.Instance.UnlockMouse();
         SwitchCameraAnimation(true);
-    }
-
-    private void DisplayMainMenu(LobbyKicked_t arg0)
-    {
-        gameObject.SetActive(true);
-        cameraParent.SetActive(true);
-        if (menuScene != null) menuScene.SetActive(true);
-        if (office != null) office.SetActive(false);
-
-        SettingsManager.Instance.UnlockMouse();
-        SwitchCameraAnimation(true);
+        AudioManager.Instance.PlayMusic(mainMenuMusic);
     }
 
     public void QuitApplication()

@@ -401,6 +401,8 @@ public class DNG_MapModule : NetworkBehaviour
 
     private Sprite GetDeadEnd(RoomDataSO.PortType type, Direction direction)
     {
+
+
         foreach (var des in deadEndSprites)
             if (des.type == type && des.direction == direction)
                 return des.sprite;
@@ -496,19 +498,20 @@ public class DNG_MapModule : NetworkBehaviour
 
             foreach (var port in sr.Value.closedPorts)
             {
-                Sprite deadEndSprite = GetDeadEnd(port.type, port.face);
+                var portData = pr.data.Ports[port];
+                Sprite deadEndSprite = GetDeadEnd(portData.type, portData.face);
                 if (deadEndSprite == null) continue;
 
-                Vector3Int portWorld = pr.anchor + port.localCell;
+                Vector3Int portWorld = pr.anchor + portData.localCell;
 
-                if (port.type == RoomDataSO.PortType.Doorway)
+                if (portData.type == RoomDataSO.PortType.Doorway)
                 {
                     if (cellObjects.TryGetValue(portWorld, out var parent))
                         SpawnDeadEnd(parent, deadEndSprite, pr.data.roomColor);
                 }
                 else
                 {
-                    Vector3Int offset = DirectionUtils.RightOf(port.face);
+                    Vector3Int offset = DirectionUtils.RightOf(portData.face);
                     if (cellObjects.TryGetValue(portWorld, out var p1)) SpawnDeadEnd(p1, deadEndSprite, pr.data.roomColor);
                     if (cellObjects.TryGetValue(portWorld + offset, out var p2)) SpawnDeadEnd(p2, deadEndSprite, pr.data.roomColor);
                     if (cellObjects.TryGetValue(portWorld - offset, out var p3)) SpawnDeadEnd(p3, deadEndSprite, pr.data.roomColor);
