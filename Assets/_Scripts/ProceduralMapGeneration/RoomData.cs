@@ -202,6 +202,23 @@ public class RoomData : MonoBehaviour
                             alignment = TextAnchor.MiddleCenter
                         });
                 }
+
+                if (port.deadEndOverride != null)
+                {
+                    Texture2D tex = UnityEditor.AssetPreview.GetAssetPreview(port.deadEndOverride);
+                    if (tex == null) tex = port.deadEndOverride.texture;
+
+                    if (tex != null)
+                    {
+                        UnityEditor.Handles.BeginGUI();
+                        Vector2 guiCenter = UnityEditor.HandleUtility.WorldToGUIPoint(faceCentre);
+                        float guiSize = spriteSize;
+                        Rect guiRect = new Rect(guiCenter.x - guiSize * 0.5f, guiCenter.y - guiSize * 0.5f, guiSize, guiSize);
+                        GUI.DrawTexture(guiRect, tex, ScaleMode.ScaleToFit, true);
+                        UnityEditor.Handles.EndGUI();
+                    }
+                }
+
             }
         }
 
@@ -278,23 +295,5 @@ public class RoomData : MonoBehaviour
         Direction.Down => Color.magenta,
         _ => Color.white
     };
-
-    private Vector3Int FindClosestFootprint(Vector3 localPos)
-    {
-        Vector3Int closest = Data.RoomFootprint[0].Footprint;
-        float bestDist = float.MaxValue;
-
-        foreach (var entry in Data.RoomFootprint)
-        {
-            float dist = Vector3.Distance(localPos, (Vector3)entry.Footprint);
-            if (dist < bestDist)
-            {
-                bestDist = dist;
-                closest = entry.Footprint;
-            }
-        }
-
-        return closest;
-    }
 #endif
 }

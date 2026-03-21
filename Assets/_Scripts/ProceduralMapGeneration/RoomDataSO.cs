@@ -13,7 +13,9 @@ public class RoomDataSO : ScriptableObject
         public Vector3Int localCell;
         public Direction face;
         public PortType type;
+
         public Sprite deadEndOverride;
+        public Vector3Int deoCell;
     }
 
     [Serializable]

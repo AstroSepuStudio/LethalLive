@@ -2,7 +2,6 @@ using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Multiplayer.PlayMode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -399,12 +398,12 @@ public class DNG_MapModule : NetworkBehaviour
 
     #region Helpers
 
-    private Sprite GetDeadEnd(RoomDataSO.PortType type, Direction direction)
+    private Sprite GetDeadEnd(RoomDataSO.RoomPort port)
     {
-
+        //if (port.deadEndOverride != null) return port.deadEndOverride;
 
         foreach (var des in deadEndSprites)
-            if (des.type == type && des.direction == direction)
+            if (des.type == port.type && des.direction == port.face)
                 return des.sprite;
         return null;
     }
@@ -476,6 +475,13 @@ public class DNG_MapModule : NetworkBehaviour
         GenerateMap();
     }
 
+    private void SpawnContinuousCell(Vector3Int worldCell, Sprite sprite, Color color)
+    {
+        if (sprite == null) return;
+        if (cellObjects.TryGetValue(worldCell, out var parent))
+            SpawnDeadEnd(parent, sprite, color);
+    }
+
     #endregion
 
     #region Generation
@@ -499,22 +505,38 @@ public class DNG_MapModule : NetworkBehaviour
             foreach (var port in sr.Value.closedPorts)
             {
                 var portData = pr.data.Ports[port];
-                Sprite deadEndSprite = GetDeadEnd(portData.type, portData.face);
-                if (deadEndSprite == null) continue;
+                Sprite defaultSprite = GetDeadEnd(portData);
 
                 Vector3Int portWorld = pr.anchor + portData.localCell;
 
                 if (portData.type == RoomDataSO.PortType.Doorway)
                 {
+                    Sprite sprite = portData.deadEndOverride != null ? portData.deadEndOverride : defaultSprite;
+                    if (sprite == null) continue;
+
                     if (cellObjects.TryGetValue(portWorld, out var parent))
-                        SpawnDeadEnd(parent, deadEndSprite, pr.data.roomColor);
+                        SpawnDeadEnd(parent, sprite, pr.data.roomColor);
                 }
                 else
                 {
+                    if (defaultSprite == null) continue;
+
                     Vector3Int offset = DirectionUtils.RightOf(portData.face);
-                    if (cellObjects.TryGetValue(portWorld, out var p1)) SpawnDeadEnd(p1, deadEndSprite, pr.data.roomColor);
-                    if (cellObjects.TryGetValue(portWorld + offset, out var p2)) SpawnDeadEnd(p2, deadEndSprite, pr.data.roomColor);
-                    if (cellObjects.TryGetValue(portWorld - offset, out var p3)) SpawnDeadEnd(p3, deadEndSprite, pr.data.roomColor);
+                    Vector3Int center = portWorld;
+                    Vector3Int right = portWorld + offset;
+                    Vector3Int left = portWorld - offset;
+
+                    bool hasOverride = portData.deadEndOverride != null;
+                    Vector3Int deoWorld = hasOverride ? pr.anchor + portData.deoCell : Vector3Int.zero;
+
+                    Sprite sprt = hasOverride && deoWorld == center ? portData.deadEndOverride : defaultSprite;
+                    SpawnContinuousCell(center, sprt, pr.data.roomColor);
+
+                    sprt = hasOverride && deoWorld == right ? portData.deadEndOverride : defaultSprite;
+                    SpawnContinuousCell(right, sprt, pr.data.roomColor);
+
+                    sprt = hasOverride && deoWorld == left ? portData.deadEndOverride : defaultSprite;
+                    SpawnContinuousCell(left, sprt, pr.data.roomColor);
                 }
             }
         }
