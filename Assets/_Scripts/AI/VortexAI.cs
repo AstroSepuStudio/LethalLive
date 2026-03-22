@@ -7,7 +7,7 @@ using System.Collections;
 using UnityEditor;
 #endif
 
-public class VortexAI : AIBrain, IHearingListener
+public class VortexAI : AIBrain
 {
     [SerializeField] Transform pickUpPos;
     [SerializeField] ParticleSystem deathParticles;
@@ -153,15 +153,9 @@ public class VortexAI : AIBrain, IHearingListener
         base.Start();
 
         SetStates();
-        HearingEventBroadcaster.Instance.AddListener(this);
 
         if (isServer)
             AssignHomeRoom();
-    }
-
-    public void OnSoundHeard(AudioSoundEvent soundEvent)
-    {
-
     }
 
     void SetStates()

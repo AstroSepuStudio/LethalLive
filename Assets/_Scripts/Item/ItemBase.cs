@@ -1,7 +1,8 @@
 using Mirror;
-using System.Collections;
 using TMPro;
 using UnityEngine;
+
+public enum ItemActionType { None, Primary, Secondary }
 
 public class ItemBase : InteractableObject
 {
@@ -11,9 +12,13 @@ public class ItemBase : InteractableObject
     [SerializeField] protected Rigidbody rb;
     [SerializeField] protected Collider coll;
     [SerializeField] protected Renderer itemRenderer;
+    [SerializeField] protected ItemAnimationModule animationModule;
 
     [SerializeField] TextMeshProUGUI itemNameTxt;
     [SerializeField] TextMeshProUGUI itemPriceTxt;
+
+    [SerializeField] ItemAction primaryAction;
+    [SerializeField] ItemAction secondaryAction;
 
     public uint ID => identity.netId;
 
@@ -21,11 +26,11 @@ public class ItemBase : InteractableObject
     [SyncVar] public bool InUse = false;
     [SyncVar] public bool HasOwner = false;
 
-    public PlayerData pData { get; private set; }
-    public PlayerData lastPlayer { get; private set; }
-
-    public AttackStat primaryAtkStats = new();
-    public AttackStat secondaryAtkStats = new();
+    public PlayerData PData { get; private set; }
+    public PlayerData LastPlayer { get; private set; }
+    public ItemAnimationModule AnimationModule => animationModule;
+    public ItemAction PrimaryAction => primaryAction;
+    public ItemAction SecondaryAction => secondaryAction;
 
     public override void OnStartServer()
     {
@@ -37,8 +42,12 @@ public class ItemBase : InteractableObject
             return;
         }
 
-        if (isServer && ItemData.isSellable)
+        if (ItemData.isSellable)
             ItemValue = Random.Range(ItemData.minValue, ItemData.maxValue);
+
+        if (animationModule != null) animationModule.Initialize();
+        if (primaryAction != null) primaryAction.Initialize(this);
+        if (secondaryAction != null) secondaryAction.Initialize(this);
     }
 
     [Server]
@@ -54,16 +63,23 @@ public class ItemBase : InteractableObject
         RpcSetScale(scale);
     }
 
+    public ItemActionType GetActionType(ItemAction ia)
+    {
+        if (primaryAction == ia) return ItemActionType.Primary;
+        if (secondaryAction == ia) return ItemActionType.Secondary;
+        return ItemActionType.None;
+    }
+
     #region Interaction
 
     [Server]
     public override void OnInteract(PlayerData sourceData)
     {
         if (!ItemData.pickable) return;
-        
+
         if (sourceData.PlayerInventory.AddItem(this))
         {
-            pData = sourceData;
+            PData = sourceData;
             RpcGetPlayerData(sourceData.netId);
         }
     }
@@ -75,7 +91,7 @@ public class ItemBase : InteractableObject
 
         NetworkClient.spawned.TryGetValue(playerID, out NetworkIdentity netIdentity);
         if (netIdentity == null) return;
-        pData = netIdentity.GetComponent<PlayerData>();
+        PData = netIdentity.GetComponent<PlayerData>();
     }
 
     #endregion
@@ -107,9 +123,23 @@ public class ItemBase : InteractableObject
         transform.SetParent(null);
         rb.isKinematic = false;
 
-        lastPlayer = pData;
-        pData = null;
+        LastPlayer = PData;
+        PData = null;
     }
+
+    #endregion
+
+    #region Item Actions — delegate to modules
+
+    public void StartPrimaryAction() => primaryAction?.Execute();
+    public void CancelPrimaryAction() => primaryAction?.Cancel();
+    public void StartSecondaryAction() => secondaryAction?.Execute();
+    public void CancelSecondaryAction() => secondaryAction?.Cancel();
+
+    public void PrimaryAnimationTrigger() => primaryAction?.OnAnimationTrigger();
+    public void PrimaryAnimationFinish() => primaryAction?.OnAnimationFinish();
+    public void SecondaryAnimationTrigger() => secondaryAction?.OnAnimationTrigger();
+    public void SecondaryAnimationFinish() => secondaryAction?.OnAnimationFinish();
 
     #endregion
 
@@ -127,10 +157,7 @@ public class ItemBase : InteractableObject
     }
 
     [Server]
-    public void SetKinematic(bool kinematic)
-    {
-        rb.isKinematic = kinematic;
-    }
+    public void SetKinematic(bool kinematic) => rb.isKinematic = kinematic;
 
     public void DisplayItem(bool visible)
     {
@@ -145,57 +172,29 @@ public class ItemBase : InteractableObject
             Debug.LogWarning($"[ItemBase] itemRenderer not assigned on '{gameObject.name}'", this);
             return;
         }
-
         itemRenderer.enabled = render;
     }
 
-    public void SetCollider(bool enabled)
-    {
-        coll.enabled = enabled;
-    }
+    public void SetCollider(bool enabled) => coll.enabled = enabled;
 
-    public void DisableColliderTemporarily(float time)
-    {
-        StartCoroutine(EnableColliderAfterDelay(time));
-    }
+    public void DisableColliderTemporarily(float time) => StartCoroutine(EnableColliderAfterDelay(time));
 
-    public void AddForce(Vector3 force, ForceMode mode)
-    {
-        rb.AddForce(force, mode);
-    }
+    public void AddForce(Vector3 force, ForceMode mode) => rb.AddForce(force, mode);
 
-    IEnumerator EnableColliderAfterDelay(float time)
+    System.Collections.IEnumerator EnableColliderAfterDelay(float time)
     {
         coll.enabled = false;
-
         float timer = 0;
         while (timer < time)
         {
             timer += Time.deltaTime;
             yield return null;
         }
-
         coll.enabled = true;
     }
 
     [ClientRpc]
-    void RpcSetScale(Vector3 scale)
-    {
-        transform.localScale = scale;
-    }
-
-    #endregion
-
-    #region Item Actions
-
-    public virtual void PrimaryAction() { }
-    public virtual void SecondaryAction() { }
-    public virtual void CancelPrimaryAction() { }
-    public virtual void CancelSecondaryAction() { }
-    public virtual void PrimaryAnimationTrigger() { }
-    public virtual void PrimaryAnimationFinish() { }
-    public virtual void SecondaryAnimationTrigger() { }
-    public virtual void SecondaryAnimationFinish() { }
+    void RpcSetScale(Vector3 scale) => transform.localScale = scale;
 
     #endregion
 }

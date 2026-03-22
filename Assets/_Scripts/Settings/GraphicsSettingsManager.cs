@@ -4,6 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using LethalLive;
+using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class GraphicsSettingsManager : MonoBehaviour
 {
@@ -28,6 +30,8 @@ public class GraphicsSettingsManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] TMP_Dropdown resolutionsDropdown;
     [SerializeField] TMP_InputField targetFpsIF;
+    [SerializeField] Slider renderDistanceSlr;
+    [SerializeField] TMP_InputField renderDistanceIF;
     #endregion
 
     #region - Settings State - 
@@ -37,8 +41,11 @@ public class GraphicsSettingsManager : MonoBehaviour
     [SerializeField] List<ResolutionOption> availableResolutions;
 
     [Header("Visual")]
-    [SerializeField] bool vsyncEnabled;
+    [SerializeField] int currentRenderDistance = 6;
+    [SerializeField] int currentRenderType = 0;
+    [SerializeField] bool useRenderSecondPass = true;
     [SerializeField] int targetFPS = -1;
+    [SerializeField] bool vsyncEnabled;
     [SerializeField] bool postProcessingEnabled = true;
     #endregion
 
@@ -106,6 +113,26 @@ public class GraphicsSettingsManager : MonoBehaviour
     #endregion
 
     #region - Setters -
+
+    void SetRenderDistance(int distance)
+    {
+        currentRenderDistance = distance;
+        renderDistanceIF.SetTextWithoutNotify(distance.ToString());
+        SaveSettings();
+    }
+
+    void SetRenderType(int index)
+    {
+        currentRenderType = index;
+        SaveSettings();
+    }
+
+    void SetUseRenderSecondPass(bool enabled)
+    {
+        useRenderSecondPass = enabled;
+        SaveSettings();
+    }
+
     void SetResolution(int index)
     {
         if (index < 0 || index >= availableResolutions.Count)
@@ -203,6 +230,9 @@ public class GraphicsSettingsManager : MonoBehaviour
     #region - Persistence -
     void SaveSettings()
     {
+        UserSettings.SetRenderDistance(currentRenderDistance);
+        UserSettings.SetRenderTypeIndex(currentRenderType);
+        UserSettings.SetUseRenderSecondPass(useRenderSecondPass);
         UserSettings.SetResolutionIndex(currentResolutionIndex);
         UserSettings.SetScreenModeIndex((int)currentScreenMode);
         UserSettings.SetVsync(vsyncEnabled);
@@ -213,11 +243,11 @@ public class GraphicsSettingsManager : MonoBehaviour
 
     void LoadSettings()
     {
-        currentResolutionIndex =
-            UserSettings.GetResolutionIndex();
+        renderDistanceSlr.SetValueWithoutNotify(UserSettings.GetRenderDistance());
 
-        currentScreenMode =
-            (ScreenMode)UserSettings.GetScreenModeIndex();
+        currentResolutionIndex = UserSettings.GetResolutionIndex();
+
+        currentScreenMode = (ScreenMode)UserSettings.GetScreenModeIndex();
 
         vsyncEnabled = UserSettings.GetVsyncEnabled();
 
@@ -254,6 +284,9 @@ public class GraphicsSettingsManager : MonoBehaviour
     #endregion
 
     #region - UI Callbacks -
+    public void OnRenderDistanceChanged(float value) => SetRenderDistance((int)value);
+    public void OnRenderTypeChanged(int value) => SetRenderType(value);
+    public void OnUseRenderSecondPass(bool enabled) => SetUseRenderSecondPass(enabled);
     public void OnResolutionChanged(int value) => SetResolution(value);
     public void OnScreenModeChanged(int value) => SetScreenMode((ScreenMode)value);
     public void OnVSyncChanged(bool enabled) => SetVSync(enabled);

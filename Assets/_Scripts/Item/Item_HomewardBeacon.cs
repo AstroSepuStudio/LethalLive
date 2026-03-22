@@ -6,22 +6,19 @@ using UnityEngine.UI;
 public class Item_HomewardBeacon : ItemBase
 {
     [SerializeField] GameObject placedCanvas;
-    [SerializeField] Image higlightImgPlaced;
+    [SerializeField] Image highlightImgPlaced;
     [SerializeField] float interactionDuration = 1f;
-    [SerializeField] bool _startActivated = false;
+    [SerializeField] bool startActivated = false;
 
     float interactTime;
-    Coroutine CheckIntTime;
+    Coroutine checkIntTime;
 
-    bool _placing = false;
-    bool _placed = false;
+    bool placed = false;
 
     protected void Start()
     {
-        if (_startActivated)
-        {
+        if (startActivated)
             PlaceBeacon();
-        }
     }
 
     [Server]
@@ -33,9 +30,11 @@ public class Item_HomewardBeacon : ItemBase
         rb.isKinematic = false;
     }
 
+    #region Canvas Overrides
+
     public override void EnableCanvas()
     {
-        if (_placed)
+        if (placed)
             placedCanvas.SetActive(true);
         else
             canvas.EnableCanvas();
@@ -50,47 +49,49 @@ public class Item_HomewardBeacon : ItemBase
     public override void SelectClosest()
     {
         canvas.SelectClosest();
-        higlightImgPlaced.sprite = canvas.highlightedSprite;
+        highlightImgPlaced.sprite = canvas.highlightedSprite;
     }
 
     public override void DeselectClosest()
     {
         canvas.DeselectClosest();
-        higlightImgPlaced.sprite = canvas.lowlightedSprite;
+        highlightImgPlaced.sprite = canvas.lowlightedSprite;
     }
 
+    #endregion
+
+    #region Interaction Overrides
+
+    [Server]
     public override void OnInteract(PlayerData sourceData)
     {
-        if (_placed)
+        if (placed)
         {
-            Debug.Log("Homeward beacon (placed) on interaction");
             interactTime = Time.time;
-            CheckIntTime = StartCoroutine(CheckInteractionTime(sourceData));
+            checkIntTime = StartCoroutine(CheckInteractionTime(sourceData));
         }
         else
         {
-            Debug.Log("Homeward beacon on interaction");
             base.OnInteract(sourceData);
         }
     }
 
+    [Server]
     public override void OnStopInteract(PlayerData sourceData)
     {
-        if (_placed)
+        if (placed)
         {
-            Debug.Log("Homeward beacon (placed) on stop interaction");
-            if (CheckIntTime != null) StopCoroutine(CheckIntTime);
+            if (checkIntTime != null) StopCoroutine(checkIntTime);
 
             if ((Time.time - interactTime) < 0.2f)
             {
-                _placed = false;
+                placed = false;
                 sourceData.PlayerInventory.AddItem(this);
                 RpcGetPlayerData(sourceData.netId);
             }
         }
         else
         {
-            Debug.Log("Homeward beacon on stop interaction");
             base.OnStopInteract(sourceData);
         }
     }
@@ -101,8 +102,7 @@ public class Item_HomewardBeacon : ItemBase
             yield return null;
 
         GoBackToOffice(sourceData);
-
-        CheckIntTime = null;
+        checkIntTime = null;
     }
 
     [Server]
@@ -113,47 +113,22 @@ public class Item_HomewardBeacon : ItemBase
         sourceData.Character_Controller.enabled = true;
 
         DisableCanvas();
-
         AudioManager.Instance.StopMusic();
     }
 
-    public override void PrimaryAction()
-    {
-        // Check if there is enough space to place beacon
+    #endregion
 
-        // Activate animation of placing the beacon on the floor
-        pData.Skin_Data.CharacterAnimator.SetBool("PlaceBeacon", true);
+    #region Placement
 
-        pData._LockPlayer = true;
-        _placing = true;
-    }
-
-    public override void CancelPrimaryAction()
-    {
-        if (!_placing) return;
-
-        pData.Skin_Data.CharacterAnimator.SetBool("PlaceBeacon", false);
-
-        pData._LockPlayer = false;
-        _placing = false;
-    }
-
-    public override void PrimaryAnimationFinish()
-    {
-        pData.Skin_Data.CharacterAnimator.SetBool("PlaceBeacon", false);
-        pData.PlayerInventory.RemoveCurrentItem();
-        pData._LockPlayer = false;
-        PlaceBeacon();
-    }
-
-    void PlaceBeacon()
+    public void PlaceBeacon()
     {
         gameObject.SetActive(true);
         transform.SetParent(null);
         rb.isKinematic = true;
         transform.up = Vector3.up;
         coll.enabled = true;
-        _placing = false;
-        _placed = true;
+        placed = true;
     }
+
+    #endregion
 }

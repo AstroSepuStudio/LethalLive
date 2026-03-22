@@ -131,54 +131,34 @@ public class EntitySpawnerManager : NetworkBehaviour
     {
         if (aliveEntities.Count >= MaxEntities) return false;
 
-        if (spawnerPositions == null)
+        if (spawnerPositions == null || spawnerPositions.Length <= 0)
         {
-            Debug.LogWarning("Spawner positions array is null");
+            Debug.LogWarning(spawnerPositions == null
+                ? "Spawner positions array is null"
+                : "Spawner positions array is empty");
             return false;
         }
 
-        if (spawnerPositions.Length <= 0)
-        {
-            Debug.LogWarning("Spawner positions array is empty");
-            return false;
-        }
+        int positionIndex = (int)(rng.NextDouble() * spawnerPositions.Length);
+        Transform position = spawnerPositions[positionIndex];
+        if (position == null) return false;
 
-        ThemeDataSO.EntitySpawn[] entitySpawn = GameManager.Instance.dngMod.ThemeDatas[GameManager.Instance.dngMod.selectedTheme].entitySpawns;
+        ThemeDataSO theme = GameManager.Instance.dngMod.ThemeDatas[GameManager.Instance.dngMod.selectedTheme];
 
-        float totalWeight = 0f;
-        foreach (var spawn in entitySpawn)
-        {
-            totalWeight += spawn.spawnWeight;
-        }
+        ThemeDataSO.EntitySpawn spawn = theme.GetWeightedEntitySpawn(position.position, rng);
 
-        float roll = (float)(rng.NextDouble() * totalWeight);
-        float cumulative = 0f;
-        foreach (var spawn in entitySpawn)
-        {
-            cumulative += spawn.spawnWeight;
-            int positionIndex = (int)(rng.NextDouble() * spawnerPositions.Length);
+        GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation, entityParent);
+        entityObj.name = $"{spawn.entityPrefab.name} (ID: {TotalQ})";
+        NetworkServer.Spawn(entityObj);
 
-            Transform position = spawnerPositions[positionIndex];
-            if (position == null) continue;
+        EntityStats stats = entityObj.GetComponentInChildren<EntityStats>();
+        stats.OnDeath.AddListener(OnEntityDeath);
+        aliveEntities.Add(stats);
 
-            if (roll <= cumulative * DungeonGenerator.Instance.GetDificultyMultiplier(position.position))
-            {
-                GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation, entityParent);
-                entityObj.name = $"{spawn.entityPrefab.name} (ID: {TotalQ})";
-                NetworkServer.Spawn(entityObj);
+        if (entityObj.TryGetComponent<NetworkIdentity>(out var ni))
+            DungeonGenerator.Instance.EntityNetIds.Add(ni.netId);
 
-                EntityStats stats = entityObj.GetComponentInChildren<EntityStats>();
-                stats.OnDeath.AddListener(OnEntityDeath);
-                aliveEntities.Add(stats);
-
-                if (entityObj.TryGetComponent<NetworkIdentity>(out var ni))
-                    DungeonGenerator.Instance.EntityNetIds.Add(ni.netId);
-
-                return true;
-            }
-        }
-
-        return false;
+        return true;
     }
 
     [Server]

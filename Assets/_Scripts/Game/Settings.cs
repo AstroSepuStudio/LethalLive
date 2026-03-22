@@ -29,12 +29,18 @@ namespace LethalLive
         public bool GetHoldToTalk() => HoldToTalk;
 
         // - Graphics -
+        [SerializeField] int RenderDistance = 6;
+        [SerializeField] int RenderTypeIndex = 0;
         [SerializeField] int ScreenModeIndex = 0;
         [SerializeField] int ResolutionIndex = 0;
         [SerializeField] int TargetFPS = 60;
+        [SerializeField] bool UseRenderSecondPass = true;
         [SerializeField] bool VsyncEnabled = true;
         [SerializeField] bool PostProcessingEnabled = true;
 
+        public int GetRenderDistance() => RenderDistance;
+        public int GetRenderTypeIndex() => RenderTypeIndex;
+        public bool GetUseRenderSecondPass() => UseRenderSecondPass;
         public int GetScreenModeIndex() => ScreenModeIndex;
         public int GetResolutionIndex() => ResolutionIndex;
         public int GetTargetFPS() => TargetFPS;
@@ -76,6 +82,24 @@ namespace LethalLive
         public void SetVoiceChatVolume(float value)
         {
             VoiceChatVolume = value;
+            OnSettingsChanged?.Invoke();
+        }
+
+        public void SetRenderDistance(int renderDistance)
+        {
+            RenderDistance = renderDistance;
+            OnSettingsChanged?.Invoke();
+        }
+
+        public void SetRenderTypeIndex(int typeIndex)
+        {
+            RenderTypeIndex = typeIndex;
+            OnSettingsChanged?.Invoke();
+        }
+
+        public void SetUseRenderSecondPass(bool use)
+        {
+            UseRenderSecondPass = use;
             OnSettingsChanged?.Invoke();
         }
 

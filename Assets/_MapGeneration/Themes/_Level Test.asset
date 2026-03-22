@@ -30,12 +30,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
   spawnableFurniture:
   - {fileID: 11400000, guid: 5ec73b96afe77a740b868e17e16ac691, type: 2}
-  entitySpawns:
-  - entityPrefab: {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
-    spawnWeight: 100
-    minSpawnCount: 1
-    maxSpawnCount: 1
-  maxEntities: 1
+  entitySpawnsByTier:
+  - tier: 0
+    entities:
+    - entityPrefab: {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
+      spawnWeight: 100
+      minSpawnCount: 1
+      maxSpawnCount: 2
+  - tier: 2
+    entities:
+    - entityPrefab: {fileID: 3576240141579852669, guid: fef2aa84dc1821c4e95235e8db1d4cf5, type: 3}
+      spawnWeight: 100
+      minSpawnCount: 1
+      maxSpawnCount: 1
+  maxEntities: 15
   loopingMusic: {fileID: 11400000, guid: 21e4fcf983c0ff04ea75d61c8c3ef203, type: 2}
   eerySFX:
   - {fileID: 11400000, guid: 45225f6f3f9748c43995323ca274d2ec, type: 2}

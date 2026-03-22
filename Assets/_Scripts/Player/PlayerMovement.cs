@@ -104,9 +104,17 @@ public class PlayerMovement : NetworkBehaviour
         movSpeed = walkSpeed;
 
         pData.CameraTarget.localPosition = new Vector3(0, normalCamTarget, 0);
+
+        if (isServer)
+        {
+            groundedTime = IsGrounded() ? coyoteTime : 0f;
+            _isGrounded = groundedTime > 0f;
+            _isFalling = !_isGrounded;
+            wasGroundedLastFrame = _isGrounded;
+        }
     }
 
-    #region Synvars
+    #region SyncVar Hooks
     void OnStandMovBlendChanged(float oldValue, float newValue)
     {
         if (pData.Skin_Data.CharacterAnimator != null)
@@ -172,16 +180,16 @@ public class PlayerMovement : NetworkBehaviour
     void CmdSendJumpInput()
     {
         if (pData._LockPlayer) return;
-
         jumpTime = 0.2f;
     }
+
     [Command]
     void CmdStartSprint()
     {
         if (pData._LockPlayer) return;
 
         if (IsCrouching)
-        {                
+        {
             if (IsSomethingAbove())
             {
                 _wantsToSprint = true;
@@ -225,18 +233,6 @@ public class PlayerMovement : NetworkBehaviour
 
     [Command]
     void CmdStopCrouch() => ServerStopCrouch();
-
-    [ClientRpc]
-    void RpcTriggerJump()
-    {
-        pData.Skin_Data.CharacterAnimator.SetTrigger("Jump");
-    }
-
-    [ClientRpc]
-    void RpcTriggerFalling(bool isFalling)
-    {
-        pData.Skin_Data.CharacterAnimator.SetBool("Falling", isFalling);
-    }
     #endregion
 
     #region Helpers
@@ -271,16 +267,10 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcStartCrouch()
-    {
-        StartCrouch();
-    }
+    void RpcStartCrouch() => StartCrouch();
 
     [ClientRpc]
-    void RpcStopCrouch()
-    {
-        StopCrouch();
-    }
+    void RpcStopCrouch() => StopCrouch();
 
     void StartCrouch()
     {
@@ -314,7 +304,7 @@ public class PlayerMovement : NetworkBehaviour
             RecalculateSpeedMultiplier();
     }
 
-    private void RecalculateSpeedMultiplier()
+    void RecalculateSpeedMultiplier()
     {
         float final = 1f;
         foreach (var mod in speedModifiers.Values)
@@ -343,9 +333,7 @@ public class PlayerMovement : NetworkBehaviour
         if (!pData._LockPlayer)
         {
             if (_isSprinting && Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
-            {
                 CmdStopSprint();
-            }
 
             UpdateMoveSpeed();
 
@@ -369,14 +357,15 @@ public class PlayerMovement : NetworkBehaviour
             if (_isGrounded && _tryJump)
             {
                 jpd = true;
-                if (Mathf.Approximately(pData.Player_Stats.currentStamina, 0))
-                    velocity.y = jumpForce * 0.75f;
-                else
-                    velocity.y = jumpForce;
+                velocity.y = Mathf.Approximately(pData.Player_Stats.currentStamina, 0)
+                    ? jumpForce * 0.75f
+                    : jumpForce;
+
                 jumpTime = 0f; _tryJump = false;
                 groundedTime = 0f; _isGrounded = false;
                 pData.Player_Stats.ModifyStamina(-staminaConsuption_Jump);
-                RpcTriggerJump();
+
+                pData.Skin_Data.CharacterAnimator.SetTrigger("Jump");
             }
 
             Vector3 camForward = pData.CameraPivot.forward;
@@ -397,9 +386,7 @@ public class PlayerMovement : NetworkBehaviour
             move *= movSpeed * speedMultiplier * (pData.Player_Stats.speed / 100f);
 
             if (jpd)
-                airborneVelocity = new Vector3(
-                    move.x + externalMomentum.x, 0f,
-                    move.z + externalMomentum.z);
+                airborneVelocity = new Vector3(move.x + externalMomentum.x, 0f, move.z + externalMomentum.z);
 
             if (_isSprinting && movementInput.magnitude > 0.1f && _isGrounded)
                 pData.Player_Stats.ModifyStamina(-staminaConsuption_Sprint * Time.deltaTime);
@@ -413,14 +400,8 @@ public class PlayerMovement : NetworkBehaviour
             velocity.y += gravity * Time.deltaTime;
 
         if (wasGroundedLastFrame && !_isGrounded)
-        {
-            airborneVelocity = new Vector3(
-                    move.x + externalMomentum.x,
-                    0f,
-                    move.z + externalMomentum.z);
+            airborneVelocity = new Vector3(move.x + externalMomentum.x, 0f, move.z + externalMomentum.z);
 
-            //airborneVelocity = new Vector3(velocity.x, 0f, velocity.z);
-        }
         wasGroundedLastFrame = _isGrounded;
 
         if (_isGrounded)
@@ -430,25 +411,24 @@ public class PlayerMovement : NetworkBehaviour
         }
         else
         {
-            //velocity.x = move.x * 0.4f + airborneVelocity.x + externalMomentum.x;
-            //velocity.z = move.z * 0.4f + airborneVelocity.z + externalMomentum.z;
             Vector3 horizontalAirVel = new(airborneVelocity.x, 0f, airborneVelocity.z);
 
             if (move.sqrMagnitude > 0.001f)
             {
                 Vector3 desiredDir = move.normalized;
                 Vector3 currentDir = horizontalAirVel.normalized;
-
                 float currentSpeed = horizontalAirVel.magnitude;
-                float dot = Vector3.Dot(currentDir, desiredDir);
 
+                float minAirSpeed = crouchSpeed * speedMultiplier;
+                if (currentSpeed < minAirSpeed)
+                    currentSpeed = Mathf.MoveTowards(currentSpeed, minAirSpeed, movSpeed * Time.deltaTime * 2f);
+
+                float dot = Vector3.Dot(currentDir, desiredDir);
                 if (dot < -0.3f)
-                {
                     currentSpeed *= airDecelerationMultiplier;
-                }
 
                 Vector3 newDir = Vector3.RotateTowards(
-                    currentDir,
+                    currentDir.sqrMagnitude < 0.001f ? desiredDir : currentDir,
                     desiredDir,
                     airRotationSpd * Mathf.Deg2Rad * Time.deltaTime,
                     0f
@@ -467,30 +447,33 @@ public class PlayerMovement : NetworkBehaviour
 
         if (pData.Skin_Data.CharacterAnimator == null) return;
 
+        // Falling — set on server animator; NetworkAnimator replicates the bool.
+        bool nowFalling = !_isGrounded;
+        if (nowFalling != _isFalling)
+        {
+            _isFalling = nowFalling;
+            pData.Skin_Data.CharacterAnimator.SetBool("Falling", _isFalling);
+        }
+
         float speed = new Vector2(velocity.x, velocity.z).magnitude;
         if (IsCrouching)
         {
-            standCrouchBlend = Mathf.MoveTowards(pData.Skin_Data.CharacterAnimator.GetFloat("StandCrouch"), 1, Time.deltaTime * animTransitionSpeed);
+            standCrouchBlend = Mathf.MoveTowards(
+                pData.Skin_Data.CharacterAnimator.GetFloat("StandCrouch"), 1f, Time.deltaTime * animTransitionSpeed);
             float targetBlend = Mathf.Approximately(speed, 0f) ? 0f : speed;
             crouchMovBlend = Mathf.MoveTowards(crouchMovBlend, targetBlend, Time.deltaTime * animTransitionSpeed);
         }
         else
         {
-            standCrouchBlend = Mathf.MoveTowards(pData.Skin_Data.CharacterAnimator.GetFloat("StandCrouch"), 0, Time.deltaTime * animTransitionSpeed);
+            standCrouchBlend = Mathf.MoveTowards(
+                pData.Skin_Data.CharacterAnimator.GetFloat("StandCrouch"), 0f, Time.deltaTime * animTransitionSpeed);
             float targetBlend = Mathf.Approximately(speed, 0f) ? 0f : speed;
             standMovBlend = Mathf.MoveTowards(standMovBlend, targetBlend, Time.deltaTime * animTransitionSpeed);
         }
 
-        if (!_isGrounded && !_isFalling)
-        {
-            _isFalling = true;
-            RpcTriggerFalling(_isFalling);
-        }
-        else if (_isGrounded && _isFalling)
-        {
-            _isFalling = false;
-            RpcTriggerFalling(_isFalling);
-        }
+        pData.Skin_Data.CharacterAnimator.SetFloat("StandMov", standMovBlend);
+        pData.Skin_Data.CharacterAnimator.SetFloat("CrouchMov", crouchMovBlend);
+        pData.Skin_Data.CharacterAnimator.SetFloat("StandCrouch", standCrouchBlend);
     }
 
     void UpdateMoveSpeed()
@@ -506,16 +489,13 @@ public class PlayerMovement : NetworkBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-
         Gizmos.DrawWireSphere(feet.transform.position, groundRadius);
         Gizmos.DrawWireSphere(pData.Head.transform.position, groundRadius);
-        Gizmos.DrawLine(feet.position + Vector3.down * groundRadius, feet.position + Vector3.down * groundRadius + Vector3.down * raycastLenght);
+        Gizmos.DrawLine(feet.position + Vector3.down * groundRadius,
+                        feet.position + Vector3.down * groundRadius + Vector3.down * raycastLenght);
     }
 
-    public void AddMomentum(Vector3 force)
-    {
-        externalMomentum += force;
-    }
+    public void AddMomentum(Vector3 force) => externalMomentum += force;
 
     public Vector3 KillMomentum()
     {
@@ -540,7 +520,6 @@ public class PlayerMovement : NetworkBehaviour
             footstepIndex = 0;
 
         AudioSource src = _isSprinting ? pData.Loud_AS : pData.Modest_AS;
-
         RPC_PlayFootstep(GetIndexOfAudioSource(src), footstepIndex);
 
         timer = _isSprinting ? sprintDelay : walkDelay;
@@ -568,25 +547,17 @@ public class PlayerMovement : NetworkBehaviour
 
     AudioSource GetAudioSourceByIndex(int index)
     {
-        if (index == 0)
-            return pData.Quiet_AS;
-        else if (index == 1)
-            return pData.Modest_AS;
-        else if (index == 2)
-            return pData.Loud_AS;
-
+        if (index == 0) return pData.Quiet_AS;
+        if (index == 1) return pData.Modest_AS;
+        if (index == 2) return pData.Loud_AS;
         return pData.Modest_AS;
     }
 
     int GetIndexOfAudioSource(AudioSource src)
     {
-        if (src == pData.Quiet_AS)
-            return 0;
-        else if (src == pData.Modest_AS)
-            return 1;
-        else if (src == pData.Loud_AS)
-            return 2;
-
+        if (src == pData.Quiet_AS) return 0;
+        if (src == pData.Modest_AS) return 1;
+        if (src == pData.Loud_AS) return 2;
         return 1;
     }
 }

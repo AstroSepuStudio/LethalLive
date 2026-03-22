@@ -32,6 +32,38 @@ Transform:
   - {fileID: 3116829939099818884}
   m_Father: {fileID: 3227019856752356923}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1444256885507771200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7832304207661060393}
+  m_Layer: 9
+  m_Name: '- Actions -'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7832304207661060393
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1444256885507771200}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 300, y: 0, z: 300}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5399756735391280201}
+  m_Father: {fileID: 3227019856752356923}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1778076825187210033
 GameObject:
   m_ObjectHideFlags: 0
@@ -46,6 +78,7 @@ GameObject:
   - component: {fileID: 5402052966136673539}
   - component: {fileID: 8534136127616536962}
   - component: {fileID: 7710087211643541705}
+  - component: {fileID: 483913646364764290}
   m_Layer: 9
   m_Name: Homeward Beacon
   m_TagString: Item
@@ -66,6 +99,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 7832304207661060393}
   - {fileID: 6023360536066588949}
   - {fileID: 2192264021991249619}
   - {fileID: 554771691548523004}
@@ -205,27 +239,34 @@ MonoBehaviour:
   rb: {fileID: 5402052966136673539}
   coll: {fileID: 8534136127616536962}
   itemRenderer: {fileID: 6700893344611773982}
+  animationModule: {fileID: 483913646364764290}
   itemNameTxt: {fileID: 2066419903514472862}
   itemPriceTxt: {fileID: 4432833690088768844}
+  primaryAction: {fileID: 3789487940925480290}
+  secondaryAction: {fileID: 0}
   ItemValue: 0
   InUse: 0
   HasOwner: 0
-  primaryAtkStats:
-    <AttackRadius>k__BackingField: 0
-    <AttackKnock>k__BackingField: 0
-    <AttackForce>k__BackingField: 0
-    <AttackDamage>k__BackingField: 0
-    <AttackCooldown>k__BackingField: 0
-  secondaryAtkStats:
-    <AttackRadius>k__BackingField: 0
-    <AttackKnock>k__BackingField: 0
-    <AttackForce>k__BackingField: 0
-    <AttackDamage>k__BackingField: 0
-    <AttackCooldown>k__BackingField: 0
   placedCanvas: {fileID: 225458853992323769}
-  higlightImgPlaced: {fileID: 3949492280191401466}
+  highlightImgPlaced: {fileID: 3949492280191401466}
   interactionDuration: 1
-  _startActivated: 0
+  startActivated: 0
+--- !u!114 &483913646364764290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1778076825187210033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72b8fa9ea111a214fa4ca06f653d8be9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAnimationModule
+  primaryTriggerTime: 0.5
+  primaryFinishTime: 1
+  secondaryTriggerTime: 0
+  secondaryFinishTime: 0
 --- !u!1 &1804099075115324478
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,6 +631,55 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &4222015797553565862
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5399756735391280201}
+  - component: {fileID: 3789487940925480290}
+  m_Layer: 9
+  m_Name: Hurtbox Attack
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5399756735391280201
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4222015797553565862}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7832304207661060393}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3789487940925480290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4222015797553565862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba35f13bdb62e7b44a3a691eb6fdc5fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IA_PlaceBeacon
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  homewardBeacon: {fileID: 7710087211643541705}
 --- !u!1 &7973663272021282569
 GameObject:
   m_ObjectHideFlags: 0

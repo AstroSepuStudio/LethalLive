@@ -21,11 +21,11 @@ public class SellPoint : NetworkBehaviour
 
         for (int i = itemsInside.Count - 1; i >= 0; i--)
         {
-            Debug.Log($"Item: {itemsInside[i].name}, pData: {itemsInside[i].lastPlayer?.PlayerName ?? "NULL"}, value: {itemsInside[i].ItemValue}");
+            Debug.Log($"Item: {itemsInside[i].name}, pData: {itemsInside[i].LastPlayer?.PlayerName ?? "NULL"}, value: {itemsInside[i].ItemValue}");
 
-            if (itemsInside[i].lastPlayer != null)
+            if (itemsInside[i].LastPlayer != null)
             {
-                PlayerTeam team = itemsInside[i].lastPlayer.Team;
+                PlayerTeam team = itemsInside[i].LastPlayer.Team;
                 float current = GameManager.Instance.ecoMod.teamsBalance[team];
                 float newBalance = current + itemsInside[i].ItemValue;
                 Debug.Log($"Team {team}: {current} -> {newBalance}");

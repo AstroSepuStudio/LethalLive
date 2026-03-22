@@ -1,18 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 using static LL_Tier;
 
 [CreateAssetMenu(menuName = "LethalLive/ThemeData")]
 public class ThemeDataSO : ScriptableObject
 {
     [System.Serializable]
+    public struct TierEntityGroup
+    {
+        public Tier tier;
+        public EntitySpawn[] entities;
+    }
+
+    [System.Serializable]
     public struct EntitySpawn
     {
         public GameObject entityPrefab;
         public float spawnWeight;
-        public int minSpawnCount;
-        public int maxSpawnCount;
+        [Range(1, 5)] public int minSpawnCount;
+        [Range(1, 5)] public int maxSpawnCount;
     }
 
     public string levelName;
@@ -25,7 +31,7 @@ public class ThemeDataSO : ScriptableObject
     [Header("Features Generation")]
     public ItemSO[] spawnableItems;
     public FurnitureDataSO[] spawnableFurniture;
-    public EntitySpawn[] entitySpawns;
+    public TierEntityGroup[] entitySpawnsByTier;
     public int maxEntities;
 
     [Header("Ambient")]
@@ -93,5 +99,57 @@ public class ThemeDataSO : ScriptableObject
             return spawnableItems[(int)(rng.NextDouble() * spawnableItems.Length)];
 
         return candidates[(int)(rng.NextDouble() * candidates.Count)];
+    }
+
+    public EntitySpawn GetWeightedEntitySpawn(Vector3 position, System.Random rng)
+    {
+        Tier selectedTier = RollTier(position, rng);
+
+        EntitySpawn[] candidates = null;
+        foreach (var group in entitySpawnsByTier)
+        {
+            if (group.tier == selectedTier)
+            {
+                candidates = group.entities;
+                break;
+            }
+        }
+
+        if (candidates == null || candidates.Length == 0)
+        {
+            List<EntitySpawn> all = new();
+            foreach (var group in entitySpawnsByTier)
+                all.AddRange(group.entities);
+
+            float totalWeight = 0f;
+            foreach (var spawn in all)
+                totalWeight += spawn.spawnWeight;
+
+            float roll = (float)(rng.NextDouble() * totalWeight);
+            float cumulative = 0f;
+            foreach (var spawn in all)
+            {
+                cumulative += spawn.spawnWeight;
+                if (roll <= cumulative)
+                    return spawn;
+            }
+
+            return all[0];
+        }
+
+        float totalCandidateWeight = 0f;
+        foreach (var e in candidates)
+            totalCandidateWeight += e.spawnWeight;
+
+        float candidateRoll = (float)(rng.NextDouble() * totalCandidateWeight);
+        float cumulativeCandidate = 0f;
+        foreach (var e in candidates)
+        {
+            cumulativeCandidate += e.spawnWeight;
+            if (candidateRoll <= cumulativeCandidate)
+                return e;
+        }
+
+        return candidates[^1];
     }
 }

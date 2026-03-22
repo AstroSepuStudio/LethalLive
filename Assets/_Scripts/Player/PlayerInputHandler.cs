@@ -44,12 +44,6 @@ public class PlayerInputHandler : NetworkBehaviour
     private void Cmd_SwitchTabletState(bool open)
     {
         pData.SetLockPlayer(open);
-        Rpc_SwitchTabletState(open);
-    }
-
-    [ClientRpc]
-    private void Rpc_SwitchTabletState(bool open)
-    {
         pData.Skin_Data.CharacterAnimator.SetBool("Tablet", open);
     }
 }

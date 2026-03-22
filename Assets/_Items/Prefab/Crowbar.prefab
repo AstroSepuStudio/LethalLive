@@ -1,5 +1,94 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1739688698011795416
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7912437127752250943}
+  m_Layer: 9
+  m_Name: '- Actions -'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7912437127752250943
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1739688698011795416}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3418759117103971730}
+  m_Father: {fileID: 8624665948880250572}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8015721605300440468
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3418759117103971730}
+  - component: {fileID: 4044414459592796408}
+  m_Layer: 9
+  m_Name: Hurtbox Attack
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3418759117103971730
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8015721605300440468}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7912437127752250943}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4044414459592796408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8015721605300440468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac8c69e66adbd8d4f8bae465efc5f77c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IA_HurtboxAttack
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  hurtbox: {fileID: 6977979795673349589}
+  animationTrigger: Atk_Crowbar
+  forceAim: 1
+  attackStat:
+    <AttackRadius>k__BackingField: 1
+    <AttackKnock>k__BackingField: 15
+    <AttackForce>k__BackingField: 20
+    <AttackDamage>k__BackingField: 10
+    <AttackCooldown>k__BackingField: 1
 --- !u!1 &9084241017591515198
 GameObject:
   m_ObjectHideFlags: 0
@@ -11,9 +100,10 @@ GameObject:
   - component: {fileID: 8624665948880250572}
   - component: {fileID: 6818651458780780045}
   - component: {fileID: 1093478729663695475}
-  - component: {fileID: 2904136773729733048}
   - component: {fileID: 2342669760519003277}
   - component: {fileID: 2545860507069542307}
+  - component: {fileID: 2904136773729733048}
+  - component: {fileID: 1636338274897175807}
   m_Layer: 9
   m_Name: Crowbar
   m_TagString: Item
@@ -34,6 +124,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 7912437127752250943}
   - {fileID: 7699270516639043589}
   - {fileID: 7299442600008818990}
   m_Father: {fileID: 0}
@@ -90,56 +181,6 @@ MonoBehaviour:
   positionSensitivity: 0.01
   rotationSensitivity: 0.01
   scaleSensitivity: 0.01
---- !u!114 &2904136773729733048
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9084241017591515198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de336e4b3d8884445baa8291f790be49, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMethod: 0
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  holdTime: 2
-  canvas: {fileID: 578609524373151835}
-  OnInteractEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStopInteractEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnHoldInteractEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  ItemData: {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
-  identity: {fileID: 6818651458780780045}
-  rb: {fileID: 2342669760519003277}
-  coll: {fileID: 2545860507069542307}
-  itemRenderer: {fileID: 8832228895478999914}
-  itemNameTxt: {fileID: 9102689919361804620}
-  itemPriceTxt: {fileID: 6880008698537713054}
-  ItemValue: 0
-  InUse: 0
-  HasOwner: 0
-  primaryAtkStats:
-    <AttackRadius>k__BackingField: 0
-    <AttackKnock>k__BackingField: 25
-    <AttackForce>k__BackingField: 4.5
-    <AttackDamage>k__BackingField: 15
-    <AttackCooldown>k__BackingField: 1
-  secondaryAtkStats:
-    <AttackRadius>k__BackingField: 0
-    <AttackKnock>k__BackingField: 0
-    <AttackForce>k__BackingField: 0
-    <AttackDamage>k__BackingField: 0
-    <AttackCooldown>k__BackingField: 0
-  hurtBox: {fileID: 6977979795673349589}
 --- !u!54 &2342669760519003277
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -188,6 +229,62 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.125, y: 0.05, z: 1}
   m_Center: {x: -0.05, y: 0, z: 0}
+--- !u!114 &2904136773729733048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9084241017591515198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ec3f640322487f4092f495245a636eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  holdTime: 2
+  canvas: {fileID: 578609524373151835}
+  OnInteractEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStopInteractEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHoldInteractEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  ItemData: {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
+  identity: {fileID: 6818651458780780045}
+  rb: {fileID: 2342669760519003277}
+  coll: {fileID: 2545860507069542307}
+  itemRenderer: {fileID: 8832228895478999914}
+  animationModule: {fileID: 1636338274897175807}
+  itemNameTxt: {fileID: 9102689919361804620}
+  itemPriceTxt: {fileID: 6880008698537713054}
+  primaryAction: {fileID: 4044414459592796408}
+  secondaryAction: {fileID: 0}
+  ItemValue: 0
+  InUse: 0
+  HasOwner: 0
+--- !u!114 &1636338274897175807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9084241017591515198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72b8fa9ea111a214fa4ca06f653d8be9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemAnimationModule
+  primaryTriggerTime: 0.1
+  primaryFinishTime: 0.35
+  secondaryTriggerTime: 0
+  secondaryFinishTime: 0
 --- !u!1001 &6443206616131854142
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -196,6 +293,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8624665948880250572}
     m_Modifications:
+    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2407890024022995578, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
       propertyPath: m_Name
       value: Interactable Canvas
@@ -282,6 +399,26 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4334162796013780496, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
+      propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -424,10 +561,10 @@ MonoBehaviour:
   syncInterval: 0
   startEnabled: 0
   hitbox: {fileID: 6562005781298952240}
-  item: {fileID: 2904136773729733048}
   audioSource: {fileID: 4286618188063812992}
   hitSFX:
   - {fileID: 11400000, guid: e3145f98da1ee9b4e82b3a0b3725c7fe, type: 2}
+  loudness: 0
 --- !u!136 &6562005781298952240
 CapsuleCollider:
   m_ObjectHideFlags: 0

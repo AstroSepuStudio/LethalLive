@@ -46,14 +46,14 @@ public class ItemInventory : NetworkBehaviour
 
     public void PrimaryInput(InputAction.CallbackContext context)
     {
-        if (context.started) CmdUsePrimary();
-        else if (context.canceled) CmdCancelPrimary();
+        if (context.started) CmdUseAction(true);
+        else if (context.canceled) CmdCancelAction(true);
     }
 
     public void SecondaryInput(InputAction.CallbackContext context)
     {
-        if (context.started) CmdUseSecondary();
-        else if (context.canceled) CmdCancelSecondary();
+        if (context.started) CmdUseAction(false);
+        else if (context.canceled) CmdCancelAction(false);
     }
 
     public void OnClientDrop(InputAction.CallbackContext context)
@@ -330,88 +330,52 @@ public class ItemInventory : NetworkBehaviour
     #region Item Actions
 
     [Command]
-    void CmdUsePrimary()
+    void CmdUseAction(bool isPrimary)
     {
         if (equippedItem == null || IsItemInUse || pData._LockPlayer) return;
-        if (equippedItem.primaryAtkStats.OnCooldown) return;
 
-        if (equippedItem.primaryAtkStats.AttackCooldown > 0)
-            StartCoroutine(equippedItem.primaryAtkStats.CountdownCooldown());
+        ItemAction action = isPrimary ? equippedItem.PrimaryAction : equippedItem.SecondaryAction;
+        if (action == null) return;
+        if (action.IsOnCooldown()) return;
+        action.EnterOnCooldown();
 
-        equippedItem.PrimaryAction();
-        RpcUsePrimary();
-    }
-
-    [ClientRpc]
-    void RpcUsePrimary()
-    {
-        if (isServer) return;
-        equippedItem?.PrimaryAction();
+        FireAction(isPrimary);
+        RpcUseAction(isPrimary);
     }
 
     [Command]
-    void CmdCancelPrimary()
+    void CmdCancelAction(bool isPrimary)
     {
         if (equippedItem == null) return;
-        equippedItem.CancelPrimaryAction();
-        RpcCancelPrimary();
+        FireCancel(isPrimary);
+        RpcCancelAction(isPrimary);
     }
 
     [ClientRpc]
-    void RpcCancelPrimary()
+    void RpcUseAction(bool isPrimary)
     {
         if (isServer) return;
-        equippedItem?.CancelPrimaryAction();
-    }
-
-    [Command]
-    void CmdUseSecondary()
-    {
-        if (equippedItem == null || IsItemInUse || pData._LockPlayer) return;
-        if (equippedItem.secondaryAtkStats.OnCooldown) return;
-
-        if (equippedItem.secondaryAtkStats.AttackCooldown > 0)
-            StartCoroutine(equippedItem.secondaryAtkStats.CountdownCooldown());
-
-        equippedItem.SecondaryAction();
-        RpcUseSecondary();
+        FireAction(isPrimary);
     }
 
     [ClientRpc]
-    void RpcUseSecondary()
+    void RpcCancelAction(bool isPrimary)
     {
         if (isServer) return;
-        equippedItem?.SecondaryAction();
+        FireCancel(isPrimary);
     }
 
-    [Command]
-    void CmdCancelSecondary()
+    void FireAction(bool isPrimary)
     {
-        if (equippedItem == null) return;
-        equippedItem.CancelSecondaryAction();
-        RpcCancelSecondary();
+        if (isPrimary) equippedItem?.StartPrimaryAction();
+        else equippedItem?.StartSecondaryAction();
     }
 
-    [ClientRpc]
-    void RpcCancelSecondary()
+    void FireCancel(bool isPrimary)
     {
-        if (isServer) return;
-        equippedItem?.CancelSecondaryAction();
+        if (isPrimary) equippedItem?.CancelPrimaryAction();
+        else equippedItem?.CancelSecondaryAction();
     }
-
-    #endregion
-
-    #region Animation Callbacks
-
-    [Server] public void PrimaryItemAnimationTrigger() => RpcPrimaryItemAnimationTrigger();
-    [Server] public void PrimaryItemAnimationFinishes() => RpcPrimaryItemAnimationFinishes();
-    [Server] public void SecondaryItemAnimationTrigger() => RpcSecondaryItemAnimationTrigger();
-    [Server] public void SecondaryItemAnimationFinishes() => RpcSecondaryItemAnimationFinishes();
-
-    [ClientRpc] void RpcPrimaryItemAnimationTrigger() => equippedItem?.PrimaryAnimationTrigger();
-    [ClientRpc] public void RpcPrimaryItemAnimationFinishes() => equippedItem?.PrimaryAnimationFinish();
-    [ClientRpc] public void RpcSecondaryItemAnimationTrigger() => equippedItem?.SecondaryAnimationTrigger();
-    [ClientRpc] public void RpcSecondaryItemAnimationFinishes() => equippedItem?.SecondaryAnimationFinish();
 
     #endregion
 

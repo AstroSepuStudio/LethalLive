@@ -1,12 +1,12 @@
+using LethalLive;
 using UnityEngine;
 
 [RequireComponent(typeof(Light))]
 public class LightLOD : MonoBehaviour
 {
     [SerializeField] private Light _light;
-
-    [Header("LOD Settings")]
-    [SerializeField] float disableDistance = 60f;
+    [SerializeField] private float disDisMult = 1.1f;
+    [SerializeField] private float shaDisMult = 0.8f;
 
     private void Start()
     {
@@ -23,9 +23,16 @@ public class LightLOD : MonoBehaviour
         if (GameManager.Instance.playMod.LocalPlayer == null) return;
 
         float distance = Vector3.Distance(transform.position, GameManager.Instance.playMod.LocalPlayer.transform.position);
-        if (distance >= disableDistance)
+        float renderDistance = SettingsManager.Instance.UserSettings.GetRenderDistance() * DungeonGenerator.Instance.CellSize;
+
+        if (distance >= renderDistance * disDisMult)
             _light.enabled = false;
+        else if (distance >= renderDistance * shaDisMult)
+            _light.shadows = LightShadows.None;
         else
+        {
             _light.enabled = true;
+            _light.shadows = LightShadows.Hard;
+        }
     }
 }
