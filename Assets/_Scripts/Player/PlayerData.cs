@@ -367,6 +367,7 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
     public void DropCameraControl()
     {
         cameraControlled = false;
-        Camera_Movement.enabled = true;
+        if (Camera_Movement != null)
+            Camera_Movement.enabled = true;
     }
 }

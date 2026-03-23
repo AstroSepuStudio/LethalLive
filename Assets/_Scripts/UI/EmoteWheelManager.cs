@@ -169,6 +169,8 @@ public class EmoteWheelManager : NetworkBehaviour
             int index = i + 6 * page;
             currentEmotes[i] = index < emotes.Length ? emotes[index] : null;
         }
+
+        RefreshUI();
     }
 
     void RefreshUI()
@@ -179,7 +181,6 @@ public class EmoteWheelManager : NetworkBehaviour
     #endregion
 
     #region Emote Logic
-    // Called when the player moves — tell the server to stop any loop emote
     public void PlayerMoves()
     {
         if (!isLocalPlayer) return;
@@ -215,6 +216,7 @@ public class EmoteWheelManager : NetworkBehaviour
             if (currentLoopEmote == emote)
             {
                 currentLoopEmote = null;
+                pData.Skin_Data.Rigging_Manager.RpcSetEmoteIK(false);
                 return;
             }
 
@@ -230,6 +232,8 @@ public class EmoteWheelManager : NetworkBehaviour
         {
             networkAnimator.SetTrigger(emote.animatorTrigger);
         }
+
+        pData.Skin_Data.Rigging_Manager.RpcSetEmoteIK(emote.disableIK);
     }
 
     public void CancelEmote()
@@ -249,6 +253,7 @@ public class EmoteWheelManager : NetworkBehaviour
         if (currentLoopEmote == null) return;
         networkAnimator.animator.SetBool(currentLoopEmote.animatorTrigger, false);
         currentLoopEmote = null;
+        pData.Skin_Data.Rigging_Manager.RpcSetEmoteIK(false);
     }
     #endregion
 }

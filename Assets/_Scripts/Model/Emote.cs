@@ -7,4 +7,5 @@ public class Emote : ScriptableObject
     public string animatorTrigger;
     public bool loop;
     public bool dynamic;
+    public bool disableIK;
 }

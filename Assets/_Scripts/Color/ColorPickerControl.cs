@@ -42,6 +42,9 @@ public class ColorPickerControl : MonoBehaviour
         skinData.SaveToJson(SkinData.CustomizationSaveDataLocation);
         skinData.SyncSkinData();
 
+        skinData.CharacterAnimator.SetBool("TabletAway", false);
+        skinData.Rigging_Manager.EnableLookAtTabletRig(true);
+
         skinData.pData.DropCameraControl();
     }
 
@@ -164,6 +167,19 @@ public class ColorPickerControl : MonoBehaviour
     public void SetCurrentMatColPair(MatColPair pair, CusElementUI elementUI)
     {
         skinData.TakeCameraControl(elementUI.GetCameraHeight);
+        skinData.Rigging_Manager.EnableLookAtTabletRig(false);
+
+        if (elementUI.GetCameraHeight == SkinData.BodyHeight.Upper)
+        {
+            skinData.CharacterAnimator.SetBool("TabletAway", true);
+            skinData.Rigging_Manager.EnableLeftHandChainRig(false);
+        }
+        else
+        {
+            skinData.CharacterAnimator.SetBool("TabletAway", false);
+            skinData.Rigging_Manager.EnableLeftHandChainRig(true);
+        }
+
         currentPair = pair;
         SetHSV(pair.GetColor());
     }

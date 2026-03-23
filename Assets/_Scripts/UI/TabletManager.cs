@@ -10,6 +10,9 @@ public class TabletManager : MonoBehaviour
     [SerializeField] GameObject rebindOverlay;
     [SerializeField] TextMeshProUGUI rebindText;
     [SerializeField] TextMeshProUGUI timeText;
+    [SerializeField] GameObject tabletGO;
+
+    public Transform leftHandIKTarget;
 
     public static UnityEvent OnKeyRebindCompletedEvent = new();
 
@@ -54,7 +57,9 @@ public class TabletManager : MonoBehaviour
         tabletObj.SetActive(IsActive);
 
         SettingsManager.Instance.SetMouseLockState(!IsActive);
-        
+
+        tabletGO.SetActive(IsActive);
+
         if (IsActive)
             GameManager.Instance.playMod.LocalPlayer.Player_Input.SwitchCurrentActionMap("Tablet");
         else

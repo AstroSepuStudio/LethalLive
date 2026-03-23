@@ -6,18 +6,27 @@ using UnityEngine.Animations.Rigging;
 public class RiggingManager : NetworkBehaviour
 {
     [SerializeField] SkinData skinData;
+    [SerializeField] TabletManager tabletManager;
+
     [SerializeField] float maxAngle = 80;
     [SerializeField] float transitionSpeed = 5f;
     [SerializeField] RigBuilder rigBuilder;
     [SerializeField] Rig FollowCameraTargetRig;
     [SerializeField] Rig FollowCameraRig;
     [SerializeField] Rig RightHandChainRig;
+    [SerializeField] Rig LeftHandChainRig;
+    [SerializeField] Rig LookAtTabletChainRig;
     [SerializeField] Transform RHCRTarget;
+    [SerializeField] Transform LHCRTarget;
 
     Coroutine camRigTransition;
     Coroutine camTargetRigTransition;
+    Coroutine leftHandRigTransition;
+    Coroutine lookAtTabletRigTransition;
 
     Transform RHCRTargetTarget;
+    Transform LHCRTargetTarget;
+
     public bool StopCameraRigs { get; private set; }
 
     private void OnDestroy()
@@ -29,7 +38,12 @@ public class RiggingManager : NetworkBehaviour
     {
         StopCameraRigs = false;
         RHCRTargetTarget = null;
+        LHCRTargetTarget = null;
         RightHandChainRig.weight = 0f;
+        LeftHandChainRig.weight = 0f;
+        LookAtTabletChainRig.weight = 0f;
+        leftHandRigTransition = null;
+        lookAtTabletRigTransition = null;
         GameTick.OnTick -= OnTick;
     }
 
@@ -49,6 +63,9 @@ public class RiggingManager : NetworkBehaviour
     {
         if (RHCRTargetTarget != null)
             RHCRTarget.position = RHCRTargetTarget.position;
+
+        if (LHCRTargetTarget != null)
+            LHCRTarget.position = LHCRTargetTarget.position;
     }
 
     void OnTick()
@@ -134,5 +151,85 @@ public class RiggingManager : NetworkBehaviour
         RHCRTargetTarget = null;
         RightHandChainRig.weight = 0f;
         StopCameraRigs = false;
+    }
+
+    public void EnableLeftHandChainRig(bool enable)
+    {
+        if (enable && LeftHandChainRig.weight > 0.5f ||
+            !enable && LeftHandChainRig.weight < 0.5f) return;
+        CmdEnableLeftHandChainRig(enable);
+    }
+
+    [Command]
+    void CmdEnableLeftHandChainRig(bool enable) => RpcEnableLeftHandChainRig(enable);
+
+    [ClientRpc]
+    public void RpcEnableLeftHandChainRig(bool enable)
+    {
+        if (enable)
+            LHCRTargetTarget = tabletManager.leftHandIKTarget;
+        else
+            LHCRTargetTarget = null;
+
+        if (leftHandRigTransition != null) StopCoroutine(leftHandRigTransition);
+        leftHandRigTransition = StartCoroutine(LeftHandTransition(enable ? 1f : 0f));
+    }
+
+    public void EnableLookAtTabletRig(bool enable)
+    {
+        if (enable && LookAtTabletChainRig.weight > 0.5f ||
+            !enable && LookAtTabletChainRig.weight < 0.5f) return;
+        CmdEnableLookAtTabletRig(enable);
+    }
+
+    [Command] void CmdEnableLookAtTabletRig(bool enable) => RpcEnableLookAtTabletRig(enable);
+
+    [ClientRpc] public void RpcEnableLookAtTabletRig(bool enable)
+    {
+        if (lookAtTabletRigTransition != null) StopCoroutine(lookAtTabletRigTransition);
+        lookAtTabletRigTransition = StartCoroutine(LookAtTabletTransition(enable ? 1f : 0f));
+    }
+
+    IEnumerator LeftHandTransition(float targetWeight)
+    {
+        while (!Mathf.Approximately(LeftHandChainRig.weight, targetWeight))
+        {
+            LeftHandChainRig.weight = Mathf.MoveTowards(LeftHandChainRig.weight, targetWeight, Time.deltaTime * transitionSpeed);
+            yield return null;
+        }
+
+        LeftHandChainRig.weight = targetWeight;
+        leftHandRigTransition = null;
+    }
+
+    IEnumerator LookAtTabletTransition(float targetWeight)
+    {
+        while (!Mathf.Approximately(LookAtTabletChainRig.weight, targetWeight))
+        {
+            LookAtTabletChainRig.weight = Mathf.MoveTowards(LookAtTabletChainRig.weight, targetWeight, Time.deltaTime * transitionSpeed);
+            yield return null;
+        }
+
+        LookAtTabletChainRig.weight = targetWeight;
+        lookAtTabletRigTransition = null;
+    }
+
+    [ClientRpc]
+    public void RpcSetEmoteIK(bool disabled)
+    {
+        if (disabled)
+        {
+            if (camRigTransition != null) StopCoroutine(camRigTransition);
+            if (camTargetRigTransition != null) StopCoroutine(camTargetRigTransition);
+
+            camRigTransition = StartCoroutine(CamTransition(0f));
+            camTargetRigTransition = StartCoroutine(CamTargetTransition(0f));
+            StopCameraRigs = true;
+        }
+        else
+        {
+            if (!RightHandChainRig.weight.Equals(1f))
+                StopCameraRigs = false;
+        }
     }
 }

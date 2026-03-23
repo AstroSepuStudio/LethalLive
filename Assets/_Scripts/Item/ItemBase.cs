@@ -107,13 +107,13 @@ public class ItemBase : InteractableObject
 
     public virtual void OnEquip(ItemInventory handler)
     {
-        gameObject.SetActive(true);
+        SetRender(true);
         canvas.DisableCanvas();
     }
 
     public virtual void OnUnequip(ItemInventory handler)
     {
-        gameObject.SetActive(false);
+        SetRender(false);
     }
 
     public virtual void OnDrop(ItemInventory handler)

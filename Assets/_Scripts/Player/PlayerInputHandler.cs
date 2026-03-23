@@ -45,5 +45,16 @@ public class PlayerInputHandler : NetworkBehaviour
     {
         pData.SetLockPlayer(open);
         pData.Skin_Data.CharacterAnimator.SetBool("Tablet", open);
+
+        if (open)
+        {
+            pData.Skin_Data.Rigging_Manager.RpcEnableLeftHandChainRig(true);
+            pData.Skin_Data.Rigging_Manager.RpcEnableLookAtTabletRig(true);
+        }
+        else
+        {
+            pData.Skin_Data.Rigging_Manager.RpcEnableLeftHandChainRig(false);
+            pData.Skin_Data.Rigging_Manager.RpcEnableLookAtTabletRig(false);
+        }
     }
 }

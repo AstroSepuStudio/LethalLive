@@ -322,7 +322,6 @@ public class ItemInventory : NetworkBehaviour
         pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", twoHanded);
         pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", !twoHanded && isCrowbar);
         pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", hasItem && !twoHanded && !isCrowbar);
-        pData.Skin_Data.CharacterAnimator.SetLayerWeight(2, hasItem ? 1f : 0f);
     }
 
     #endregion
