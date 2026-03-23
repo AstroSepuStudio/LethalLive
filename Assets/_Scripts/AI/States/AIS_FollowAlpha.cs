@@ -8,35 +8,31 @@ public class AIS_FollowAlpha : AIState
     [SerializeField] float separationDistance = 1.5f;
     [SerializeField] float separationPushDistance = 3f;
     [SerializeField] float searchDispatchTimeout = 45f;
-    float dispatchTimer;
 
-    public VortexAI AlphaTarget { get; set; }
-    public UnityEvent OnFollowLost;
+    public AIBrain AlphaTarget { get; set; }
 
     float recalcTimer;
+    float dispatchTimer;
+
+    public UnityEvent OnFollowLost;
 
     public override void OnEnterState(AIBrain brain)
     {
         brain.ResumeAgentMovement();
         recalcTimer = 0f;
         dispatchTimer = searchDispatchTimeout;
-
         brain.Agent.stoppingDistance = followStopDistance;
+        brain.SetIdleState(false);
     }
 
     public override void OnUpdateState(AIBrain brain)
     {
-        if (AlphaTarget == null)
-        {
-            OnFollowLost?.Invoke();
-            return;
-        }
+        if (AlphaTarget == null) { OnFollowLost?.Invoke(); return; }
 
         dispatchTimer -= Time.deltaTime;
         if (dispatchTimer <= 0f)
         {
-            VortexAI vortex = brain as VortexAI;
-            vortex?.BeginSearch();
+            brain.OnModuleEvent(AIBrain.ModuleEvent.BeginSearch);
             return;
         }
 
@@ -65,5 +61,6 @@ public class AIS_FollowAlpha : AIState
     {
         brain.Agent.stoppingDistance = 0f;
         brain.Animator_.SetBool("Walk", false);
+        brain.SetIdleState(true);
     }
 }

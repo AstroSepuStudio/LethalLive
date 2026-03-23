@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -20,13 +21,12 @@ public class AIS_SearchForItems : AIState
         waitingAtPosition = false;
         waitTimer = 0f;
         MoveToNextSearchPosition(brain);
+        brain.SetIdleState(false);
     }
 
     public override void OnUpdateState(AIBrain brain)
     {
-        VortexAI vortex = brain as VortexAI;
-
-        if (vortex != null && vortex.CarriedItem != null)
+        if (brain.TryGetModule<AIModule_ItemCarrier>(out var carrier) && carrier.HasItem)
         {
             OnItemFound?.Invoke();
             return;
@@ -38,13 +38,7 @@ public class AIS_SearchForItems : AIState
             if (waitTimer <= 0f)
             {
                 waitingAtPosition = false;
-
-                if (attemptsRemaining <= 0)
-                {
-                    OnSearchFailed?.Invoke();
-                    return;
-                }
-
+                if (attemptsRemaining <= 0) { OnSearchFailed?.Invoke(); return; }
                 MoveToNextSearchPosition(brain);
             }
             return;
@@ -55,6 +49,7 @@ public class AIS_SearchForItems : AIState
             brain.Animator_.SetBool("Walk", false);
             waitingAtPosition = true;
             waitTimer = waitAtPositionDuration;
+            brain.SetIdleState(true);
         }
     }
 
@@ -62,10 +57,12 @@ public class AIS_SearchForItems : AIState
     {
         brain.Animator_.SetBool("Walk", false);
         waitingAtPosition = false;
+        brain.SetIdleState(true);
     }
 
     void MoveToNextSearchPosition(AIBrain brain)
     {
+        brain.SetIdleState(false);
         attemptsRemaining--;
 
         var gen = DungeonGenerator.Instance;
@@ -82,7 +79,7 @@ public class AIS_SearchForItems : AIState
             if (!gen.RoomAdjacency.TryGetValue(currentId, out var neighbors) || neighbors.Count == 0)
                 break;
 
-            var candidates = new System.Collections.Generic.List<int>(neighbors);
+            var candidates = new List<int>(neighbors);
             currentId = candidates[Random.Range(0, candidates.Count)];
         }
 

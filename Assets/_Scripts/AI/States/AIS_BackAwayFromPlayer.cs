@@ -19,14 +19,14 @@ public class AIS_BackAwayFromPlayer : AIState
         giveUpTimer = giveUpDuration;
         recalcTimer = 0f;
         brain.ResumeAgentMovement();
+        brain.SetIdleState(false);
     }
 
     public override void OnUpdateState(AIBrain brain)
     {
-        VortexAI vortex = brain as VortexAI;
-        if (vortex == null) { OnSafe?.Invoke(); return; }
+        if (!brain.TryGetModule<AIModule_Senses>(out var senses)) { OnSafe?.Invoke(); return; }
 
-        PlayerData closest = vortex.GetClosestSeenPlayer();
+        PlayerData closest = senses.GetClosestSeenPlayer(brain);
 
         if (closest == null) { OnSafe?.Invoke(); return; }
 
@@ -60,6 +60,7 @@ public class AIS_BackAwayFromPlayer : AIState
 
     public override void OnExitState(AIBrain brain)
     {
+        brain.SetIdleState(true);
         brain.Animator_.SetBool("Walk", false);
     }
 }

@@ -34,6 +34,7 @@ public class AIS_PickUpItem : AIState
         graceTimer = movementGracePeriod;
         stuckTimer = stuckTimeout;
         attemptsRemaining = pickupAttempts;
+        brain.SetIdleState(false);
     }
 
     public override void OnUpdateState(AIBrain brain)
@@ -44,42 +45,29 @@ public class AIS_PickUpItem : AIState
         if (validationTimer <= 0f)
         {
             validationTimer = validationInterval;
-            if (!IsItemAvailable())
-            {
-                OnItemLost?.Invoke();
-                return;
-            }
+            if (!IsItemAvailable()) { OnItemLost?.Invoke(); return; }
         }
 
         if (TargetItem != null)
         {
+            recalcTimer -= Time.deltaTime;
             if (recalcTimer <= 0f)
             {
                 recalcTimer = recalculateInterval;
-                if (TargetItem != null)
-                    brain.MoveAgent(TargetItem.transform.position);
+                brain.MoveAgent(TargetItem.transform.position);
             }
-            recalcTimer -= Time.deltaTime;
         }
 
         bool mov = brain.IsAgentInMovement();
         brain.Animator_.SetBool("Walk", mov);
-        if (mov)
-        {
-            stuckTimer = stuckTimeout;
-            return;
-        }
+        if (mov) { stuckTimer = stuckTimeout; return; }
 
         stuckTimer -= Time.deltaTime;
-        if (stuckTimer <= 0f)
-        {
-            OnItemLost?.Invoke();
-            return;
-        }
+        if (stuckTimer <= 0f) { OnItemLost?.Invoke(); return; }
 
         float dist = TargetItem != null
-                ? Vector3.Distance(brain.transform.position, TargetItem.transform.position)
-                : float.MaxValue;
+            ? Vector3.Distance(brain.transform.position, TargetItem.transform.position)
+            : float.MaxValue;
 
         if (dist <= GetEffectivePickUpRange(brain))
         {
@@ -94,10 +82,13 @@ public class AIS_PickUpItem : AIState
                 OnItemLost?.Invoke();
         }
 
-        attemptsRemaining --;
+        attemptsRemaining--;
     }
 
-    public override void OnExitState(AIBrain brain) { }
+    public override void OnExitState(AIBrain brain) 
+    { 
+        brain.SetIdleState(true); 
+    }
 
     bool IsItemAvailable() =>
         TargetItem != null &&
@@ -106,38 +97,26 @@ public class AIS_PickUpItem : AIState
 
     void TryPickUp(AIBrain brain)
     {
-        if (!IsItemAvailable())
-        {
-            OnItemLost?.Invoke();
-            return;
-        }
+        if (!IsItemAvailable()) { OnItemLost?.Invoke(); return; }
 
-        VortexAI vortex = brain as VortexAI;
-        if (vortex == null) return;
+        var carrier = brain.GetModule<AIModule_ItemCarrier>();
+        if (carrier == null) { OnItemLost?.Invoke(); return; }
 
-        vortex.CarryItem(TargetItem);
+        carrier.CarryItem(TargetItem, brain);
         OnItemPickedUp?.Invoke();
     }
 
     FurnitureEntity FindBlockingFurniture()
     {
         if (TargetItem == null) return null;
-
-        Collider[] hits = Physics.OverlapSphere(
-            TargetItem.transform.position, 1f);
-
+        Collider[] hits = Physics.OverlapSphere(TargetItem.transform.position, 1f);
         foreach (var hit in hits)
-        {
-            if (hit.TryGetComponent<FurnitureEntity>(out var f)) 
-                return f;
-        }
+            if (hit.TryGetComponent<FurnitureEntity>(out var f)) return f;
         return null;
     }
 
     float GetEffectivePickUpRange(AIBrain brain)
     {
-        VortexAI vortex = brain as VortexAI;
-        if (vortex == null) return pickUpRange;
-        return pickUpRange * vortex.transform.localScale.x;
+        return pickUpRange * brain.transform.localScale.x;
     }
 }

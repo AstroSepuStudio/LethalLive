@@ -20,31 +20,29 @@ public class AIS_DropItemAtHome : AIState
 
     public override void OnEnterState(AIBrain brain)
     {
-        VortexAI vortex = brain as VortexAI;
-        if (vortex == null) return;
+        var carrier = brain.GetModule<AIModule_ItemCarrier>();
+        var home = brain.GetModule<AIModule_Home>();
 
-        if (vortex.CarriedItem == null)
+        if (carrier == null || !carrier.HasItem)
         {
             destinationSet = false;
             return;
         }
 
-        RoomData home = vortex.GetEffectiveHome();
-        if (home == null)
+        if (home == null || home.GetEffectiveHome() == null)
         {
             destinationSet = false;
             return;
         }
 
         brain.Animator_.SetBool("Walk", true);
-
         destinationSet = true;
         stuckTimer = stuckTimeout;
         graceTimer = movementGracePeriod;
         recalcTimer = recalculateInterval;
-        targetPosition = home.transform.position;
-
+        targetPosition = home.GetEffectiveHome().transform.position;
         brain.MoveAgent(targetPosition);
+        brain.SetIdleState(false);
     }
 
     public override void OnUpdateState(AIBrain brain)
@@ -55,11 +53,7 @@ public class AIS_DropItemAtHome : AIState
             return;
         }
 
-        if (graceTimer > 0f)
-        {
-            graceTimer -= Time.deltaTime;
-            return;
-        }
+        if (graceTimer > 0f) { graceTimer -= Time.deltaTime; return; }
 
         recalcTimer -= Time.deltaTime;
         if (recalcTimer <= 0f)
@@ -70,24 +64,19 @@ public class AIS_DropItemAtHome : AIState
 
         bool mov = brain.IsAgentInMovement();
         brain.Animator_.SetBool("Walk", mov);
-        if (mov)
-        {
-            stuckTimer = stuckTimeout;
-            return;
-        }
+
+        if (mov) { stuckTimer = stuckTimeout; return; }
 
         stuckTimer -= Time.deltaTime;
-        if (stuckTimer <= 0f)
-        {
-            OnItemDropped?.Invoke();
-            return;
-        }
+        if (stuckTimer <= 0f) { OnItemDropped?.Invoke(); return; }
 
         float dist = Vector3.Distance(brain.transform.position, targetPosition);
         if (dist <= dropRange)
         {
-            DropItem(brain as VortexAI);
+            brain.GetModule<AIModule_ItemCarrier>()?.DropCarriedItem();
             OnArrivedAtHome?.Invoke();
+            OnItemDropped?.Invoke();
+            graceTimer = 0f;
         }
     }
 
@@ -95,13 +84,6 @@ public class AIS_DropItemAtHome : AIState
     {
         brain.Animator_.SetBool("Walk", false);
         destinationSet = false;
-    }
-
-    void DropItem(VortexAI vortex)
-    {
-        if (vortex == null) return;
-        vortex.DropCarriedItem();
-        OnItemDropped?.Invoke();
-        graceTimer = 0f;
+        brain.SetIdleState(true);
     }
 }

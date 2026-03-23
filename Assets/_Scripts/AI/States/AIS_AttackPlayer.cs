@@ -38,9 +38,8 @@ public class AIS_AttackPlayer : AIState
         brain.ResumeAgentMovement();
         brain.Agent.stoppingDistance = brain.AttackStat_.AttackRadius * 0.8f;
         brain.PlaySFX(AIBrain.SFXEvent.Aggressive, 1);
-
-        VortexAI vortex = brain as VortexAI;
-        vortex.SetAggressive(true);
+        brain.SetAggressive(true);
+        brain.SetIdleState(false);
 
         graceTimer = movementGracePeriod;
         stuckTimer = stuckTimeout;
@@ -177,9 +176,8 @@ public class AIS_AttackPlayer : AIState
         brain.ResumeAgentMovement();
         brain.Agent.stoppingDistance = 0;
         brain.Animator_.SetBool("Walk", false);
-
-        VortexAI vortex = brain as VortexAI;
-        vortex.SetAggressive(false);
+        brain.SetAggressive(false);
+        brain.SetIdleState(true);
 
         attackPending = false;
         calmingDown = false;
@@ -189,9 +187,7 @@ public class AIS_AttackPlayer : AIState
     {
         brain.Animator_.SetBool("Walk", false);
         brain.StopAgentMovement();
-
-        VortexAI vortex = brain as VortexAI;
-        vortex.SetAggressive(false);
+        brain.SetAggressive(false);
 
         calmingDown = true;
         calmDownTimer = calmDownDuration;

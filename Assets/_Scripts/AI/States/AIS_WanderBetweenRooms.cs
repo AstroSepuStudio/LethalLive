@@ -19,11 +19,13 @@ public class AIS_WanderBetweenRooms : AIState
 
     public override void OnEnterState(AIBrain brain)
     {
+        brain.SetIdleState(false);
         MoveAgent(brain);
     }
 
     public override void OnExitState(AIBrain brain)
     {
+        brain.SetIdleState(true);
         brain.Animator_.SetBool("Walk", false);
     }
 
@@ -36,6 +38,7 @@ public class AIS_WanderBetweenRooms : AIState
 
         if (moving)
         {
+            brain.SetIdleState(true);
             moving = false;
             OnWanderCompleted?.Invoke();
         }
@@ -78,6 +81,7 @@ public class AIS_WanderBetweenRooms : AIState
     private void MoveAgent(AIBrain brain)
     {
         if (sleepTimer > 0) return;
+        brain.SetIdleState(false);
 
         brain.MoveAgent(GetRandomRoomPosition(transform.position, maxRooms, minRooms));
         sleepTimer = Random.Range(minSleep, maxSleep);

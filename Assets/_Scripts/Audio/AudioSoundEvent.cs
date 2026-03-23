@@ -24,7 +24,7 @@ public class AudioSoundEvent
             SoundLoudness.Quiet => 5,
             SoundLoudness.Loud => 40,
             SoundLoudness.Global => Mathf.Infinity,
-            _ => throw new System.NotImplementedException()
+            _ => 20
         };
     }
 }

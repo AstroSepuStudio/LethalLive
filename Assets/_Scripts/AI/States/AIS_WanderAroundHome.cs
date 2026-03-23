@@ -6,8 +6,8 @@ public class AIS_WanderAroundHome : AIState
     [SerializeField] float minSleep = 3f;
     [SerializeField] float maxSleep = 8f;
     [SerializeField] int maxWandersBeforeLeaving = 2;
-    int wanderCount;
 
+    int wanderCount;
     float sleepTimer;
     bool moving;
     bool arrived;
@@ -24,12 +24,12 @@ public class AIS_WanderAroundHome : AIState
         moving = false;
         arrived = false;
         MoveToRandomHomePosition(brain);
+        brain.SetIdleState(false);
     }
 
     public override void OnUpdateState(AIBrain brain)
     {
         bool mov = brain.IsAgentInMovement();
-
         brain.Animator_.SetBool("Walk", mov);
         if (mov) return;
 
@@ -38,9 +38,9 @@ public class AIS_WanderAroundHome : AIState
             moving = false;
             wanderCount++;
             OnWanderCompleted?.Invoke();
+            brain.SetIdleState(true);
 
-            VortexAI vortex = brain as VortexAI;
-            bool isAlpha = vortex != null && vortex.IsActingAsAlpha;
+            bool isAlpha = brain.TryGetModule<AIModule_Alpha>(out var alpha) && alpha.IsActingAsAlpha;
 
             if (!isAlpha && wanderCount >= maxWandersBeforeLeaving)
                 OnHomeVisitComplete?.Invoke();
@@ -55,10 +55,9 @@ public class AIS_WanderAroundHome : AIState
                 OnArrivedAtHome?.Invoke();
             }
 
-            VortexAI vortex = brain as VortexAI;
-            if (vortex.CarriedItem != null)
+            if (brain.TryGetModule<AIModule_ItemCarrier>(out var carrier) && carrier.HasItem)
             {
-                vortex.TriggerDropAtHome();
+                carrier.DropCarriedItem();
                 return;
             }
 
@@ -69,15 +68,17 @@ public class AIS_WanderAroundHome : AIState
     public override void OnExitState(AIBrain brain)
     {
         brain.Animator_.SetBool("Walk", false);
+        brain.SetIdleState(true);
     }
 
     void MoveToRandomHomePosition(AIBrain brain)
     {
-        VortexAI vortex = brain as VortexAI;
-        RoomData home = vortex?.HomeRoom;
-        if (home == null) return;
+        var home = brain.GetModule<AIModule_Home>();
+        RoomData homeRoom = home?.HomeRoom;
+        if (homeRoom == null) return;
+        brain.SetIdleState(false);
 
-        brain.MoveAgent(home.GetRandomPositionInRoom());
+        brain.MoveAgent(homeRoom.GetRandomPositionInRoom());
         brain.Animator_.SetBool("Walk", true);
         sleepTimer = Random.Range(minSleep, maxSleep);
         moving = true;

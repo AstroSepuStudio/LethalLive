@@ -19,11 +19,13 @@ public class AIS_SmallWander : AIState
     public override void OnEnterState(AIBrain brain)
     {
         MoveAgent(brain);
+        brain.SetIdleState(false);
     }
 
     public override void OnExitState(AIBrain brain)
     {
         brain.Animator_.SetBool("Walk", false);
+        brain.SetIdleState(true);
     }
 
     public override void OnUpdateState(AIBrain brain)
@@ -35,6 +37,7 @@ public class AIS_SmallWander : AIState
 
         if (moving)
         {
+            brain.SetIdleState(true);
             moving = false;
             OnWanderCompleted?.Invoke();
         }
@@ -53,6 +56,7 @@ public class AIS_SmallWander : AIState
 
     private void MoveAgent(AIBrain brain)
     {
+        brain.SetIdleState(false);
         if (sleepTimer > 0) return;
 
         brain.MoveAgent(GetRandomPositionInCircle(transform.position, maxDistance, minDistance));

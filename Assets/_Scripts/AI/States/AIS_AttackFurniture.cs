@@ -27,6 +27,7 @@ public class AIS_AttackFurniture : AIState
         brain.Agent.stoppingDistance = brain.AttackStat_.AttackRadius * 0.5f;
         brain.ResumeAgentMovement();
         brain.MoveAgent(Target.transform.position);
+        brain.SetIdleState(false);
         graceTimer = movementGracePeriod;
         stuckTimer = stuckTimeout;
         attackPending = false;
@@ -96,6 +97,7 @@ public class AIS_AttackFurniture : AIState
 
     public override void OnExitState(AIBrain brain)
     {
+        brain.SetIdleState(true);
         brain.Agent.stoppingDistance = 0;
         brain.Animator_.SetBool("Walk", false);
         attackPending = false;

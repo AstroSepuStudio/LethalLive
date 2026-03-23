@@ -124,6 +124,15 @@ public class AudioManager : MonoBehaviour
         BroadcastToHearing(src.transform.position, go, sfx, category);
     }
 
+    public void PlayOneShotWithDelay(AudioSource src, AudioSFX sfx, float delay, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
+        => StartCoroutine(DelayPlay(src, sfx, delay, goSrc, category));
+
+    IEnumerator DelayPlay(AudioSource src, AudioSFX sfx, float delay, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
+    {
+        yield return new WaitForSeconds(delay);
+        PlayOneShot(src, sfx, goSrc, category);
+    }
+
     public void PlayOneShot(AudioSource src, AudioSFX sfx, float multiplier, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);

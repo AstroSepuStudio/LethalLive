@@ -11,6 +11,7 @@ public class VortexAI : AIBrain
 {
     [SerializeField] Transform pickUpPos;
     [SerializeField] ParticleSystem deathParticles;
+    [SerializeField] AudioSource alphaCallSrc;
 
     [Header("State Indexes")]
     [SerializeField] int[] wanderIndexes;
@@ -35,55 +36,14 @@ public class VortexAI : AIBrain
     int curWanIndex = 0;
     int totalWanCycles = 0;
 
-    [Header("Alpha")]
-    [SerializeField] AudioSource alphaCallSrc;
-    [SerializeField][SyncVar(hook = nameof(UpdateScale))] int alpha = -1;
-    bool isActingAsAlpha = false;
-    bool pendingFollowerDispatch = false;
-    readonly List<VortexAI> pendingFollowers = new();
-    readonly List<VortexAI> packMembers = new();
-
-    public float Alpha => alpha;
-    public bool IsActingAsAlpha => isActingAsAlpha;
-    public VortexAI CurrentAlpha => followState.AlphaTarget;
-
     [Header("Detection")]
     [SerializeField] float detectionRadius = 10f;
     [SerializeField] float detectionInterval = 1f;
+    [SerializeField] float playerTooCloseDistance = 3f;
+    [SerializeField] float playerNearItemDistance = 3f;
     float detectionTimer = 0f;
 
     readonly HashSet<VortexAI> seenVortexes = new();
-    readonly HashSet<PlayerData> seenPlayers = new();
-    readonly List<PlayerData> watchedPlayers = new();
-
-    [Header("Item")]
-    [SerializeField] float dropCooldownDuration = 3f;
-    [SerializeField] float playerTooCloseDistance = 3f;
-    [SerializeField] float playerNearItemDistance = 3f;
-    float postDropCooldown = 0f;
-    readonly HashSet<ItemBase> homeItems = new();
-
-    public ItemBase CarriedItem { get; private set; }
-
-    [Header("Home")]
-    [SerializeField] float homeDistanceFraction = 0.5f;
-    [SerializeField] float homeDistanceTolerance = 0.2f;
-    bool hasAlphaHomeOverride = false;
-    RoomData alphaHomeOverride = null;
-
-    public RoomData HomeRoom { get; private set; }
-
-    [Header("Patience")]
-    [SerializeField] float patienceDecayDistance = 4;
-    [SerializeField] float patienceDecay = 2f;
-    [SerializeField] float patienceDecayOnBackAway = 5f;
-    [SerializeField] float patienceDecayOnItemStolen = 25f;
-    float patience;
-    float maxPatience;
-
-    public enum Personality { Passive, Cautious, Neutral, Irritated, Hostile }
-    public Personality CurrentPersonality { get; private set; }
-    public float Patience => patience;
 
     AIS_StareAtVortex stareState;
     AIS_FollowAlpha followState;
@@ -96,11 +56,22 @@ public class VortexAI : AIBrain
     AIS_StareAtPlayerNearItem stareAtPlayerNearItemState;
     AIS_AttackPlayer attackPlayerState;
 
-    public float GetAlphaPitch() => (2f - GetAlphaMultiplier());
+    AIModule_Alpha AlphaModule => GetModule<AIModule_Alpha>();
+    AIModule_Home HomeModule => GetModule<AIModule_Home>();
+    AIModule_Patience PatienceModule => GetModule<AIModule_Patience>();
+    AIModule_ItemCarrier CarrierModule => GetModule<AIModule_ItemCarrier>();
+    AIModule_Senses SensesModule => GetModule<AIModule_Senses>();
+
+    public float Alpha => AlphaModule?.AlphaValue ?? 0f;
+    public bool IsActingAsAlpha => AlphaModule?.IsActingAsAlpha ?? false;
+    public AIBrain CurrentAlpha => followState?.AlphaTarget;
+    public ItemBase CarriedItem => CarrierModule?.CarriedItem;
+    public RoomData HomeRoom => HomeModule?.HomeRoom;
+    public float Patience => PatienceModule?.Patience ?? float.MaxValue;
 
     public override void PlaySFX(SFXEvent sfxEvent, float pitch)
     {
-        pitch *= GetAlphaPitch();
+        pitch *= AlphaModule?.GetPitch() ?? 1f;
         base.PlaySFX(sfxEvent, pitch);
     }
 
@@ -108,43 +79,27 @@ public class VortexAI : AIBrain
     {
         if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var group) || group.Clips.Length == 0) return;
         int index = Random.Range(0, group.Clips.Length);
-        RpcPlaySFX(index, pitch);
+        RpcPlayAlphaCall(index, pitch);
     }
 
     [ClientRpc]
-    void RpcPlaySFX(int clipIndex, float pitch)
+    void RpcPlayAlphaCall(int clipIndex, float pitch)
     {
         if (alphaCallSrc == null) return;
         if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var group) || group.Clips.Length == 0) return;
-
         audioSrc.pitch = pitch;
         AudioManager.Instance.PlayOneShot(alphaCallSrc, group.Clips[clipIndex], gameObject, group.Loudness);
     }
-
-    #region Lifecycle
 
     public override void OnStartServer()
     {
         base.OnStartServer();
 
-        alpha = Random.Range(0, 100);
-        AssignPersonality();
-
-        float am = GetAlphaMultiplier();
-        entityStats.OverrideMaxHP(entityStats.maxHP * am, true);
-
-        attackStat = new(
-            Mathf.Clamp(attackStat.AttackRadius * am, 1.1f, 2f),
-            attackStat.AttackKnock,
-            attackStat.AttackForce * am,
-            attackStat.AttackDamage * am,
-            attackStat.AttackCooldown);
-
         lootDropper.OnLootSpawned = (item) =>
         {
-            float am = GetAlphaMultiplier();
+            float am = AlphaModule?.GetMultiplier() ?? 1f;
             item.MultiplyValue(am);
-            item.SetScale(Vector3.one * Mathf.Lerp(0.6f, 1.2f, (float)alpha / 100f));
+            item.SetScale(Vector3.one * Mathf.Lerp(0.6f, 1.2f, Alpha / 100f));
         };
     }
 
@@ -152,86 +107,41 @@ public class VortexAI : AIBrain
     {
         base.Start();
 
-        SetStates();
+        CacheStates();
 
         if (isServer)
-            AssignHomeRoom();
+            targetWanCycles = Random.Range(minWanderCycles, maxWanderCycles);
     }
 
-    void SetStates()
+    void CacheStates()
     {
-        targetWanCycles = Random.Range(minWanderCycles, maxWanderCycles);
+        if (states == null) return;
 
-        if (states != null)
-        {
-            if (stareStateIndex < states.Length)
-                stareState = states[stareStateIndex] as AIS_StareAtVortex;
-
-            if (followStateIndex < states.Length)
-                followState = states[followStateIndex] as AIS_FollowAlpha;
-
-            if (pickUpStateIndex < states.Length)
-                pickUpState = states[pickUpStateIndex] as AIS_PickUpItem;
-
-            if (dropAtHomeStateIndex < states.Length)
-                dropAtHomeState = states[dropAtHomeStateIndex] as AIS_DropItemAtHome;
-
-            if (searchStateIndex < states.Length)
-                searchState = states[searchStateIndex] as AIS_SearchForItems;
-
-            if (attackFurnitureStateIndex < states.Length)
-                attackFurnitureState = states[attackFurnitureStateIndex] as AIS_AttackFurniture;
-
-            if (followPlayerStateIndex < states.Length)
-                followPlayerState = states[followPlayerStateIndex] as AIS_FollowPlayer;
-
-            if (backAwayStateIndex < states.Length)
-                backAwayState = states[backAwayStateIndex] as AIS_BackAwayFromPlayer;
-
-            if (stareAtPlayerNearItemStateIndex < states.Length)
-                stareAtPlayerNearItemState = states[stareAtPlayerNearItemStateIndex] as AIS_StareAtPlayerNearItem;
-
-            if (attackPlayerStateIndex < states.Length)
-                attackPlayerState = states[attackPlayerStateIndex] as AIS_AttackPlayer;
-        }
+        stareState = SafeGetState<AIS_StareAtVortex>(stareStateIndex);
+        followState = SafeGetState<AIS_FollowAlpha>(followStateIndex);
+        pickUpState = SafeGetState<AIS_PickUpItem>(pickUpStateIndex);
+        dropAtHomeState = SafeGetState<AIS_DropItemAtHome>(dropAtHomeStateIndex);
+        searchState = SafeGetState<AIS_SearchForItems>(searchStateIndex);
+        followPlayerState = SafeGetState<AIS_FollowPlayer>(followPlayerStateIndex);
+        attackFurnitureState = SafeGetState<AIS_AttackFurniture>(attackFurnitureStateIndex);
+        backAwayState = SafeGetState<AIS_BackAwayFromPlayer>(backAwayStateIndex);
+        stareAtPlayerNearItemState = SafeGetState<AIS_StareAtPlayerNearItem>(stareAtPlayerNearItemStateIndex);
+        attackPlayerState = SafeGetState<AIS_AttackPlayer>(attackPlayerStateIndex);
     }
 
-    void UpdateScale(int oldValue, int newValue)
+    T SafeGetState<T>(int index) where T : AIState
     {
-        float scale = Mathf.Lerp(0.6f, 1.2f, (float)newValue / 100f);
-        transform.localScale = new Vector3(scale, scale, scale);
+        if (index >= 0 && index < states.Length)
+            return states[index] as T;
+        return null;
     }
-
-    void AssignPersonality()
-    {
-        if (alpha < 15) CurrentPersonality = Personality.Passive;
-        else if (alpha < 35) CurrentPersonality = Personality.Cautious;
-        else if (alpha < 60) CurrentPersonality = Personality.Neutral;
-        else if (alpha < 80) CurrentPersonality = Personality.Irritated;
-        else CurrentPersonality = Personality.Hostile;
-
-        maxPatience = CurrentPersonality switch
-        {
-            Personality.Passive => Random.Range(120f, 180f),
-            Personality.Cautious => Random.Range(70f, 120f),
-            Personality.Neutral => Random.Range(35f, 70f),
-            Personality.Irritated => Random.Range(12f, 35f),
-            Personality.Hostile => Random.Range(2f, 12f),
-            _ => 60f
-        };
-
-        patience = maxPatience;
-    }
-
 
     protected override void Update()
     {
         if (isDying) return;
         if (!isServer) return;
-        base.Update();
-        TickPatience();
 
-        if (postDropCooldown > 0f) postDropCooldown -= Time.deltaTime;
+        base.Update();
 
         detectionTimer -= Time.deltaTime;
         if (detectionTimer > 0f) return;
@@ -241,79 +151,23 @@ public class VortexAI : AIBrain
         RunDetection();
     }
 
-    void TickPatience()
+    public override void OnModuleEvent(ModuleEvent evt, object context = null)
     {
-        if (patience <= 0f) return;
-        if (followPlayerState != null && CurrentState == followPlayerState) return;
-
-        PlayerData closest = GetClosestSeenPlayer();
-        if (closest == null)
+        switch (evt)
         {
-            closest = GetClosestPlayer();
-            if (closest == null) return;
+            case ModuleEvent.BeginSearch:
+                TriggerSearch();
+                break;
+
+            case ModuleEvent.RespondToAlphaCall:
+                if (context is VortexAI alphaSource) RespondToAlphaCall(alphaSource);
+                break;
+
+            case ModuleEvent.RespondToHelpCall:
+                if (context is VortexAI helpCaller) RespondToHelpCall(helpCaller);
+                break;
         }
-
-        float dist = Vector3.Distance(transform.position, closest.transform.position);
-        float proximity = 1f - Mathf.Clamp01(dist / patienceDecayDistance);
-        patience -= patienceDecay * proximity * Time.deltaTime;
-
-        if (patience <= 0f) TriggerAttackPlayer();
     }
-
-    #endregion
-
-    #region Home Assignment
-
-    void AssignHomeRoom()
-    {
-        var gen = DungeonGenerator.Instance;
-        if (gen == null || gen.SpawnedRooms == null) return;
-
-        float maxDist = gen.MaxDistance;
-        float prefDist = maxDist * homeDistanceFraction;
-        float minBand = prefDist - maxDist * homeDistanceTolerance;
-        float maxBand = prefDist + maxDist * homeDistanceTolerance;
-
-        Vector3 startPos = gen.StartRoomPos;
-
-        List<RoomData> candidates = new();
-        List<RoomData> fallback = new();
-
-        foreach (var kvp in gen.SpawnedRooms)
-        {
-            RoomData rd = kvp.Value;
-            if (rd == null) continue;
-            if (rd.Data.biome == Biome.Hallway || !rd.Data.ValidVortexHome) continue;
-
-            float dist = Vector3.Distance(startPos, rd.transform.position);
-            if (dist >= minBand && dist <= maxBand)
-                candidates.Add(rd);
-            else
-                fallback.Add(rd);
-        }
-
-        HomeRoom = candidates.Count > 0
-            ? candidates[Random.Range(0, candidates.Count)]
-            : fallback.Count > 0 ? fallback[Random.Range(0, fallback.Count)] : null;
-    }
-
-    public RoomData GetEffectiveHome() => hasAlphaHomeOverride ? alphaHomeOverride : HomeRoom;
-
-    void SetAlphaHomeOverride(RoomData alphaHome)
-    {
-        alphaHomeOverride = alphaHome;
-        hasAlphaHomeOverride = alphaHome != null;
-    }
-
-    void ClearAlphaHomeOverride()
-    {
-        alphaHomeOverride = null;
-        hasAlphaHomeOverride = false;
-    }
-
-    #endregion
-
-    #region Detection
 
     void RunDetection()
     {
@@ -331,6 +185,9 @@ public class VortexAI : AIBrain
         float closestItemDist = float.MaxValue;
         float closestPlayerDist = float.MaxValue;
 
+        var carrier = CarrierModule;
+        var home = HomeModule;
+
         foreach (var hit in hits)
         {
             string tag = hit.tag;
@@ -338,7 +195,7 @@ public class VortexAI : AIBrain
             if (tag == "Vortex")
             {
                 if (!IsInWanderState()) continue;
-                VortexAI other = hit.GetComponent<VortexAI>();
+                var other = hit.GetComponent<VortexAI>();
                 if (other == null || other == this) continue;
                 float d = Vector3.Distance(transform.position, other.transform.position);
                 if (d < closestVortexDist && HasLineOfSight(other.transform.position))
@@ -346,52 +203,38 @@ public class VortexAI : AIBrain
             }
             else if (tag == "Item")
             {
-                if (postDropCooldown > 0f) continue;
-                ItemBase item = hit.GetComponent<ItemBase>();
+                if (carrier != null && carrier.IsOnDropCooldown) continue;
+                var item = hit.GetComponent<ItemBase>();
                 if (item == null || !item.ItemData.pickable || item.HasOwner) continue;
-                if (IsItemAtEffectiveHome(item)) continue;
+                if (home != null && home.IsItemAtHome(item)) continue;
                 float d = Vector3.Distance(transform.position, item.transform.position);
                 if (d < closestItemDist && HasLineOfSight(item.transform.position))
                 { closestItemDist = d; closestItem = item; }
             }
             else if (tag == "Player")
             {
-                PlayerData player = hit.GetComponent<PlayerData>();
-                if (player == null) continue;
+                if (!hit.TryGetComponent<PlayerData>(out var player)) continue;
                 if (!HasLineOfSight(player.transform.position)) continue;
                 float d = Vector3.Distance(transform.position, player.transform.position);
-                if (d <= playerTooCloseDistance)
-                    tooClosePlayer = player;
-                if (d < closestPlayerDist)
-                { closestPlayerDist = d; closestPlayer = player; }
+                if (d <= playerTooCloseDistance) tooClosePlayer = player;
+                if (d < closestPlayerDist) { closestPlayerDist = d; closestPlayer = player; }
             }
         }
 
-        // Priority order: back away > vortex stare > item pickup > player follow
-        if (tooClosePlayer != null)
-        {
-            TriggerBackAway();
-            return;
-        }
+        // Priority: back away > vortex stare > item pickup > player follow
+        if (tooClosePlayer != null) { TriggerBackAway(); return; }
 
         if (closestVortex != null && !seenVortexes.Contains(closestVortex))
-        {
-            TriggerStare(closestVortex);
-            return;
-        }
+        { TriggerStare(closestVortex); return; }
 
-        if (closestItem != null)
-        {
-            TriggerPickUp(closestItem);
-            return;
-        }
+        if (closestItem != null) { TriggerPickUp(closestItem); return; }
 
         if (closestPlayer != null && IsInWanderState())
         {
-            if (!seenPlayers.Contains(closestPlayer))
+            var senses = SensesModule;
+            if (senses != null && !senses.HasSeenPlayer(closestPlayer))
             {
-                seenPlayers.Add(closestPlayer);
-                watchedPlayers.Add(closestPlayer);
+                senses.RegisterSeenPlayer(closestPlayer);
                 TriggerFollowPlayer();
             }
         }
@@ -399,32 +242,27 @@ public class VortexAI : AIBrain
 
     void CheckHomeItems()
     {
-        if (homeItems.Count == 0) return;
-
-        RoomData home = GetEffectiveHome();
+        var home = HomeModule;
         if (home == null) return;
 
-        float distFromHome = Vector3.Distance(transform.position, home.transform.position);
+        RoomData effectiveHome = home.GetEffectiveHome();
+        if (effectiveHome == null) return;
+
+        float distFromHome = Vector3.Distance(transform.position, effectiveHome.transform.position);
         if (distFromHome > detectionRadius) return;
 
-        homeItems.RemoveWhere(item => item == null);
-
-        foreach (var item in homeItems)
-        {
-            if (!item.HasOwner) continue;
-            homeItems.Remove(item);
-            DrainPatience(patienceDecayOnItemStolen);
-            break;
-        }
+        home.ScanAndCheckStolenItems(this);
     }
 
-    bool IsItemAtEffectiveHome(ItemBase item)
+    bool IsInWanderState()
     {
-        RoomData home = GetEffectiveHome();
-        if (home == null) return false;
-
-        float threshold = DungeonGenerator.Instance.CellSize;
-        return Vector3.Distance(item.transform.position, home.transform.position) <= threshold;
+        if (CurrentState == null) return false;
+        if (wanderHomeStateIndex < states.Length && CurrentState == states[wanderHomeStateIndex])
+            return true;
+        if (wanderIndexes == null) return false;
+        foreach (int idx in wanderIndexes)
+            if (idx < states.Length && CurrentState == states[idx]) return true;
+        return false;
     }
 
     bool IsInAttackState()
@@ -434,96 +272,19 @@ public class VortexAI : AIBrain
         return false;
     }
 
-    #endregion
-
-    #region State Helpers
-
-    bool IsInWanderState()
-    {
-        if (CurrentState == null) return false;
-        if (states[wanderHomeStateIndex] != null && CurrentState == states[wanderHomeStateIndex])
-            return true;
-
-        if (wanderIndexes == null) return false;
-        foreach (int idx in wanderIndexes)
-            if (idx < states.Length && CurrentState == states[idx]) return true;
-        return false;
-    }
-
-    PlayerData GetClosestPlayer()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, patienceDecayDistance);
-        PlayerData closest = null;
-        float closestDist = float.MaxValue;
-
-        foreach (var hit in hits)
-        {
-            if (!hit.CompareTag("Player")) continue;
-            if (!hit.TryGetComponent<PlayerData>(out var p)) continue;
-            if (!HasLineOfSight(p.transform.position)) continue;
-            float d = Vector3.Distance(transform.position, p.transform.position);
-            if (d < closestDist) { closestDist = d; closest = p; }
-        }
-
-        if (closest != null) 
-        { 
-            seenPlayers.Add(closest); 
-            watchedPlayers.Add(closest);
-        }
-        return closest;
-    }
-
-    public PlayerData GetClosestSeenPlayer()
-    {
-        PlayerData closest = null;
-        float closestDist = float.MaxValue;
-        
-        foreach (var p in seenPlayers)
-        {
-            if (p == null) continue;
-            float d = Vector3.Distance(transform.position, p.transform.position);
-            if (d < closestDist) { closestDist = d; closest = p; }
-        }
-        return closest;
-    }
-
-    PlayerData GetPlayerNearItem(ItemBase item)
-    {
-        Collider[] hits = Physics.OverlapSphere(item.transform.position, playerNearItemDistance);
-        foreach (var hit in hits)
-        {
-            if (!hit.CompareTag("Player")) continue;
-            PlayerData p = hit.GetComponent<PlayerData>();
-            if (p != null) return p;
-        }
-        return null;
-    }
-
-    public void DrainPatience(float amount)
-    {
-        patience -= amount;
-        if (patience <= 0f) TriggerAttackPlayer();
-    }
-
     void TriggerStare(VortexAI target)
     {
         if (stareState == null) return;
         seenVortexes.Add(target);
-        stareState.TargetVortex = target;
+        stareState.TargetBrain = target;
         SetState(states[stareStateIndex]);
     }
 
     void TriggerPickUp(ItemBase item)
     {
         if (pickUpState == null) return;
-
-        PlayerData blocker = GetPlayerNearItem(item);
-        if (blocker != null)
-        {
-            TriggerStareAtPlayerNearItem(item, blocker);
-            return;
-        }
-
+        PlayerData blocker = GetPlayerNearItem(item, playerNearItemDistance);
+        if (blocker != null) { TriggerStareAtPlayerNearItem(item, blocker); return; }
         pickUpState.TargetItem = item;
         SetState(states[pickUpStateIndex]);
     }
@@ -531,13 +292,14 @@ public class VortexAI : AIBrain
     void TriggerFollowPlayer()
     {
         if (followPlayerState == null) return;
-        followPlayerState.WatchedPlayers = watchedPlayers;
+        if (SensesModule == null) return;
+        followPlayerState.WatchedPlayers = SensesModule.WatchedPlayers;
         SetState(states[followPlayerStateIndex]);
     }
 
     public void TriggerDropAtHome() => SetState(states[dropAtHomeStateIndex]);
     void TriggerWanderHome() => SetState(states[wanderHomeStateIndex]);
-    void ResumeWander() => SetState(states[wanderIndexes[curWanIndex]]);
+    public void ResumeWander() => SetState(states[wanderIndexes[curWanIndex]]);
 
     void TriggerSearch()
     {
@@ -548,8 +310,9 @@ public class VortexAI : AIBrain
     void TriggerBackAway()
     {
         if (backAwayState == null) { ResumeWander(); return; }
-        DrainPatienceOnBackAway();
-        if (patience > 0f)
+        if (PatienceModule == null) return;
+        PatienceModule.DrainOnBackAway();
+        if (PatienceModule == null || !PatienceModule.IsExhausted)
             SetState(states[backAwayStateIndex]);
     }
 
@@ -561,82 +324,31 @@ public class VortexAI : AIBrain
         SetState(states[stareAtPlayerNearItemStateIndex]);
     }
 
-    void TriggerAttackPlayer()
+    public void TriggerAttackPlayer()
     {
-        patience = 0f;
-        if (attackPlayerState == null) { ResumeWander(); return; }
+        var patience = PatienceModule;
+        if (patience != null) patience.Restore(0f);
 
-        PlayerData target = GetClosestSeenPlayer();
+        if (attackPlayerState == null) { ResumeWander(); return; }
+        if (SensesModule == null) return;
+
+        PlayerData target = SensesModule.GetClosestSeenPlayer(this);
         if (target == null) { ResumeWander(); return; }
 
-        ItemBase droppedItem = CarriedItem;
-        if (CarriedItem != null) DropCarriedItem();
-
+        if (CarrierModule != null)
+        {
+            ItemBase droppedItem = CarriedItem;
+            CarrierModule.DropCarriedItem();
+            attackPlayerState.ItemToRecoverAfter = droppedItem;
+        }
+        
         attackPlayerState.Target = target;
-        attackPlayerState.ItemToRecoverAfter = droppedItem;
         SetState(states[attackPlayerStateIndex]);
     }
 
-    #endregion
-
-    #region Item
-
-    public void CarryItem(ItemBase item)
-    {
-        PlaySFX(SFXEvent.Happy, 1);
-
-        if (stareAtPlayerNearItemState != null) stareAtPlayerNearItemState.WatchedItem = null;
-        CarriedItem = item;
-        item.OnPickUp();
-        item.transform.SetParent(pickUpPos);
-        item.transform.localPosition = Vector3.zero;
-
-        Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
-        foreach (var hit in hits)
-        {
-            if (!hit.CompareTag("Player")) continue;
-            if (hit.TryGetComponent<PlayerData>(out var player)) 
-                watchedPlayers.Remove(player);
-        }
-    }
-
-    public void DropCarriedItem()
-    {
-        if (CarriedItem == null) return;
-        CarriedItem.OnDrop(null);
-        CarriedItem.transform.SetParent(null);
-        CarriedItem = null;
-        postDropCooldown = dropCooldownDuration;
-    }
-
-    void ScanHomeItems()
-    {
-        homeItems.Clear();
-        RoomData home = GetEffectiveHome();
-        if (home == null) return;
-
-        Collider[] hits = Physics.OverlapSphere(home.transform.position,
-            DungeonGenerator.Instance.CellSize);
-        foreach (var hit in hits)
-        {
-            if (!hit.CompareTag("Item")) continue;
-            ItemBase item = hit.GetComponent<ItemBase>();
-            if (item != null && !item.HasOwner)
-                homeItems.Add(item);
-        }
-    }
-
-    #endregion
-
-    #region Alpha / Follower Role
-
     void BecomeAlpha(VortexAI follower)
     {
-        isActingAsAlpha = true;
-        follower.SetAlphaHomeOverride(HomeRoom);
-        pendingFollowers.Add(follower);
-        packMembers.Add(follower);
-        pendingFollowerDispatch = true;
+        AlphaModule?.BecomeLeaderOf(follower, this);
 
         if (CurrentState == states[wanderHomeStateIndex])
         {
@@ -650,28 +362,21 @@ public class VortexAI : AIBrain
     public void RespondToAlphaCall(VortexAI alpha)
     {
         if (IsInAttackState()) return;
-        if (CarriedItem != null) DropCarriedItem();
+        CarrierModule?.DropCarriedItem();
 
-        PlayerData alphaTarget = alpha.attackPlayerState != null ? alpha.attackPlayerState.Target : alpha.GetClosestSeenPlayer();
+        PlayerData alphaTarget = alpha.attackPlayerState?.Target ?? alpha.SensesModule?.GetClosestSeenPlayer(alpha);
 
-        if (alphaTarget != null && !seenPlayers.Contains(alphaTarget))
+        if (alphaTarget != null) SensesModule?.RegisterSeenPlayer(alphaTarget);
+
+        if (alphaTarget != null &&
+            Vector3.Distance(transform.position, alphaTarget.transform.position) <= detectionRadius)
         {
-            seenPlayers.Add(alphaTarget);
-            watchedPlayers.Add(alphaTarget);
-        }
-
-        if (alphaTarget != null)
-        {
-            float dist = Vector3.Distance(transform.position, alphaTarget.transform.position);
-            if (dist <= detectionRadius)
-            {
-                if (attackPlayerState == null) return;
-                attackPlayerState.Target = alphaTarget;
-                attackPlayerState.ItemToRecoverAfter = null;
-                patience = 0f;
-                SetState(states[attackPlayerStateIndex]);
-                return;
-            }
+            if (attackPlayerState == null) return;
+            PatienceModule?.Restore(0f);
+            attackPlayerState.Target = alphaTarget;
+            attackPlayerState.ItemToRecoverAfter = null;
+            SetState(states[attackPlayerStateIndex]);
+            return;
         }
 
         TriggerWanderHome();
@@ -680,62 +385,44 @@ public class VortexAI : AIBrain
     public void RespondToHelpCall(VortexAI caller)
     {
         if (IsInAttackState()) return;
-        if (CarriedItem != null) DropCarriedItem();
-
+        CarrierModule?.DropCarriedItem();
         PlaySFX(SFXEvent.CallForHelp, 1f);
 
-        PlayerData target = caller.attackPlayerState.Target != null ? caller.attackPlayerState.Target : caller.GetClosestSeenPlayer();
-
+        PlayerData target = caller.attackPlayerState?.Target ?? caller.SensesModule?.GetClosestSeenPlayer(caller);
         if (target == null) return;
 
-        if (!seenPlayers.Contains(target))
-        {
-            seenPlayers.Add(target);
-            watchedPlayers.Add(target);
-        }
+        SensesModule?.RegisterSeenPlayer(target);
 
-        float dist = Vector3.Distance(transform.position, target.transform.position);
-        if (dist <= detectionRadius)
+        if (Vector3.Distance(transform.position, target.transform.position) <= detectionRadius)
         {
             if (attackPlayerState == null) return;
+            PatienceModule?.Restore(0f);
             attackPlayerState.Target = target;
             attackPlayerState.ItemToRecoverAfter = null;
-            patience = 0f;
             SetState(states[attackPlayerStateIndex]);
         }
     }
 
-    public void BeginSearch() => TriggerSearch();
-
-    float GetAlphaMultiplier()
+    public override void SetAggressive(bool aggressive)
     {
-        return Mathf.Lerp(0.5f, 1.5f, (float)alpha / 100f);
-    }
-
-    public void SetAggressive(bool aggressive)
-    {
-        Animator_.SetBool("Aggresive", aggressive);
+        base.SetAggressive(aggressive);
         renderer_.SetBlendShapeWeight(0, aggressive ? 0 : 100);
     }
-
-    #endregion
-
-    #region Events
 
     public void OnItemPickedUp() => TriggerDropAtHome();
     public void OnItemLost() => ResumeWander();
 
     public void OnItemDropped()
     {
-        if (isActingAsAlpha) { TriggerWanderHome(); return; }
-        if (hasAlphaHomeOverride) TriggerSearch();
+        if (IsActingAsAlpha) { TriggerWanderHome(); return; }
+        if (HomeModule?.HasOverride == true) TriggerSearch();
         else ResumeWander();
     }
 
     public void OnNoItemToDeliver()
     {
-        if (isActingAsAlpha) { TriggerWanderHome(); return; }
-        if (hasAlphaHomeOverride) TriggerSearch();
+        if (IsActingAsAlpha) { TriggerWanderHome(); return; }
+        if (HomeModule?.HasOverride == true) TriggerSearch();
         else ResumeWander();
     }
 
@@ -744,12 +431,16 @@ public class VortexAI : AIBrain
 
     public void OnStareDecisionMade(bool shouldFollow)
     {
-        if (shouldFollow && followState != null && stareState?.TargetVortex != null)
+        if (shouldFollow && followState != null && stareState?.TargetBrain != null)
         {
-            VortexAI target = stareState.TargetVortex;
-            VortexAI actualAlpha = target.hasAlphaHomeOverride && target.followState?.AlphaTarget != null
-            ? target.followState.AlphaTarget
-            : target;
+            AIBrain targetBrain = stareState.TargetBrain;
+            VortexAI target = targetBrain as VortexAI;
+
+            var targetHome = target.HomeModule;
+            var targetFollow = target.followState;
+            VortexAI actualAlpha = (targetHome != null && targetHome.HasOverride && targetFollow?.AlphaTarget is VortexAI va)
+                ? va
+                : target;
 
             followState.AlphaTarget = actualAlpha;
             actualAlpha.BecomeAlpha(this);
@@ -774,13 +465,9 @@ public class VortexAI : AIBrain
 
         if (totalWanCycles >= cyclesBeforeHomeVisit)
         {
-            if (CarriedItem != null)
-            {
-                TriggerDropAtHome();
-                return;
-            }
+            if (CarriedItem != null) { TriggerDropAtHome(); return; }
 
-            if (!isActingAsAlpha && !hasAlphaHomeOverride)
+            if (!IsActingAsAlpha && HomeModule?.HasOverride != true)
             {
                 totalWanCycles = 0;
                 TriggerWanderHome();
@@ -793,33 +480,24 @@ public class VortexAI : AIBrain
 
     public void OnFollowLost()
     {
-        ClearAlphaHomeOverride();
+        HomeModule?.ClearOverride();
         seenVortexes.Clear();
-        isActingAsAlpha = false;
 
-        if (followState?.AlphaTarget != null)
-            followState.AlphaTarget.RemoveFromPack(this);
+        if (followState?.AlphaTarget is VortexAI alpha)
+            alpha.AlphaModule?.RemoveFromPack(this);
 
         ResumeWander();
     }
 
-    public void RemoveFromPack(VortexAI follower) => packMembers.Remove(follower);
-
     public void OnArrivedAtHome()
     {
-        ScanHomeItems();
-
-        if (!pendingFollowerDispatch) return;
-        pendingFollowerDispatch = false;
-
-        foreach (var follower in pendingFollowers)
-            follower.BeginSearch();
-        pendingFollowers.Clear();
+        HomeModule?.ScanHomeItems();
+        AlphaModule?.DispatchPendingFollowers();
     }
 
     public void OnCuriosityExpired()
     {
-        watchedPlayers.Clear();
+        SensesModule?.ClearWatched();
         ResumeWander();
     }
 
@@ -840,7 +518,6 @@ public class VortexAI : AIBrain
     }
 
     public void OnFurnitureLost() => ResumeWander();
-
     public void OnBackAwaySafe() => ResumeWander();
     public void OnBackAwayGaveUp() => ResumeWander();
 
@@ -852,14 +529,13 @@ public class VortexAI : AIBrain
             ResumeWander();
     }
     public void OnItemStareGaveUp() => ResumeWander();
-
     public void OnAttackPlayerLost() => ResumeWander();
 
     public void OnAttackPlayerCalmedDown()
     {
-        patience = maxPatience * 0.3f;
+        PatienceModule?.Restore(0.3f);
 
-        ItemBase itemToRecover = attackPlayerState != null ? attackPlayerState.ItemToRecoverAfter : null;
+        ItemBase itemToRecover = attackPlayerState?.ItemToRecoverAfter;
         if (itemToRecover != null && itemToRecover.ItemData.pickable && !itemToRecover.HasOwner)
         {
             attackPlayerState.ItemToRecoverAfter = null;
@@ -870,47 +546,33 @@ public class VortexAI : AIBrain
         ResumeWander();
     }
 
-    public void DrainPatienceOnItemStolen() => DrainPatience(patienceDecayOnItemStolen);
-    public void DrainPatienceOnBackAway() => DrainPatience(patienceDecayOnBackAway);
+    public void DrainPatienceOnItemStolen() => PatienceModule?.DrainOnItemStolen();
+    public void DrainPatienceOnBackAway() => PatienceModule?.DrainOnBackAway();
 
     public override void OnAgentHurt(AttackEvent source)
     {
-        if (isActingAsAlpha && packMembers.Count > 0) OnAlphaHurt();
-
+        if (IsActingAsAlpha && AlphaModule != null) OnAlphaHurt();
         OnVortexHurt();
     }
 
-    private void OnAlphaHurt()
+    void OnAlphaHurt()
     {
-        if (!isActingAsAlpha || packMembers.Count == 0) return;
-
         PlaySFX(SFXEvent.AlphaCall, 1f);
-
         TriggerAttackPlayer();
-
-        foreach (var follower in packMembers)
-        {
-            if (follower == null) continue;
-            float dist = Vector3.Distance(transform.position, follower.transform.position);
-            if (dist > detectionRadius * 2f) continue;
-            follower.RespondToAlphaCall(this);
-        }
+        AlphaModule?.AlertPack(this);
     }
 
-    private void OnVortexHurt()
+    void OnVortexHurt()
     {
         PlaySFX(SFXEvent.CallForHelp, 1f);
-
         TriggerAttackPlayer();
 
         Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
         foreach (var hit in hits)
         {
             if (!hit.CompareTag("Vortex")) continue;
-            VortexAI other = hit.GetComponent<VortexAI>();
-            if (other == null || other == this) continue;
-            if (other.IsInAttackState()) continue;
-
+            var other = hit.GetComponent<VortexAI>();
+            if (other == null || other == this || other.IsInAttackState()) continue;
             other.RespondToHelpCall(this);
         }
     }
@@ -919,7 +581,7 @@ public class VortexAI : AIBrain
     {
         base.OnAgentDeath(source);
 
-        DropCarriedItem();
+        CarrierModule?.DropCarriedItem();
         isDying = true;
         StopAgentMovement();
         DisableCollider();
@@ -933,24 +595,18 @@ public class VortexAI : AIBrain
     IEnumerator DespawnVortex()
     {
         yield return new WaitForSeconds(8f);
-
         NetworkServer.Destroy(gameObject);
     }
 
-    [ClientRpc]
-    private void RPC_PlayDeathParticles() => StartCoroutine(PlayDeathParticles());
+    [ClientRpc] void RPC_PlayDeathParticles() => StartCoroutine(PlayDeathParticles());
 
     IEnumerator PlayDeathParticles()
     {
         deathParticles.Play();
         yield return new WaitForSeconds(2f);
-
         deathParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
     }
 
-    #endregion
-
-    #region Gizmos
 #if UNITY_EDITOR
     protected override void OnDrawGizmosSelected()
     {
@@ -959,11 +615,12 @@ public class VortexAI : AIBrain
         Handles.color = Color.yellow;
         Handles.DrawWireDisc(transform.position, Vector3.up, detectionRadius);
 
-        RoomData effectiveHome = GetEffectiveHome();
+        RoomData effectiveHome = HomeModule?.GetEffectiveHome();
         if (effectiveHome != null)
         {
             Vector3 homePos = effectiveHome.transform.position + Vector3.up * 0.1f;
-            Color homeColor = hasAlphaHomeOverride ? new Color(0.6f, 0f, 1f) : new Color(1f, 0.5f, 0f);
+            bool hasOverride = HomeModule?.HasOverride ?? false;
+            Color homeColor = hasOverride ? new Color(0.6f, 0f, 1f) : new Color(1f, 0.5f, 0f);
 
             Handles.color = new Color(homeColor.r, homeColor.g, homeColor.b, 0.35f);
             Handles.DrawSolidDisc(homePos, Vector3.up, 1.5f);
@@ -971,24 +628,19 @@ public class VortexAI : AIBrain
             Handles.DrawWireDisc(homePos, Vector3.up, 1.5f);
             Handles.DrawDottedLine(transform.position, homePos, 4f);
 
-            GUIStyle homeStyle = new();
-            homeStyle.alignment = TextAnchor.MiddleCenter;
-            homeStyle.fontSize = 10;
+            GUIStyle homeStyle = new() { alignment = TextAnchor.MiddleCenter, fontSize = 10 };
             homeStyle.normal.textColor = homeColor;
-            Handles.Label(
-                effectiveHome.transform.position + Vector3.up * 2f,
-                hasAlphaHomeOverride ? "a Home (override)" : "Home",
-                homeStyle);
+            Handles.Label(effectiveHome.transform.position + Vector3.up * 2f,
+                hasOverride ? "Home (override)" : "Home", homeStyle);
         }
 
-        GUIStyle style = new();
-        style.alignment = TextAnchor.MiddleCenter;
+        GUIStyle style = new() { alignment = TextAnchor.MiddleCenter };
         Vector3 labelPos = transform.position + Vector3.up;
 
         style.normal.textColor = Color.cyan;
         style.fontSize = 14;
         style.fontStyle = FontStyle.Bold;
-        Handles.Label(labelPos, $"a {alpha:F0}", style);
+        Handles.Label(labelPos, $"a {Alpha:F0}", style);
 
         if (CurrentState != null)
         {
@@ -1005,18 +657,21 @@ public class VortexAI : AIBrain
             Handles.Label(labelPos + Vector3.up * 0.2f, $"[{CarriedItem.ItemData.itemName}]", style);
         }
 
-        if (isActingAsAlpha)
+        if (IsActingAsAlpha)
         {
             style.normal.textColor = new Color(1f, 0.5f, 0f);
             style.fontSize = 11;
             Handles.Label(labelPos + Vector3.up * 0.4f, "ALPHA", style);
         }
 
-        style.normal.textColor = Color.Lerp(Color.red, Color.green, patience / maxPatience);
-        style.fontSize = 10;
-        Handles.Label(labelPos + Vector3.up * 0.6f,
-            $"{CurrentPersonality} [{patience:F0}/{maxPatience:F0}]", style);
+        var pm = PatienceModule;
+        if (pm != null)
+        {
+            style.normal.textColor = Color.Lerp(Color.red, Color.green, pm.Patience / pm.MaxPatience);
+            style.fontSize = 10;
+            Handles.Label(labelPos + Vector3.up * 0.6f,
+                $"{pm.CurrentPersonality} [{pm.Patience:F0}/{pm.MaxPatience:F0}]", style);
+        }
     }
 #endif
-    #endregion
 }

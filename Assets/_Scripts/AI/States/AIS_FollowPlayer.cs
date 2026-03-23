@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using UnityEngine.Events;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AIS_FollowPlayer : AIState
 {
@@ -13,7 +13,6 @@ public class AIS_FollowPlayer : AIState
 
     public List<PlayerData> WatchedPlayers { get; set; }
 
-    float CuriosityDuration;
     float curiosityTimer;
     float recalcTimer;
 
@@ -21,18 +20,16 @@ public class AIS_FollowPlayer : AIState
 
     public override void OnEnterState(AIBrain brain)
     {
-        CuriosityDuration = Random.Range(minCuriosityDuration, maxCuriosityDuration);
-        curiosityTimer = CuriosityDuration;
+        curiosityTimer = Random.Range(minCuriosityDuration, maxCuriosityDuration);
         recalcTimer = 0f;
         brain.ResumeAgentMovement();
         brain.Agent.stoppingDistance = followStopDistance;
-        Debug.Log($"{brain.Prefix} seems to be intereset in a player!");
+        brain.SetIdleState(false);
     }
 
     public override void OnUpdateState(AIBrain brain)
     {
-        VortexAI vortex = brain as VortexAI;
-        if (vortex != null && vortex.CarriedItem != null)
+        if (brain.TryGetModule<AIModule_ItemCarrier>(out var carrier) && carrier.HasItem)
         {
             OnCuriosityExpired?.Invoke();
             return;
@@ -45,11 +42,7 @@ public class AIS_FollowPlayer : AIState
         }
 
         curiosityTimer -= Time.deltaTime;
-        if (curiosityTimer <= 0)
-        {
-            OnCuriosityExpired?.Invoke();
-            return;
-        }
+        if (curiosityTimer <= 0f) { OnCuriosityExpired?.Invoke(); return; }
 
         PlayerData target = GetClosestPlayer(brain.transform.position);
         if (target == null) { OnCuriosityExpired?.Invoke(); return; }
@@ -78,6 +71,7 @@ public class AIS_FollowPlayer : AIState
     {
         brain.Agent.stoppingDistance = 0f;
         brain.Animator_.SetBool("Walk", false);
+        brain.SetIdleState(true);
     }
 
     PlayerData GetClosestPlayer(Vector3 origin)

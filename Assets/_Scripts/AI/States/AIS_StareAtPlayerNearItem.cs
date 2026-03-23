@@ -26,6 +26,7 @@ public class AIS_StareAtPlayerNearItem : AIState
         waitTimer = waitDuration;
         checkTimer = 0f;
         warningTimer = Random.Range(minWarningInterval, maxWarningInterval);
+        brain.SetIdleState(false);
     }
 
     public override void OnUpdateState(AIBrain brain)
@@ -45,11 +46,10 @@ public class AIS_StareAtPlayerNearItem : AIState
                 brain.PlaySFX(AIBrain.SFXEvent.Warning, 1);
             }
 
-            VortexAI vortex = brain as VortexAI;
-            if (vortex != null)
+            if (brain.TryGetModule<AIModule_Patience>(out var patience))
             {
-                vortex.DrainPatience(patienceDecayRate * Time.deltaTime);
-                if (vortex.Patience <= 0f) return;
+                patience.Drain(patienceDecayRate * Time.deltaTime);
+                if (patience.IsExhausted) return;
             }
         }
 
@@ -60,18 +60,8 @@ public class AIS_StareAtPlayerNearItem : AIState
         if (checkTimer > 0f) return;
         checkTimer = checkInterval;
 
-        if (WatchedItem == null || !WatchedItem.ItemData.pickable)
-        {
-            OnGaveUp?.Invoke();
-            return;
-        }
-
-        if (WatchedItem.HasOwner)
-        {
-            OnItemStolen?.Invoke();
-            return;
-        }
-
+        if (WatchedItem == null || !WatchedItem.ItemData.pickable) { OnGaveUp?.Invoke(); return; }
+        if (WatchedItem.HasOwner) { OnItemStolen?.Invoke(); return; }
         if (BlockingPlayer == null) { OnPlayerLeft?.Invoke(); return; }
 
         float dist = Vector3.Distance(BlockingPlayer.transform.position, WatchedItem.transform.position);
@@ -79,5 +69,8 @@ public class AIS_StareAtPlayerNearItem : AIState
             OnPlayerLeft?.Invoke();
     }
 
-    public override void OnExitState(AIBrain brain) { }
+    public override void OnExitState(AIBrain brain)
+    {
+        brain.SetIdleState(true);
+    }
 }

@@ -9,6 +9,13 @@ public class AIBrain : NetworkBehaviour
 {
     public enum SFXEvent { Living, Attack, CallForHelp, AlphaCall, Happy, Footstep, Aggressive, Warning }
 
+    public enum ModuleEvent
+    {
+        BeginSearch,
+        RespondToAlphaCall,
+        RespondToHelpCall,
+    }
+
     [System.Serializable]
     public struct SFXGroup
     {
@@ -26,6 +33,14 @@ public class AIBrain : NetworkBehaviour
         [Range(1, 5)] public int maxQuantity;
     }
 
+    [System.Serializable]
+    public struct IdleAnimationTrigger
+    {
+        public string Trigger;
+        public AudioSFX Audio_SFX;
+        public float Delay;
+    }
+
     [Header("AI Core")]
     [SerializeField] protected Animator animator;
     [SerializeField] protected Collider collider_;
@@ -34,12 +49,20 @@ public class AIBrain : NetworkBehaviour
     [SerializeField] protected AILootDropper lootDropper;
 
     [SerializeField] protected AIState[] states;
+    [SerializeField] protected AIModule[] modules;
     [SerializeField] protected LayerMask losBlockingLayers;
 
     [SerializeField] protected EntityStats entityStats;
     [SerializeField] protected AttackStat attackStat;
 
     [SerializeField] protected LootDrop[] lootPool;
+
+    [Header("Idle")]
+    [SerializeField] IdleAnimationTrigger[] idleTriggers;
+    [SerializeField] float minIdleCD = 6f;
+    [SerializeField] float maxIdleCD = 18f;
+    protected bool isIdle = true;
+    float idleTimer = 0;
 
     [Header("AI Audio")]
     [SerializeField] protected AudioSource audioSrc;
@@ -50,21 +73,49 @@ public class AIBrain : NetworkBehaviour
     [SerializeField] float footstepDelay = 0.5f;
     [SerializeField] float footstepMinPitch = 0.9f;
     [SerializeField] float footstepMaxPitch = 1.1f;
-
+    protected bool stayQuiet = false;
     protected Dictionary<SFXEvent, SFXGroup> sfxMap;
     float livingSFXTimer;
     float footstepTimer;
 
+    readonly Dictionary<System.Type, AIModule> moduleMap = new();
+
+    public T GetModule<T>() where T : AIModule
+    {
+        moduleMap.TryGetValue(typeof(T), out var module);
+        return module as T;
+    }
+
+    public bool TryGetModule<T>(out T result) where T : AIModule
+    {
+        result = GetModule<T>();
+        return result != null;
+    }
+
+    void RegisterModules()
+    {
+        moduleMap.Clear();
+        foreach (var m in modules)
+            moduleMap[m.GetType()] = m;
+
+        foreach (var m in modules)
+            m.OnModuleInit(this);
+    }
+
     public string Prefix => $"[AIBrain ({gameObject.name})]";
     public LootDrop[] GetLootPool() => lootPool;
 
-    [field:SerializeField] protected AIState CurrentState { get; private set; }
+    [field: SerializeField] protected AIState CurrentState { get; private set; }
     protected bool isDying;
 
     public NavMeshAgent Agent => agent;
     public Animator Animator_ => animator;
     public EntityStats EntityStats_ => entityStats;
-    public AttackStat AttackStat_ => attackStat;
+    public AttackStat AttackStat_
+    {
+        get => attackStat;
+        set => attackStat = value;
+    }
 
     #region Lifecycle
 
@@ -77,6 +128,8 @@ public class AIBrain : NetworkBehaviour
 
     protected virtual void Start()
     {
+        RegisterModules();
+
         if (states == null || states.Length == 0)
         {
             Debug.LogWarning($"{Prefix} Ai agent doesn't have any AI states");
@@ -85,6 +138,14 @@ public class AIBrain : NetworkBehaviour
 
         SetState(states[0]);
         livingSFXTimer = Random.Range(minLivingSFXInterval, maxLivingSFXInterval);
+        idleTimer = Random.Range(minIdleCD, maxIdleCD);
+
+        GameTick.OnTick += OnTick;
+    }
+
+    protected virtual void OnDestroy()
+    {
+        GameTick.OnTick -= OnTick;
     }
 
     protected void SetState(AIState newState)
@@ -97,17 +158,42 @@ public class AIBrain : NetworkBehaviour
     protected virtual void Update()
     {
         if (isDying) return;
+        if (!isServer) return;
         if (CurrentState == null) return;
+
         CurrentState.OnUpdateState(this);
-        TickLivingSFX();
+
+        foreach (var m in moduleMap.Values)
+            m.OnModuleTick(this);
+
         TickFootstep();
+    }
+
+    protected virtual void OnTick()
+    {
+        if (isDying) return;
+        TickLivingSFX();
+
+        if (!isIdle) return;
+        if (idleTriggers == null || idleTriggers.Length == 0) return;
+
+        idleTimer -= GameTick.TickRate;
+        if (idleTimer <= 0)
+        {
+            idleTimer = Random.Range(minIdleCD, maxIdleCD);
+
+            IdleAnimationTrigger iat = idleTriggers[Random.Range(0, idleTriggers.Length)];
+
+            if (!stayQuiet && iat.Audio_SFX != null) AudioManager.Instance.PlayOneShotWithDelay(audioSrc, iat.Audio_SFX, iat.Delay, gameObject);
+            animator.SetTrigger(iat.Trigger);
+        }
     }
 
     protected virtual void TickLivingSFX()
     {
-        if (sfxMap == null) return;
+        if (sfxMap == null || stayQuiet) return;
 
-        livingSFXTimer -= Time.deltaTime;
+        livingSFXTimer -= GameTick.TickRate;
         if (livingSFXTimer > 0f) return;
 
         livingSFXTimer = Random.Range(minLivingSFXInterval, maxLivingSFXInterval);
@@ -161,6 +247,14 @@ public class AIBrain : NetworkBehaviour
 
     #endregion
 
+    #region Module Events
+
+    public virtual void OnModuleEvent(ModuleEvent evt, object context = null) { }
+
+    #endregion
+
+    #region Helpers
+
     public bool HasLineOfSight(Vector3 target)
     {
         Vector3 origin = transform.position + Vector3.up;
@@ -168,10 +262,7 @@ public class AIBrain : NetworkBehaviour
         return !Physics.Raycast(origin, dir.normalized, dir.magnitude, losBlockingLayers, QueryTriggerInteraction.Ignore);
     }
 
-    public virtual void OnAgentHurt(AttackEvent source)
-    {
-
-    }
+    public virtual void OnAgentHurt(AttackEvent source) { }
 
     public virtual void OnAgentDeath(AttackEvent source)
     {
@@ -183,15 +274,33 @@ public class AIBrain : NetworkBehaviour
         lootDropper.OnOwnerDeath(source);
     }
 
+    public virtual void SetAggressive(bool aggressive)
+    {
+        animator.SetBool("Aggressive", aggressive);
+    }
+
+    protected PlayerData GetPlayerNearItem(ItemBase item, float radius)
+    {
+        Collider[] hits = Physics.OverlapSphere(item.transform.position, radius);
+        foreach (var hit in hits)
+        {
+            if (!hit.CompareTag("Player")) continue;
+            PlayerData p = hit.GetComponent<PlayerData>();
+            if (p != null) return p;
+        }
+        return null;
+    }
+
     public void MoveAgent(Vector3 position) => agent.SetDestination(position);
     public void StopAgentMovement() => agent.isStopped = true;
     public void ResumeAgentMovement() => agent.isStopped = false;
     public void DisableAgent() => agent.enabled = false;
     public void DisableCollider() => collider_.enabled = false;
-    public bool IsAgentInMovement() =>  
-        !agent.isStopped && agent.hasPath && 
-        agent.remainingDistance > agent.stoppingDistance && 
+    public bool IsAgentInMovement() =>
+        !agent.isStopped && agent.hasPath &&
+        agent.remainingDistance > agent.stoppingDistance &&
         agent.velocity.sqrMagnitude > 0.01f;
+    public void SetIdleState(bool isIdle) => this.isIdle = isIdle;
 
     protected virtual void OnDrawGizmosSelected()
     {
@@ -199,4 +308,6 @@ public class AIBrain : NetworkBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackStat.AttackRadius);
     }
+
+    #endregion
 }
