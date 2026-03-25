@@ -35,6 +35,8 @@ public class ThemeDataSO : ScriptableObject
     public int maxEntities;
 
     [Header("Ambient")]
+    public Color AmbienceClr;
+    public float AmbienceIntensity;
     public AudioSFX loopingMusic;
     public AudioSFX[] eerySFX;
     public AudioReverbPreset reverbPreset = AudioReverbPreset.Cave;

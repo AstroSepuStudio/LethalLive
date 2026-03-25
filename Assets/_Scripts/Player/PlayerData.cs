@@ -334,11 +334,9 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
         PlayerCollider.enabled = false;
         Character_Controller.enabled = false;
         netTransform.ServerTeleport(position, transform.rotation);
-        //transform.position = position;
         float timer = 0;
         while (timer < tpDelay)
         {
-            //netTransform.ServerTeleport(position, transform.rotation);
             timer += Time.deltaTime;
             yield return null;
         }
@@ -369,5 +367,22 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
         cameraControlled = false;
         if (Camera_Movement != null)
             Camera_Movement.enabled = true;
+    }
+
+    [TargetRpc]
+    public void RpcOnEnterDungeon()
+    {
+        var dng = GameManager.Instance.dngMod;
+        if (dng.ThemeDatas[dng.selectedTheme].loopingMusic != null)
+            AudioManager.Instance.PlayMusic(dng.ThemeDatas[dng.selectedTheme].loopingMusic);
+
+        EnvironmentLightManager.Instance.SetAmbient(dng.ThemeDatas[dng.selectedTheme].AmbienceClr, dng.ThemeDatas[dng.selectedTheme].AmbienceIntensity);
+    }
+
+    [TargetRpc]
+    public void RpcOnReturnOffice()
+    {
+        EnvironmentLightManager.Instance.ResetAmbient();
+        AudioManager.Instance.StopMusic();
     }
 }

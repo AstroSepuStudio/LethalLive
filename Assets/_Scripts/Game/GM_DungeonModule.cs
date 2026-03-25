@@ -39,18 +39,15 @@ public class GM_DungeonModule : NetworkBehaviour
     [Server]
     public void OnEnterDungeon(PlayerData playerData)
     {
-        if (ThemeDatas[selectedTheme].loopingMusic != null)
-            AudioManager.Instance.PlayMusic(ThemeDatas[selectedTheme].loopingMusic);
-
         Instance.playMod.playersOnDungeon.Add(playerData);
+        playerData.RpcOnEnterDungeon();
     }
 
     [Server]
     public void OnReturnOffice(PlayerData playerData)
     {
-        AudioManager.Instance.StopMusic();
-
         Instance.playMod.playersOnDungeon.Remove(playerData);
+        playerData.RpcOnReturnOffice();
     }
 
     [Server]

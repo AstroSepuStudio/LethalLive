@@ -17,6 +17,10 @@ public class MainMenuManager : UIManager
     [SerializeField] Transform resetPosition;
     [SerializeField] float menuCamSpd = 4f;
 
+    [Header("Visual")]
+    [SerializeField] Color menuAmbienceClr;
+    [SerializeField] float menuAmbienceIntensity;
+
     Coroutine menuCamCor;
 
     protected override void Start()
@@ -32,6 +36,8 @@ public class MainMenuManager : UIManager
         SwitchCameraAnimation(true);
 
         AudioManager.Instance.PlayMusic(mainMenuMusic);
+
+        EnvironmentLightManager.Instance.SetAmbient(menuAmbienceClr, menuAmbienceIntensity);
     }
 
     private void HideMainMenu(LobbyCreated_t arg0) => HideMainMenu();
@@ -41,8 +47,11 @@ public class MainMenuManager : UIManager
     {
         gameObject.SetActive(false);
         cameraParent.SetActive(false);
+
         if (menuScene != null) menuScene.SetActive(false);
         if (office != null) office.SetActive(true);
+
+        EnvironmentLightManager.Instance.ResetAmbient();
         SwitchCameraAnimation(false);
         AudioManager.Instance.StopMusic();
     }
@@ -53,9 +62,11 @@ public class MainMenuManager : UIManager
     {
         gameObject.SetActive(true);
         cameraParent.SetActive(true);
+
         if (menuScene != null) menuScene.SetActive(true);
         if (office != null) office.SetActive(false);
 
+        EnvironmentLightManager.Instance.SetAmbient(menuAmbienceClr, menuAmbienceIntensity);
         SettingsManager.Instance.UnlockMouse();
         SwitchCameraAnimation(true);
         AudioManager.Instance.PlayMusic(mainMenuMusic);
