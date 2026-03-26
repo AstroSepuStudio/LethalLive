@@ -8,7 +8,7 @@ public class SellButton : InteractableObject
     {
         if (isServer)
         {
-            sellPoint.SellItems();
+            //sellPoint.SellItems();
         }
     }
 }

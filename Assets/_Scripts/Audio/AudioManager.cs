@@ -1,7 +1,6 @@
 using UnityEngine;
 using LethalLive;
 using System.Collections;
-using UnityEngine.UIElements;
 
 public class AudioManager : MonoBehaviour
 {
@@ -68,6 +67,7 @@ public class AudioManager : MonoBehaviour
     private void BroadcastToHearing(Vector3 position, GameObject source, AudioSFX sfx, SoundLoudness category)
     {
         if (HearingEventBroadcaster.Instance == null) return;
+        if (category == SoundLoudness.NoSound) return;
 
         var soundEvent = new AudioSoundEvent(position, source, sfx, category);
         HearingEventBroadcaster.Instance.Broadcast(soundEvent);

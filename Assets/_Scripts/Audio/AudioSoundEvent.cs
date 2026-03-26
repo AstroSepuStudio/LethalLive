@@ -34,5 +34,6 @@ public enum SoundLoudness
     Average,
     Quiet,
     Loud,
-    Global
+    Global,
+    NoSound
 }

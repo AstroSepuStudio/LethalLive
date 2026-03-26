@@ -33,11 +33,7 @@ public class MainMenuManager : UIManager
         LobbyManager.Instance.OnLobbyLeaveEvent.AddListener(DisplayMainMenu);
         LobbyManager.Instance.OnLobbyKickedEvent.AddListener(DisplayMainMenu);
 
-        SwitchCameraAnimation(true);
-
-        AudioManager.Instance.PlayMusic(mainMenuMusic);
-
-        EnvironmentLightManager.Instance.SetAmbient(menuAmbienceClr, menuAmbienceIntensity);
+        DisplayMainMenu();
     }
 
     private void HideMainMenu(LobbyCreated_t arg0) => HideMainMenu();

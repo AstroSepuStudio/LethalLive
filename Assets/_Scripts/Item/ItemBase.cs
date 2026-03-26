@@ -181,6 +181,12 @@ public class ItemBase : InteractableObject
 
     public void AddForce(Vector3 force, ForceMode mode) => rb.AddForce(force, mode);
 
+    public void SetVelocity(Vector3 velocity)
+    {
+        if (HasOwner) return;
+        rb.linearVelocity = velocity;
+    }
+
     System.Collections.IEnumerator EnableColliderAfterDelay(float time)
     {
         coll.enabled = false;

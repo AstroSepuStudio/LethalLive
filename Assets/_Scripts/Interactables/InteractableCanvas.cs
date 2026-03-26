@@ -18,28 +18,28 @@ public class InteractableCanvas : MonoBehaviour
 
     protected virtual void Start()
     {
-        holdTxtGo.SetActive(hold);
-        bgImg.color = hold ? holdColor : tapColor;
-        itemCanvas.gameObject.SetActive(false);
+        if (holdTxtGo != null) holdTxtGo.SetActive(hold);
+        if (bgImg != null) bgImg.color = hold ? holdColor : tapColor;
+        if (itemCanvas != null) itemCanvas.gameObject.SetActive(false);
     }
 
     public virtual void EnableCanvas()
     {
-        itemCanvas.gameObject.SetActive(true);
+        if (itemCanvas != null) itemCanvas.gameObject.SetActive(true);
     }
 
     public virtual void DisableCanvas()
     {
-        itemCanvas.gameObject.SetActive(false);
+        if (itemCanvas != null) itemCanvas.gameObject.SetActive(false);
     }
 
     public virtual void SelectClosest()
     {
-        higlightImg.sprite = highlightedSprite;
+        if (higlightImg != null) higlightImg.sprite = highlightedSprite;
     }
 
     public virtual void DeselectClosest()
     {
-        higlightImg.sprite = lowlightedSprite;
+        if (higlightImg != null) higlightImg.sprite = lowlightedSprite;
     }
 }

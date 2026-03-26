@@ -27,16 +27,24 @@ public class GM_EconomyModule : NetworkBehaviour
     [SyncVar]
     int startingQuota = 0;
 
-    [SyncVar]
+    [SyncVar(hook = nameof(OnQuotaChanged))]
     public int targetQuota;
 
     public bool IsQuotaMet => TotalBalance >= targetQuota;
 
     public UnityEvent<PlayerTeam, float> OnTeamBalanceChangedEv;
+    public UnityEvent<int> OnQuotaChangedEv;
 
     private void Start()
     {
         teamsBalance.OnChange += OnTeamBalanceChanged;
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        SetNewQuota();
     }
 
     [Server]
@@ -128,5 +136,10 @@ public class GM_EconomyModule : NetworkBehaviour
                                   float item)
     {
         OnTeamBalanceChangedEv?.Invoke(key, item);
+    }
+
+    private void OnQuotaChanged(int newValue, int oldValue)
+    {
+        OnQuotaChangedEv?.Invoke(newValue);
     }
 }

@@ -35,7 +35,9 @@ public class GM_DayCycleModule : NetworkBehaviour
     [SerializeField] AudioSFX[] letterSfx;
     [SerializeField] AudioSFX numberSfx;
     [SerializeField] AudioSFX dewSFX;
+    [SerializeField] AudioSFX intermissionSFX;
     [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioSource speakerSrc;
 
     [Header("Animation")]
     [SerializeField] float dayDuration = 900;
@@ -120,6 +122,9 @@ public class GM_DayCycleModule : NetworkBehaviour
 
     [ClientRpc] void RpcStartDay()
     {
+        if (currentDay == 1)
+            AudioManager.Instance.PlayOneShot(speakerSrc, intermissionSFX, gameObject, SoundLoudness.NoSound);
+
         clientSortedEvents = new();
         foreach (var e in clientTimeEvents)
         {
