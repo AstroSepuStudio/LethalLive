@@ -186,24 +186,17 @@ public class DynamicOcclusionCulling : MonoBehaviour
             }
         }
 
-        foreach (var kvp in Instance.RoomFurniture)
+        foreach (var furniture in Instance.SpawnedFurniture)
         {
-            foreach (var furniture in kvp.Value)
-            {
-                if (furniture == null) continue;
-                int roomId = Instance.GetRoomIdAtPosition(furniture.transform.position);
-                furniture.SetRender(roomId != -1 && expandedVisible.Contains(roomId));
-            }
+            if (furniture == null) continue;
+            furniture.SetRender(Vector3.Distance(furniture.transform.position, playerPos) < renderDist * Instance.CellSize);
         }
 
-        foreach (var kvp in Instance.RoomItems)
+        foreach (var item in Instance.SpawnedItems)
         {
-            foreach (var item in kvp.Value)
-            {
-                if (item == null) continue;
-                int roomId = Instance.GetRoomIdAtPosition(item.transform.position);
-                item.SetRender(roomId != -1 && expandedVisible.Contains(roomId));
-            }
+            if (item == null) continue;
+            if (item.HasOwner) continue;
+            item.SetRender(Vector3.Distance(item.transform.position, playerPos) < renderDist * Instance.CellSize);
         }
 
         if (fogEnabled) UpdateFog(maxWorldDist);

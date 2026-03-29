@@ -21,6 +21,33 @@ public class GM_PlayerModule : NetworkBehaviour
     public LobbyMemberData[] CachedMemberData { get; private set; }
     public UnityEvent OnLobbyMemberDataChanged;
 
+    public UnityEvent<PlayerData> OnPlayerLeft;
+
+    public override void OnStartServer()
+    {
+        NetworkServer.OnDisconnectedEvent += OnServerPlayerDisconnected;
+    }
+
+    public override void OnStopServer()
+    {
+        NetworkServer.OnDisconnectedEvent -= OnServerPlayerDisconnected;
+    }
+
+    [Server]
+    private void OnServerPlayerDisconnected(NetworkConnectionToClient conn)
+    {
+        if (conn.identity == null) return;
+        if (!conn.identity.TryGetComponent<PlayerData>(out var player)) return;
+
+        Debug.Log($"[Server] Player disconnected: {player.PlayerName} ({player.netId})");
+
+        if (!deadPlayers.Contains(player.netId)) PlayerDies(player.netId);
+
+        OnPlayerLeft?.Invoke(player);
+        UnregisterPlayer(player);
+        RefreshLobbyMemberData();
+    }
+
     [Command(requiresAuthority = false)]
     public void CmdRequestTeamChange(int playerIndex, PlayerTeam team)
     {

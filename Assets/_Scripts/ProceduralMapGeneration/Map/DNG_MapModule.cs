@@ -299,8 +299,21 @@ public class DNG_MapModule : NetworkBehaviour
         SetRenderLayer(n);
     }
 
-    public void SetNextLayer() { if (followPlayer) ToggleFollowPlayer(); SetRenderLayer(currentLayer + 1); }
-    public void SetPreviousLayer() { if (followPlayer) ToggleFollowPlayer(); SetRenderLayer(currentLayer - 1); }
+    public void SetNextLayer()
+    {
+        if (followPlayer) ToggleFollowPlayer();
+        if (layerChunks.Keys.Count == 0) return;
+        if (currentLayer >= layerChunks.Keys.Max()) return;
+        SetRenderLayer(currentLayer + 1);
+    }
+
+    public void SetPreviousLayer()
+    {
+        if (followPlayer) ToggleFollowPlayer();
+        if (layerChunks.Keys.Count == 0) return;
+        if (currentLayer <= layerChunks.Keys.Min()) return;
+        SetRenderLayer(currentLayer - 1);
+    }
 
     public void ToggleFollowPlayer()
     {
@@ -367,13 +380,15 @@ public class DNG_MapModule : NetworkBehaviour
             foreach (var go in oldFeatures)
                 if (go) go.SetActive(false);
 
+        currentLayer = layer;
+
         if (featureLayers.TryGetValue(layer, out var newFeatures))
             foreach (var go in newFeatures)
                 if (go) go.SetActive(displayFeatures);
 
-        currentLayer = layer;
         if (isClient) CmdSetCurrentLayer(layer);
 
+        _lastAnchorPos = Vector2.positiveInfinity;
         UpdateVisibleChunks();
     }
 
@@ -543,16 +558,16 @@ public class DNG_MapModule : NetworkBehaviour
 
         foreach (var entry in gen.RoomItemNetIds)
         {
-            if (!NetworkClient.spawned.TryGetValue(entry.netId, out var ni)) continue;
-            if (!ni.TryGetComponent<ItemBase>(out var item)) continue;
-            SpawnDynamicIcon(item.transform, itemSprite, itemColor, itemParent, GetLayerFromNetId(ni));
+            if (!NetworkClient.spawned.TryGetValue(entry, out var ni)) continue;
+            //if (!ni.TryGetComponent<ItemBase>(out var item)) continue;
+            SpawnDynamicIcon(ni.transform, itemSprite, itemColor, itemParent, GetLayerFromNetId(ni));
         }
 
         foreach (var entry in gen.RoomFurnitureNetIds)
         {
-            if (!NetworkClient.spawned.TryGetValue(entry.netId, out var ni)) continue;
-            if (!ni.TryGetComponent<FurnitureEntity>(out var furn)) continue;
-            SpawnDynamicIcon(furn.transform, furnSprite, furnColor, furnParent, GetLayerFromNetId(ni));
+            if (!NetworkClient.spawned.TryGetValue(entry, out var ni)) continue;
+            //if (!ni.TryGetComponent<FurnitureEntity>(out var furn)) continue;
+            SpawnDynamicIcon(ni.transform, furnSprite, furnColor, furnParent, GetLayerFromNetId(ni));
         }
 
         followTargets.Clear();

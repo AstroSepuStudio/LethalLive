@@ -337,9 +337,13 @@ public class PlayerMovement : NetworkBehaviour
 
             UpdateMoveSpeed();
 
+            bool somethingAbove = false;
+            if (_wantsToUncrouch || _wantsToSprint || (_isGrounded && _tryJump))
+                somethingAbove = IsSomethingAbove();
+
             if (_wantsToUncrouch || _wantsToSprint)
             {
-                if (!IsSomethingAbove())
+                if (!somethingAbove)
                 {
                     ServerStopCrouch();
                     if (_wantsToSprint)
@@ -354,7 +358,7 @@ public class PlayerMovement : NetworkBehaviour
             }
 
             bool jpd = false;
-            if (_isGrounded && _tryJump)
+            if (_isGrounded && _tryJump && !somethingAbove)
             {
                 jpd = true;
                 velocity.y = Mathf.Approximately(pData.Player_Stats.currentStamina, 0)

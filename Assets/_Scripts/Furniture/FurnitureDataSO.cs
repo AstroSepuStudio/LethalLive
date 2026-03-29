@@ -13,11 +13,6 @@ public class FurnitureDataSO : ScriptableObject, IHaveTier
     public ItemDropThreshold[] dropThresholds;
     public ItemDrop[] lootTable;
 
-    public float horizontalMinDistance = 1f;
-    public float horizontalMaxDistance = 2f;
-    public float verticalMinDistance = 0.2f;
-    public float verticalMaxDistance = 0.6f;
-
     [Serializable]
     public struct ItemDrop
     {

@@ -26,6 +26,7 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
     public VoiceChatHandler VCHandler;
     public DeathOverlayManager DeathOvManager;
     public SocialPlayerList SocialPlayList;
+    public DNG_MapModuleOffline MapModule;
     public UnityEvent<PlayerTeam> OnPlayerTeamChanged;
     public UnityEvent<int, ChatMessage> OnReceiveChatMessage;
 
@@ -114,6 +115,7 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
             PlayerCanvas.SetActive(false);
             PlayerAudio.enabled = false;
             PlayerCamera.enabled = false;
+            MapModule.DisableModule();
         }
     }
 
@@ -318,6 +320,7 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
     [TargetRpc]
     public void Rpc_RevivePlayer()
     {
+        EnvironmentLightManager.Instance.ResetAmbient();
         Spectator_Movement.enabled = false;
         Player_Movement.enabled = true;
         DeathOvManager.DisableOverlay();

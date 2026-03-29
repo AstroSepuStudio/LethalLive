@@ -11,9 +11,6 @@ public class DungeonGenerator : NetworkBehaviour
 {
     public static DungeonGenerator Instance;
 
-    [Serializable]
-    public struct RoomNetIdEntry { public int roomId; public uint netId; }
-
     [Header("Content")]
     [SerializeField] ThemeDataSO theme;
     [SerializeField] GameObject entitySpawnerPref;
@@ -52,8 +49,8 @@ public class DungeonGenerator : NetworkBehaviour
     [SerializeField] TextMeshProUGUI seedDisplayTxt;
 
     public System.Random RNG { get; private set; }
-    public readonly SyncList<RoomNetIdEntry> RoomItemNetIds = new();
-    public readonly SyncList<RoomNetIdEntry> RoomFurnitureNetIds = new();
+    public readonly SyncList<uint> RoomItemNetIds = new();
+    public readonly SyncList<uint> RoomFurnitureNetIds = new();
     public readonly SyncList<uint> EntityNetIds = new();
 
     Cell[,,] grid;
@@ -69,8 +66,8 @@ public class DungeonGenerator : NetworkBehaviour
     public IReadOnlyDictionary<int, RoomData> SpawnedRooms => spawned;
     public IReadOnlyList<PlacedRoom> PlacedRooms => placed;
 
-    public Dictionary<int, List<FurnitureEntity>> RoomFurniture = new();
-    public Dictionary<int, List<ItemBase>> RoomItems = new();
+    public List<FurnitureEntity> SpawnedFurniture = new();
+    public List<ItemBase> SpawnedItems = new();
 
     public ThemeDataSO Theme => theme;
     public Cell[,,] Grid => grid;
@@ -408,13 +405,27 @@ public class DungeonGenerator : NetworkBehaviour
     public int GetRoomIdAtPosition(Vector3 worldPos)
     {
         Vector3Int cellPos = new(
-            Mathf.RoundToInt(worldPos.x) / cellSize,
-            Mathf.RoundToInt(worldPos.y) / cellSize,
-            Mathf.RoundToInt(worldPos.z) / cellSize
-        );
+            Mathf.FloorToInt(worldPos.x / cellSize),
+            Mathf.FloorToInt(worldPos.y / cellSize),
+            Mathf.FloorToInt(worldPos.z / cellSize));
 
         if (!InBounds(cellPos)) return -1;
-        return grid[cellPos.x, cellPos.y, cellPos.z]?.placedRoom?.id ?? -1;
+
+        var cell = grid[cellPos.x, cellPos.y, cellPos.z];
+        if (cell?.placedRoom != null) return cell.placedRoom.id;
+
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++)
+                for (int dz = -1; dz <= 1; dz++)
+                {
+                    if (dx == 0 && dy == 0 && dz == 0) continue;
+                    var nb = cellPos + new Vector3Int(dx, dy, dz);
+                    if (!InBounds(nb)) continue;
+                    var nbCell = grid[nb.x, nb.y, nb.z];
+                    if (nbCell?.placedRoom != null) return nbCell.placedRoom.id;
+                }
+
+        return -1;
     }
 
     #endregion
@@ -500,15 +511,8 @@ public class DungeonGenerator : NetworkBehaviour
 
                 lootPositions.AddRange(furnEnt.lootPositions);
 
-                int roomId = GetRoomIdAtPosition(pos.transform.position);
-                if (roomId != -1)
-                {
-                    if (!RoomFurniture.ContainsKey(roomId))
-                        RoomFurniture[roomId] = new();
-                    RoomFurniture[roomId].Add(furnEnt);
-
-                    RoomFurnitureNetIds.Add(new RoomNetIdEntry { roomId = roomId, netId = fni.netId });
-                }
+                SpawnedFurniture.Add(furnEnt);
+                RoomFurnitureNetIds.Add(fni.netId);
             }
         }
 
@@ -560,15 +564,8 @@ public class DungeonGenerator : NetworkBehaviour
                 if (!itemObj.TryGetComponent<ItemBase>(out var itemBase)) continue;
                 if (!itemObj.TryGetComponent<NetworkIdentity>(out var ni)) continue;
 
-                int roomId = GetRoomIdAtPosition(pos.transform.position);
-                if (roomId != -1)
-                {
-                    if (!RoomItems.ContainsKey(roomId))
-                        RoomItems[roomId] = new();
-                    RoomItems[roomId].Add(itemBase);
-
-                    RoomItemNetIds.Add(new RoomNetIdEntry { roomId = roomId, netId = ni.netId });
-                }
+                SpawnedItems.Add(itemBase);
+                RoomItemNetIds.Add(ni.netId);
             }
         }
 
@@ -784,8 +781,8 @@ public class DungeonGenerator : NetworkBehaviour
         lootPositions.Clear();
         furniturePositions.Clear();
         entitySpawnerPositions.Clear();
-        RoomFurniture.Clear();
-        RoomItems.Clear();
+        SpawnedFurniture.Clear();
+        SpawnedItems.Clear();
 
         if (isServer)
         {

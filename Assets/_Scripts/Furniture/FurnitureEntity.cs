@@ -9,6 +9,8 @@ public class FurnitureEntity : EntityStats
     [SerializeField] Renderer furRenderer;
     [SerializeField] FurnitureDataSO dataSO;
     [SerializeField] Rigidbody rb;
+    [SerializeField] Vector3 center;
+    [SerializeField] Vector3 dropArea;
 
     public List<ItemSpawnPosition> lootPositions;
 
@@ -17,6 +19,8 @@ public class FurnitureEntity : EntityStats
 
     public void SetRender(bool active)
         => furRenderer.enabled = active;
+
+    public bool gizmos;
 
     protected override void Awake()
     {
@@ -107,25 +111,37 @@ public class FurnitureEntity : EntityStats
         int qty = Random.Range(drop.minQuantity, drop.maxQuantity);
         for (int i = 0; i < qty; i++)
         {
-            Vector2 circle = Random.insideUnitCircle.normalized;
-            float dist = Random.Range(dataSO.horizontalMinDistance, dataSO.horizontalMaxDistance);
-            Vector3 offset = new Vector3(circle.x, 0, circle.y) * dist;
-            offset.y = Random.Range(dataSO.verticalMinDistance, dataSO.verticalMaxDistance);
-            Vector3 pos = transform.position + offset;
+            Vector3 worldCenter = transform.position + center;
 
-            GameObject spawned = Instantiate(drop.Item.itemPrefab, pos, Quaternion.identity);
+            Vector3 offset = new(
+                Random.Range(-dropArea.x, dropArea.x),
+                Random.Range(-dropArea.y, dropArea.y),
+                Random.Range(-dropArea.z, dropArea.z));
+
+            Vector3 position = worldCenter + offset;
+
+            GameObject spawned = Instantiate(drop.Item.itemPrefab, position, Quaternion.identity);
             NetworkServer.Spawn(spawned);
 
             if (spawned.TryGetComponent(out ItemBase item))
-                item.AddForce((pos - transform.position).normalized * Random.Range(1f, 2f), ForceMode.Impulse);
+                item.AddForce((position - transform.position).normalized * Random.Range(1f, 2f), ForceMode.Impulse);
         }
         return true;
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
-        if (GameManager.Instance == null || !GameManager.Instance.debug) return;
+        if (!gizmos) return;
+
+        Vector3 worldCenter = transform.position + center;
+
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.4f);
+        Gizmos.DrawCube(worldCenter, dropArea * 2f);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(worldCenter, dropArea * 2f);
+
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, 1.5f);
+        Gizmos.DrawSphere(worldCenter, 0.1f);
     }
 }
