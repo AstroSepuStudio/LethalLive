@@ -3,10 +3,10 @@ using UnityEngine;
 public class IA_HurtboxAttack : ItemAction
 {
     [Header("Hurtbox Attack Settings")]
-    [SerializeField] ItemHurtbox hurtbox;
-    [SerializeField] string animationTrigger = "Atk_Default";
-    [SerializeField] bool forceAim = true;
-    [SerializeField] AttackStat attackStat;
+    [SerializeField] protected ItemHurtbox hurtbox;
+    [SerializeField] protected string animationTrigger = "Atk_Default";
+    [SerializeField] protected bool forceAim = true;
+    [SerializeField] protected AttackStat attackStat;
 
     public AttackStat AttackStat => attackStat;
 

@@ -46,4 +46,9 @@ public class HotbarSlot : MonoBehaviour
     {
         hotbarSlotImg.sprite = deselectedSlot;
     }
+
+    public void LockSlot()
+    {
+
+    }
 }

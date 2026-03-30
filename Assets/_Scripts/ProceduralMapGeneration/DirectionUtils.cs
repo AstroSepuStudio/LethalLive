@@ -2,6 +2,8 @@ using UnityEngine;
 
 public enum Direction { North, South, East, West, Up, Down }
 
+public enum SequenceDirection { Forward, Backwards }
+
 public enum Biome { Default, Pillar, Dark, Hallway, Holes }
 
 public static class DirectionUtils

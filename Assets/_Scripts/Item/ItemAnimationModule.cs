@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class ItemAnimationModule : MonoBehaviour
 {
+    [SerializeField] Animator animatorOverride;
+
     [SerializeField] float primaryTriggerTime;
     [SerializeField] float primaryFinishTime;
     [SerializeField] float secondaryTriggerTime;
@@ -46,7 +48,10 @@ public class ItemAnimationModule : MonoBehaviour
     IEnumerator Sequence(ItemAction action, PlayerData pData, string animTrigger,
                          WaitForSeconds triggerDelay, WaitForSeconds finishDelay)
     {
-        pData.Skin_Data.CharacterAnimator.SetTrigger(animTrigger);
+        if (animatorOverride != null)
+            animatorOverride.SetTrigger(animTrigger);
+        else
+            pData.Skin_Data.CharacterAnimator.SetTrigger(animTrigger);
 
         yield return triggerDelay;
         action.OnAnimationTrigger();
