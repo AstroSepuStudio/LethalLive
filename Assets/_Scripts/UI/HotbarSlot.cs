@@ -4,19 +4,23 @@ using UnityEngine.UI;
 
 public class HotbarSlot : MonoBehaviour
 {
+    [SerializeField] GameObject handsFullGO;
     [SerializeField] Image hotbarSlotImg;
     [SerializeField] Sprite selectedSlot;
     [SerializeField] Sprite deselectedSlot;
+    [SerializeField] Color selectedSlotColor = Color.white;
+    [SerializeField] Color deselectedSlotColor = Color.orange;
+    [SerializeField] Color lockedSlotColor = Color.gray;
     [SerializeField] Image iconImg;
     [SerializeField] TextMeshProUGUI valueTxt;
 
     ItemBase slotItem;
+    bool selected = false;
 
     public void SetItem(ItemBase item)
     {
         if (item == null || item.ItemData == null)
         {
-            Debug.LogWarning("[HotbarSlot] SetItem called with null item or missing ItemData.");
             RemoveItem();
             return;
         }
@@ -34,21 +38,31 @@ public class HotbarSlot : MonoBehaviour
         iconImg.enabled = false;
         iconImg.sprite = null;
         valueTxt.enabled = false;
-        Debug.Log("[HotbarSlot] Removed item from slot.", gameObject);
     }
 
     public void SelectSlot()
     {
+        selected = true;
         hotbarSlotImg.sprite = selectedSlot;
+        hotbarSlotImg.color = selectedSlotColor;
     }
 
     public void DeselectSlot()
     {
+        selected = false;
         hotbarSlotImg.sprite = deselectedSlot;
+        hotbarSlotImg.color = deselectedSlotColor;
     }
 
     public void LockSlot()
     {
+        hotbarSlotImg.color = lockedSlotColor;
+        handsFullGO.SetActive(true);
+    }
 
+    public void UnlockSlot()
+    {
+        hotbarSlotImg.color = selected ? selectedSlotColor : deselectedSlotColor;
+        handsFullGO.SetActive(false);
     }
 }

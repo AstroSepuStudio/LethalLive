@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -93,10 +94,11 @@ public class ItemInventory : NetworkBehaviour
     [Server]
     public bool AddItem(ItemBase item)
     {
-        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return false; 
         if (pData._LockPlayer) return false;
-        if (item == null) return false;
+        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return false; 
+        if (equippedItem != null && equippedItem.ItemData.isTwoHanded) return false;
         if (IsFull()) return false;
+        if (item == null) return false;
 
         int index = selectedSlotIndex;
         if (inventorySlots[index] != null)
@@ -196,6 +198,7 @@ public class ItemInventory : NetworkBehaviour
         for (int i = 0; i < inventorySlots.Length; i++)
         {
             hotbarSlots[i].RemoveItem();
+            hotbarSlots[i].UnlockSlot();
             inventorySlots[i] = null;
         }
 
@@ -213,6 +216,12 @@ public class ItemInventory : NetworkBehaviour
         inventorySlots[selectedSlotIndex] = null;
         hotbarSlots[selectedSlotIndex].RemoveItem();
 
+        if (equippedItem.ItemData.isTwoHanded)
+        {
+            for (int i = 0; i < hotbarSlots.Length; i++)
+                hotbarSlots[i].UnlockSlot();
+        }
+
         ItemBase dropping = equippedItem;
         equippedItem = null;
         SetEquipAnimState(null);
@@ -228,6 +237,7 @@ public class ItemInventory : NetworkBehaviour
             if (inventorySlots[i] == null) continue;
 
             hotbarSlots[i].RemoveItem();
+            hotbarSlots[i].UnlockSlot();
             if (drop)
                 inventorySlots[i].OnDrop(this);
             inventorySlots[i] = null;
@@ -245,6 +255,7 @@ public class ItemInventory : NetworkBehaviour
     void CmdSelectNextSlot()
     {
         if (pData._LockPlayer) return;
+        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return;
         if (HasTwoHandedEquipped || IsItemInUse) return;
 
         int startIndex = selectedSlotIndex;
@@ -267,6 +278,7 @@ public class ItemInventory : NetworkBehaviour
     void CmdSelectSlot(int index)
     {
         if (pData._LockPlayer) return;
+        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return;
         if (HasTwoHandedEquipped || IsItemInUse) return;
         if (index < 0 || index >= inventorySlots.Length) return;
 
@@ -302,13 +314,20 @@ public class ItemInventory : NetworkBehaviour
         item.OnEquip(this);
 
         item.transform.SetParent(pData.Skin_Data.GrabPoint);
-        item.transform.SetLocalPositionAndRotation(
-            item.ItemData.gOffset,
+        item.transform.SetLocalPositionAndRotation(item.ItemData.gOffset,
             Quaternion.Euler(item.ItemData.gRotation));
 
-        if (nameDisplayCoroutine != null)
-            StopCoroutine(nameDisplayCoroutine);
+        if (nameDisplayCoroutine != null) StopCoroutine(nameDisplayCoroutine);
         nameDisplayCoroutine = StartCoroutine(DisplayItemName(item.ItemData.itemName));
+
+        if (item.ItemData.isTwoHanded)
+        {
+            for (int i = 0; i < hotbarSlots.Length; i++)
+            {
+                if (i != index) hotbarSlots[i].LockSlot();
+                else hotbarSlots[i].UnlockSlot();
+            }
+        }
 
         SetEquipAnimState(item);
     }

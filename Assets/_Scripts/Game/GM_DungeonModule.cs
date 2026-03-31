@@ -19,6 +19,8 @@ public class GM_DungeonModule : NetworkBehaviour
 
     public Int_HomewardBeacon HomewardBeacon => homewardBeacon;
 
+    Coroutine cooldownCor;
+
     [SyncVar(hook = nameof(SetHomewardBeaconPosition))]
     public Vector3 startRoomPos;
 
@@ -53,7 +55,7 @@ public class GM_DungeonModule : NetworkBehaviour
     [Server]
     public void OpenDungeon()
     {
-        StartCoroutine(GenerationCooldown());
+        cooldownCor = StartCoroutine(GenerationCooldown());
 
         OnDungeonOpens?.Invoke();
         dungeonOpen = true;
@@ -75,7 +77,11 @@ public class GM_DungeonModule : NetworkBehaviour
     }
 
     [Server]
-    public void ResetCooldown() => genTimer = 0;
+    public void ResetCooldown()
+    {
+        if (cooldownCor != null) StopCoroutine(cooldownCor);
+        genTimer = 0;
+    }
 
     [Server]
     public void TryOpenNewDungeon()
@@ -158,5 +164,7 @@ public class GM_DungeonModule : NetworkBehaviour
             yield return null;
         }
         genTimer = 0;
+
+        cooldownCor = null;
     }
 }

@@ -823,6 +823,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8629724533525740995}
   - component: {fileID: 7138631525017607374}
+  - component: {fileID: 2273596099932240890}
   m_Layer: 9
   m_Name: Model
   m_TagString: Untagged
@@ -868,6 +869,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2273596099932240890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4464997843654144663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f6f3bf89aa97405989c802ba270f815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror.Components::Mirror.NetworkAnimator
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  clientAuthority: 0
+  animator: {fileID: 7138631525017607374}
 --- !u!1 &4579696679029268800
 GameObject:
   m_ObjectHideFlags: 0
