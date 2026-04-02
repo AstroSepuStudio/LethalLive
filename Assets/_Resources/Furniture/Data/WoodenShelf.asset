@@ -10,38 +10,41 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfc1a20dbf057d446b521b1ee14a4709, type: 3}
-  m_Name: WoodenDesktop
+  m_Name: WoodenShelf
   m_EditorClassIdentifier: Assembly-CSharp::FurnitureDataSO
-  Prefab: {fileID: 1515907428897238213, guid: 526ce8cb1c5b6b346994111a24cda8c4, type: 3}
-  Tier: 0
+  Prefab: {fileID: 1515907428897238213, guid: 08943fc102486784288cfd9100784825, type: 3}
+  Tier: 2
   dropThresholds:
   - Item_Drop:
       Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
       dropChance: 50
       minQuantity: 1
       maxQuantity: 1
-    dropThreshold: 25
+    dropThreshold: 20
+    triggered: 0
+  - Item_Drop:
+      Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+      dropChance: 50
+      minQuantity: 1
+      maxQuantity: 1
+    dropThreshold: 40
     triggered: 0
   - Item_Drop:
       Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
       dropChance: 100
       minQuantity: 1
       maxQuantity: 1
-    dropThreshold: 50
+    dropThreshold: 60
     triggered: 0
   - Item_Drop:
       Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
-      dropChance: 25
+      dropChance: 50
       minQuantity: 1
       maxQuantity: 1
-    dropThreshold: 75
+    dropThreshold: 80
     triggered: 0
   lootTable:
   - Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
     dropChance: 100
     minQuantity: 1
     maxQuantity: 3
-  - Item: {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
-    dropChance: 10
-    minQuantity: 1
-    maxQuantity: 1
