@@ -128,6 +128,12 @@ public class AIBrain : NetworkBehaviour
 
     protected virtual void Start()
     {
+        if (!isServer)
+        {
+            agent.enabled = false;
+            return;
+        }
+
         RegisterModules();
 
         if (states == null || states.Length == 0)
@@ -145,7 +151,7 @@ public class AIBrain : NetworkBehaviour
 
     protected virtual void OnDestroy()
     {
-        GameTick.OnTick -= OnTick;
+        if (isServer) GameTick.OnTick -= OnTick;
     }
 
     protected void SetState(AIState newState)

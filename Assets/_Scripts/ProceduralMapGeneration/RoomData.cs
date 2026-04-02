@@ -20,6 +20,7 @@ public class RoomData : MonoBehaviour
 
     public List<ItemSpawnPosition> ItemSpawnPositions;
     public List<FurnitureSpawnPosition> FurnitureSpawnPositions;
+    public List<DecorationSpawnPoint> DecorationPositions;
 
     public List<Transform> entitySpawnerPositions;
     public Renderer[] roomRenderers;

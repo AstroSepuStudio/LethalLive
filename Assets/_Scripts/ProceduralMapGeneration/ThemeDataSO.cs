@@ -5,6 +5,8 @@ using static LL_Tier;
 [CreateAssetMenu(menuName = "LethalLive/ThemeData")]
 public class ThemeDataSO : ScriptableObject
 {
+    public enum SpawnableSize { Tiny, Small, Medium, Large, ExtraLarge, Colossal }
+
     [System.Serializable]
     public struct TierEntityGroup
     {
@@ -32,6 +34,8 @@ public class ThemeDataSO : ScriptableObject
     public ItemSO[] spawnableItems;
     public FurnitureDataSO[] spawnableFurniture;
     public TierEntityGroup[] entitySpawnsByTier;
+    public DecorationDataSO[] spawnableDecoration;
+
     public int maxEntities;
 
     [Header("Ambient")]
@@ -99,6 +103,30 @@ public class ThemeDataSO : ScriptableObject
 
         if (candidates.Count == 0)
             return spawnableItems[(int)(rng.NextDouble() * spawnableItems.Length)];
+
+        return candidates[(int)(rng.NextDouble() * candidates.Count)];
+    }
+
+    public DecorationDataSO GetWeightedDecoration(Vector3 position, SpawnableSize maxSize, System.Random rng)
+    {
+        Tier selectedTier = RollTier(position, rng);
+
+        List<DecorationDataSO> candidates = new();
+        foreach (var f in spawnableDecoration)
+        {
+            if ((int)f.Size > (int)maxSize) continue;
+            if (f.Tier == selectedTier)
+                candidates.Add(f);
+        }
+
+        if (candidates.Count == 0)
+        {
+            foreach (var f in spawnableDecoration)
+            {
+                if ((int)f.Size > (int)maxSize) continue;
+                return f;
+            }
+        }
 
         return candidates[(int)(rng.NextDouble() * candidates.Count)];
     }

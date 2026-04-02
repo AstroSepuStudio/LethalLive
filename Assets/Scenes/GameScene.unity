@@ -24495,6 +24495,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1201263403}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &481602164
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 481602165}
+  m_Layer: 0
+  m_Name: Deco Parent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &481602165
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481602164}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1993879864}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &485597413
 Mesh:
   m_ObjectHideFlags: 0
@@ -69479,6 +69510,7 @@ MonoBehaviour:
   roomsParent: {fileID: 1993879864}
   furnitureParent: {fileID: 832593851}
   itemsParent: {fileID: 822107717}
+  decoParent: {fileID: 481602165}
   entSpawnParent: {fileID: 45718053}
   voidDestroyerParent: {fileID: 1226996362}
   surface: {fileID: 1993879865}
@@ -91199,7 +91231,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 481602165}
   m_Father: {fileID: 1410324980}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1993879865
@@ -98895,7 +98928,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1239388915988228603, guid: 9d8b43db3f565f54497755c3891f6883, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.55511475
+      value: 1.095
       objectReference: {fileID: 0}
     - target: {fileID: 1239388915988228603, guid: 9d8b43db3f565f54497755c3891f6883, type: 3}
       propertyPath: m_LocalPosition.y
@@ -98903,7 +98936,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1239388915988228603, guid: 9d8b43db3f565f54497755c3891f6883, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.5
+      value: -8.083
       objectReference: {fileID: 0}
     - target: {fileID: 1239388915988228603, guid: 9d8b43db3f565f54497755c3891f6883, type: 3}
       propertyPath: m_LocalRotation.w

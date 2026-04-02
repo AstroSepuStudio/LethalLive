@@ -47,6 +47,8 @@ public class RoomDataEditor : Editor
                 roomData.GetComponentsInChildren<ItemSpawnPosition>(includeInactive: true));
             roomData.FurnitureSpawnPositions = new System.Collections.Generic.List<FurnitureSpawnPosition>(
                 roomData.GetComponentsInChildren<FurnitureSpawnPosition>(includeInactive: true));
+            roomData.DecorationPositions = new System.Collections.Generic.List<DecorationSpawnPoint>(
+                roomData.GetComponentsInChildren<DecorationSpawnPoint>(includeInactive: true));
             EditorUtility.SetDirty(roomData);
 
             Debug.Log($"[RoomData] '{roomData.name}' — found {roomData.ItemSpawnPositions.Count} item + " +

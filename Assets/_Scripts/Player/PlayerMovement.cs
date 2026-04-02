@@ -451,15 +451,15 @@ public class PlayerMovement : NetworkBehaviour
 
         if (pData.Skin_Data.CharacterAnimator == null) return;
 
-        // Falling — set on server animator; NetworkAnimator replicates the bool.
-        bool nowFalling = !_isGrounded;
-        if (nowFalling != _isFalling)
+        if (_isGrounded != _isFalling)
         {
-            _isFalling = nowFalling;
+            _isFalling = _isGrounded;
             pData.Skin_Data.CharacterAnimator.SetBool("Falling", _isFalling);
         }
+        else if (_isGrounded)
+            pData.Skin_Data.CharacterAnimator.SetBool("Falling", false);
 
-        float speed = new Vector2(velocity.x, velocity.z).magnitude;
+            float speed = new Vector2(velocity.x, velocity.z).magnitude;
         if (IsCrouching)
         {
             standCrouchBlend = Mathf.MoveTowards(

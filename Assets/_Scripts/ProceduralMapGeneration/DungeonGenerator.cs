@@ -17,6 +17,7 @@ public class DungeonGenerator : NetworkBehaviour
     [SerializeField] Transform roomsParent;
     [SerializeField] Transform furnitureParent;
     [SerializeField] Transform itemsParent;
+    [SerializeField] Transform decoParent;
     [SerializeField] Transform entSpawnParent;
     [SerializeField] Transform voidDestroyerParent;
     [SerializeField] NavMeshSurface surface;
@@ -61,6 +62,7 @@ public class DungeonGenerator : NetworkBehaviour
 
     readonly List<ItemSpawnPosition> lootPositions = new();
     readonly List<FurnitureSpawnPosition> furniturePositions = new();
+    readonly List<DecorationSpawnPoint> decorationPositions = new();
     readonly List<Transform> entitySpawnerPositions = new();
 
     public IReadOnlyDictionary<int, RoomData> SpawnedRooms => spawned;
@@ -110,6 +112,9 @@ public class DungeonGenerator : NetworkBehaviour
 
     private float RandomRange(float min, float max) =>
     (float)(RNG.NextDouble() * (max - min)) + min;
+
+    private int RandomRange(int min, int max) =>
+    (int)(RNG.NextDouble() * (max - min)) + min;
 
     private void Awake()
     {
@@ -449,6 +454,7 @@ public class DungeonGenerator : NetworkBehaviour
 
             furniturePositions.AddRange(rd.FurnitureSpawnPositions);
             lootPositions.AddRange(rd.ItemSpawnPositions);
+            decorationPositions.AddRange(rd.DecorationPositions);
 
             entitySpawnerPositions.AddRange(rd.entitySpawnerPositions);
         }
@@ -467,6 +473,7 @@ public class DungeonGenerator : NetworkBehaviour
         {
             SpawnFurniture();
             SpawnLoot();
+            SpawnDecoration();
             SetEntitySpawners();
         }
 
@@ -631,6 +638,48 @@ public class DungeonGenerator : NetworkBehaviour
         Debug.Log($"Entity Spawners -> total: {q}, inner: {inner}, mid: {mid}, outer: {outer}");
     }
 
+    [Server]
+    private void SpawnDecoration()
+    {
+        if (decorationPositions == null || decorationPositions.Count <= 0) return;
+        Vector3 initialRoomPos = spawned[placed[0].id].transform.position;
+        int inner = 0;
+        int mid = 0;
+        int outer = 0;
+
+        int q = 0;
+        float chance = 1f;
+        float acChance = chance;
+        foreach (var pos in decorationPositions)
+        {
+            if (!EvaluateSpawn(acChance, pos.transform.position))
+            {
+                acChance += chance;
+                continue;
+            }
+
+            Quaternion rot = pos.transform.rotation * Quaternion.Euler(0, RandomRange(-pos.maxRotation, pos.maxRotation), 0);
+            Vector3 offset = new(
+                RandomRange(-pos.maxOffset.x, pos.maxOffset.x),
+                RandomRange(-pos.maxOffset.y, pos.maxOffset.y),
+                RandomRange(-pos.maxOffset.z, pos.maxOffset.z));
+
+            float distance = Vector3.Distance(initialRoomPos, pos.transform.position);
+            if (distance < maxDistance / 3) inner++;
+            else if (distance < maxDistance / 3 * 2) mid++;
+            else outer++;
+
+            acChance = chance;
+            q++;
+
+            DecorationDataSO deco = theme.GetWeightedDecoration(pos.transform.position, pos.maxSize, RNG);
+            GameObject spawner = Instantiate(deco.Prefab, pos.transform.position + offset, rot, decoParent);
+            NetworkServer.Spawn(spawner);
+        }
+
+        Debug.Log($"Decoration -> total: {q}, inner: {inner}, mid: {mid}, outer: {outer}");
+    }
+
     private void ResolveDoors()
     {
         foreach (var pr in placed)
@@ -771,7 +820,7 @@ public class DungeonGenerator : NetworkBehaviour
     {
         OnDungeonClear?.Invoke();
 
-        DestroyChildren(roomsParent, false);
+        DestroyChildren(roomsParent, false, true);
         DestroyChildren(furnitureParent, true);
         DestroyChildren(itemsParent, true);
         DestroyChildren(entSpawnParent, true);
@@ -780,6 +829,7 @@ public class DungeonGenerator : NetworkBehaviour
         spawned.Clear();
         lootPositions.Clear();
         furniturePositions.Clear();
+        decorationPositions.Clear();
         entitySpawnerPositions.Clear();
         SpawnedFurniture.Clear();
         SpawnedItems.Clear();
@@ -799,13 +849,15 @@ public class DungeonGenerator : NetworkBehaviour
             surface.RemoveData();
     }
 
-    private void DestroyChildren(Transform parent, bool hasNetID)
+    private void DestroyChildren(Transform parent, bool hasNetID, bool ignoreFirst = false)
     {
         if (parent == null) return;
         if (hasNetID && !isServer) return;
 
         for (int i = parent.childCount - 1; i >= 0; i--)
         {
+            if (i == 0 && ignoreFirst) continue;
+
             var child = parent.GetChild(i).gameObject;
             if (hasNetID)
                 NetworkServer.Destroy(child);
