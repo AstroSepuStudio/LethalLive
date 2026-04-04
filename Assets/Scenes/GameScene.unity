@@ -10520,6 +10520,31 @@ MonoBehaviour:
   OnDeselectedEvent:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &144775573 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 1160751250}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &144775577 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 1160751250}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &144775578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144775573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 144775577}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!43 &151734200
 Mesh:
   m_ObjectHideFlags: 0
@@ -10910,7 +10935,7 @@ PrefabInstance:
       objectReference: {fileID: 341145047}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -10966,7 +10991,7 @@ PrefabInstance:
       objectReference: {fileID: 1142357554}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -11686,7 +11711,7 @@ PrefabInstance:
       objectReference: {fileID: 78304850}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -11742,7 +11767,7 @@ PrefabInstance:
       objectReference: {fileID: 2008965019}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -15408,6 +15433,31 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &254735197 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 455749988}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &254735201 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 455749988}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &254735202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 254735197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 254735201}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!43 &255107922
 Mesh:
   m_ObjectHideFlags: 0
@@ -16264,6 +16314,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LED (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 743671491918977449, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1899224613387431574, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -16274,7 +16328,7 @@ PrefabInstance:
       objectReference: {fileID: 1327429009}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 628
+      value: 631
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -16326,12 +16380,15 @@ PrefabInstance:
       objectReference: {fileID: 1265067912}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 665
+      value: 668
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1934031238}
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
 --- !u!4 &279170031 stripped
 Transform:
@@ -16355,6 +16412,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LED (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 743671491918977449, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1899224613387431574, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -16365,7 +16426,7 @@ PrefabInstance:
       objectReference: {fileID: 1011097291}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 634
+      value: 637
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -16417,12 +16478,15 @@ PrefabInstance:
       objectReference: {fileID: 72274350}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 671
+      value: 674
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1769199837}
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
 --- !u!4 &279668835 stripped
 Transform:
@@ -16463,7 +16527,7 @@ PrefabInstance:
       objectReference: {fileID: 1426894911}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -16519,7 +16583,7 @@ PrefabInstance:
       objectReference: {fileID: 1030842750}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -20360,7 +20424,7 @@ PrefabInstance:
       objectReference: {fileID: 1689904330}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -20416,7 +20480,7 @@ PrefabInstance:
       objectReference: {fileID: 956012875}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -21454,6 +21518,7 @@ GameObject:
   - component: {fileID: 400320847}
   - component: {fileID: 400320849}
   - component: {fileID: 400320848}
+  - component: {fileID: 400320850}
   m_Layer: 0
   m_Name: Point Light (4)
   m_TagString: Untagged
@@ -21570,6 +21635,21 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &400320850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400320846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 400320849}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!43 &410264532
 Mesh:
   m_ObjectHideFlags: 0
@@ -23478,6 +23558,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LED (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 743671491918977449, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1899224613387431574, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -23488,7 +23572,7 @@ PrefabInstance:
       objectReference: {fileID: 2105925357}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 628
+      value: 631
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -23540,12 +23624,15 @@ PrefabInstance:
       objectReference: {fileID: 614823999}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 665
+      value: 668
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 254735202}
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
 --- !u!4 &455749989 stripped
 Transform:
@@ -24386,7 +24473,7 @@ PrefabInstance:
       objectReference: {fileID: 922642834}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -24442,7 +24529,7 @@ PrefabInstance:
       objectReference: {fileID: 1568781674}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -26323,6 +26410,7 @@ GameObject:
   - component: {fileID: 529593685}
   - component: {fileID: 529593687}
   - component: {fileID: 529593686}
+  - component: {fileID: 529593688}
   m_Layer: 0
   m_Name: Point Light (3)
   m_TagString: Untagged
@@ -26439,6 +26527,21 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &529593688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 529593684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 529593687}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!43 &531544743
 Mesh:
   m_ObjectHideFlags: 0
@@ -30248,6 +30351,31 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &621660085 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 1250672659}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &621660089 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 1250672659}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &621660090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 621660085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 621660089}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!1 &625523375
 GameObject:
   m_ObjectHideFlags: 0
@@ -31099,6 +31227,7 @@ GameObject:
   - component: {fileID: 666346142}
   - component: {fileID: 666346144}
   - component: {fileID: 666346143}
+  - component: {fileID: 666346145}
   m_Layer: 0
   m_Name: Point Light (1)
   m_TagString: Untagged
@@ -31215,6 +31344,21 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &666346145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 666346141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 666346144}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!1 &676296263
 GameObject:
   m_ObjectHideFlags: 0
@@ -32277,7 +32421,7 @@ PrefabInstance:
       objectReference: {fileID: 1229366515}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -32333,7 +32477,7 @@ PrefabInstance:
       objectReference: {fileID: 447779609}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -35639,7 +35783,7 @@ PrefabInstance:
       objectReference: {fileID: 1132604803}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -35695,7 +35839,7 @@ PrefabInstance:
       objectReference: {fileID: 275223756}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -37496,7 +37640,7 @@ PrefabInstance:
       objectReference: {fileID: 97936504}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -37552,7 +37696,7 @@ PrefabInstance:
       objectReference: {fileID: 2002244783}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -37780,6 +37924,7 @@ GameObject:
   - component: {fileID: 847944294}
   - component: {fileID: 847944296}
   - component: {fileID: 847944295}
+  - component: {fileID: 847944297}
   m_Layer: 0
   m_Name: Point Light
   m_TagString: Untagged
@@ -37896,6 +38041,21 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &847944297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847944293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 847944296}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!1001 &848882420
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39784,6 +39944,7 @@ GameObject:
   - component: {fileID: 890464615}
   - component: {fileID: 890464617}
   - component: {fileID: 890464616}
+  - component: {fileID: 890464618}
   m_Layer: 0
   m_Name: Point Light (2)
   m_TagString: Untagged
@@ -39900,6 +40061,21 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &890464618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890464614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 890464617}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!1 &895289940
 GameObject:
   m_ObjectHideFlags: 0
@@ -40837,6 +41013,7 @@ GameObject:
   - component: {fileID: 924595739}
   - component: {fileID: 924595741}
   - component: {fileID: 924595740}
+  - component: {fileID: 924595742}
   m_Layer: 0
   m_Name: Point Light (1)
   m_TagString: Untagged
@@ -40953,6 +41130,21 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &924595742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 924595738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 924595741}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!1 &926097623
 GameObject:
   m_ObjectHideFlags: 0
@@ -48141,6 +48333,9 @@ MonoBehaviour:
   distanceMethod: 0
   docActive: 1
   triesToUpdate: 10
+  rotationCullingEnabled: 1
+  rotationCullFOVBuffer: 20
+  rotationCullMinCellDist: 3
   fogEnabled: 1
   fogStartRatio: 0.25
   fogEndRatio: 0.4
@@ -48258,7 +48453,7 @@ PrefabInstance:
       objectReference: {fileID: 1351309321}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 646
+      value: 649
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -48314,7 +48509,7 @@ PrefabInstance:
       objectReference: {fileID: 1093956233}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 683
+      value: 686
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -49566,7 +49761,7 @@ PrefabInstance:
       objectReference: {fileID: 1926604652}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -49622,7 +49817,7 @@ PrefabInstance:
       objectReference: {fileID: 1005516597}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -49957,6 +50152,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LED (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 743671491918977449, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1899224613387431574, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -49967,7 +50166,7 @@ PrefabInstance:
       objectReference: {fileID: 395825381}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 628
+      value: 631
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -50019,12 +50218,15 @@ PrefabInstance:
       objectReference: {fileID: 665672256}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 665
+      value: 668
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1605772114}
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
 --- !u!4 &1071351424 stripped
 Transform:
@@ -54309,6 +54511,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LED (8)
       objectReference: {fileID: 0}
+    - target: {fileID: 743671491918977449, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1899224613387431574, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -54319,7 +54525,7 @@ PrefabInstance:
       objectReference: {fileID: 205660318}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 628
+      value: 631
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -54371,12 +54577,15 @@ PrefabInstance:
       objectReference: {fileID: 93614676}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 665
+      value: 668
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 144775578}
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
 --- !u!4 &1160751251 stripped
 Transform:
@@ -55431,7 +55640,7 @@ PrefabInstance:
       objectReference: {fileID: 191625177}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 646
+      value: 649
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -55487,7 +55696,7 @@ PrefabInstance:
       objectReference: {fileID: 209074994}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 683
+      value: 686
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -57049,7 +57258,7 @@ PrefabInstance:
       objectReference: {fileID: 1964318518}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -57105,7 +57314,7 @@ PrefabInstance:
       objectReference: {fileID: 1898293113}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -58390,6 +58599,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LED (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 743671491918977449, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1899224613387431574, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -58400,7 +58613,7 @@ PrefabInstance:
       objectReference: {fileID: 1952818061}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 628
+      value: 631
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -58452,12 +58665,15 @@ PrefabInstance:
       objectReference: {fileID: 1774070004}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 665
+      value: 668
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 621660090}
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
 --- !u!4 &1250672660 stripped
 Transform:
@@ -67594,7 +67810,7 @@ PrefabInstance:
       objectReference: {fileID: 398276109}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -67650,7 +67866,7 @@ PrefabInstance:
       objectReference: {fileID: 151734200}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -69570,7 +69786,7 @@ MonoBehaviour:
   maxRooms: 50
   maxDepth: 10
   generateOnStart: 0
-  simMapSize: 1
+  simMapSize: 5
   seedDisplayCanvas: {fileID: 1348597482}
   seedDisplayTransform: {fileID: 1067416731}
   seedDisplayGroup: {fileID: 1067416732}
@@ -70565,7 +70781,7 @@ PrefabInstance:
       objectReference: {fileID: 1822602143}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -70621,7 +70837,7 @@ PrefabInstance:
       objectReference: {fileID: 1453054083}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -71709,7 +71925,7 @@ PrefabInstance:
       objectReference: {fileID: 2048077404}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -71765,7 +71981,7 @@ PrefabInstance:
       objectReference: {fileID: 1904489205}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -74741,7 +74957,7 @@ PrefabInstance:
       objectReference: {fileID: 787577649}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -74797,7 +75013,7 @@ PrefabInstance:
       objectReference: {fileID: 2116185597}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -75666,7 +75882,7 @@ PrefabInstance:
       objectReference: {fileID: 1677190555}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -75722,7 +75938,7 @@ PrefabInstance:
       objectReference: {fileID: 1797289638}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -75937,6 +76153,31 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1605232873}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1605772109 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 1071351423}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &1605772113 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 1071351423}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1605772114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1605772109}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 1605772113}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!1 &1609368232
 GameObject:
   m_ObjectHideFlags: 0
@@ -80531,7 +80772,7 @@ PrefabInstance:
       objectReference: {fileID: 1147813159}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -80587,7 +80828,7 @@ PrefabInstance:
       objectReference: {fileID: 1745293458}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -82253,6 +82494,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2134294513}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!1 &1769199832 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 279668834}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &1769199836 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 279668834}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1769199837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1769199832}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 1769199836}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!43 &1770094620
 Mesh:
   m_ObjectHideFlags: 0
@@ -82465,7 +82731,7 @@ PrefabInstance:
       objectReference: {fileID: 1402267203}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -82521,7 +82787,7 @@ PrefabInstance:
       objectReference: {fileID: 57549758}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -83304,7 +83570,7 @@ PrefabInstance:
       objectReference: {fileID: 723946647}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -83360,7 +83626,7 @@ PrefabInstance:
       objectReference: {fileID: 154878921}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -84464,7 +84730,7 @@ PrefabInstance:
       objectReference: {fileID: 1411936927}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -84520,7 +84786,7 @@ PrefabInstance:
       objectReference: {fileID: 965259362}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -85046,7 +85312,7 @@ PrefabInstance:
       objectReference: {fileID: 1011394966}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -85102,7 +85368,7 @@ PrefabInstance:
       objectReference: {fileID: 384024564}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -85341,7 +85607,7 @@ PrefabInstance:
       objectReference: {fileID: 447881694}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -85397,7 +85663,7 @@ PrefabInstance:
       objectReference: {fileID: 1005058671}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -86600,6 +86866,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1874368640}
   m_CullTransparentMesh: 1
+--- !u!1 &1874373265 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 1977441044}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &1874373269 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 1977441044}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1874373270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1874373265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 1874373269}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!1 &1882537687
 GameObject:
   m_ObjectHideFlags: 0
@@ -87460,7 +87751,7 @@ PrefabInstance:
       objectReference: {fileID: 364216393}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 646
+      value: 649
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -87516,7 +87807,7 @@ PrefabInstance:
       objectReference: {fileID: 682071654}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 683
+      value: 686
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -88649,7 +88940,7 @@ PrefabInstance:
       objectReference: {fileID: 2022913891}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -88705,7 +88996,7 @@ PrefabInstance:
       objectReference: {fileID: 474401019}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -88905,6 +89196,31 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1934031233 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 279170030}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &1934031237 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1810080985545549990, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+  m_PrefabInstance: {fileID: 279170030}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1934031238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1934031233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60f2d54700ba214ea798e8d0e421f27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightLOD
+  _light: {fileID: 1934031237}
+  disDisMult: 1.1
+  shaDisMult: 0.8
 --- !u!1 &1941433724
 GameObject:
   m_ObjectHideFlags: 0
@@ -89188,7 +89504,7 @@ PrefabInstance:
       objectReference: {fileID: 551175095}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 667
+      value: 670
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -89244,7 +89560,7 @@ PrefabInstance:
       objectReference: {fileID: 383185995}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 704
+      value: 707
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier
@@ -90169,6 +90485,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LED
       objectReference: {fileID: 0}
+    - target: {fileID: 743671491918977449, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1899224613387431574, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -90179,7 +90499,7 @@ PrefabInstance:
       objectReference: {fileID: 320489017}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 628
+      value: 631
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -90231,12 +90551,15 @@ PrefabInstance:
       objectReference: {fileID: 255107922}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 665
+      value: 668
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1938346441613965381, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1874373270}
   m_SourcePrefab: {fileID: 100100000, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
 --- !u!4 &1977441045 stripped
 Transform:
@@ -99410,7 +99733,7 @@ PrefabInstance:
       objectReference: {fileID: 793815105}
     - target: {fileID: 4786521776462836950, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 724
+      value: 727
       objectReference: {fileID: 0}
     - target: {fileID: 5454299190363892300, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_Mesh
@@ -99462,7 +99785,7 @@ PrefabInstance:
       objectReference: {fileID: 1403455081}
     - target: {fileID: 6702966530876059468, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_VersionIndex
-      value: 761
+      value: 764
       objectReference: {fileID: 0}
     - target: {fileID: 7461724244724810454, guid: 5f4e6eeeb2c5d15418800e2ee6d0a1e2, type: 3}
       propertyPath: m_AdditionalLightsShadowResolutionTier

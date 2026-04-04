@@ -12,6 +12,11 @@ public class DynamicOcclusionCulling : MonoBehaviour
     [SerializeField] bool docActive = false;
     [SerializeField] int triesToUpdate = 10;
 
+    [Header("Rotation Culling")]
+    [SerializeField] bool rotationCullingEnabled = true;
+    [SerializeField] float rotationCullFOVBuffer = 10f;
+    [SerializeField] int rotationCullMinCellDist = 2;
+
     [Header("Fog")]
     [SerializeField] bool fogEnabled = true;
     [SerializeField] float fogStartRatio = 0.35f;
@@ -24,16 +29,8 @@ public class DynamicOcclusionCulling : MonoBehaviour
     Dictionary<int, HashSet<int>> validAdjacency = new();
     Dictionary<int, Vector3Int> roomAnchors = new();
 
-    void OnEnable()
-    {
-        GameTick.OnTick -= UpdateCulling;
-        GameTick.OnTick += UpdateCulling;
-    }
-
     void OnDisable()
     {
-        GameTick.OnTick -= UpdateCulling;
-
         if (Instance == null || !Instance.GeneratedDungeon) return;
         foreach (var room in Instance.SpawnedRooms)
             room.Value.SetRender(true);
@@ -79,14 +76,19 @@ public class DynamicOcclusionCulling : MonoBehaviour
         }
     }
 
+    private void Update() => UpdateCulling();
+
     private void UpdateCulling()
     {
         if (!Instance.GeneratedDungeon || !docActive) return;
 
         if (validAdjacency.Count == 0) RebuildValidAdjacency();
 
-        PlayerData pData = GameManager.Instance.playMod.LocalPlayer
-                                       .Spectator_Movement.GetPlayerData();
+        PlayerData pData = GameManager.Instance.playMod.LocalPlayer.Spectator_Movement.GetPlayerData();
+
+        Vector3 camForward = pData.PlayerCamera.transform.forward;
+        camForward.y = 0f;
+        camForward.Normalize();
 
         Vector3 playerPos = pData.transform.position;
         Vector3Int cellPosition = new(
@@ -174,14 +176,46 @@ public class DynamicOcclusionCulling : MonoBehaviour
             bool shouldRender = expandedVisible.Contains(r.Key);
             r.Value.SetRender(shouldRender);
 
-            if (shouldRender && fogEnabled &&
+            if (shouldRender && rotationCullingEnabled &&
                 roomAnchors.TryGetValue(r.Key, out Vector3Int rAnchor))
             {
-                Vector3 roomWorldPos = (Vector3)rAnchor * Instance.CellSize;
+                int dist = distanceMethod switch
+                {
+                    DistanceMethod.Chebyshev => CellDistance_Chebyshev(cellPosition, rAnchor),
+                    DistanceMethod.Manhattan => CellDistance_Manhattan(cellPosition, rAnchor),
+                    _ => CellDistance_Chebyshev(cellPosition, rAnchor)
+                };
+
+                if (dist > rotationCullMinCellDist)
+                {
+                    Vector3 roomWorldPos = (Vector3)rAnchor * Instance.CellSize;
+                    Vector3 toRoom = roomWorldPos - playerPos;
+                    toRoom.y = 0f;
+
+                    if (toRoom.sqrMagnitude > 0.001f)
+                    {
+                        float vFov = pData.PlayerCamera.fieldOfView;
+                        float aspect = pData.PlayerCamera.aspect;
+                        float hFov = Camera.VerticalToHorizontalFieldOfView(vFov, aspect);
+                        float cullAngle = (hFov * 0.5f) + rotationCullFOVBuffer;
+                        float angle = Vector3.Angle(camForward, toRoom.normalized);
+
+                        if (angle > cullAngle)
+                            shouldRender = false;
+                    }
+                }
+            }
+
+            r.Value.SetRender(shouldRender);
+
+            if (shouldRender && fogEnabled &&
+                roomAnchors.TryGetValue(r.Key, out Vector3Int fogAnchor))
+            {
+                Vector3 roomWorldPos = (Vector3)fogAnchor * Instance.CellSize;
                 float dist = Vector3.Distance(playerPos, roomWorldPos);
                 float roomRadius = Instance.SpawnedRooms[r.Key]
-                                               .PlacedRoom.data.RoomFootprint.Length
-                                               * Instance.CellSize;
+                                       .PlacedRoom.data.RoomFootprint.Length
+                                       * Instance.CellSize;
                 maxWorldDist = Mathf.Max(maxWorldDist, dist + roomRadius);
             }
         }

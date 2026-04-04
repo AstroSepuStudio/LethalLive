@@ -20,46 +20,72 @@ MonoBehaviour:
   RoomFootprint:
   - Footprint: {x: 0, y: 0, z: 0}
     MapSprite: {fileID: -12555032, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 1, y: 0, z: 0}
     MapSprite: {fileID: 879511598, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 0, y: 0, z: 1}
     MapSprite: {fileID: -377420611, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 1, y: 0, z: 1}
     MapSprite: {fileID: 486411642, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 2
   - Footprint: {x: 0, y: -1, z: 0}
     MapSprite: {fileID: -12555032, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 1, y: -1, z: 0}
     MapSprite: {fileID: -1856504453, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 0, y: -1, z: 1}
     MapSprite: {fileID: -377420611, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 1, y: -1, z: 1}
     MapSprite: {fileID: 844996304, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 1
   Ports:
   - localCell: {x: 0, y: 0, z: 1}
     face: 0
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 0, y: 0, z: 0}
     face: 1
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 0, y: 0, z: 0}
     face: 3
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 0, y: 0, z: 1}
     face: 3
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 0, y: -1, z: 1}
     face: 0
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 0, y: -1, z: 0}
     face: 1
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 0, y: -1, z: 0}
     face: 3
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 0, y: -1, z: 1}
     face: 3
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 1, y: 0, z: 0}
     face: 2
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   FootprintCorners: []

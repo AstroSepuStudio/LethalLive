@@ -190,12 +190,17 @@ public class DungeonGenerator : NetworkBehaviour
             var neighborRoom = placed.Find(r => r.id == open.roomId);
             var candidates = GetWeightedCandidates(theme.spawnableRooms, neighborRoom.biome);
 
-            bool placedAny = false; 
-
-            for (int c = 0; c < candidates.Length; c++) 
-            { 
-                var cand = candidates[c]; 
-                if (cand == null) continue; 
+            bool placedAny = false;
+            int biomeSearchTries = candidates.Length / 10;
+            for (int c = 0; c < candidates.Length; c++)
+            {
+                var cand = candidates[c];
+                if (cand == null) continue;
+                if (cand.biome != neighborRoom.biome && biomeSearchTries > 0)
+                {
+                    biomeSearchTries--;
+                    continue;
+                }
 
                 for (int p = 0; p < cand.Ports.Length; p++) 
                 { 

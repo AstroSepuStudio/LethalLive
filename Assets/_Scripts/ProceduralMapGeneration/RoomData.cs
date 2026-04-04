@@ -37,6 +37,8 @@ public class RoomData : MonoBehaviour
 
     [SerializeField] Color fontColor = Color.darkRed;
     [SerializeField] int fontSize = 25;
+
+    [SerializeField] Color spriteColor = Color.darkGreen;
     [SerializeField] int spriteSize = 150;
 
     [SerializeField] bool useLayers = false;
@@ -250,6 +252,7 @@ public class RoomData : MonoBehaviour
                     Vector2 guiCenter = UnityEditor.HandleUtility.WorldToGUIPoint(worldCenter);
                     float guiSize = spriteSize;
                     Rect guiRect = new Rect(guiCenter.x - guiSize * 0.5f, guiCenter.y - guiSize * 0.5f, guiSize, guiSize);
+                    GUI.color = spriteColor;
                     GUI.DrawTexture(guiRect, tex, ScaleMode.ScaleToFit, true);
                     UnityEditor.Handles.EndGUI();
                 }

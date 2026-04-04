@@ -23,6 +23,7 @@ public class RoomDataSO : ScriptableObject
     {
         public Vector3Int Footprint;
         public Sprite MapSprite;
+        public MapSpriteDBSO.LayerDir layerDir;
     }
 
     public GameObject Prefab;
