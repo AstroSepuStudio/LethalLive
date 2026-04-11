@@ -43,7 +43,7 @@ public class AIS_StareAtPlayerNearItem : AIState
             {
                 warningTimer = Random.Range(minWarningInterval, maxWarningInterval);
                 brain.Animator_.SetTrigger("Attack");
-                brain.PlaySFX(AIBrain.SFXEvent.Warning, 1);
+                brain.PlaySFX(AIBrain.SourceType.Default, AIBrain.SFXEvent.Warning, 1);
             }
 
             if (brain.TryGetModule<AIModule_Patience>(out var patience))

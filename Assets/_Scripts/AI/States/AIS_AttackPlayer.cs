@@ -37,7 +37,7 @@ public class AIS_AttackPlayer : AIState
         if (Target == null) { OnTargetLost?.Invoke(); return; }
         brain.ResumeAgentMovement();
         brain.Agent.stoppingDistance = brain.AttackStat_.AttackRadius * 0.8f;
-        brain.PlaySFX(AIBrain.SFXEvent.Aggressive, 1);
+        brain.PlaySFX(AIBrain.SourceType.Default, AIBrain.SFXEvent.Aggressive, 1);
         brain.SetAggressive(true);
         brain.SetIdleState(false);
 
@@ -140,7 +140,7 @@ public class AIS_AttackPlayer : AIState
             if (!brain.AttackStat_.OnCooldown && !attackPending)
             {
                 brain.Animator_.SetTrigger("Attack");
-                brain.PlaySFX(AIBrain.SFXEvent.Attack, 1);
+                brain.PlaySFX(AIBrain.SourceType.Default, AIBrain.SFXEvent.Attack, 1);
                 brain.StartCoroutine(brain.AttackStat_.CountdownCooldown());
                 targetPosAtSwing = Target.transform.position;
                 attackPending = true;

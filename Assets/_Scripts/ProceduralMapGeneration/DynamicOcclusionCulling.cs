@@ -14,7 +14,6 @@ public class DynamicOcclusionCulling : MonoBehaviour
 
     [Header("Rotation Culling")]
     [SerializeField] bool rotationCullingEnabled = true;
-    [SerializeField] float rotationCullFOVBuffer = 10f;
     [SerializeField] int rotationCullMinCellDist = 2;
 
     [Header("Fog")]
@@ -170,14 +169,14 @@ public class DynamicOcclusionCulling : MonoBehaviour
         }
 
         float maxWorldDist = 0f;
+        Plane[] frustumPlanes = rotationCullingEnabled ? GeometryUtility.CalculateFrustumPlanes(pData.PlayerCamera) : null;
 
         foreach (var r in Instance.SpawnedRooms)
         {
             bool shouldRender = expandedVisible.Contains(r.Key);
             r.Value.SetRender(shouldRender);
 
-            if (shouldRender && rotationCullingEnabled &&
-                roomAnchors.TryGetValue(r.Key, out Vector3Int rAnchor))
+            if (shouldRender && rotationCullingEnabled && roomAnchors.TryGetValue(r.Key, out Vector3Int rAnchor))
             {
                 int dist = distanceMethod switch
                 {
@@ -188,21 +187,16 @@ public class DynamicOcclusionCulling : MonoBehaviour
 
                 if (dist > rotationCullMinCellDist)
                 {
-                    Vector3 roomWorldPos = (Vector3)rAnchor * Instance.CellSize;
-                    Vector3 toRoom = roomWorldPos - playerPos;
-                    toRoom.y = 0f;
+                    var placedRoom = Instance.SpawnedRooms[r.Key].PlacedRoom;
+                    Bounds localBounds = placedRoom.data.ComputedBounds;
 
-                    if (toRoom.sqrMagnitude > 0.001f)
-                    {
-                        float vFov = pData.PlayerCamera.fieldOfView;
-                        float aspect = pData.PlayerCamera.aspect;
-                        float hFov = Camera.VerticalToHorizontalFieldOfView(vFov, aspect);
-                        float cullAngle = (hFov * 0.5f) + rotationCullFOVBuffer;
-                        float angle = Vector3.Angle(camForward, toRoom.normalized);
+                    Vector3 roomWorldOrigin = (Vector3)rAnchor * Instance.CellSize;
+                    Bounds worldBounds = new Bounds(
+                        roomWorldOrigin + localBounds.center,
+                        localBounds.size);
 
-                        if (angle > cullAngle)
-                            shouldRender = false;
-                    }
+                    if (!GeometryUtility.TestPlanesAABB(frustumPlanes, worldBounds))
+                        shouldRender = false;
                 }
             }
 

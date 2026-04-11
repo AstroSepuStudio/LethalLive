@@ -225,6 +225,14 @@ public class RoomData : MonoBehaviour
             }
         }
 
+        if (Data != null && Data.ComputedBounds.size != Vector3.zero)
+        {
+            Gizmos.color = new Color(1f, 0.5f, 0f, 0.4f);
+            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+            Gizmos.DrawWireCube(Data.ComputedBounds.center, Data.ComputedBounds.size);
+            Gizmos.matrix = Matrix4x4.identity;
+        }
+
         foreach (var entry in Data.RoomFootprint)
         {
             if (useLayers && entry.Footprint.y != currentLayer)

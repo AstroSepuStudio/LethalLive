@@ -369,7 +369,8 @@ public class PlayerMovement : NetworkBehaviour
                 groundedTime = 0f; _isGrounded = false;
                 pData.Player_Stats.ModifyStamina(-staminaConsuption_Jump);
 
-                pData.Skin_Data.CharacterAnimator.SetTrigger("Jump");
+                pData.Skin_Data.CharacterAnimator.SetBool("Jump", true);
+                //pData.Skin_Data.CharacterAnimator.SetBool("Falling", true);
             }
 
             Vector3 camForward = pData.CameraPivot.forward;
@@ -451,15 +452,19 @@ public class PlayerMovement : NetworkBehaviour
 
         if (pData.Skin_Data.CharacterAnimator == null) return;
 
-        if (_isGrounded != _isFalling)
+        if (!_isGrounded)
         {
-            _isFalling = _isGrounded;
-            pData.Skin_Data.CharacterAnimator.SetBool("Falling", _isFalling);
+            pData.Skin_Data.CharacterAnimator.SetBool("Falling", true);
         }
-        else if (_isGrounded)
+        else
+        {
             pData.Skin_Data.CharacterAnimator.SetBool("Falling", false);
+            pData.Skin_Data.CharacterAnimator.SetBool("Jump", false);
+        }
 
-            float speed = new Vector2(velocity.x, velocity.z).magnitude;
+        _isFalling = !_isGrounded;
+
+        float speed = new Vector2(velocity.x, velocity.z).magnitude;
         if (IsCrouching)
         {
             standCrouchBlend = Mathf.MoveTowards(

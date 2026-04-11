@@ -20,17 +20,28 @@ MonoBehaviour:
   RoomFootprint:
   - Footprint: {x: 0, y: 0, z: 0}
     MapSprite: {fileID: 2102985003, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 0, y: 0, z: 1}
     MapSprite: {fileID: 1825996772, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 1, y: 0, z: 0}
     MapSprite: {fileID: -1077967388, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   - Footprint: {x: 1, y: 0, z: 1}
     MapSprite: {fileID: 533125077, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    layerDir: 0
   Ports:
   - localCell: {x: 0, y: 0, z: 0}
     face: 3
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   - localCell: {x: 1, y: 0, z: 1}
     face: 2
     type: 0
+    deadEndOverride: {fileID: 0}
+    deoCell: {x: 0, y: 0, z: 0}
   FootprintCorners: []
+  ComputedBounds:
+    m_Center: {x: 2.5, y: 2.5, z: 2.5}
+    m_Extent: {x: 5, y: 2.5, z: 5}

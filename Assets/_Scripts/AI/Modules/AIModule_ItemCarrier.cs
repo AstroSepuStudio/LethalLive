@@ -24,7 +24,7 @@ public class AIModule_ItemCarrier : AIModule
 
     public void CarryItem(ItemBase item, AIBrain brain)
     {
-        brain.PlaySFX(AIBrain.SFXEvent.Happy, 1f);
+        brain.PlaySFX(AIBrain.SourceType.Default, AIBrain.SFXEvent.Happy, 1f);
         CarriedItem = item;
         item.OnPickUp();
         item.transform.SetParent(pickUpPos);

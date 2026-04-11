@@ -20,11 +20,11 @@ public class AudioSoundEvent
     {
         return category switch
         {
-            SoundLoudness.Average => 20,
-            SoundLoudness.Quiet => 5,
-            SoundLoudness.Loud => 40,
+            SoundLoudness.Average => 16,
+            SoundLoudness.Quiet => 4,
+            SoundLoudness.Loud => 32,
             SoundLoudness.Global => Mathf.Infinity,
-            _ => 20
+            _ => 16
         };
     }
 }

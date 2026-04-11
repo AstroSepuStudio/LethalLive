@@ -939,6 +939,9 @@ MonoBehaviour:
     wall: {fileID: 3024308065666893071}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: 74a8d1cf0b6ce7a4d856fa8094da36ce, type: 2}
+  RoomBounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 1, y: 1, z: 1}
   ItemSpawnPositions:
   - {fileID: 2382904896982317228}
   FurnitureSpawnPositions:
@@ -998,6 +1001,7 @@ MonoBehaviour:
   showFootprintSprites: 0
   fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
   fontSize: 25
+  spriteColor: {r: 0, g: 0.3921569, b: 0, a: 1}
   spriteSize: 160
   useLayers: 0
   currentLayer: 0

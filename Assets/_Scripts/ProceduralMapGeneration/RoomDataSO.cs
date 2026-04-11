@@ -36,6 +36,7 @@ public class RoomDataSO : ScriptableObject
     public RoomPort[] Ports = Array.Empty<RoomPort>();
 
     public FootprintStr[] FootprintCorners = Array.Empty<FootprintStr>();
+    public Bounds ComputedBounds;
 
     public bool ContainsLocalCell(in Vector3Int local)
     {

@@ -60,6 +60,11 @@ public class RoomDataEditor : Editor
             SyncPorts(roomData);
         }
 
+        if (GUILayout.Button("Bake Footprint Bounds"))
+        {
+            BakeFootprintBounds(roomData);
+        }
+
         EditorGUI.BeginDisabledGroup(_bindingsSO == null || roomData.Data == null);
         if (GUILayout.Button("Populate Port Walls & Doors"))
             PopulatePortWallsDoors(roomData, _bindingsSO);
@@ -89,6 +94,40 @@ public class RoomDataEditor : Editor
         so.ApplyModifiedProperties();
         EditorUtility.SetDirty(roomData);
         Debug.Log($"[RoomData] '{roomData.name}' — synced {sourcePorts.Length} port(s) from '{roomData.Data.name}'.");
+    }
+
+    private void BakeFootprintBounds(RoomData roomData)
+    {
+        if (roomData.Data == null || roomData.Data.RoomFootprint.Length == 0)
+        {
+            Debug.LogWarning("[RoomData] No footprint data to bake.");
+            return;
+        }
+
+        const float cellSize = 5f;
+        const float halfCell = cellSize * 0.5f;
+
+        Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+        bool first = true;
+
+        foreach (var entry in roomData.Data.RoomFootprint)
+        {
+            Vector3 cellCenter = new Vector3(
+                entry.Footprint.x * cellSize,
+                entry.Footprint.y * cellSize + halfCell,
+                entry.Footprint.z * cellSize);
+
+            Bounds cellBounds = new Bounds(cellCenter, Vector3.one * cellSize);
+
+            if (first) { bounds = cellBounds; first = false; }
+            else bounds.Encapsulate(cellBounds);
+        }
+
+        Undo.RecordObject(roomData.Data, "Bake Footprint Bounds");
+        roomData.Data.ComputedBounds = bounds;
+        EditorUtility.SetDirty(roomData.Data);
+
+        Debug.Log($"[RoomData] '{roomData.Data.name}' — baked bounds: center={bounds.center}, size={bounds.size}");
     }
 
     private void PopulatePortWallsDoors(RoomData roomData, PortWallBindingsSO bindings)

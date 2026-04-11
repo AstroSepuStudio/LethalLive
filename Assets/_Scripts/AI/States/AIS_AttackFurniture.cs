@@ -65,7 +65,7 @@ public class AIS_AttackFurniture : AIState
 
         if (!brain.AttackStat_.OnCooldown && !attackPending)
         {
-            brain.PlaySFX(AIBrain.SFXEvent.Attack, 1);
+            brain.PlaySFX(AIBrain.SourceType.Default, AIBrain.SFXEvent.Attack, 1);
             brain.Animator_.SetTrigger("Attack");
             brain.StartCoroutine(brain.AttackStat_.CountdownCooldown());
             targetPosAtSwing = Target.transform.position;

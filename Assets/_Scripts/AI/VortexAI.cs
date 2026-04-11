@@ -69,17 +69,17 @@ public class VortexAI : AIBrain
     public RoomData HomeRoom => HomeModule?.HomeRoom;
     public float Patience => PatienceModule?.Patience ?? float.MaxValue;
 
-    public override void PlaySFX(SFXEvent sfxEvent, float pitch)
+    public override void PlaySFX(SourceType type, SFXEvent sfxEvent, float pitch)
     {
-        pitch *= AlphaModule?.GetPitch() ?? 1f;
-        base.PlaySFX(sfxEvent, pitch);
+        pitch *= AlphaModule.GetPitch();
+        base.PlaySFX(type, sfxEvent, pitch);
     }
 
-    public void PlayAlphaCall(float pitch)
+    public void PlayAlphaCall()
     {
         if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var group) || group.Clips.Length == 0) return;
         int index = Random.Range(0, group.Clips.Length);
-        RpcPlayAlphaCall(index, pitch);
+        RpcPlayAlphaCall(index, AlphaModule.GetPitch());
     }
 
     [ClientRpc]
@@ -87,7 +87,8 @@ public class VortexAI : AIBrain
     {
         if (alphaCallSrc == null) return;
         if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var group) || group.Clips.Length == 0) return;
-        audioSrc.pitch = pitch;
+
+        alphaCallSrc.pitch = pitch;
         AudioManager.Instance.PlayOneShot(alphaCallSrc, group.Clips[clipIndex], gameObject, group.Loudness);
     }
 
@@ -386,7 +387,7 @@ public class VortexAI : AIBrain
     {
         if (IsInAttackState()) return;
         CarrierModule?.DropCarriedItem();
-        PlaySFX(SFXEvent.CallForHelp, 1f);
+        PlaySFX(SourceType.Default, SFXEvent.CallForHelp, 1f);
 
         PlayerData target = caller.attackPlayerState?.Target ?? caller.SensesModule?.GetClosestSeenPlayer(caller);
         if (target == null) return;
@@ -557,14 +558,14 @@ public class VortexAI : AIBrain
 
     void OnAlphaHurt()
     {
-        PlaySFX(SFXEvent.AlphaCall, 1f);
+        PlayAlphaCall();
         TriggerAttackPlayer();
         AlphaModule?.AlertPack(this);
     }
 
     void OnVortexHurt()
     {
-        PlaySFX(SFXEvent.CallForHelp, 1f);
+        PlaySFX(SourceType.Default, SFXEvent.CallForHelp, 1f);
         TriggerAttackPlayer();
 
         Collider[] hits = Physics.OverlapSphere(transform.position, detectionRadius);
