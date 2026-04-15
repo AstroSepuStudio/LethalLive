@@ -8,6 +8,7 @@ public class AIS_DropItemAtHome : AIState
     [SerializeField] float movementGracePeriod = 1f;
     [SerializeField] float stuckTimeout = 3f;
 
+    bool hasDropped;
     float stuckTimer;
     float graceTimer;
     float recalcTimer;
@@ -34,15 +35,17 @@ public class AIS_DropItemAtHome : AIState
             destinationSet = false;
             return;
         }
-
+        hasDropped = false;
         brain.Animator_.SetBool("Walk", true);
         destinationSet = true;
         stuckTimer = stuckTimeout;
         graceTimer = movementGracePeriod;
         recalcTimer = recalculateInterval;
-        targetPosition = home.GetEffectiveHome().transform.position;
+        targetPosition = home.GetEffectiveHome().transform.position + PickOffset();
         brain.MoveAgent(targetPosition);
         brain.SetIdleState(false);
+
+        Debug.Log($"Entered drop item at home state", brain.gameObject);
     }
 
     public override void OnUpdateState(AIBrain brain)
@@ -62,21 +65,30 @@ public class AIS_DropItemAtHome : AIState
             brain.MoveAgent(targetPosition);
         }
 
-        bool mov = brain.IsAgentInMovement();
-        brain.Animator_.SetBool("Walk", mov);
-
-        if (mov) { stuckTimer = stuckTimeout; return; }
-
-        stuckTimer -= Time.deltaTime;
-        if (stuckTimer <= 0f) { OnItemDropped?.Invoke(); return; }
-
         float dist = Vector3.Distance(brain.transform.position, targetPosition);
-        if (dist <= dropRange)
+        if (!hasDropped && dist <= dropRange)
         {
+            hasDropped = true;
             brain.GetModule<AIModule_ItemCarrier>()?.DropCarriedItem();
             OnArrivedAtHome?.Invoke();
             OnItemDropped?.Invoke();
             graceTimer = 0f;
+        }
+
+        bool mov = brain.IsAgentInMovement();
+        brain.Animator_.SetBool("Walk", mov);
+
+        if (mov) 
+        { 
+            stuckTimer = stuckTimeout; 
+            return; 
+        }
+
+        stuckTimer -= Time.deltaTime;
+        if (stuckTimer <= 0f) 
+        { 
+            OnItemDropped?.Invoke(); 
+            return; 
         }
     }
 
@@ -85,5 +97,12 @@ public class AIS_DropItemAtHome : AIState
         brain.Animator_.SetBool("Walk", false);
         destinationSet = false;
         brain.SetIdleState(true);
+    }
+
+    Vector3 PickOffset()
+    {
+        float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+        float dist = DungeonGenerator.Instance.CellSize * 0.4f;
+        return new Vector3(Mathf.Cos(angle) * dist, 0f, Mathf.Sin(angle) * dist);
     }
 }

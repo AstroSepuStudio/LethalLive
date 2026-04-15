@@ -1,71 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &760935623270235787
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1129531367027361159}
-  - component: {fileID: 2413247349213477552}
-  m_Layer: 11
-  m_Name: Wander Between Rooms
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1129531367027361159
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 760935623270235787}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6789960467342715894}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2413247349213477552
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 760935623270235787}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f232b74a45ed722498cc7196b2ba3782, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIS_WanderBetweenRooms
-  minRooms: 1
-  maxRooms: 10
-  minSleep: 3
-  maxSleep: 10
-  OnWanderStart:
-    m_PersistentCalls:
-      m_Calls: []
-  OnWanderCompleted:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8538427736269133656}
-        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
-        m_MethodName: OnWanderCompleted
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1 &867018489768579456
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,84 +30,18 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6989369875583294188}
-  - {fileID: 1129531367027361159}
-  - {fileID: 4398678187888901562}
-  - {fileID: 5002428553436339625}
   - {fileID: 2072101232030819499}
   - {fileID: 56260779162629118}
   - {fileID: 3814231526723139945}
   - {fileID: 3007012423167136059}
   - {fileID: 6529992742766248371}
+  - {fileID: 7294011076941766969}
   - {fileID: 4486039953752972746}
   - {fileID: 6588167297750537907}
   - {fileID: 7826627664349605990}
   - {fileID: 6698399995323232420}
   m_Father: {fileID: 5360604290841652880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1154420825500620997
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4398678187888901562}
-  - component: {fileID: 36289192184949634}
-  m_Layer: 11
-  m_Name: Follow Alpha
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4398678187888901562
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1154420825500620997}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6789960467342715894}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &36289192184949634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1154420825500620997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 433108a8384cf9743b254971620fc9f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIS_FollowAlpha
-  followStopDistance: 2.5
-  recalculateInterval: 1.5
-  separationDistance: 1
-  separationPushDistance: 2
-  searchDispatchTimeout: 45
-  OnFollowLost:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8538427736269133656}
-        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
-        m_MethodName: OnFollowLost
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1 &1262728172233394261
 GameObject:
   m_ObjectHideFlags: 0
@@ -300,8 +168,16 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  debug: 0
   detectionRadius: 10
   playerTooCloseDistance: 3
+  scanInterval: 0.5
+  OnPlayerSpotted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayerTooClose:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1644121939981887396
 GameObject:
   m_ObjectHideFlags: 0
@@ -639,6 +515,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  debug: 0
   patienceDecayDistance: 4
   patienceDecay: 2
   patienceDecayOnBackAway: 5
@@ -688,9 +565,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6764845774054226777}
+  - {fileID: 4243414596507914400}
   - {fileID: 6039139894191827924}
   - {fileID: 656578501418958833}
-  - {fileID: 6104163454227518577}
   - {fileID: 5095799734098723778}
   m_Father: {fileID: 5360604290841652880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -936,6 +813,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  debug: 0
   pickUpPos: {fileID: 8634228294013497961}
   dropCooldownDuration: 3
   OnItemCarried:
@@ -5847,9 +5725,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6989369875583294188}
-  - component: {fileID: 4665471481818912242}
+  - component: {fileID: 1897091908395506780}
   m_Layer: 11
-  m_Name: Wander Room
+  m_Name: Wander
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5870,7 +5748,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6789960467342715894}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4665471481818912242
+--- !u!114 &1897091908395506780
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5879,9 +5757,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 3498123862162605214}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 944b9d3c09985214d834ede7934ee7b3, type: 3}
+  m_Script: {fileID: 11500000, guid: 525591afc1fb21b41b7a1dc83f42a0cc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIS_WanderAroundRoom
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_Wander
+  minRooms: 3
+  maxRooms: 6
+  minRoomWanders: 1
+  maxRoomWanders: 4
   minSleep: 3
   maxSleep: 10
   OnWanderStart:
@@ -5889,19 +5771,7 @@ MonoBehaviour:
       m_Calls: []
   OnWanderCompleted:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8538427736269133656}
-        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
-        m_MethodName: OnWanderCompleted
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &3527599226344362840
 GameObject:
   m_ObjectHideFlags: 0
@@ -6158,13 +6028,11 @@ MonoBehaviour:
   agent: {fileID: 7835215223755380179}
   lootDropper: {fileID: 8143324799053888419}
   states:
-  - {fileID: 4665471481818912242}
-  - {fileID: 2413247349213477552}
-  - {fileID: 3180477249304640464}
-  - {fileID: 36289192184949634}
+  - {fileID: 1897091908395506780}
   - {fileID: 7133718605970597530}
   - {fileID: 7644456220787798302}
   - {fileID: 6136122223590132774}
+  - {fileID: 7215510845044104886}
   - {fileID: 2217452905688052205}
   - {fileID: 8395602400308223306}
   - {fileID: 8809746357602813789}
@@ -6175,8 +6043,8 @@ MonoBehaviour:
   - {fileID: 2825119451484950378}
   - {fileID: 7504382746723938169}
   - {fileID: 8546791208055205158}
-  - {fileID: 278039404612759641}
   - {fileID: 7436775296683710956}
+  - {fileID: 1047743277504127468}
   losBlockingLayers:
     serializedVersion: 2
     m_Bits: 951
@@ -6241,31 +6109,33 @@ MonoBehaviour:
   minLivingSFXInterval: 7
   maxLivingSFXInterval: 30
   footstepDelay: 0.5
+  footstepAggressiveDelay: 0.5
   footstepMinPitch: 0.8
   footstepMaxPitch: 1.2
-  <CurrentState>k__BackingField: {fileID: 0}
   pickUpPos: {fileID: 8634228294013497961}
   deathParticles: {fileID: 6913728265527835974}
   alphaCallSrc: {fileID: 5461227370321308843}
-  wanderIndexes: 0000000001000000
-  stareStateIndex: 2
-  followStateIndex: 3
-  pickUpStateIndex: 4
-  dropAtHomeStateIndex: 5
-  wanderHomeStateIndex: 6
-  searchStateIndex: 7
-  followPlayerStateIndex: 8
-  attackFurnitureStateIndex: 9
-  backAwayStateIndex: 10
-  stareAtPlayerNearItemStateIndex: 11
-  attackPlayerStateIndex: 12
-  minWanderCycles: 1
-  maxWanderCycles: 4
-  cyclesBeforeHomeVisit: 6
-  detectionRadius: 10
-  detectionInterval: 1
-  playerTooCloseDistance: 3
+  wanderStateIndex: 0
+  pickUpStateIndex: 1
+  dropAtHomeStateIndex: 2
+  wanderHomeStateIndex: 3
+  followLeaderStateIndex: 4
+  searchStateIndex: 5
+  followPlayerStateIndex: 6
+  attackFurnitureStateIndex: 7
+  backAwayStateIndex: 8
+  stareAtPlayerNearItemStateIndex: 9
+  attackPlayerStateIndex: 10
   playerNearItemDistance: 3
+  itemScanInterval: 1
+  minDispatchTime: 5
+  maxDispatchTime: 10
+  showDetectionRadius: 0
+  showHomeIndicator: 0
+  showStateLabel: 0
+  showCarriedItem: 0
+  showAlphaStatus: 0
+  showPatience: 0
 --- !u!114 &3384841598755132090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6282,7 +6152,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  audioSource: {fileID: 0}
+  audioSource: {fileID: 1494402149528632572}
   sfxGroups:
   - Event: 0
     Clips:
@@ -6515,6 +6385,58 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!1 &5304538593513993200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7294011076941766969}
+  - component: {fileID: 7215510845044104886}
+  m_Layer: 11
+  m_Name: Follow Leader
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7294011076941766969
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5304538593513993200}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6789960467342715894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7215510845044104886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5304538593513993200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 433108a8384cf9743b254971620fc9f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_FollowAlpha
+  followStopDistance: 2
+  recalculateInterval: 0.5
+  separationRadius: 2.5
+  separationPushForce: 3
+  searchDispatchTimeout: 45
+  OnFollowLost:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5372730375037458790
 GameObject:
   m_ObjectHideFlags: 0
@@ -6549,56 +6471,6 @@ Transform:
   - {fileID: 3432637646198873504}
   m_Father: {fileID: 5360604290841652880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &5455263902634458137
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6104163454227518577}
-  - component: {fileID: 278039404612759641}
-  m_Layer: 11
-  m_Name: Home Module
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &6104163454227518577
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5455263902634458137}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4395917646699880044}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &278039404612759641
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5455263902634458137}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f67cf52d1e0cd914e920674ecb33c115, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIModule_Home
-  syncMethod: 0
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  homeDistanceFraction: 0.5
-  homeDistanceTolerance: 0.2
 --- !u!1 &5463313185492510547
 GameObject:
   m_ObjectHideFlags: 0
@@ -6676,7 +6548,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!1 &5739359130965052901
+--- !u!1 &6007962773381850353
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6684,60 +6556,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5002428553436339625}
-  - component: {fileID: 3180477249304640464}
+  - component: {fileID: 4243414596507914400}
+  - component: {fileID: 1047743277504127468}
   m_Layer: 11
-  m_Name: Stare
+  m_Name: Home Module
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5002428553436339625
+--- !u!4 &4243414596507914400
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5739359130965052901}
+  m_GameObject: {fileID: 6007962773381850353}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6789960467342715894}
+  m_Father: {fileID: 4395917646699880044}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3180477249304640464
+--- !u!114 &1047743277504127468
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5739359130965052901}
+  m_GameObject: {fileID: 6007962773381850353}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 181ce9610ef71de40a86a5032defd7fc, type: 3}
+  m_Script: {fileID: 11500000, guid: f67cf52d1e0cd914e920674ecb33c115, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIS_StareAtVortex
-  minStareDuration: 1.5
-  maxStareDuration: 3.5
-  turnSpeed: 5
-  OnStareDecisionMade:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8538427736269133656}
-        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
-        m_MethodName: OnStareDecisionMade
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  m_EditorClassIdentifier: Assembly-CSharp::AIModule_Home
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  debug: 0
+  homeDistanceFraction: 0.5
+  homeDistanceTolerance: 0.2
 --- !u!1 &6788792008377803996
 GameObject:
   m_ObjectHideFlags: 0
@@ -7137,6 +6998,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  debug: 0
 --- !u!1 &8127432277328215330
 GameObject:
   m_ObjectHideFlags: 0
@@ -7192,19 +7054,7 @@ MonoBehaviour:
       m_Calls: []
   OnHomeVisitComplete:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8538427736269133656}
-        m_TargetAssemblyTypeName: VortexAI, Assembly-CSharp
-        m_MethodName: OnArrivedAtHome
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   OnArrivedAtHome:
     m_PersistentCalls:
       m_Calls:

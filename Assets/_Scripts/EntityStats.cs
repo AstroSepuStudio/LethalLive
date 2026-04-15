@@ -110,7 +110,6 @@ public class EntityStats : NetworkBehaviour
     [Server]
     public virtual void ReceiveAttack(AttackEvent source)
     {
-        PlaySFX(SFXEvent.TakeDamage);
         ApplyDamage(source);
         ApplyKnock(source);
     }
@@ -123,6 +122,8 @@ public class EntityStats : NetworkBehaviour
 
         if (currentHP <= 0f)
             HandleDeath(source);
+        else
+            PlaySFX(SFXEvent.TakeDamage);
     }
 
     protected virtual void OnHPChanged(float oldVal, float newVal) { }

@@ -18,6 +18,7 @@ public class AIModule_Patience : AIModule
 
     float patience;
     float maxPatience;
+    bool tickSuppressed;
 
     public UnityEvent OnPatienceExhausted;
 
@@ -30,33 +31,6 @@ public class AIModule_Patience : AIModule
     public override void OnModuleTick(AIBrain brain)
     {
         if (patience <= 0f) return;
-        Tick(brain);
-    }
-
-    public void Drain(float amount)
-    {
-        patience -= amount;
-        if (patience <= 0f)
-        {
-            patience = 0f;
-            OnPatienceExhausted?.Invoke();
-        }
-    }
-
-    public void DrainOnBackAway() => Drain(patienceDecayOnBackAway);
-    public void DrainOnItemStolen() => Drain(patienceDecayOnItemStolen);
-
-    public void Restore(float fraction = 1f)
-    {
-        patience = maxPatience * Mathf.Clamp01(fraction);
-    }
-
-    public void SuppressTick(bool suppressed) => tickSuppressed = suppressed;
-
-    bool tickSuppressed;
-
-    void Tick(AIBrain brain)
-    {
         if (tickSuppressed) return;
 
         if (!brain.TryGetModule<AIModule_Senses>(out var senses)) return;
@@ -76,10 +50,24 @@ public class AIModule_Patience : AIModule
         }
     }
 
-    void AssignPersonality()
+    public void Drain(float amount)
     {
-        AssignPersonalityFromValue(Random.Range(0, 100));
+        patience -= amount;
+        if (patience <= 0f)
+        {
+            patience = 0f;
+            OnPatienceExhausted?.Invoke();
+        }
     }
+
+    public void DrainOnBackAway() => Drain(patienceDecayOnBackAway);
+    public void DrainOnItemStolen() => Drain(patienceDecayOnItemStolen);
+
+    public void Restore(float fraction = 1f) => patience = maxPatience * Mathf.Clamp01(fraction);
+
+    public void SuppressTick(bool suppressed) => tickSuppressed = suppressed;
+
+    void AssignPersonality() => AssignPersonalityFromValue(Random.Range(0, 100));
 
     public void AssignPersonalityFromValue(int value)
     {
@@ -100,5 +88,13 @@ public class AIModule_Patience : AIModule
         };
 
         patience = maxPatience;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!debug) return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, patienceDecayDistance);
     }
 }

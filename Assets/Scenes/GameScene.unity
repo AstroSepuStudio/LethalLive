@@ -14,7 +14,7 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 1
+  m_Fog: 0
   m_FogColor: {r: 0, g: 0, b: 0, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.01
@@ -30616,6 +30616,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 628936475}
   m_CullTransparentMesh: 1
+--- !u!1 &634936957
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 634936958}
+  - component: {fileID: 634936959}
+  m_Layer: 0
+  m_Name: Vortex Pack
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &634936958
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 634936957}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1410324980}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &634936959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 634936957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78e15be8d9accaa458818700df80d129, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VortexPack
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  homeDistanceFraction: 0.5
+  homeDistanceTolerance: 0.2
+  minGroupSize: 2
+  maxGroupSize: 3
+  minExploreDuration: 30
+  maxExploreDuration: 120
 --- !u!1 &636772229
 GameObject:
   m_ObjectHideFlags: 0
@@ -48302,7 +48356,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1041155638
 Transform:
   m_ObjectHideFlags: 0
@@ -69716,6 +69770,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 634936958}
   - {fileID: 1041155638}
   - {fileID: 1348597483}
   - {fileID: 1993879864}
@@ -69798,6 +69853,18 @@ MonoBehaviour:
       - m_Target: {fileID: 1041155639}
         m_TargetAssemblyTypeName: DynamicOcclusionCulling, Assembly-CSharp
         m_MethodName: RebuildValidAdjacency
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 634936959}
+        m_TargetAssemblyTypeName: VortexPack, Assembly-CSharp
+        m_MethodName: OnDungeonGenerated
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

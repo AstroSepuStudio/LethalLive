@@ -61,7 +61,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6904307905412923327}
   - {fileID: 1124999468810632343}
   - {fileID: 5297138192835472946}
   - {fileID: 6290660678466395446}
@@ -402,8 +401,7 @@ MonoBehaviour:
   agent: {fileID: 7835215223755380179}
   lootDropper: {fileID: 8143324799053888419}
   states:
-  - {fileID: 3613604061096923927}
-  - {fileID: 5101702752431421634}
+  - {fileID: 5769727936410784272}
   - {fileID: 3180775965182727455}
   - {fileID: 3532059472417496517}
   modules:
@@ -449,28 +447,32 @@ MonoBehaviour:
   - Event: 5
     Loudness: 0
     Clips:
-    - {fileID: 11400000, guid: 33111f7a4faec594fae34f4b718ed09a, type: 2}
+    - {fileID: 11400000, guid: b329eebce9ec1eb41b055fb495b4a45e, type: 2}
+    - {fileID: 11400000, guid: 6eee321314380c64dad1cfdb7a3353c1, type: 2}
+    - {fileID: 11400000, guid: fcbeb9b6d9855684a9d08d737d9f5281, type: 2}
+    - {fileID: 11400000, guid: f58aac097010042479bd25fd2dba79b8, type: 2}
+    - {fileID: 11400000, guid: 704258d9b274bce40a3861dd0772e59f, type: 2}
   - Event: 8
     Loudness: 0
     Clips:
     - {fileID: 11400000, guid: eb158bc30396fcc48815f0de5721aaad, type: 2}
+    - {fileID: 11400000, guid: be4a069b21736ec4aa15b02637923b97, type: 2}
   - Event: 7
     Loudness: 0
     Clips:
     - {fileID: 11400000, guid: 1074e567db11cf041b75753c41d7ccf5, type: 2}
   minLivingSFXInterval: 7
   maxLivingSFXInterval: 30
-  footstepDelay: 0.5
+  footstepDelay: 1
+  footstepAggressiveDelay: 0.5
   footstepMinPitch: 0.8
   footstepMaxPitch: 1.2
   <CurrentState>k__BackingField: {fileID: 0}
-  wanderIndexes: 0000000001000000
-  investigateStateIndex: 2
-  lungeStateIndex: 3
-  minWanderCycles: 1
-  maxWanderCycles: 4
-  minWCAfterInvest: 3
-  maxWCAfterInvest: 6
+  wanderStateIndex: 0
+  investigateStateIndex: 1
+  lungeStateIndex: 2
+  maxPatience: 2
+  patienceRestoreTime: 30
 --- !u!114 &3384841598755132090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -487,15 +489,15 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  audioSource: {fileID: 0}
+  audioSource: {fileID: 8635128664098079231}
   sfxGroups:
   - Event: 0
     Clips:
-    - {fileID: 11400000, guid: c461dc5697803ab4bbdbf29e6d5a9685, type: 2}
+    - {fileID: 11400000, guid: 21ec0f1b8de9f5f48881ce51580061e2, type: 2}
     Loudness: 0
   - Event: 2
     Clips:
-    - {fileID: 11400000, guid: e2d5a126ae584044785803b4c21d831c, type: 2}
+    - {fileID: 11400000, guid: d9a56b421b2b94848a709cca4a68b2d1, type: 2}
     Loudness: 0
   knockRecoveryDelay: 0
   knockRecoveryRate: 0
@@ -635,7 +637,7 @@ MonoBehaviour:
   roamRadius: 5
   minRoamSleep: 1.5
   maxRoamSleep: 3.5
-  alertCooldown: 3
+  alertCooldown: 6
   alertsBeforeLunge: 3
   CompletedInvestigation:
     m_PersistentCalls:
@@ -725,10 +727,10 @@ MonoBehaviour:
   minSlideDur: 0.75
   maxSlideDur: 1.4
   rayRecalcTime: 0.2
-  slideDeceleration: 0.4
+  slideDeceleration: 0.3
+  huntRecalcDelay: 0.1
   recoveryDuration: 0.8
-  playerDetectRadius: 20
-  playerHuntChance: 0.3
+  playerHuntChance: 0.2
   randomSlideRadius: 8
   triggerCaster: {fileID: 8249654056597382895}
   rb: {fileID: 7644718641583359206}
@@ -756,9 +758,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1124999468810632343}
-  - component: {fileID: 3613604061096923927}
+  - component: {fileID: 5769727936410784272}
   m_Layer: 10
-  m_Name: Wander Between Rooms
+  m_Name: Wander
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -779,7 +781,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6789960467342715894}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3613604061096923927
+--- !u!114 &5769727936410784272
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -788,11 +790,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4896520626718442327}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f232b74a45ed722498cc7196b2ba3782, type: 3}
+  m_Script: {fileID: 11500000, guid: 525591afc1fb21b41b7a1dc83f42a0cc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIS_WanderBetweenRooms
+  m_EditorClassIdentifier: Assembly-CSharp::AIS_Wander
   minRooms: 1
-  maxRooms: 5
+  maxRooms: 3
+  minRoomWanders: 1
+  maxRoomWanders: 4
   minSleep: 3
   maxSleep: 10
   OnWanderStart:
@@ -800,19 +804,7 @@ MonoBehaviour:
       m_Calls: []
   OnWanderCompleted:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8538427736269133656}
-        m_TargetAssemblyTypeName: SkullCrusherAI, Assembly-CSharp
-        m_MethodName: OnWanderCompleted
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &5371144291870086710
 GameObject:
   m_ObjectHideFlags: 0
@@ -861,8 +853,9 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  detectionRadius: 2
-  playerTooCloseDistance: 2
+  detectionRadius: 5
+  playerTooCloseDistance: 1
+  scanInterval: 0.5
 --- !u!1 &5415616353478311945
 GameObject:
   m_ObjectHideFlags: 0
@@ -897,70 +890,6 @@ Transform:
   - {fileID: 8590111463736297497}
   m_Father: {fileID: 5360604290841652880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &6057642696607542039
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6904307905412923327}
-  - component: {fileID: 5101702752431421634}
-  m_Layer: 10
-  m_Name: Wander Room
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &6904307905412923327
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6057642696607542039}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6789960467342715894}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5101702752431421634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6057642696607542039}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 944b9d3c09985214d834ede7934ee7b3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIS_WanderAroundRoom
-  minSleep: 3
-  maxSleep: 6
-  OnWanderStart:
-    m_PersistentCalls:
-      m_Calls: []
-  OnWanderCompleted:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8538427736269133656}
-        m_TargetAssemblyTypeName: SkullCrusherAI, Assembly-CSharp
-        m_MethodName: OnWanderCompleted
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1 &7144861409572785253
 GameObject:
   m_ObjectHideFlags: 0

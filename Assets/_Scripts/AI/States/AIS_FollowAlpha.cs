@@ -5,11 +5,14 @@ public class AIS_FollowAlpha : AIState
 {
     [SerializeField] float followStopDistance = 2f;
     [SerializeField] float recalculateInterval = 0.5f;
-    [SerializeField] float separationDistance = 1.5f;
-    [SerializeField] float separationPushDistance = 3f;
+    [SerializeField] float separationRadius = 2.5f;
+    [SerializeField] float separationPushForce = 3f;
     [SerializeField] float searchDispatchTimeout = 45f;
 
     public AIBrain AlphaTarget { get; set; }
+
+    Vector3 leaderOffset;
+    bool offsetAssigned;
 
     float recalcTimer;
     float dispatchTimer;
@@ -23,6 +26,12 @@ public class AIS_FollowAlpha : AIState
         dispatchTimer = searchDispatchTimeout;
         brain.Agent.stoppingDistance = followStopDistance;
         brain.SetIdleState(false);
+
+        if (!offsetAssigned)
+        {
+            offsetAssigned = true;
+            leaderOffset = PickOffset();
+        }
     }
 
     public override void OnUpdateState(AIBrain brain)
@@ -36,21 +45,24 @@ public class AIS_FollowAlpha : AIState
             return;
         }
 
-        float dist = Vector3.Distance(brain.transform.position, AlphaTarget.transform.position);
-
         recalcTimer -= Time.deltaTime;
         if (recalcTimer <= 0f)
         {
             recalcTimer = recalculateInterval;
 
-            if (dist < separationDistance)
+            Vector3 desiredPos = AlphaTarget.transform.position + leaderOffset;
+            float distToSlot = Vector3.Distance(brain.transform.position, desiredPos);
+            float distToLeader = Vector3.Distance(brain.transform.position, AlphaTarget.transform.position);
+
+            if (distToLeader < separationRadius * 0.5f)
             {
                 Vector3 pushDir = (brain.transform.position - AlphaTarget.transform.position).normalized;
-                brain.MoveAgent(brain.transform.position + pushDir * separationPushDistance);
+                if (pushDir == Vector3.zero) pushDir = leaderOffset.normalized;
+                brain.MoveAgent(brain.transform.position + pushDir * separationPushForce);
             }
             else
             {
-                brain.MoveAgent(AlphaTarget.transform.position);
+                brain.MoveAgent(desiredPos);
             }
         }
 
@@ -62,5 +74,12 @@ public class AIS_FollowAlpha : AIState
         brain.Agent.stoppingDistance = 0f;
         brain.Animator_.SetBool("Walk", false);
         brain.SetIdleState(true);
+    }
+
+    Vector3 PickOffset()
+    {
+        float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+        float dist = separationRadius;
+        return new Vector3(Mathf.Cos(angle) * dist, 0f, Mathf.Sin(angle) * dist);
     }
 }

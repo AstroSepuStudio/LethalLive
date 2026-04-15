@@ -61,17 +61,11 @@ public class AIS_InvestigateSound : AIState
         }
     }
 
-    public void RedirectAttention(Vector3 position, Transform source, AIBrain brain)
+    public void RedirectAttention(Vector3 position, Transform source, AIBrain brain, bool scalateRange)
     {
-        if (alertCooldownTimer > 0f)
-        {
-            BeginMovingTo(position, brain);
-            return;
-        }
-
         PlayAlert(brain);
 
-        if (alertCount >= alertsBeforeLunge)
+        if (alertCount >= alertsBeforeLunge && scalateRange)
         {
             EscalatedToLunge?.Invoke(source);
             return;
@@ -82,6 +76,8 @@ public class AIS_InvestigateSound : AIState
 
     void PlayAlert(AIBrain brain)
     {
+        if (alertCooldownTimer > 0f) return;
+
         brain.PlaySFX(AIBrain.SourceType.Default, AIBrain.SFXEvent.Alert, 1f);
         alertCooldownTimer = alertCooldown;
         alertCount++;

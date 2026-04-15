@@ -31,7 +31,6 @@ public class AIS_Lunge : AIState
     [SerializeField] float recoveryDuration = 0.8f;
 
     [Header("Player Hunt")]
-    [SerializeField] float playerDetectRadius = 12f;
     [SerializeField, Range(0f, 1f)] float playerHuntChance = 0.3f;
 
     [Header("Random Slide")]
@@ -192,8 +191,8 @@ public class AIS_Lunge : AIState
         if (currentSlideType == SlideType.Walk)
         {
             huntRecalcTimer -= Time.deltaTime;
-            if (huntRecalcTimer < 0) 
-            { 
+            if (huntRecalcTimer < 0)
+            {
                 brain.MoveAgent(TargetSource.position);
                 huntRecalcTimer = huntRecalcDelay;
             }
@@ -230,8 +229,18 @@ public class AIS_Lunge : AIState
         }
         else
         {
-            TargetSource = null;
-            TargetPosition = GetRandomNearLocation();
+            PlayerData player = brain.GetModule<AIModule_Senses>().GetClosestSeenPlayer(brain);
+            if (player != null)
+            {
+                TargetSource = player.transform;
+                TargetPosition = player.transform.position;
+                lastKnownLocation = TargetPosition;
+            }
+            else
+            {
+                TargetSource = null;
+                TargetPosition = GetRandomNearLocation();
+            }
         }
 
         EnterWindup(brain, playWarning: false);
@@ -287,7 +296,8 @@ public class AIS_Lunge : AIState
 
         if (Random.value < playerHuntChance)
         {
-            PlayerData player = FindNearestPlayer(brain);
+            var senses = brain.GetModule<AIModule_Senses>();
+            PlayerData player = senses?.GetClosestSeenPlayer(brain);
             if (player != null)
             {
                 TargetSource = player.transform;
@@ -356,23 +366,6 @@ public class AIS_Lunge : AIState
             brain.transform.rotation,
             Quaternion.LookRotation(dir.normalized),
             speed * Time.deltaTime);
-    }
-
-    PlayerData FindNearestPlayer(AIBrain brain)
-    {
-        Collider[] hits = Physics.OverlapSphere(brain.transform.position, playerDetectRadius);
-        PlayerData closest = null;
-        float closestDist = float.MaxValue;
-
-        foreach (var hit in hits)
-        {
-            if (!hit.CompareTag("Player")) continue;
-            if (!hit.TryGetComponent<PlayerData>(out var p)) continue;
-            float d = Vector3.Distance(brain.transform.position, p.transform.position);
-            if (d < closestDist) { closestDist = d; closest = p; }
-        }
-
-        return closest;
     }
 
     Vector3 GetRandomNearLocation()

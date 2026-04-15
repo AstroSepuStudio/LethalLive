@@ -6,7 +6,7 @@ public class AIModule_Home : AIModule
     [SerializeField] float homeDistanceFraction = 0.5f;
     [SerializeField] float homeDistanceTolerance = 0.2f;
 
-    public RoomData HomeRoom { get; private set; }
+    private RoomData HomeRoom;
 
     readonly HashSet<ItemBase> homeItems = new();
 

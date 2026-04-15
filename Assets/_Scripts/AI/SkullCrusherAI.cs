@@ -1,29 +1,32 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SkullCrusherAI : AIBrain, IHearingListener
 {
     [Header("State Indexes")]
-    [SerializeField] int[] wanderIndexes;
+    [SerializeField] int wanderStateIndex = 0;
     [SerializeField] int investigateStateIndex = 1;
     [SerializeField] int lungeStateIndex = 2;
 
-    [Header("Wander Cycling")]
-    [SerializeField] int minWanderCycles = 1;
-    [SerializeField] int maxWanderCycles = 4;
-    [SerializeField] int minWCAfterInvest = 3;
-    [SerializeField] int maxWCAfterInvest = 6;
-    int targetWanCycles = 0;
-    int curWanCycles = 0;
-    int curWanIndex = 0;
-    int totalWanCycles = 0;
+    [Header("Patience")]
+    [SerializeField] int maxPatience = 2;
+    [SerializeField] float patienceRestoreTime = 30f;
+    int patience = 0;
+    float patienceTimer = 0;
 
-    readonly Dictionary<SoundLoudness, float> lungeThreshold = new()
+    readonly System.Collections.Generic.Dictionary<SoundLoudness, float> lungeThreshold = new()
     {
         { SoundLoudness.Quiet,   2.5f  },
         { SoundLoudness.Average, 7.5f },
         { SoundLoudness.Loud,    15f },
         { SoundLoudness.Global,  100f }
+    };
+
+    readonly System.Collections.Generic.Dictionary<SoundLoudness, float> invScalateThreshold = new()
+    {
+        { SoundLoudness.Quiet,   3.5f  },
+        { SoundLoudness.Average, 11f },
+        { SoundLoudness.Loud,    24f },
+        { SoundLoudness.Global,  50f }
     };
 
     AIS_InvestigateSound investigateState;
@@ -35,7 +38,6 @@ public class SkullCrusherAI : AIBrain, IHearingListener
 
         if (!isServer) return;
 
-        targetWanCycles = Random.Range(minWanderCycles, maxWanderCycles);
         SetStates();
         HearingEventBroadcaster.Instance.AddListener(this);
     }
@@ -44,6 +46,14 @@ public class SkullCrusherAI : AIBrain, IHearingListener
     {
         base.OnDestroy();
         if (isServer) HearingEventBroadcaster.Instance.RemoveListener(this);
+    }
+
+    protected override void OnTick()
+    {
+        base.OnTick();
+
+        if (patienceTimer > 0) patienceTimer -= GameTick.TickRate;
+        if (patienceTimer <= 0) patience = 0;
     }
 
     void SetStates()
@@ -68,9 +78,17 @@ public class SkullCrusherAI : AIBrain, IHearingListener
         Transform source = soundEvent.source != null ? soundEvent.source.transform : null;
 
         if (dist <= threshold || IsInLungeState())
-            HandleLungeSound(soundEvent.position, source);
+        {
+            if (patience >= maxPatience)
+                HandleLungeSound(soundEvent.position, source);
+            patience++;
+            patienceTimer = patienceRestoreTime;
+        }
         else
-            HandleInvestigateSound(soundEvent.position, source);
+        {
+            invScalateThreshold.TryGetValue(soundEvent.category, out threshold);
+            HandleInvestigateSound(soundEvent.position, source, dist <= threshold);
+        }
     }
 
     void HandleLungeSound(Vector3 position, Transform source)
@@ -95,10 +113,10 @@ public class SkullCrusherAI : AIBrain, IHearingListener
         }
     }
 
-    void HandleInvestigateSound(Vector3 position, Transform source)
+    void HandleInvestigateSound(Vector3 position, Transform source, bool escalateRange)
     {
         if (IsInInvestigateState())
-            investigateState.RedirectAttention(position, source, this);
+            investigateState.RedirectAttention(position, source, this, escalateRange);
         else
             TriggerInvestigate(position);
     }
@@ -125,43 +143,9 @@ public class SkullCrusherAI : AIBrain, IHearingListener
     bool IsInInvestigateState() => investigateState != null && CurrentState == states[investigateStateIndex];
     bool IsInLungeState() => lungeState != null && CurrentState == states[lungeStateIndex];
 
-    bool IsInWanderState()
-    {
-        if (CurrentState == null) return false;
+    public void ResumeWander() => SetState(states[wanderStateIndex]);
 
-        if (wanderIndexes == null) return false;
-        foreach (int idx in wanderIndexes)
-            if (idx < states.Length && CurrentState == states[idx]) return true;
-        return false;
-    }
-
-    public void ResumeWander()
-    {
-        if (wanderIndexes == null || wanderIndexes.Length == 0) return;
-        SetState(states[wanderIndexes[curWanIndex]]);
-    }
-
-    public void OnWanderCompleted()
-    {
-        curWanCycles++;
-        totalWanCycles++;
-
-        if (curWanCycles < targetWanCycles) return;
-
-        curWanCycles = 0;
-        targetWanCycles = Random.Range(minWanderCycles, maxWanderCycles);
-        curWanIndex = (curWanIndex + 1) % wanderIndexes.Length;
-
-        SetState(states[wanderIndexes[curWanIndex]]);
-    }
-
-    public void OnInvestigationCompleted()
-    {
-        curWanIndex = 1;
-        curWanCycles = 0;
-        targetWanCycles = Random.Range(minWCAfterInvest, maxWCAfterInvest);
-        ResumeWander();
-    }
+    public void OnInvestigationCompleted() => ResumeWander();
 
     public void OnInvestigationEscalated(Transform source)
     {
@@ -182,5 +166,17 @@ public class SkullCrusherAI : AIBrain, IHearingListener
         AttackEvent attack = AttackEvent.From(entityStats, target, attackStat);
         target.ReceiveAttack(attack);
         Debug.Log("Attacking");
+    }
+
+    public override void OnAgentHurt(AttackEvent source)
+    {
+        if (!IsInLungeState())
+            TriggerLunge(source.Position, source.SourceStats.transform);
+    }
+
+    public override void OnAgentDeath(AttackEvent source)
+    {
+        base.OnAgentDeath(source);
+        isDying = true;
     }
 }

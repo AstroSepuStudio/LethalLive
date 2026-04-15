@@ -65,6 +65,8 @@ public class AIBrain : NetworkBehaviour
 
     [SerializeField] protected LootDrop[] lootPool;
 
+    protected bool aggressive;
+
     [Header("Idle")]
     [SerializeField] IdleAnimationTrigger[] idleTriggers;
     [SerializeField] float minIdleCD = 6f;
@@ -79,6 +81,7 @@ public class AIBrain : NetworkBehaviour
     [SerializeField] float minLivingSFXInterval = 7f;
     [SerializeField] float maxLivingSFXInterval = 30f;
     [SerializeField] float footstepDelay = 0.5f;
+    [SerializeField] float footstepAggressiveDelay = 0.5f;
     [SerializeField] float footstepMinPitch = 0.9f;
     [SerializeField] float footstepMaxPitch = 1.1f;
     protected bool stayQuiet = false;
@@ -101,7 +104,7 @@ public class AIBrain : NetworkBehaviour
         return result != null;
     }
 
-    void RegisterModules()
+    protected virtual void RegisterModules()
     {
         moduleMap.Clear();
         foreach (var m in modules)
@@ -114,7 +117,8 @@ public class AIBrain : NetworkBehaviour
     public string Prefix => $"[AIBrain ({gameObject.name})]";
     public LootDrop[] GetLootPool() => lootPool;
 
-    [field: SerializeField] protected AIState CurrentState { get; private set; }
+    //[field: SerializeField] protected AIState CurrentState { get; private set; }
+    public AIState CurrentState { get; private set; }
     protected bool isDying;
 
     public NavMeshAgent Agent => agent;
@@ -178,9 +182,6 @@ public class AIBrain : NetworkBehaviour
 
         CurrentState.OnUpdateState(this);
 
-        foreach (var m in moduleMap.Values)
-            m.OnModuleTick(this);
-
         TickFootstep();
     }
 
@@ -188,6 +189,9 @@ public class AIBrain : NetworkBehaviour
     {
         if (isDying) return;
         TickLivingSFX();
+
+        foreach (var m in moduleMap.Values)
+            m.OnModuleTick(this);
 
         if (!isIdle) return;
         if (idleTriggers == null || idleTriggers.Length == 0) return;
@@ -225,10 +229,13 @@ public class AIBrain : NetworkBehaviour
             return;
         }
 
+        if (aggressive && footstepTimer > footstepAggressiveDelay) 
+            footstepTimer = footstepAggressiveDelay;
+
         footstepTimer -= Time.deltaTime;
         if (footstepTimer > 0f) return;
 
-        footstepTimer = footstepDelay;
+        footstepTimer = aggressive ? footstepAggressiveDelay : footstepDelay;
         float pitch = Random.Range(footstepMinPitch, footstepMaxPitch);
         PlaySFX(SourceType.Footstep, SFXEvent.Footstep, pitch);
     }
@@ -307,6 +314,7 @@ public class AIBrain : NetworkBehaviour
 
     public virtual void SetAggressive(bool aggressive)
     {
+        this.aggressive = aggressive;
         animator.SetBool("Aggressive", aggressive);
     }
 

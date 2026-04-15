@@ -98,7 +98,7 @@ public class RoomData : MonoBehaviour
             entry.Footprint.y * cellSize + yOffset,
             entry.Footprint.z * cellSize);
 
-        cellSize *= 0.8f;
+        cellSize *= 0.35f;
         float x = UnityEngine.Random.Range(-cellSize, cellSize);
         float z = UnityEngine.Random.Range(-cellSize, cellSize);
         Vector3 candidate = cellOrigin + new Vector3(x, 0f, z);

@@ -41,6 +41,7 @@ public class AIS_WanderAroundHome : AIState
             brain.SetIdleState(true);
 
             bool isAlpha = brain.TryGetModule<AIModule_Alpha>(out var alpha) && alpha.IsActingAsAlpha;
+            if (brain is VortexAI vai) isAlpha = vai.IsAlpha;
 
             if (!isAlpha && wanderCount >= maxWandersBeforeLeaving)
                 OnHomeVisitComplete?.Invoke();
@@ -49,7 +50,7 @@ public class AIS_WanderAroundHome : AIState
         sleepTimer -= Time.deltaTime;
         if (sleepTimer <= 0f)
         {
-            if (!arrived)
+            if (!arrived && !moving)
             {
                 arrived = true;
                 OnArrivedAtHome?.Invoke();
@@ -74,7 +75,7 @@ public class AIS_WanderAroundHome : AIState
     void MoveToRandomHomePosition(AIBrain brain)
     {
         var home = brain.GetModule<AIModule_Home>();
-        RoomData homeRoom = home?.HomeRoom;
+        RoomData homeRoom = home?.GetEffectiveHome();
         if (homeRoom == null) return;
         brain.SetIdleState(false);
 

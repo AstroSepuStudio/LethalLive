@@ -52,7 +52,7 @@ public class IA_HurtboxAttack : ItemAction
         if (isServer) item.InUse = false;
         hurtbox.DisableHitbox();
 
-        if (forceAim)
+        if (forceAim && item.PData != null)
             item.PData.Camera_Movement.StopForcePlayerToAim();
     }
 }
