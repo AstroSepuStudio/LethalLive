@@ -20,7 +20,7 @@ Suit up, raid the liminal hallways, and bring back enough cash to avoid being di
 
 **Lethal Live** is a survival game where you explore the backrooms to scavenge goods, sell them, and complete a daily quota.
 
-Use the materials you find to craft **weapons, barricades, traps, ladders**, and items to help you navigate liminal spaces and get out alive.
+Careful with the unstability of the backrooms, you never know if the lights will turn off...
 
 Subscribe to different services, you can gain access to a **portable map on your tablet!**.
 
@@ -37,8 +37,9 @@ Send messages through the **global chat** or your own private **team chat**.
 ### Procedural Map Generation
 Every run generates a new layout. No two expeditions are the same.
 
-<img width="763" height="515" alt="Procedural map screenshot 1" src="https://github.com/user-attachments/assets/66982830-33d4-4c11-a652-2664040166fd" />
-<img width="770" height="501" alt="Procedural map screenshot 2" src="https://github.com/user-attachments/assets/4fea319b-257e-4317-a3a4-962406892b71" />
+<img width="1617" height="724" alt="Captura de pantalla 2026-04-18 212918" src="https://github.com/user-attachments/assets/056dff36-74e2-4f3a-8a2c-c63dc54779ea" />
+<img width="1745" height="702" alt="Captura de pantalla 2026-04-18 212938" src="https://github.com/user-attachments/assets/6d7437cc-395c-45fa-b4dc-6a4bc061feba" />
+<img width="1215" height="873" alt="Captura de pantalla 2026-04-18 213018" src="https://github.com/user-attachments/assets/99db6958-72d1-431e-8e01-d812700947b2" />
 
 ### Player Customization
 Make your operative your own before heading into the dark.
