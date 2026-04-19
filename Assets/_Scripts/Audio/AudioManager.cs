@@ -90,7 +90,7 @@ public class AudioManager : MonoBehaviour
         src.PlayOneShot(sfx.clip, finalVolume);
     }
 
-    public void PlayOneShotAndDestroy(Vector3 position, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
+    public void PlayOneShotAndDestroy(Vector3 position, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.NoSound)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
@@ -101,7 +101,7 @@ public class AudioManager : MonoBehaviour
         BroadcastToHearing(position, go, sfx, category);
     }
 
-    public void PlayOneShotAndDestroy(AudioSource src, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
+    public void PlayOneShotAndDestroy(AudioSource src, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.NoSound)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
@@ -113,7 +113,7 @@ public class AudioManager : MonoBehaviour
         BroadcastToHearing(src.transform.position, go, sfx, category);
     }
 
-    public void PlayOneShot(AudioSource src, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
+    public void PlayOneShot(AudioSource src, AudioSFX sfx, GameObject goSrc = null, SoundLoudness category = SoundLoudness.NoSound)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
@@ -124,16 +124,16 @@ public class AudioManager : MonoBehaviour
         BroadcastToHearing(src.transform.position, go, sfx, category);
     }
 
-    public void PlayOneShotWithDelay(AudioSource src, AudioSFX sfx, float delay, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
+    public void PlayOneShotWithDelay(AudioSource src, AudioSFX sfx, float delay, GameObject goSrc = null, SoundLoudness category = SoundLoudness.NoSound)
         => StartCoroutine(DelayPlay(src, sfx, delay, goSrc, category));
 
-    IEnumerator DelayPlay(AudioSource src, AudioSFX sfx, float delay, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
+    IEnumerator DelayPlay(AudioSource src, AudioSFX sfx, float delay, GameObject goSrc = null, SoundLoudness category = SoundLoudness.NoSound)
     {
         yield return new WaitForSeconds(delay);
         PlayOneShot(src, sfx, goSrc, category);
     }
 
-    public void PlayOneShot(AudioSource src, AudioSFX sfx, float multiplier, GameObject goSrc = null, SoundLoudness category = SoundLoudness.Average)
+    public void PlayOneShot(AudioSource src, AudioSFX sfx, float multiplier, GameObject goSrc = null, SoundLoudness category = SoundLoudness.NoSound)
     {
         float typeVolume = GetTypeVolume(sfx.audioType);
         float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume * multiplier;

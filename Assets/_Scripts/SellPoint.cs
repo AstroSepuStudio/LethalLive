@@ -83,7 +83,7 @@ public class SellPoint : NetworkBehaviour
         currentLabel = EcoMod.TotalBalance >= EcoMod.targetQuota ? "quota met" : originalLabel;
         labelTxt.SetText(currentLabel);
 
-        UpdateBalanceText(_displayedBalance);
+        UpdateBalanceText(newValue);
     }
 
     public void RefreshBalance(PlayerTeam t, float v)
@@ -123,6 +123,8 @@ public class SellPoint : NetworkBehaviour
         string sign = balance < quota ? "<" : balance > quota ? ">" : "=";
         Color col = balance < quota ? colorBelowQuota : colorMetQuota;
 
+        Debug.Log($"[SellPoint] Balance: {balance}; Quota: {quota}");
+
         totalBalanceTxt.color = col;
         totalBalanceTxt.SetText($"${balance:0} {sign} ${quota:0}");
     }
@@ -146,10 +148,12 @@ public class SellPoint : NetworkBehaviour
 
             float t = Mathf.SmoothStep(0f, 1f, elapsed / counterRollDuration);
             _displayedBalance = Mathf.Lerp(from, to, t);
+            totalBalanceTxt.color = _displayedBalance < EcoMod.targetQuota ? colorBelowQuota : colorMetQuota;
             totalBalanceTxt.SetText($"${_displayedBalance:0}/${EcoMod.targetQuota}");
             yield return null;
         }
         _displayedBalance = to;
+        totalBalanceTxt.color = _displayedBalance < EcoMod.targetQuota ? colorBelowQuota : colorMetQuota;
         totalBalanceTxt.SetText($"${to:0}/${EcoMod.targetQuota}");
     }
 

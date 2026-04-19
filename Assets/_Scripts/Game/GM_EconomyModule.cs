@@ -44,6 +44,7 @@ public class GM_EconomyModule : NetworkBehaviour
     {
         base.OnStartServer();
 
+        ResetEconomy();
         SetNewQuota();
     }
 
@@ -87,34 +88,39 @@ public class GM_EconomyModule : NetworkBehaviour
 
         float remainingQuota = targetQuota;
 
-        while (remainingQuota > 0)
+        while (remainingQuota > 0 && validTeams > 0)
         {
             float evenTake = remainingQuota / validTeams;
-            Dictionary<PlayerTeam, float> teamsToRemove = new();
 
-            foreach (var pair in validBalances)
+            var keys = validBalances.Keys.ToList();
+            List<PlayerTeam> toRemove = new();
+
+            foreach (var key in keys)
             {
-                if (pair.Value >= evenTake)
+                float value = validBalances[key];
+
+                if (value >= evenTake)
                 {
-                    validBalances[pair.Key] -= evenTake;
-                    teamsBalance[pair.Key] -= evenTake;
+                    validBalances[key] -= evenTake;
+                    teamsBalance[key] -= evenTake;
                     remainingQuota -= evenTake;
                 }
                 else
                 {
-                    remainingQuota -= validBalances[pair.Key];
-                    validBalances[pair.Key] = 0;
-                    teamsBalance[pair.Key] = 0;
+                    remainingQuota -= value;
+                    validBalances[key] = 0;
+                    teamsBalance[key] = 0;
 
-                    validTeams--;
-                    teamsToRemove.Add(pair.Key, pair.Value);
+                    toRemove.Add(key);
                 }
             }
 
-            foreach (var pair in teamsToRemove)
+            foreach (var key in toRemove)
             {
-                validBalances.Remove(pair.Key);
+                validBalances.Remove(key);
             }
+
+            validTeams = validBalances.Count;
         }
     }
 

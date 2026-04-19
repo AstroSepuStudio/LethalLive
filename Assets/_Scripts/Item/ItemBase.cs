@@ -51,9 +51,11 @@ public class ItemBase : InteractableObject
     }
 
     [Server]
-    public void MultiplyValue(float multiplier)
+    public float MultiplyValue(float multiplier)
     {
+        float baseValue = ItemValue;
         ItemValue = Mathf.RoundToInt(ItemValue * multiplier);
+        return ItemValue - baseValue;
     }
 
     [Server]

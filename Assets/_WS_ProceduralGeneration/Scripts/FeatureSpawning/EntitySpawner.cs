@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
@@ -72,6 +73,8 @@ public class EntitySpawner : NetworkDungeonSpawner
 
     protected override void OnClear()
     {
+        DestroyChildren(entitySpawnerParent, true, IsServer);
+
         spawnedTransforms.Clear();
     }
 

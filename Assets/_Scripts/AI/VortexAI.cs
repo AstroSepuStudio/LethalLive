@@ -6,7 +6,7 @@ using Mirror;
 using UnityEditor;
 #endif
 
-public class VortexAI : AIBrain
+public class VortexAI : AIBrain, IHearingListener
 {
     [SerializeField] Transform pickUpPos;
     [SerializeField] ParticleSystem deathParticles;
@@ -112,6 +112,12 @@ public class VortexAI : AIBrain
 
         if (!isServer) return;
         Pack?.Register(this);
+        HearingEventBroadcaster.Instance.AddListener(this);
+    }
+
+    public void OnSoundHeard(AudioSoundEvent soundEvent)
+    {
+
     }
 
     protected override void RegisterModules()
@@ -128,7 +134,11 @@ public class VortexAI : AIBrain
     {
         base.OnDestroy();
         UnsubscribeSensesEvents();
-        if (isServer) Pack?.Unregister(this);
+        if (isServer) 
+        { 
+            Pack?.Unregister(this);
+            HearingEventBroadcaster.Instance.RemoveListener(this);
+        }
     }
 
     void CacheStates()

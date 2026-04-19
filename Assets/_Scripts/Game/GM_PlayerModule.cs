@@ -26,6 +26,7 @@ public class GM_PlayerModule : NetworkBehaviour
     public override void OnStartServer()
     {
         NetworkServer.OnDisconnectedEvent += OnServerPlayerDisconnected;
+        playersOnDungeon.Clear();
     }
 
     public override void OnStopServer()

@@ -22,9 +22,6 @@ public class GM_DayCycleModule : NetworkBehaviour
     [Header("References")]
     [SerializeField] GameObject dayCycleCanvas;
     [SerializeField] CanvasGroup dayGroupStart;
-    [SerializeField] CanvasGroup dewCanvasGroup;
-    [SerializeField] RectTransform dewInitialPos;
-    [SerializeField] RectTransform dewTargetPos;
     [SerializeField] TextMeshProUGUI dayTxt;
     [SerializeField] TextMeshProUGUI dayNum;
 
@@ -42,11 +39,6 @@ public class GM_DayCycleModule : NetworkBehaviour
     [Header("Animation")]
     [SerializeField] float dayDuration = 900;
     [SerializeField] float letterDelay = 0.35f;
-
-    [SerializeField] float dewMoveDuration = 1f;
-    [SerializeField] float dewBlinkDuration = 4f;
-    [SerializeField] float dewBlinkSpeed = 0.15f;
-    [SerializeField] float dewFadeDuration = 0.5f;
 
     [SyncVar] public int currentDay = 1;
     [SyncVar] public bool dayStarted = false;
@@ -138,7 +130,10 @@ public class GM_DayCycleModule : NetworkBehaviour
     }
 
     public void DisplayDayStart() => StartCoroutine(DisplayDayStartAnim());
-    public void DisplayDayEndWarning() => StartCoroutine(DisplayDEW());
+    public void DisplayDayEndWarning() => AlertMessagerManager.Instance.SendAlert(
+        "Watch your clock!",
+        "Return to the office. The connection will be lost at 12 PM",
+        AlertMessage.Severity.High);
 
     [Server]
     IEnumerator DayTimer()
@@ -193,6 +188,7 @@ public class GM_DayCycleModule : NetworkBehaviour
     [Server]
     public void ResetDays()
     {
+        Instance.playMod.playersOnDungeon.Clear();
         currentDay = 1;
         currentDayTime = -1;
         dayStarted = false;
@@ -262,37 +258,6 @@ public class GM_DayCycleModule : NetworkBehaviour
             yield return null;
         }
         text.color = to;
-    }
-
-    IEnumerator DisplayDEW()
-    {
-        AudioManager.Instance.PlayOneShot(audioSource, dewSFX);
-        dayCycleCanvas.SetActive(true);
-        dewCanvasGroup.alpha = 0.5f;
-        ((RectTransform)dewCanvasGroup.transform).anchoredPosition = dewInitialPos.anchoredPosition;
-
-        LeanTween.move((RectTransform)dewCanvasGroup.transform, dewTargetPos.anchoredPosition, dewMoveDuration)
-                 .setEase(LeanTweenType.easeOutQuad);
-
-        float blinkTimer = 0f;
-        bool blinkUp = true;
-        while (blinkTimer < dewBlinkDuration)
-        {
-            float blinkTarget = blinkUp ? 0.5f : 0.3f;
-            dewCanvasGroup.alpha = Mathf.MoveTowards(dewCanvasGroup.alpha, blinkTarget, Time.deltaTime * dewBlinkSpeed);
-
-            if (Mathf.Approximately(dewCanvasGroup.alpha, blinkTarget))
-                blinkUp = !blinkUp;
-
-            blinkTimer += Time.deltaTime;
-            yield return null;
-        }
-
-        LeanTween.alphaCanvas(dewCanvasGroup, 0f, dewFadeDuration).setEase(LeanTweenType.easeInQuad);
-
-        yield return new WaitForSeconds(dewFadeDuration);
-
-        dayCycleCanvas.SetActive(false);
     }
 
     public string GetFormatedTime()

@@ -34,6 +34,7 @@ public class GameManager : NetworkBehaviour
     [Server] public void SetSeed(int seed) => Seed = seed;
 
     public bool debug = false;
+    public bool onDeadTime = false;
 
     private void Awake()
     {
@@ -79,20 +80,22 @@ public class GameManager : NetworkBehaviour
 
     IEnumerator QuotaCompletionSequence()
     {
+        onDeadTime = true;
         Debug.Log("Quota completed");
 
         yield return null;
 
         dngMod.CloseDungeon();
-        dngMod.ResetCooldown();
         playMod.ReviveAllPlayers();
         StopMusic();
 
         dayMod.currentDay++;
+        onDeadTime = false;
     }
 
     IEnumerator QuotaNotMetSequence()
     {
+        onDeadTime = true;
         Debug.Log("Quota not completed");
         yield return null;
 
@@ -100,27 +103,28 @@ public class GameManager : NetworkBehaviour
         dayMod.ResetDays();
         ecoMod.ResetEconomy();
         dngMod.CloseDungeon();
-        dngMod.ResetCooldown();
 
         yield return new WaitForSeconds(6f);
 
         StopMusic();
         playMod.ReviveAllPlayers();
+        onDeadTime = false;
     }
 
     IEnumerator ResetGameSequence()
     {
+        onDeadTime = true;
         yield return new WaitForSeconds(5f);
 
         dayMod.ResetDays();
         ecoMod.ResetEconomy();
         dngMod.CloseDungeon();
-        dngMod.ResetCooldown();
 
         yield return new WaitForSeconds(5f);
 
         StopMusic();
         playMod.ReviveAllPlayers();
+        onDeadTime = false;
     }
 
     [ClientRpc]

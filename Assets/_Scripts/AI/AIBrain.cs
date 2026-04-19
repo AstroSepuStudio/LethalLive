@@ -335,7 +335,7 @@ public class AIBrain : NetworkBehaviour
     }
 
     public void ResetSpeed() => agent.speed = entityStats.speed;
-    public void MoveAgent(Vector3 position) => agent.SetDestination(position);
+    public void MoveAgent(Vector3 position) { if (agent.enabled) agent.SetDestination(position); }
     public void StopAgentMovement() => agent.isStopped = true;
     public void ResumeAgentMovement() => agent.isStopped = false;
     public void DisableAgent() => agent.enabled = false;

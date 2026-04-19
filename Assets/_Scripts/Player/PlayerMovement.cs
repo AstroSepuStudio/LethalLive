@@ -559,12 +559,12 @@ public class PlayerMovement : NetworkBehaviour
         if (srcindex == 1)
         {
             volMult = walkVolMult;
-            loudness = SoundLoudness.Average;
+            loudness = SoundLoudness.Moderate;
         }
         else
         {
             volMult = sprintVolMult;
-            loudness = SoundLoudness.Loud;
+            loudness = SoundLoudness.Average;
         }
 
         AudioManager.Instance.PlayOneShot(GetAudioSourceByIndex(srcindex), footsteps[sfxindex], volMult, gameObject, loudness);

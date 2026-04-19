@@ -1570,6 +1570,17 @@ MonoBehaviour:
   maxRotation: 0
   chance: 5
   tries: 3
+  snapToSurface: 0
+  snapDirections: 05000000
+  snapMaxDistance: 2
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4083
+  snapSurfaceOffset: 0
+  alignToNormal: 0
+  useSpecificNormalDirection: 0
+  normalAlignDirection: 5
+  prefabUpAxis: 4
 --- !u!1 &5648828027698496584
 GameObject:
   m_ObjectHideFlags: 0
@@ -2352,7 +2363,6 @@ MonoBehaviour:
   Data: {fileID: 11400000, guid: 1486d5f5ec29dab46a56f4308eca3102, type: 2}
   SpawnPoints:
   - {fileID: 4911055456998207522}
-  entitySpawnerPositions: []
   roomRenderers:
   - {fileID: 1320188683045567862}
   - {fileID: 2734533666922115502}

@@ -20,6 +20,11 @@ public class InteractableObject : NetworkBehaviour
     public virtual void DisableCanvas() => canvas.DisableCanvas();
     public virtual void EnableCanvas() => canvas.EnableCanvas();
 
+    public void SetLabel(string label) => canvas.SetLabel(label);
+    public void SetDescription(string description) => canvas.SetLabel(description);
+    public void ResetLabel() => canvas.ResetLabel();
+    public void ResetDescription() => canvas.ResetDescription();
+
     private void Start()
     {
         if (canvas == null)

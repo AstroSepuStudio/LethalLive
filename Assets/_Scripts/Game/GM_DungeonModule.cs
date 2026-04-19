@@ -11,15 +11,13 @@ public class GM_DungeonModule : NetworkBehaviour
     [SerializeField] DungeonGenerator mapGenerator;
     [SerializeField] Int_Teleport teleporter;
     [SerializeField] Int_HomewardBeacon homewardBeacon;
-    [SerializeField] float generationCD = 300;
+    [SerializeField] InteractableObject dungeonOpenerInt;
 
     public UnityEvent OnDungeonOpens = new();
     public UnityEvent OnDungeonCloses = new();
     public UnityEvent<int> OnThemeChangedEv = new();
 
     public Int_HomewardBeacon HomewardBeacon => homewardBeacon;
-
-    Coroutine cooldownCor;
 
     [SyncVar(hook = nameof(SetHomewardBeaconPosition))]
     public Vector3 startRoomPos;
@@ -33,10 +31,14 @@ public class GM_DungeonModule : NetworkBehaviour
     [SyncVar]
     public bool dungeonOpen = false;
 
-    [SyncVar]
-    public float genTimer = 0;
-
     private void OnThemeChanged(int oldValue, int newValue) => OnThemeChangedEv?.Invoke(newValue);
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        dungeonOpen = false;
+    }
 
     [Server]
     public void OnEnterDungeon(PlayerData playerData)
@@ -55,7 +57,7 @@ public class GM_DungeonModule : NetworkBehaviour
     [Server]
     public void OpenDungeon()
     {
-        cooldownCor = StartCoroutine(GenerationCooldown());
+        dungeonOpenerInt.SetLabel("Close connection");
 
         OnDungeonOpens?.Invoke();
         dungeonOpen = true;
@@ -72,6 +74,8 @@ public class GM_DungeonModule : NetworkBehaviour
     [Server]
     public void CloseDungeon()
     {
+        dungeonOpenerInt.SetLabel("Open connection");
+
         OnDungeonCloses?.Invoke();
         dungeonOpen = false;
 
@@ -79,20 +83,9 @@ public class GM_DungeonModule : NetworkBehaviour
     }
 
     [Server]
-    public void ResetCooldown()
-    {
-        if (cooldownCor != null) StopCoroutine(cooldownCor);
-        genTimer = 0;
-    }
-
-    [Server]
     public void TryOpenNewDungeon()
     {
-        if (genTimer > 0)
-        {
-            Debug.Log($"Generation on cooldown {genTimer}");
-            return;
-        }
+        if (Instance.onDeadTime) return;
 
         if (!Instance.gameStarted)
             Instance.StartGame();
@@ -104,16 +97,39 @@ public class GM_DungeonModule : NetworkBehaviour
             return;
         }
 
+        if (!dungeonOpen) return;
+
         if (Instance.playMod.playersOnDungeon.Count > 0)
         {
+            AlertMessagerManager.Instance.SendAlert(
+                "comrades inside", 
+                "There is people in the liminal space", 
+                AlertMessage.Severity.Medium);
+
             Debug.Log("There is players in the liminal space");
             return;
         }
 
-        if (dungeonOpen)
-            CloseDungeon();
+        if (Instance.ecoMod.TotalBalance < Instance.ecoMod.targetQuota)
+        {
+            AlertMessagerManager.Instance.SendAlert(
+                "quota not met", 
+                "cannot close the connection until the quota has been met", 
+                AlertMessage.Severity.Medium);
+
+            Debug.Log("Quota have not been met");
+            return;
+        }
         else
-            OpenDungeon();
+        {
+            AlertMessagerManager.Instance.SendAlert(
+                "quota completed",
+                "you have completed today's quota, you can rest for now",
+                AlertMessage.Severity.Low);
+
+            Debug.Log("Quota have been met, finishing the day");
+            Instance.dayMod.FinishDay();
+        }
     }
 
     [ClientRpc]
@@ -155,18 +171,5 @@ public class GM_DungeonModule : NetworkBehaviour
     {
         Instance.dayMod.StartDay();
         mapGenerator.OnDungeonGenerated.RemoveListener(StartDay);
-    }
-
-    IEnumerator GenerationCooldown()
-    {
-        genTimer = generationCD;
-        while (genTimer > 0)
-        {
-            genTimer -= Time.deltaTime;
-            yield return null;
-        }
-        genTimer = 0;
-
-        cooldownCor = null;
     }
 }

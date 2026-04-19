@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -145,4 +146,18 @@ public abstract class DungeonSpawner : MonoBehaviour, IDungeonSpawner
     static Quaternion RandomisedRotation(DungeonSpawnPoint point) =>
         point.transform.rotation * Quaternion.Euler(
             0f, Random.Range(-point.maxRotation, point.maxRotation), 0f);
+
+    protected void DestroyChildren(Transform parent, bool hasNetID, bool isServer, bool ignoreFirst = false)
+    {
+        if (parent == null) return;
+        if (hasNetID && !isServer) return;
+
+        for (int i = parent.childCount - 1; i >= 0; i--)
+        {
+            if (i == 0 && ignoreFirst) continue;
+            var child = parent.GetChild(i).gameObject;
+            if (hasNetID) NetworkServer.Destroy(child);
+            else Destroy(child);
+        }
+    }
 }

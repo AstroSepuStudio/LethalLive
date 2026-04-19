@@ -12,7 +12,6 @@ public class DecorationSpawner : NetworkDungeonSpawner
     [Header("Decoration Spawner")]
     [SerializeField] Transform decoParent;
     [SerializeField] float baseChance = 1f;
-
     float accumulatedChance;
 
     protected override void OnCollected()
@@ -63,6 +62,11 @@ public class DecorationSpawner : NetworkDungeonSpawner
         Quaternion rot = ResolveRotation(point);
 
         NetworkSpawn(deco.Prefab, pos, rot, decoParent);
+    }
+
+    protected override void OnClear()
+    {
+        DestroyChildren(decoParent, true, IsServer);
     }
 
     protected override void OnSpawnComplete(int count) =>

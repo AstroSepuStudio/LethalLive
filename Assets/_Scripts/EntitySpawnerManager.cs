@@ -13,8 +13,8 @@ public class EntitySpawnerManager : NetworkBehaviour
     [SerializeField] float spawnChance = 0.1f;
     [SerializeField] float spawnCooldown = 10f;
 
-    readonly List<EntityStats> aliveEntities = new();
-    readonly List<EntityStats> deadEntities = new();
+    [SerializeField] List<EntityStats> aliveEntities = new();
+    [SerializeField] List<EntityStats> deadEntities = new();
 
     int TotalQ => aliveEntities.Count + deadEntities.Count;
     int MaxEntities => GameManager.Instance.progressionMod.CurrentEntityCap;
@@ -60,11 +60,15 @@ public class EntitySpawnerManager : NetworkBehaviour
             NetworkServer.Destroy(e.gameObject);
         }
 
+        aliveEntities.Clear();
+
         foreach (var e in deadEntities)
         {
             if (e == null) continue;
             NetworkServer.Destroy(e.gameObject);
         }
+
+        deadEntities.Clear();
 
         StopCoroutine(enemySpawningCoroutine);
         if (isServer) DungeonGenerator.Instance.EntityNetIds.Clear();
@@ -72,6 +76,9 @@ public class EntitySpawnerManager : NetworkBehaviour
 
     private void OnDungeonOpens()
     {
+        aliveEntities.Clear();
+        deadEntities.Clear();
+
         rng = DungeonGenerator.Instance.RNG;
         enemySpawningCoroutine = StartCoroutine(EnemySpawning());
     }

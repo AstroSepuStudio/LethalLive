@@ -57,6 +57,8 @@ public class FurnitureSpawner : NetworkDungeonSpawner
 
     protected override void OnClear()
     {
+        DestroyChildren(furnitureParent, true, IsServer);
+
         SpawnedFurniture.Clear();
         FurnitureNetIds.Clear();
         discoveredLootPoints.Clear();

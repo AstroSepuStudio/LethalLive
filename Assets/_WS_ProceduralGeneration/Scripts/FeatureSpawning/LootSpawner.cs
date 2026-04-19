@@ -17,7 +17,8 @@ public class LootSpawner : NetworkDungeonSpawner
     public List<ItemBase> SpawnedItems { get; } = new();
     public List<uint> ItemNetIds { get; } = new();
 
-    // Extra points added after furniture spawning (furniture-interior loot slots)
+    float totalItemsValue = 0f;
+
     readonly List<DungeonSpawnPoint> extraPoints = new();
 
     /// <summary>
@@ -39,10 +40,10 @@ public class LootSpawner : NetworkDungeonSpawner
 
     public override void Spawn(DungeonGenerator generator)
     {
-        // Run the normal base pass first (room-level points)
+        totalItemsValue = 0f;
+
         base.Spawn(generator);
 
-        // Then run the extra furniture-interior points
         foreach (var point in extraPoints)
         {
             for (int t = 0; t < point.tries; t++)
@@ -50,6 +51,30 @@ public class LootSpawner : NetworkDungeonSpawner
                 if (!EvaluateChance(point, generator)) continue;
                 SpawnOne(point, generator);
             }
+        }
+
+        float target = GameManager.Instance.ecoMod.targetQuota;
+        float deficit = target - totalItemsValue;
+
+        if (deficit <= 0f) return;
+
+        float multiplier = Random.Range(1f, 1.3f);
+        float adjustedTarget = target * multiplier;
+        deficit = adjustedTarget - totalItemsValue;
+
+        float totalWeight = 0f;
+        foreach (var item in SpawnedItems)
+            totalWeight += item.ItemValue;
+
+        foreach (var item in SpawnedItems)
+        {
+            float weight = item.ItemValue / totalWeight;
+            float add = deficit * weight;
+
+            int increase = Mathf.RoundToInt(add);
+            item.ItemValue += increase;
+
+            totalItemsValue += increase;
         }
     }
 
@@ -63,7 +88,6 @@ public class LootSpawner : NetworkDungeonSpawner
 
         if (item == null) return;
 
-        // Loot gets fully random rotation unlike furniture
         Quaternion rot = Quaternion.Euler(
             Random.Range(-180f, 180f),
             Random.Range(-180f, 180f),
@@ -79,6 +103,8 @@ public class LootSpawner : NetworkDungeonSpawner
 
         SpawnedItems.Add(itemBase);
         ItemNetIds.Add(ni.netId);
+
+        totalItemsValue += itemBase.ItemValue;
     }
 
     protected override void OnSpawnComplete(int count) =>
