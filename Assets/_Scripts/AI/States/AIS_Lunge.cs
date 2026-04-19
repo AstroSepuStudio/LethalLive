@@ -4,7 +4,9 @@ using UnityEngine.Events;
 public class AIS_Lunge : AIState
 {
     [Header("Active Window")]
-    [SerializeField] float activeDuration = 15f;
+    [SerializeField] float minDuration = 6f;
+    [SerializeField] float maxDuration = 12f;
+    float activeDuration;
 
     [Header("Windup")]
     [SerializeField] float minWindup = 0.3f;
@@ -86,6 +88,7 @@ public class AIS_Lunge : AIState
 
     public override void OnEnterState(AIBrain brain)
     {
+        activeDuration = Random.Range(minDuration, maxDuration);
         activeTimer = activeDuration;
         lastKnownLocation = TargetPosition;
         queuedTarget = null;

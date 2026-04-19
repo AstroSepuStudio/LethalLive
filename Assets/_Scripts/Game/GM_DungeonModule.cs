@@ -60,11 +60,13 @@ public class GM_DungeonModule : NetworkBehaviour
         OnDungeonOpens?.Invoke();
         dungeonOpen = true;
 
+        Instance.progressionMod.ApplyForDay(Instance.dayMod.currentDay);
+
         mapSeed = LobbySettings.Instance.UseSetSeed
         ? Instance.Seed
         : Random.Range(int.MinValue, int.MaxValue);
 
-        RpcGenerateMap(mapSeed, selectedTheme);
+        RpcGenerateMap(mapSeed, selectedTheme, Instance.progressionMod.CurrentMapSize);
     }
 
     [Server]
@@ -115,9 +117,9 @@ public class GM_DungeonModule : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcGenerateMap(int seed, int theme)
+    void RpcGenerateMap(int seed, int theme, int mapSize)
     {
-        mapGenerator.StartGeneration(seed, theme);
+        mapGenerator.StartGeneration(seed, theme, mapSize);
     }
 
     private void SetHomewardBeaconPosition(Vector3 oldValue, Vector3 newValue)

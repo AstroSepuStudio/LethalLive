@@ -17,7 +17,7 @@ public class EntitySpawnerManager : NetworkBehaviour
     readonly List<EntityStats> deadEntities = new();
 
     int TotalQ => aliveEntities.Count + deadEntities.Count;
-    int MaxEntities => DungeonGenerator.Instance.Theme.maxEntities;
+    int MaxEntities => GameManager.Instance.progressionMod.CurrentEntityCap;
 
     Transform[] spawnerPositions;
     Coroutine enemySpawningCoroutine;
@@ -144,8 +144,12 @@ public class EntitySpawnerManager : NetworkBehaviour
         if (position == null) return false;
 
         ThemeDataSO theme = GameManager.Instance.dngMod.ThemeDatas[GameManager.Instance.dngMod.selectedTheme];
+        var prog = GameManager.Instance.progressionMod;
 
-        ThemeDataSO.EntitySpawn spawn = theme.GetWeightedEntitySpawn(position.position, rng);
+        ThemeDataSO.EntitySpawn spawn = theme.GetWeightedEntitySpawn(
+            position.position, rng,
+            prog.CurrentMinEntityTier,
+            prog.CurrentMaxEntityTier);
 
         GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation, entityParent);
         entityObj.name = $"{spawn.entityPrefab.name} (ID: {TotalQ})";

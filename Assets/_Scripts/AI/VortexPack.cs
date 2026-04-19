@@ -95,7 +95,7 @@ public class VortexPack : NetworkBehaviour
         }
         else HomeRoom = null;
 
-        Debug.Log($"[VortexPack] Home: {(HomeRoom != null ? HomeRoom.name : "none")}");
+        //Debug.Log($"[VortexPack] Home: {(HomeRoom != null ? HomeRoom.name : "none")}");
     }
 
     public bool IsItemAtHome(ItemBase item)
@@ -189,7 +189,7 @@ public class VortexPack : NetworkBehaviour
         previous?.OnAlphaRoleRevoked();
         currentAlpha?.OnAlphaRoleGranted();
 
-        Debug.Log($"[VortexPack] Alpha -> {(currentAlpha != null ? currentAlpha.name : "none")} (a {bestVal:F0})");
+        //Debug.Log($"[VortexPack] Alpha -> {(currentAlpha != null ? currentAlpha.name : "none")} (a {bestVal:F0})");
     }
 
     [Server]
@@ -217,7 +217,7 @@ public class VortexPack : NetworkBehaviour
             i += size;
         }
 
-        Debug.Log($"[VortexPack] Dispatched {activeGroups.Count} group(s) from {available.Count} scouts.");
+        //Debug.Log($"[VortexPack] Dispatched {activeGroups.Count} group(s) from {available.Count} scouts.");
     }
 
     public void OnGroupDisbanded(VortexScoutGroup group)
@@ -322,9 +322,7 @@ public class VortexScoutGroup
 
     public void NotifyMemberArrived(VortexAI vortex)
     {
-        Debug.Log("Member arrived at home");
         if (!IsActive) return;
-        Debug.Log("Scout group is active");
         if (!allMembers.Contains(vortex)) return;
         returnedCount++;
 
@@ -332,7 +330,6 @@ public class VortexScoutGroup
         foreach (var m in allMembers)
             if (m != null) aliveCount++;
 
-        Debug.Log($"Member is part of the scout group: returned {returnedCount}/{aliveCount}");
         Disband();
     }
 

@@ -21,6 +21,7 @@ public class AudioSoundEvent
         return category switch
         {
             SoundLoudness.Quiet => 4,
+            SoundLoudness.Moderate => 8,
             SoundLoudness.Average => 16,
             SoundLoudness.Loud => 32,
             SoundLoudness.Global => Mathf.Infinity,
@@ -35,5 +36,6 @@ public enum SoundLoudness
     Quiet,
     Loud,
     Global,
-    NoSound
+    NoSound,
+    Moderate
 }

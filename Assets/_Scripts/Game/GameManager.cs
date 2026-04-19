@@ -1,6 +1,5 @@
 using Mirror;
 using Steamworks;
-using System;
 using System.Collections;
 using UnityEngine;
 
@@ -24,6 +23,7 @@ public class GameManager : NetworkBehaviour
     public GM_EconomyModule ecoMod;
     public GM_PlayerModule playMod;
     public GM_DungeonModule dngMod;
+    public GM_DayProgressionModule progressionMod;
 
     [SyncVar]
     public bool gameStarted = false;

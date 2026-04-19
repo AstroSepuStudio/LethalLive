@@ -41,7 +41,10 @@ public class ItemHurtbox : NetworkBehaviour
 
     [ClientRpc]
     void RpcPlayHitSFX(int index)
-        => AudioManager.Instance.PlayOneShot(audioSource, hitSFX[index], itemAction.Item.PData.gameObject, loudness);
+    {
+        if (isServer) return;
+        AudioManager.Instance.PlayOneShot(audioSource, hitSFX[index], itemAction.Item.PData.gameObject, loudness);
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -50,13 +53,16 @@ public class ItemHurtbox : NetworkBehaviour
         if (other.gameObject == itemAction.Item.PData.gameObject) return;
         if (hitEntities.Contains(other.gameObject)) return;
 
-        if (!other.TryGetComponent(out EntityStats target)) return;
-
         if ((Time.time - lastHitTime) > 0.5f)
         {
             lastHitTime = Time.time;
-            RpcPlayHitSFX(Random.Range(0, hitSFX.Length));
+
+            int index = Random.Range(0, hitSFX.Length);
+            AudioManager.Instance.PlayOneShot(audioSource, hitSFX[index], itemAction.Item.PData.gameObject, loudness);
+            RpcPlayHitSFX(index);
         }
+
+        if (!other.TryGetComponent(out EntityStats target)) return;
 
         target.ReceiveAttack(AttackEvent.From(itemAction.Item.PData, target, itemAction.AttackStat));
         hitEntities.Add(other.gameObject);

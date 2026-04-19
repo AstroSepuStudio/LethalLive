@@ -190,11 +190,11 @@ MonoBehaviour:
   center: {x: 0, y: 0.675, z: 0}
   dropArea: {x: 0.55, y: 0.375, z: 0.55}
   lootPositions:
-  - {fileID: 3585220547248472665}
-  - {fileID: 9015756370931014388}
-  - {fileID: 3726172536971079378}
-  - {fileID: 1118074172920095491}
-  - {fileID: 6083356369953846693}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   gizmos: 0
 --- !u!82 &1878123820758244030
 AudioSource:
@@ -491,7 +491,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 722808349342280701}
-  - component: {fileID: 9015756370931014388}
+  - component: {fileID: 3780528094693069548}
   m_Layer: 10
   m_Name: Item Pos (1)
   m_TagString: Untagged
@@ -514,7 +514,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6527902677820297088}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9015756370931014388
+--- !u!114 &3780528094693069548
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -523,10 +523,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1570600238991169697}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Script: {fileID: 11500000, guid: 03fedb8aaac5390428d0eb866a74bf6e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonSpawnPoint
+  channel: {fileID: 11400000, guid: c02381d971083d8428f7a2813f25ac4b, type: 2}
   maxOffset: {x: 0.35, y: 0, z: 0.1}
+  maxRotation: 0
   chance: 5
   tries: 3
 --- !u!1 &2619474639562674020
@@ -538,7 +540,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4018092360816762437}
-  - component: {fileID: 6083356369953846693}
+  - component: {fileID: 8564963082356885144}
   m_Layer: 10
   m_Name: Item Pos (4)
   m_TagString: Untagged
@@ -561,7 +563,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6527902677820297088}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6083356369953846693
+--- !u!114 &8564963082356885144
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -570,10 +572,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2619474639562674020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Script: {fileID: 11500000, guid: 03fedb8aaac5390428d0eb866a74bf6e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonSpawnPoint
+  channel: {fileID: 11400000, guid: c02381d971083d8428f7a2813f25ac4b, type: 2}
   maxOffset: {x: 0.35, y: 0, z: 0.1}
+  maxRotation: 0
   chance: 5
   tries: 3
 --- !u!1 &3119878786713800340
@@ -585,7 +589,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4878535904652359411}
-  - component: {fileID: 1118074172920095491}
+  - component: {fileID: 2601212677627423931}
   m_Layer: 10
   m_Name: Item Pos (3)
   m_TagString: Untagged
@@ -608,7 +612,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6527902677820297088}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1118074172920095491
+--- !u!114 &2601212677627423931
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -617,10 +621,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 3119878786713800340}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Script: {fileID: 11500000, guid: 03fedb8aaac5390428d0eb866a74bf6e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonSpawnPoint
+  channel: {fileID: 11400000, guid: c02381d971083d8428f7a2813f25ac4b, type: 2}
   maxOffset: {x: 0.35, y: 0, z: 0.1}
+  maxRotation: 0
   chance: 5
   tries: 3
 --- !u!1 &4766377430233220350
@@ -632,7 +638,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5982380585759605557}
-  - component: {fileID: 3726172536971079378}
+  - component: {fileID: 6869494352476972887}
   m_Layer: 10
   m_Name: Item Pos (2)
   m_TagString: Untagged
@@ -655,7 +661,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6527902677820297088}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3726172536971079378
+--- !u!114 &6869494352476972887
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -664,10 +670,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4766377430233220350}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Script: {fileID: 11500000, guid: 03fedb8aaac5390428d0eb866a74bf6e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonSpawnPoint
+  channel: {fileID: 11400000, guid: c02381d971083d8428f7a2813f25ac4b, type: 2}
   maxOffset: {x: 0.35, y: 0, z: 0.1}
+  maxRotation: 0
   chance: 5
   tries: 3
 --- !u!1 &7272826756057476517
@@ -679,7 +687,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2468905640288472950}
-  - component: {fileID: 3585220547248472665}
+  - component: {fileID: 7206629453779654332}
   m_Layer: 10
   m_Name: Item Pos (0)
   m_TagString: Untagged
@@ -702,7 +710,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6527902677820297088}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3585220547248472665
+--- !u!114 &7206629453779654332
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -711,10 +719,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7272826756057476517}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Script: {fileID: 11500000, guid: 03fedb8aaac5390428d0eb866a74bf6e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonSpawnPoint
+  channel: {fileID: 11400000, guid: c02381d971083d8428f7a2813f25ac4b, type: 2}
   maxOffset: {x: 0.35, y: 0, z: 0.1}
+  maxRotation: 0
   chance: 5
   tries: 3
 --- !u!1001 &493170211738922633

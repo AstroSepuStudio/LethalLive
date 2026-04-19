@@ -79,6 +79,8 @@ public class PlayerMovement : NetworkBehaviour
     Vector3 velocity;
     Vector3 airborneVelocity;
     bool wasGroundedLastFrame;
+    Vector3 forcedAimDirection;
+    readonly float forcedAimSpeed = 20f;
 
     bool IsGrounded()
     {
@@ -381,10 +383,24 @@ public class PlayerMovement : NetworkBehaviour
             camRight.Normalize();
 
             move = (camForward * movementInput.y + camRight * movementInput.x).normalized;
-            if (!Mathf.Approximately(move.magnitude, 0) && !pData._IsPlayerAimLocked)
+            if (pData._IsPlayerAimLocked)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(forcedAimDirection);
+                transform.rotation = Quaternion.Lerp(
+                    transform.rotation,
+                    targetRotation,
+                    forcedAimSpeed * Time.deltaTime
+                );
+            }
+            else if (!Mathf.Approximately(move.magnitude, 0) && !pData._IsPlayerAimLocked)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(move);
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Lerp(
+                    transform.rotation,
+                    targetRotation,
+                    rotationSpeed * Time.deltaTime
+                );
+
                 pData.EmoteManager.PlayerMoves();
             }
 
@@ -552,6 +568,39 @@ public class PlayerMovement : NetworkBehaviour
         }
 
         AudioManager.Instance.PlayOneShot(GetAudioSourceByIndex(srcindex), footsteps[sfxindex], volMult, gameObject, loudness);
+    }
+
+    [Server]
+    public void ServerForceAimAt(Vector3 worldPosition)
+    {
+        Vector3 dir = worldPosition - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.001f) return;
+
+        pData._IsPlayerAimLocked = true;
+        forcedAimDirection = dir.normalized;
+
+        RpcForceAimAt(dir.normalized);
+    }
+
+    [Server]
+    public void ServerClearForcedAim()
+    {
+        pData._IsPlayerAimLocked = false;
+        forcedAimDirection = Vector3.zero;
+        RpcClearForcedAim();
+    }
+
+    [TargetRpc]
+    void RpcForceAimAt(Vector3 direction)
+    {
+        pData.Camera_Movement.ForcePlayerToAimDirection(direction);
+    }
+
+    [TargetRpc]
+    void RpcClearForcedAim()
+    {
+        pData.Camera_Movement.ServerClearForcedAim();
     }
 
     AudioSource GetAudioSourceByIndex(int index)

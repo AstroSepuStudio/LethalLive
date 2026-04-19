@@ -1,7 +1,7 @@
+using LethalLive;
 using Steamworks;
 using System.Collections;
 using UnityEngine;
-using LethalLive;
 
 public class CameraMovement : MonoBehaviour
 {
@@ -11,7 +11,6 @@ public class CameraMovement : MonoBehaviour
     [SerializeField] Camera pCamera;
     [SerializeField] AudioListener audioListener;
     [SerializeField] GameObject crosshair;
-    //[SerializeField] bool _ignoreCrosshair = false;
 
     [Header("Settings")]
     [SerializeField] float minVertical = -80f;
@@ -27,6 +26,7 @@ public class CameraMovement : MonoBehaviour
     float horizontal;
     float vertical;
     bool _stop;
+    bool _cameraInputLocked;
 
     private void Start()
     {
@@ -72,11 +72,12 @@ public class CameraMovement : MonoBehaviour
 
         if (pData._LockPlayer || Cursor.lockState == CursorLockMode.None) return;
         if (!pData.isLocalPlayer || _stop || pData.HUDManager.OpenedWindow) return;
+        if (_cameraInputLocked) return;
 
         Vector2 camOffset = pData.Player_Input.actions["AdjustCam"].ReadValue<Vector2>();
         float xOffset = Mathf.Clamp(pData.CameraTarget.localPosition.x + camOffset.x * Time.deltaTime * offsetSpeed, -0.6f, 0.6f);
         float yOffset = Mathf.Clamp(pData.CameraTarget.localPosition.y + camOffset.y * Time.deltaTime * offsetSpeed, 0.8f, 1.6f);
-        pData.CameraTarget.localPosition = new (xOffset, yOffset, 0f);
+        pData.CameraTarget.localPosition = new(xOffset, yOffset, 0f);
 
         float scrollInput = pData.Player_Input.actions["Zoom"].ReadValue<float>();
         distanceToTarget = Mathf.Clamp(distanceToTarget - scrollInput * zoomSensitivity * Time.deltaTime, minZoom, maxZoom);
@@ -92,10 +93,9 @@ public class CameraMovement : MonoBehaviour
         Quaternion targetRotation = Quaternion.Euler(vertical, horizontal, 0f);
         pData.CameraPivot.rotation = targetRotation;
 
-        //Vector3 dir = (pData.PlayerCamera.transform.position - pData.CameraPivot.position).normalized;
         Vector3 back = -pData.CameraPivot.forward;
         pData.PlayerCamera.transform.position = pData.CameraPivot.position + back * distanceToTarget;
-        
+
         if (Physics.Linecast(pData.CameraPivot.position, pData.PlayerCamera.transform.position + back * 0.12f, out RaycastHit hit, pData.IgnorePlayer))
         {
             Vector3 safePos = pData.CameraPivot.position + back * (hit.distance - 0.12f);
@@ -105,32 +105,29 @@ public class CameraMovement : MonoBehaviour
         pData.CmdSetCameraData(horizontal, vertical, distanceToTarget, pData.CameraTarget.localPosition.x, pData.CameraTarget.localPosition.y);
     }
 
-    public void PauseCamera()
+    public void PauseCamera() => _stop = true;
+    public void ResumeCamera() => _stop = false;
+
+    // Punch path — only blocks mouse input, never touches transform
+    public void LockCameraInput() => _cameraInputLocked = true;
+    public void UnlockCameraInput() => _cameraInputLocked = false;
+
+    // Server-driven path (lobby screen, abilities) — smooth rotation toward a direction
+    public void ForcePlayerToAimDirection(Vector3 worldDirection)
     {
-        _stop = true;
+        Vector3 dir = worldDirection;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.001f) return;
+        StopAllCoroutines();
+        StartCoroutine(SmoothAimRotation(dir.normalized));
     }
 
-    public void ResumeCamera()
+    public void ServerClearForcedAim() => StopAllCoroutines();
+
+    private IEnumerator SmoothAimRotation(Vector3 targetForward)
     {
-        _stop = false;
-    }
-
-    public void ForcePlayerToAim()
-    {
-        StartCoroutine(SmoothAimRotation());
-    }
-
-    private IEnumerator SmoothAimRotation()
-    {
-        Vector3 camForward = pData.CameraPivot.forward;
-        camForward.y = 0f;
-        camForward.Normalize();
-
-        Vector3 startForward = pData.transform.forward;
-        Quaternion startRotation = Quaternion.LookRotation(startForward);
-        Quaternion targetRotation = Quaternion.LookRotation(camForward);
-
-        pData._IsPlayerAimLocked = true;
+        Quaternion startRotation = Quaternion.LookRotation(pData.transform.forward);
+        Quaternion targetRotation = Quaternion.LookRotation(targetForward);
 
         float duration = 0.1f;
         float elapsed = 0f;
@@ -138,16 +135,10 @@ public class CameraMovement : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            pData.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            pData.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsed / duration);
             yield return null;
         }
 
         pData.transform.rotation = targetRotation;
-    }
-
-    public void StopForcePlayerToAim()
-    {
-        pData._IsPlayerAimLocked = false;
     }
 }

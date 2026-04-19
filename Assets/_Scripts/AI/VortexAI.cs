@@ -502,16 +502,11 @@ public class VortexAI : AIBrain
 
     public override void OnAgentDeath(AttackEvent source)
     {
-        Pack?.Unregister(this);
         base.OnAgentDeath(source);
 
+        Pack?.Unregister(this);
         CarrierModule?.DropCarriedItem();
-        isDying = true;
-        StopAgentMovement();
-        DisableCollider();
-        DisableAgent();
-        animator.SetTrigger("Death");
-
+        
         StartCoroutine(DespawnVortex());
         RPC_PlayDeathParticles();
     }

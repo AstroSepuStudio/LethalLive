@@ -28,8 +28,9 @@ public class IA_HurtboxAttack : ItemAction
         ItemActionType type = item.GetActionType(this);
         if (type == ItemActionType.None) return;
 
-        if (forceAim)
-            item.PData.Camera_Movement.ForcePlayerToAim();
+        if (forceAim && isServer)
+            item.PData.Player_Movement.ServerForceAimAt(
+                item.PData.transform.position + item.PData.CameraPivot.forward * 10f);
 
         if (type == ItemActionType.Primary)
             item.AnimationModule.PlayPrimary(this, item.PData, animationTrigger);
@@ -39,7 +40,8 @@ public class IA_HurtboxAttack : ItemAction
 
     public override void Cancel()
     {
-
+        if (forceAim && isServer)
+            item.PData.Player_Movement.ServerClearForcedAim();
     }
 
     public override void OnAnimationTrigger()
@@ -52,7 +54,7 @@ public class IA_HurtboxAttack : ItemAction
         if (isServer) item.InUse = false;
         hurtbox.DisableHitbox();
 
-        if (forceAim && item.PData != null)
-            item.PData.Camera_Movement.StopForcePlayerToAim();
+        if (forceAim && isServer)
+            item.PData.Player_Movement.ServerClearForcedAim();
     }
 }

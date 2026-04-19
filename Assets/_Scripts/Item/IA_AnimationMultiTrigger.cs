@@ -12,6 +12,9 @@ public class IA_AnimationMultiTrigger : ItemAction
 
     public override void Cancel()
     {
+        if (forceAim && isServer)
+            item.PData.Player_Movement.ServerClearForcedAim();
+
         TryPlaySFX(currentTrigger, ActionTiming.Cancel);
     }
 
@@ -27,7 +30,9 @@ public class IA_AnimationMultiTrigger : ItemAction
         ItemActionType type = item.GetActionType(this);
         if (type == ItemActionType.None) return;
 
-        if (forceAim) item.PData.Camera_Movement.ForcePlayerToAim();
+        if (forceAim && isServer)
+            item.PData.Player_Movement.ServerForceAimAt(
+                item.PData.transform.position + item.PData.CameraPivot.forward * 10f);
 
         int index = sequenced ? GetSequencedIndex() : GetRandomIndex();
         currentTrigger = animationTriggers[index];
@@ -43,7 +48,8 @@ public class IA_AnimationMultiTrigger : ItemAction
     public override void OnAnimationFinish()
     {
         if (isServer) item.InUse = false;
-        if (forceAim) item.PData.Camera_Movement.StopForcePlayerToAim();
+        if (forceAim && isServer)
+            item.PData.Player_Movement.ServerClearForcedAim();
 
         TryPlaySFX(currentTrigger, ActionTiming.Finish);
     }

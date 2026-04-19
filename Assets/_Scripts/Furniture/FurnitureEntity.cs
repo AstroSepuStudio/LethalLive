@@ -12,7 +12,7 @@ public class FurnitureEntity : EntityStats
     [SerializeField] Vector3 center;
     [SerializeField] Vector3 dropArea;
 
-    public List<ItemSpawnPosition> lootPositions;
+    public List<DungeonSpawnPoint> lootPositions;
 
     bool _dying;
     public bool IsDying => _dying;

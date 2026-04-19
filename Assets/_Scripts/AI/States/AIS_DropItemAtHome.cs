@@ -44,8 +44,6 @@ public class AIS_DropItemAtHome : AIState
         targetPosition = home.GetEffectiveHome().transform.position + PickOffset();
         brain.MoveAgent(targetPosition);
         brain.SetIdleState(false);
-
-        Debug.Log($"Entered drop item at home state", brain.gameObject);
     }
 
     public override void OnUpdateState(AIBrain brain)

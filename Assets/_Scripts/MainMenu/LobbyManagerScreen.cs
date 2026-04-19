@@ -113,6 +113,7 @@ public class LobbyManagerScreen : UIManagerNetwork
         currentPlayer = playerData;
 
         playerData.Teleport(playerTargetPos.position);
+        playerData.Player_Movement.ServerForceAimAt(playerTargetPos.position + playerTargetPos.forward);
         playerData.Skin_Data.Rigging_Manager.RpcEnableRightHandChainRig();
 
         RpcOpenLMS(playerData.Index);
@@ -157,6 +158,8 @@ public class LobbyManagerScreen : UIManagerNetwork
         currentPlayer.Player_Stats.OnPlayerKnocked.RemoveListener(OnPlayerKnocked);
 
         currentPlayer.Skin_Data.Rigging_Manager.RpcDisableRightHandChainRig();
+        currentPlayer.Player_Movement.ServerClearForcedAim();
+
         currentPlayer._LockPlayer = false;
         currentPlayer = null;
 

@@ -1077,8 +1077,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 45718053}
+  - component: {fileID: 45718054}
   m_Layer: 0
-  m_Name: Entity Spawner Parent
+  m_Name: Entity Spawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1099,6 +1100,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1410324980}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &45718054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 45718052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d4a9b0becff0b04e81b0cd34d622549, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EntitySpawner
+  channel: {fileID: 11400000, guid: 2548740da2e5fba409f72cc28c713ebd, type: 2}
+  entitySpawnerPrefab: {fileID: 8414626633250624720, guid: e5b4d0428e1ff70498c8b0b6062503e3, type: 3}
+  entitySpawnerParent: {fileID: 45718053}
+  baseChance: 1
+  minimumSpawners: 3
 --- !u!1 &47228675
 GameObject:
   m_ObjectHideFlags: 0
@@ -1853,6 +1871,177 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 50744547}
   m_CullTransparentMesh: 1
+--- !u!1 &53912377
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 53912378}
+  - component: {fileID: 53912379}
+  m_Layer: 0
+  m_Name: '- Day Progression -'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &53912378
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 53912377}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1730614855}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &53912379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 53912377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2342cea6f91e65d448e8cf36a1cb903f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GM_DayProgressionModule
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  maxMapSize: 10
+  difficultyOffset: 6
+  defaultEntityCap: 5
+  overrides:
+  - day: 1
+    mapSize: 3
+    difficultyMultiplier: 1
+    entityCap: 5
+    minEntityTier: 0
+    maxEntityTier: 0
+    minLootTier: 0
+    maxLootTier: 2
+  - day: 2
+    mapSize: 3
+    difficultyMultiplier: 1.25
+    entityCap: 5
+    minEntityTier: 0
+    maxEntityTier: 1
+    minLootTier: 0
+    maxLootTier: 2
+  - day: 3
+    mapSize: 4
+    difficultyMultiplier: 1.5
+    entityCap: 6
+    minEntityTier: 0
+    maxEntityTier: 2
+    minLootTier: 0
+    maxLootTier: 3
+  - day: 4
+    mapSize: 4
+    difficultyMultiplier: 1.75
+    entityCap: 6
+    minEntityTier: 0
+    maxEntityTier: 2
+    minLootTier: 0
+    maxLootTier: 3
+  - day: 5
+    mapSize: 5
+    difficultyMultiplier: 2
+    entityCap: 7
+    minEntityTier: 1
+    maxEntityTier: 3
+    minLootTier: 1
+    maxLootTier: 3
+  - day: 6
+    mapSize: 5
+    difficultyMultiplier: 2.25
+    entityCap: 7
+    minEntityTier: 1
+    maxEntityTier: 3
+    minLootTier: 1
+    maxLootTier: 3
+  - day: 7
+    mapSize: 6
+    difficultyMultiplier: 2.5
+    entityCap: 8
+    minEntityTier: 1
+    maxEntityTier: 3
+    minLootTier: 2
+    maxLootTier: 4
+  - day: 8
+    mapSize: 6
+    difficultyMultiplier: 2.75
+    entityCap: 9
+    minEntityTier: 1
+    maxEntityTier: 3
+    minLootTier: 2
+    maxLootTier: 4
+  - day: 9
+    mapSize: 7
+    difficultyMultiplier: 3
+    entityCap: 10
+    minEntityTier: 1
+    maxEntityTier: 3
+    minLootTier: 2
+    maxLootTier: 4
+  - day: 10
+    mapSize: 7
+    difficultyMultiplier: 4
+    entityCap: 11
+    minEntityTier: 2
+    maxEntityTier: 4
+    minLootTier: 2
+    maxLootTier: 4
+  - day: 11
+    mapSize: 8
+    difficultyMultiplier: 5
+    entityCap: 12
+    minEntityTier: 2
+    maxEntityTier: 4
+    minLootTier: 2
+    maxLootTier: 4
+  - day: 12
+    mapSize: 8
+    difficultyMultiplier: 6
+    entityCap: 13
+    minEntityTier: 2
+    maxEntityTier: 4
+    minLootTier: 2
+    maxLootTier: 4
+  - day: 13
+    mapSize: 9
+    difficultyMultiplier: 7
+    entityCap: 14
+    minEntityTier: 2
+    maxEntityTier: 4
+    minLootTier: 2
+    maxLootTier: 4
+  - day: 14
+    mapSize: 10
+    difficultyMultiplier: 8
+    entityCap: 15
+    minEntityTier: 2
+    maxEntityTier: 4
+    minLootTier: 2
+    maxLootTier: 4
+  CurrentMapSize: 3
+  CurrentDifficultyMultiplier: 1
+  CurrentEntityCap: 5
+  CurrentMinEntityTier: 0
+  CurrentMaxEntityTier: 0
+  CurrentMinLootTier: 0
+  CurrentMaxLootTier: 2
 --- !u!43 &57549758
 Mesh:
   m_ObjectHideFlags: 0
@@ -2221,7 +2410,7 @@ GameObject:
   - component: {fileID: 60093906}
   - component: {fileID: 60093905}
   m_Layer: 0
-  m_Name: --- Player Chat Manager ---
+  m_Name: '- Player Chat Manager -'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19321,7 +19510,7 @@ GameObject:
   m_Component:
   - component: {fileID: 382441220}
   m_Layer: 0
-  m_Name: -- Dev --
+  m_Name: --- Dev ---
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19341,18 +19530,12 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1145969124}
-  - {fileID: 1410324980}
+  - {fileID: 634936958}
   - {fileID: 1387233359}
-  - {fileID: 1730614855}
-  - {fileID: 1919113838}
   - {fileID: 1780550698}
-  - {fileID: 713686471}
-  - {fileID: 679349882}
   - {fileID: 845070769}
   - {fileID: 1559785197}
-  - {fileID: 1679809402}
   - {fileID: 60093904}
-  - {fileID: 759266804}
   m_Father: {fileID: 1585093472}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &383185995
@@ -27466,7 +27649,7 @@ GameObject:
   - component: {fileID: 573970242}
   - component: {fileID: 573970243}
   m_Layer: 0
-  m_Name: -- Lobby Settings --
+  m_Name: Lobby Settings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29833,7 +30016,7 @@ GameObject:
   m_Component:
   - component: {fileID: 603450810}
   m_Layer: 0
-  m_Name: Office
+  m_Name: -- Office --
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30625,9 +30808,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 634936958}
+  - component: {fileID: 634936960}
   - component: {fileID: 634936959}
   m_Layer: 0
-  m_Name: Vortex Pack
+  m_Name: '- Vortex Pack -'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30641,12 +30825,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 634936957}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1410324980}
+  m_Father: {fileID: 382441220}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &634936959
 MonoBehaviour:
@@ -30670,6 +30854,23 @@ MonoBehaviour:
   maxGroupSize: 3
   minExploreDuration: 30
   maxExploreDuration: 120
+--- !u!114 &634936960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 634936957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
+  sceneId: 1379431070
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &636772229
 GameObject:
   m_ObjectHideFlags: 0
@@ -31631,7 +31832,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 382441220}
+  m_Father: {fileID: 1585093472}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &679424932
 GameObject:
@@ -33082,7 +33283,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 382441220}
+  m_Father: {fileID: 1585093472}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &713686472
 MonoBehaviour:
@@ -35000,7 +35201,7 @@ GameObject:
   - component: {fileID: 759266806}
   - component: {fileID: 759266805}
   m_Layer: 0
-  m_Name: --- Ambient Player ---
+  m_Name: '- Ambient Player -'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35014,13 +35215,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 759266803}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1610250533}
-  m_Father: {fileID: 382441220}
+  m_Father: {fileID: 1919113838}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &759266805
 MonoBehaviour:
@@ -37349,8 +37550,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 822107717}
+  - component: {fileID: 822107718}
   m_Layer: 0
-  m_Name: Item Parent
+  m_Name: Loot Parent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37371,6 +37573,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1410324980}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &822107718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 822107716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90a2b69216728944b9d69297afe861e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootSpawner
+  channel: {fileID: 11400000, guid: c02381d971083d8428f7a2813f25ac4b, type: 2}
+  itemsParent: {fileID: 822107717}
 --- !u!1 &827422309
 GameObject:
   m_ObjectHideFlags: 0
@@ -37559,6 +37775,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 832593851}
+  - component: {fileID: 832593852}
   m_Layer: 0
   m_Name: Furniture Parent
   m_TagString: Untagged
@@ -37581,6 +37798,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1410324980}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &832593852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832593850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16eb675eb606cf54bb9bbbcbdab12047, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureSpawner
+  channel: {fileID: 11400000, guid: f4c3f596022366544855b2fa3b64c60f, type: 2}
+  furnitureParent: {fileID: 832593851}
 --- !u!1 &834433366
 GameObject:
   m_ObjectHideFlags: 0
@@ -37916,7 +38147,7 @@ GameObject:
   - component: {fileID: 845070769}
   - component: {fileID: 845070770}
   m_Layer: 0
-  m_Name: --- Lobby Manager ---
+  m_Name: '- Lobby Manager -'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -39987,6 +40218,53 @@ MonoBehaviour:
   OnWindowClose:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &889534279
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 889534280}
+  - component: {fileID: 889534281}
+  m_Layer: 0
+  m_Name: Decoration Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &889534280
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 889534279}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1410324980}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &889534281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 889534279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f20dad6d9ab0f924d814992459792427, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DecorationSpawner
+  channel: {fileID: 11400000, guid: 2783107b5ec84cb4e89c27b4c712badc, type: 2}
+  decoParent: {fileID: 481602165}
+  baseChance: 5
 --- !u!1 &890464614
 GameObject:
   m_ObjectHideFlags: 0
@@ -68476,7 +68754,7 @@ GameObject:
   - component: {fileID: 1387233359}
   - component: {fileID: 1387233360}
   m_Layer: 0
-  m_Name: --- Game Tick ---
+  m_Name: '- Game Tick -'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -69770,16 +70048,16 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 634936958}
   - {fileID: 1041155638}
   - {fileID: 1348597483}
   - {fileID: 1993879864}
   - {fileID: 832593851}
   - {fileID: 822107717}
+  - {fileID: 889534280}
   - {fileID: 45718053}
   - {fileID: 1911637262}
   - {fileID: 1226996362}
-  m_Father: {fileID: 382441220}
+  m_Father: {fileID: 1585093472}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1410324981
 MonoBehaviour:
@@ -69798,12 +70076,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   theme: {fileID: 11400000, guid: 580f57a2680f48c45877e251dc3e0e8d, type: 2}
-  entitySpawnerPref: {fileID: 8414626633250624720, guid: e5b4d0428e1ff70498c8b0b6062503e3, type: 3}
   roomsParent: {fileID: 1993879864}
-  furnitureParent: {fileID: 832593851}
-  itemsParent: {fileID: 822107717}
-  decoParent: {fileID: 481602165}
-  entSpawnParent: {fileID: 45718053}
   voidDestroyerParent: {fileID: 1226996362}
   surface: {fileID: 1993879865}
   difficultyCurve:
@@ -69845,8 +70118,6 @@ MonoBehaviour:
   seedDisplayTransform: {fileID: 1067416731}
   seedDisplayGroup: {fileID: 1067416732}
   seedDisplayTxt: {fileID: 1716513751}
-  SpawnedFurniture: []
-  SpawnedItems: []
   OnDungeonGenerated:
     m_PersistentCalls:
       m_Calls:
@@ -74546,7 +74817,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6983887723712745980, guid: c1acb59c03c3aa8499c7864440ed251c, type: 3}
       propertyPath: m_Name
-      value: --- Client Logger ---
+      value: '- Client Logger -'
       objectReference: {fileID: 0}
     - target: {fileID: 6983887723712745980, guid: c1acb59c03c3aa8499c7864440ed251c, type: 3}
       propertyPath: m_IsActive
@@ -75785,7 +76056,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1585093472}
   m_Layer: 0
-  m_Name: --- Game ---
+  m_Name: l--- Game ---l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -75804,6 +76075,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 713686471}
+  - {fileID: 679349882}
+  - {fileID: 1410324980}
+  - {fileID: 1730614855}
+  - {fileID: 1919113838}
   - {fileID: 382441220}
   - {fileID: 1686793180}
   - {fileID: 1656892191}
@@ -78105,10 +78381,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1679809402}
-  - component: {fileID: 1679809404}
   - component: {fileID: 1679809403}
   m_Layer: 0
-  m_Name: --- Enemy Spawner ---
+  m_Name: '- Enemy Spawner -'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78122,12 +78397,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1679809401}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 300, y: -1, z: 300}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 382441220}
+  m_Father: {fileID: 1730614855}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1679809403
 MonoBehaviour:
@@ -78149,23 +78424,6 @@ MonoBehaviour:
   spawnDelay: 0
   spawnChance: 100
   spawnCooldown: 2
---- !u!114 &1679809404
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1679809401}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 3804204969
-  _assetId: 0
-  serverOnly: 0
-  visibility: 0
-  hasSpawned: 0
 --- !u!1 &1683010085
 GameObject:
   m_ObjectHideFlags: 0
@@ -80972,6 +81230,7 @@ MonoBehaviour:
   ecoMod: {fileID: 647318312}
   playMod: {fileID: 1867659647}
   dngMod: {fileID: 1142356163}
+  progressionMod: {fileID: 53912379}
   gameStarted: 0
   Seed: 67
   debug: 0
@@ -80988,11 +81247,13 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 53912378}
   - {fileID: 1250948261}
   - {fileID: 647318313}
   - {fileID: 1867659646}
   - {fileID: 1142356162}
-  m_Father: {fileID: 382441220}
+  - {fileID: 1679809402}
+  m_Father: {fileID: 1585093472}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1732480799
 GameObject:
@@ -82008,7 +82269,7 @@ GameObject:
   - component: {fileID: 1751716341}
   - component: {fileID: 1751716342}
   m_Layer: 0
-  m_Name: --- Main Menu ---
+  m_Name: l--- Main Menu ---l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83725,7 +83986,7 @@ GameObject:
   - component: {fileID: 1780550698}
   - component: {fileID: 1780550697}
   m_Layer: 0
-  m_Name: --- Settings Manager ---
+  m_Name: '- Settings Manager -'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -88798,10 +89059,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 759266804}
   - {fileID: 180054150}
   - {fileID: 2088684151}
   - {fileID: 575109695}
-  m_Father: {fileID: 382441220}
+  m_Father: {fileID: 1585093472}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1919113839
 MonoBehaviour:

@@ -15,18 +15,20 @@ public class SkullCrusherAI : AIBrain, IHearingListener
 
     readonly System.Collections.Generic.Dictionary<SoundLoudness, float> lungeThreshold = new()
     {
-        { SoundLoudness.Quiet,   2.5f  },
-        { SoundLoudness.Average, 7.5f },
-        { SoundLoudness.Loud,    15f },
-        { SoundLoudness.Global,  100f }
+        { SoundLoudness.Quiet, 2f },
+        { SoundLoudness.Moderate, 4f },
+        { SoundLoudness.Average, 8f },
+        { SoundLoudness.Loud, 16f },
+        { SoundLoudness.Global, 32f }
     };
 
     readonly System.Collections.Generic.Dictionary<SoundLoudness, float> invScalateThreshold = new()
     {
-        { SoundLoudness.Quiet,   3.5f  },
-        { SoundLoudness.Average, 11f },
-        { SoundLoudness.Loud,    24f },
-        { SoundLoudness.Global,  50f }
+        { SoundLoudness.Quiet, 3f },
+        { SoundLoudness.Moderate, 6f },
+        { SoundLoudness.Average, 12f },
+        { SoundLoudness.Loud, 24f },
+        { SoundLoudness.Global, 48f }
     };
 
     AIS_InvestigateSound investigateState;
@@ -70,6 +72,8 @@ public class SkullCrusherAI : AIBrain, IHearingListener
     public void OnSoundHeard(AudioSoundEvent soundEvent)
     {
         if (!isServer) return;
+        if (isDying) return;
+
         float dist = Vector3.Distance(transform.position, soundEvent.position);
         if (soundEvent.source == gameObject) return;
         if (soundEvent.source.CompareTag("SkullCrusher")) return;
@@ -172,11 +176,5 @@ public class SkullCrusherAI : AIBrain, IHearingListener
     {
         if (!IsInLungeState())
             TriggerLunge(source.Position, source.SourceStats.transform);
-    }
-
-    public override void OnAgentDeath(AttackEvent source)
-    {
-        base.OnAgentDeath(source);
-        isDying = true;
     }
 }

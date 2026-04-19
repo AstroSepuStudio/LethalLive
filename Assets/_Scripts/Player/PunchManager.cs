@@ -29,14 +29,17 @@ public class PunchManager : NetworkBehaviour
         if (isPunching || pData._LockPlayer) return;
 
         if (debuffIndex != -1) RemoveDebuff();
-        string astr = pData.Player_Movement.IsCrouching ? "AttackCrouch" : "Attack";
 
+        string astr = pData.Player_Movement.IsCrouching ? "AttackCrouch" : "Attack";
         pData.Skin_Data.CharacterAnimator.SetTrigger(astr);
         debuffIndex = pData.Player_Movement.AddSpeedModifier(0.5f);
 
-        StartCoroutine(ServerPunchSequence());
+        pData.Player_Movement.ServerForceAimAt(
+            transform.position + pData.CameraPivot.forward * 10f);
 
+        StartCoroutine(ServerPunchSequence());
         pData.EmoteManager.ServerClearLoopEmote();
+
         RpcStartPunchClient();
     }
 
@@ -48,12 +51,12 @@ public class PunchManager : NetworkBehaviour
 
         yield return finishDelay;
         RemoveDebuff();
+        pData.Player_Movement.ServerClearForcedAim();
     }
 
     [ClientRpc]
     void RpcStartPunchClient()
     {
-        pData.Camera_Movement.ForcePlayerToAim();
         StartCoroutine(ClientPunchCooldown());
     }
 
@@ -62,7 +65,6 @@ public class PunchManager : NetworkBehaviour
         isPunching = true;
         yield return new WaitForSeconds(punchStats.AttackCooldown);
         isPunching = false;
-        pData.Camera_Movement.StopForcePlayerToAim();
     }
 
     [Server]
@@ -75,7 +77,6 @@ public class PunchManager : NetworkBehaviour
         {
             if (!col.TryGetComponent(out EntityStats target)) continue;
             if (target == pData.Player_Stats) continue;
-
             target.ReceiveAttack(AttackEvent.From(pData, target, punchStats));
         }
     }

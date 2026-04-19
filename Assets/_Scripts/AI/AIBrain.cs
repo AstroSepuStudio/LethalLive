@@ -304,12 +304,16 @@ public class AIBrain : NetworkBehaviour
 
     public virtual void OnAgentDeath(AttackEvent source)
     {
-        if (lootDropper == null)
-        {
-            if (!TryGetComponent(out lootDropper))
-                return;
-        }
-        lootDropper.OnOwnerDeath(source);
+        CurrentState.OnExitState(this);
+
+        if (lootDropper == null) TryGetComponent(out lootDropper);
+        if (lootDropper != null) lootDropper.OnOwnerDeath(source);
+
+        isDying = true;
+        animator.SetTrigger("Death");
+        StopAgentMovement();
+        DisableCollider();
+        DisableAgent();
     }
 
     public virtual void SetAggressive(bool aggressive)

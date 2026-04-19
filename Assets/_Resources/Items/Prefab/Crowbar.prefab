@@ -80,6 +80,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  audioSource: {fileID: 0}
   hurtbox: {fileID: 6977979795673349589}
   animationTrigger: Atk_Crowbar
   forceAim: 1
@@ -281,6 +282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72b8fa9ea111a214fa4ca06f653d8be9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemAnimationModule
+  animatorOverride: {fileID: 0}
   primaryTriggerTime: 0.1
   primaryFinishTime: 0.35
   secondaryTriggerTime: 0

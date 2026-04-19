@@ -7,10 +7,12 @@ public class AIS_InvestigateSound : AIState
     [SerializeField] float arrivalThreshold = 1.5f;
 
     [Header("Roam After Arrival")]
-    [SerializeField] float roamDuration = 10f;
+    [SerializeField] float minRoamDuration = 5f;
+    [SerializeField] float maxRoamDuration = 12f;
     [SerializeField] float roamRadius = 5f;
     [SerializeField] float minRoamSleep = 1.5f;
     [SerializeField] float maxRoamSleep = 3.5f;
+    float roamDuration;
 
     [Header("Alert / Escalation")]
     [SerializeField] float alertCooldown = 2f;
@@ -106,6 +108,7 @@ public class AIS_InvestigateSound : AIState
         }
 
         roamOrigin = brain.transform.position;
+        roamDuration = Random.Range(minRoamDuration, maxRoamDuration);
         roamTimer = roamDuration;
         roamSleepTimer = 0f;
         roamMoving = false;

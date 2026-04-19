@@ -199,7 +199,7 @@ MonoBehaviour:
   center: {x: 0, y: 0.675, z: 0}
   dropArea: {x: 0.55, y: 0.375, z: 0.55}
   lootPositions:
-  - {fileID: 3585220547248472665}
+  - {fileID: 0}
   gizmos: 0
 --- !u!82 &1878123820758244030
 AudioSource:
@@ -307,7 +307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2468905640288472950}
-  - component: {fileID: 3585220547248472665}
+  - component: {fileID: 2432440731576350065}
   m_Layer: 10
   m_Name: Item Pos (0)
   m_TagString: Untagged
@@ -330,7 +330,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6527902677820297088}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3585220547248472665
+--- !u!114 &2432440731576350065
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -339,10 +339,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7272826756057476517}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84b1badc48047a84c882a4bb16cedaa5, type: 3}
+  m_Script: {fileID: 11500000, guid: 03fedb8aaac5390428d0eb866a74bf6e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawnPosition
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonSpawnPoint
+  channel: {fileID: 11400000, guid: c02381d971083d8428f7a2813f25ac4b, type: 2}
   maxOffset: {x: 0.25, y: 0.25, z: 0.25}
+  maxRotation: 0
   chance: 5
   tries: 3
 --- !u!1001 &978180165230960273
