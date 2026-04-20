@@ -46,6 +46,9 @@ Make your operative your own before heading into the dark.
 
 ![CustomGif](https://github.com/user-attachments/assets/53d5ea49-13e6-4c9e-80ad-14b76bf63b56)
 
+### Board
+<img width="1006" height="657" alt="Captura de pantalla 2026-04-08 192131" src="https://github.com/user-attachments/assets/85a99d32-299c-4ada-b861-e2b290ff6dab" />
+
 ---
 
 ## ⚠️ Disclaimer
