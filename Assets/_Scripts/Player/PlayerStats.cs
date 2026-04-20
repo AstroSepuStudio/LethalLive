@@ -1,24 +1,57 @@
 using Mirror;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.ProBuilder;
 
 public class PlayerStats : EntityStats
 {
     [Header("Player")]
     public PlayerData pData;
 
-    [SerializeField] float staminaRecoveryDelay;
-    [SerializeField] float staminaRecoveryRate;
-    float staminaRecoveryTimer;
+    [SerializeField, Range(0, 100)] float lowHPEffectsThreshold = 40f;
+    [SerializeField, Range(0, 100)] float lowHPThreshold = 20f;
+    [SerializeField] float healthRecoveryDelay = 10f;
+    [SerializeField] float healthRecoveryRate = 1f;
+    [SerializeField] float staminaRecoveryDelay = 0.5f;
+    [SerializeField] float staminaRecoveryRate = 10f;
+
+    [Header("SFX")]
+    [SerializeField] AudioSource audioSrc;
+    [SerializeField] AudioSFX[] heartbeatSFXs;
+
+    [Header("FX")]
+    [SerializeField] GameObject takeDamageGO;
+    [SerializeField] GameObject lowHPGO;
+
+    float healthRecoveryTimer = 0;
+    float staminaRecoveryTimer = 0;
+    TakeDamageEffect takeDamageFX;
+    LowHPEffect lowHPFX;
 
     [SyncVar] public float maxStamina = 100f;
     [SyncVar(hook = nameof(OnStaminaChanged))] public float currentStamina;
 
     public UnityEvent OnPlayerKnocked;
+    
+    float LowHPThreshold => maxHP * (lowHPThreshold / 100f);
+    float LowHPFXThreshold => maxHP * (lowHPEffectsThreshold / 100f);
+
+    float heartbeatTimer = 0f;
 
     #region Lifecycle
 
     public override void OnStartServer() => ResetStats();
+
+    private void Start()
+    {
+        if (!pData.isLocalPlayer) return;
+
+        if (takeDamageGO.TryGetComponent(out takeDamageFX))
+            GameManager.Instance.ppController.RegisterEffect(takeDamageFX);
+
+        if (lowHPGO.TryGetComponent(out lowHPFX))
+            GameManager.Instance.ppController.RegisterEffect(lowHPFX);
+    }
 
     [Server]
     public void ResetStats()
@@ -28,12 +61,18 @@ public class PlayerStats : EntityStats
         currentKnock = 0f;
         dead = false;
         knocked = false;
+
+        RpcUpdateLowHPEffect(1, false);
     }
 
     protected override void Update()
     {
-        if (!isServer || dead) return;
+        if (dead) return;
+        TickHeartbeat();
 
+        if (!isServer) return;
+
+        TickHealthRecovery();
         TickStaminaRecovery();
         TickKnockRecovery();
 
@@ -42,6 +81,33 @@ public class PlayerStats : EntityStats
             pData.Skin_Data.Ragdoll_Manager.DisableRagdoll();
             knocked = false;
         }
+    }
+
+    void TickHeartbeat()
+    {
+        if (!pData.isLocalPlayer || heartbeatSFXs == null || heartbeatSFXs.Length == 0) return;
+
+        float lowHP = LowHPThreshold;
+        if (currentHP >= lowHP)
+        {
+            heartbeatTimer = 0f;
+            return;
+        }
+
+        float danger = 1f - Mathf.Clamp01(currentHP / lowHP);
+
+        float interval = Mathf.Lerp(1.5f, 0.3f, danger);
+        heartbeatTimer -= Time.deltaTime;
+
+        if (heartbeatTimer > 0f) return;
+
+        heartbeatTimer = interval;
+
+        int index = Mathf.Clamp(Mathf.FloorToInt(danger * heartbeatSFXs.Length), 0, heartbeatSFXs.Length - 1);
+        var sfx = heartbeatSFXs[index];
+
+        float volumeMultiplier = Mathf.Lerp(0.3f, 1f, danger);
+        AudioManager.Instance.PlayOneShot(audioSrc, sfx, volumeMultiplier);
     }
 
     #endregion
@@ -70,13 +136,55 @@ public class PlayerStats : EntityStats
 
     #region HP
 
+    private void TickHealthRecovery()
+    {
+        float lowHP = LowHPThreshold;
+
+        if (currentHP >= lowHP) return;
+
+        healthRecoveryTimer = Mathf.Clamp(healthRecoveryTimer + Time.deltaTime, 0f, healthRecoveryDelay);
+        if (!Mathf.Approximately(healthRecoveryTimer, healthRecoveryDelay)) return;
+
+        currentHP = Mathf.Clamp(currentHP + Time.deltaTime * healthRecoveryRate, 0f, lowHP);
+
+        lowHP = LowHPFXThreshold;
+        bool isLow = currentHP < lowHP;
+        float normHP = isLow ? currentHP / lowHP : 1f;
+
+        pData.Skin_Data.CharacterAnimator.SetBool("LowHP", isLow);
+        RpcUpdateLowHPEffect(normHP, isLow);
+    }
+
     [Server]
     public override void ApplyDamage(AttackEvent source)
     {
         if (!GameManager.Instance.gameStarted || !GameManager.Instance.dayMod.dayStarted)
             return;
 
+        float normDmg = source.AttackStat_.AttackDamage / 100f;
+        RpcTriggerDamageEffect(normDmg);
         base.ApplyDamage(source);
+
+        float lowHP = LowHPFXThreshold;
+        bool isLow = currentHP < lowHP;
+        float normHP = isLow ? currentHP / lowHP : 1f;
+
+        pData.Skin_Data.CharacterAnimator.SetBool("LowHP", isLow);
+        RpcUpdateLowHPEffect(normHP, isLow);
+    }
+
+    [ClientRpc]
+    void RpcTriggerDamageEffect(float normDmg)
+    {
+        if (!pData.isLocalPlayer || takeDamageFX == null) return;
+        takeDamageFX.Trigger(normDmg);
+    }
+
+    [ClientRpc]
+    void RpcUpdateLowHPEffect(float normHP, bool isLow)
+    {
+        if (!pData.isLocalPlayer || lowHPFX == null) return;
+        lowHPFX.SetHealthNormalized(isLow ? normHP : 1f);
     }
 
     protected override void OnHPChanged(float oldVal, float newVal)

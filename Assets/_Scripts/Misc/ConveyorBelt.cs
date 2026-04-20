@@ -1,4 +1,5 @@
 using Mirror;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ConveyorBelt : NetworkBehaviour
@@ -14,6 +15,7 @@ public class ConveyorBelt : NetworkBehaviour
 
     readonly Vector2 offsetDir = new(0f, 1f);
     readonly System.Collections.Generic.HashSet<ItemBase> objectsOnBelt = new();
+    readonly List<ItemBase> itemsToRemove = new();
 
     void Start()
     {
@@ -32,7 +34,22 @@ public class ConveyorBelt : NetworkBehaviour
         foreach (var item in objectsOnBelt)
         {
             if (item == null) continue;
+            if (item.HasOwner)
+            {
+                itemsToRemove.Add(item);
+                continue;
+            }
+
             ApplyBeltForce(item);
+        }
+
+        if (itemsToRemove.Count > 0)
+        {
+            foreach (var item in itemsToRemove)
+                if (objectsOnBelt.Contains(item))
+                    objectsOnBelt.Remove(item);
+
+            itemsToRemove.Clear();
         }
     }
 

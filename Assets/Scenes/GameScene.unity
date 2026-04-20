@@ -14211,6 +14211,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 197715764}
   m_CullTransparentMesh: 1
+--- !u!1 &205149743
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 205149744}
+  - component: {fileID: 205149745}
+  m_Layer: 0
+  m_Name: '- Post Processing Manager -'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &205149744
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 205149743}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1730614855}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &205149745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 205149743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ddd9ac2b4e5d7d43a30b3130a4b5249, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PostProcessingController
+  volume: {fileID: 832575518}
+  effectGOs: []
+  maxVignette: 0.5
+  maxChromatic: 0.7
+  minSaturation: -80
 --- !u!43 &205660318
 Mesh:
   m_ObjectHideFlags: 0
@@ -81038,6 +81087,7 @@ MonoBehaviour:
   playMod: {fileID: 1867659647}
   dngMod: {fileID: 1142356163}
   progressionMod: {fileID: 53912379}
+  ppController: {fileID: 205149745}
   gameStarted: 0
   Seed: 67
   debug: 0
@@ -81062,6 +81112,7 @@ Transform:
   - {fileID: 1142356162}
   - {fileID: 1679809402}
   - {fileID: 1202678317}
+  - {fileID: 205149744}
   m_Father: {fileID: 1585093472}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1732480799
