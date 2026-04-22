@@ -25,6 +25,7 @@ public class GameManager : NetworkBehaviour
     public GM_DungeonModule dngMod;
     public GM_DayProgressionModule progressionMod;
     public PostProcessingController ppController; // ¯\_(~o~)_/¯
+    public Int_Teleport Teleporter;
 
     [SyncVar]
     public bool gameStarted = false;

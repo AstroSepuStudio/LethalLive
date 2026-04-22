@@ -63,6 +63,7 @@ public class GM_DungeonModule : NetworkBehaviour
         dungeonOpen = true;
 
         Instance.progressionMod.ApplyForDay(Instance.dayMod.currentDay);
+        Instance.Teleporter.EnableInteractable();
 
         mapSeed = LobbySettings.Instance.UseSetSeed
         ? Instance.Seed
@@ -75,6 +76,7 @@ public class GM_DungeonModule : NetworkBehaviour
     public void CloseDungeon()
     {
         dungeonOpenerInt.SetLabel("Open connection");
+        Instance.Teleporter.DisableInteractable();
 
         OnDungeonCloses?.Invoke();
         dungeonOpen = false;

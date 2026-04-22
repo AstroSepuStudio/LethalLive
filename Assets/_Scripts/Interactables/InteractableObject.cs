@@ -12,13 +12,17 @@ public class InteractableObject : NetworkBehaviour
     [SerializeField] protected UnityEvent<PlayerData> OnStopInteractEvent;
     [SerializeField] protected UnityEvent<PlayerData> OnHoldInteractEvent;
 
+    [SerializeField] protected bool interactable = true;
     protected bool _holding;
     protected float startHoldTime;
 
+    public bool IsInteractable => interactable;
     public virtual void SelectClosest() => canvas.SelectClosest();
     public virtual void DeselectClosest() => canvas.DeselectClosest();
-    public virtual void DisableCanvas() => canvas.DisableCanvas();
     public virtual void EnableCanvas() => canvas.EnableCanvas();
+    public virtual void DisableCanvas() => canvas.DisableCanvas();
+    public virtual void EnableInteractable() => interactable = true;
+    public virtual void DisableInteractable() => interactable = false;
 
     public void SetLabel(string label) => canvas.SetLabel(label);
     public void SetDescription(string description) => canvas.SetLabel(description);
@@ -34,6 +38,18 @@ public class InteractableObject : NetworkBehaviour
     public virtual void OnInteract(PlayerData sourceData)
     {
         StartCoroutine(CheckForHold(sourceData));
+    }
+
+    public virtual void OnStopInteract(PlayerData sourceData)
+    {
+        _holding = false;
+        TargetUpdateFill(sourceData.connectionToClient, 0f);
+        OnStopInteractEvent?.Invoke(sourceData);
+    }
+
+    public virtual void OnHoldInteract(PlayerData sourceData)
+    {
+        OnHoldInteractEvent?.Invoke(sourceData);
     }
 
     IEnumerator CheckForHold(PlayerData sourceData)
@@ -61,16 +77,9 @@ public class InteractableObject : NetworkBehaviour
         TargetUpdateFill(sourceData.connectionToClient, 0f);
 
         if (timer >= holdTime)
-            OnHoldInteractEvent?.Invoke(sourceData);
+            OnHoldInteract(sourceData);
         else
             OnInteractEvent?.Invoke(sourceData);
-    }
-
-    public virtual void OnStopInteract(PlayerData sourceData)
-    {
-        _holding = false;
-        TargetUpdateFill(sourceData.connectionToClient, 0f);
-        OnStopInteractEvent?.Invoke(sourceData);
     }
 
     [TargetRpc]

@@ -67,7 +67,7 @@ public class CameraMovement : MonoBehaviour
             pData.CameraTarget.position,
             ref velocity,
             smoothTime);
-
+        
         pCamera.transform.localRotation = Quaternion.identity;
 
         if (pData._LockPlayer || Cursor.lockState == CursorLockMode.None) return;
@@ -108,11 +108,9 @@ public class CameraMovement : MonoBehaviour
     public void PauseCamera() => _stop = true;
     public void ResumeCamera() => _stop = false;
 
-    // Punch path — only blocks mouse input, never touches transform
     public void LockCameraInput() => _cameraInputLocked = true;
     public void UnlockCameraInput() => _cameraInputLocked = false;
 
-    // Server-driven path (lobby screen, abilities) — smooth rotation toward a direction
     public void ForcePlayerToAimDirection(Vector3 worldDirection)
     {
         Vector3 dir = worldDirection;
@@ -140,5 +138,18 @@ public class CameraMovement : MonoBehaviour
         }
 
         pData.transform.rotation = targetRotation;
+    }
+
+    public void StartTeleport()
+    {
+        pCamera.enabled = false;
+        StartCoroutine(TeleportCoroutine());
+    }
+    
+    IEnumerator TeleportCoroutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+        pCamera.enabled = true;
+        velocity = Vector3.zero;
     }
 }

@@ -18,6 +18,7 @@ public class RiggingManager : NetworkBehaviour
     [SerializeField] Rig LookAtTabletChainRig;
     [SerializeField] Transform RHCRTarget;
     [SerializeField] Transform LHCRTarget;
+    [SerializeField] Transform customTarget;
 
     Coroutine camRigTransition;
     Coroutine camTargetRigTransition;
@@ -143,6 +144,42 @@ public class RiggingManager : NetworkBehaviour
         FollowCameraRig.weight = 0;
         FollowCameraTargetRig.weight = 0;
         StopCameraRigs = true;
+    }
+
+    [ClientRpc]
+    public void RpcAnimateRightHandChainRig(Vector3 initialPos, Vector3 finalPos, float duration)
+    {
+        StartCoroutine(AnimateRightHandChainRigCor(initialPos, finalPos, duration));
+    }
+
+    public void AnimateRightHandChainRig(Vector3 initialPos, Vector3 finalPos, float duration)
+    {
+        StartCoroutine(AnimateRightHandChainRigCor(initialPos, finalPos, duration));
+    }
+
+    IEnumerator AnimateRightHandChainRigCor(Vector3 initialPos, Vector3 finalPos, float duration)
+    {
+        RightHandChainRig.weight = 1f;
+        customTarget.position = initialPos;
+        RHCRTargetTarget = customTarget;
+
+        FollowCameraRig.weight = 0;
+        FollowCameraTargetRig.weight = 0;
+        StopCameraRigs = true;
+
+        float timer = 0;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            customTarget.position = Vector3.Lerp(initialPos, finalPos, timer / duration);
+            yield return null;
+        }
+
+        customTarget.position = finalPos;
+
+        RHCRTargetTarget = null;
+        RightHandChainRig.weight = 0f;
+        StopCameraRigs = false;
     }
 
     [ClientRpc]

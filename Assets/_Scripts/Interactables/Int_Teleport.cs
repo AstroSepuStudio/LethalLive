@@ -1,4 +1,3 @@
-using Mirror;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -8,11 +7,15 @@ public class Int_Teleport : InteractableObject
     [SerializeField] float minDistance = 1f;
     [SerializeField] float maxDistance = 4f;
     [SerializeField] AudioSFX musicSFX;
+    [SerializeField] ParticleSystem[] teleportParticles;
+    [SerializeField] Material teleportEMMat;
 
     public readonly UnityEvent<PlayerData> OnPlayerTeleports;
 
     [Header("Debug")]
     [SerializeField] bool _displayRing;
+
+    static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
 
     public void SetTeleportPos(Vector3 pos)
     {
@@ -24,7 +27,38 @@ public class Int_Teleport : InteractableObject
         targetPosition.parent = parent;
         targetPosition.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
-    
+
+    public override void EnableInteractable()
+    {
+        base.EnableInteractable();
+        foreach (var tps in teleportParticles)
+            tps.Play();
+
+        teleportEMMat.SetColor(EmissionColor, teleportEMMat.color * 10);
+    }
+
+    public override void DisableInteractable()
+    {
+        base.DisableInteractable();
+
+        foreach (var tps in teleportParticles)
+            tps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+        teleportEMMat.SetColor(EmissionColor, teleportEMMat.color * -10);
+    }
+
+    public override void OnInteract(PlayerData sourceData)
+    {
+        base.OnInteract(sourceData);
+        sourceData.RpcStartTeleport();
+    }
+
+    public override void OnStopInteract(PlayerData sourceData)
+    {
+        base.OnStopInteract(sourceData);
+        sourceData.RpcCancelTeleport();
+    }
+
     public void Teleport(PlayerData sourceData)
     {
         if (!GameManager.Instance.dngMod.dungeonOpen) return;
@@ -59,6 +93,7 @@ public class Int_Teleport : InteractableObject
 
         if (!foundValidPos) return;
 
+        sourceData.RpcCompleteTeleport();
         sourceData.Teleport(desiredPosition);
         sourceData._PlayerInOffice = false;
 

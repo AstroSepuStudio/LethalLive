@@ -48,6 +48,7 @@ public class InteractonDetection : NetworkBehaviour
         foreach (var hit in hits)
         {
             if (!hit.TryGetComponent<InteractableObject>(out var item)) continue;
+            if (!item.IsInteractable) continue;
             detectedItems.Add(item);
 
             if (!nearbyItems.Contains(item))
@@ -87,6 +88,7 @@ public class InteractonDetection : NetworkBehaviour
         foreach (var item in candidates)
         {
             if (item == null) continue;
+            if (!item.IsInteractable) continue;
 
             Vector3 toItem = (item.transform.position - cam.position).normalized;
             float angle = Vector3.Angle(cam.forward, toItem);

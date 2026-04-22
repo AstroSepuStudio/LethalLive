@@ -44,6 +44,9 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
     public EmoteWheelManager EmoteManager;
     public HUD_Manager HUDmanager;
     public SkinData Skin_Data;
+    [SerializeField] ParticleSystem teleportPS;
+    [SerializeField] AudioSFX teleportingSFX;
+    [SerializeField] AudioSFX teleportFinishSFX;
 
     [Header("Camera")]
     public Transform Head;
@@ -387,5 +390,25 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
     {
         EnvironmentLightManager.Instance.ResetAmbient();
         AudioManager.Instance.StopMusic();
+    }
+
+    [ClientRpc]
+    public void RpcStartTeleport()
+    {
+        teleportPS.Play();
+        AudioManager.Instance.PlayOneShot(Loud_AS, teleportingSFX, gameObject, SoundLoudness.Average);
+    }
+
+    [ClientRpc]
+    public void RpcCancelTeleport()
+    {
+        teleportPS.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+    }
+
+    [ClientRpc]
+    public void RpcCompleteTeleport()
+    {
+        AudioManager.Instance.PlayOneShot(Loud_AS, teleportFinishSFX, gameObject, SoundLoudness.Average);
+        Camera_Movement.StartTeleport();
     }
 }
