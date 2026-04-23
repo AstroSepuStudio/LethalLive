@@ -9,16 +9,15 @@ public class InteractableCanvas : MonoBehaviour
     public Canvas itemCanvas;
     public Image higlightImg;
     public Image holdImgDisplayer;
-    public Sprite highlightedSprite;
-    public Sprite lowlightedSprite;
 
     [SerializeField] GameObject holdTxtGo;
+    [SerializeField] GameObject interactGo;
     [SerializeField] TextMeshProUGUI labelTxt;
     [SerializeField] TextMeshProUGUI descriptionTxt;
 
     [SerializeField] Image bgImg;
-    [SerializeField] Color tapColor = Color.darkCyan;
-    [SerializeField] Color holdColor = Color.orangeRed;
+    [SerializeField] Color selectedClr = Color.darkOrange;
+    [SerializeField] Color deselectedClr = Color.darkGreen;
 
     string defaultLabel;
     string defaultDescription;
@@ -26,8 +25,8 @@ public class InteractableCanvas : MonoBehaviour
     protected virtual void Start()
     {
         if (holdTxtGo != null) holdTxtGo.SetActive(hold);
-        if (bgImg != null) bgImg.color = hold ? holdColor : tapColor;
         if (itemCanvas != null) itemCanvas.gameObject.SetActive(false);
+        if (interactGo != null) interactGo.SetActive(false);
 
         defaultLabel = labelTxt.text;
         defaultDescription = descriptionTxt.text;
@@ -50,11 +49,13 @@ public class InteractableCanvas : MonoBehaviour
 
     public virtual void SelectClosest()
     {
-        if (higlightImg != null) higlightImg.sprite = highlightedSprite;
+        if (higlightImg != null) higlightImg.color = selectedClr;
+        if (interactGo != null) interactGo.SetActive(true);
     }
 
     public virtual void DeselectClosest()
     {
-        if (higlightImg != null) higlightImg.sprite = lowlightedSprite;
+        if (higlightImg != null) higlightImg.color = deselectedClr;
+        if (interactGo != null) interactGo.SetActive(false);
     }
 }

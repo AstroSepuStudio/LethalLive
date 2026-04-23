@@ -14,9 +14,6 @@ public class ItemBase : InteractableObject
     [SerializeField] protected Renderer itemRenderer;
     [SerializeField] protected ItemAnimationModule animationModule;
 
-    [SerializeField] TextMeshProUGUI itemNameTxt;
-    [SerializeField] TextMeshProUGUI itemPriceTxt;
-
     [SerializeField] ItemAction primaryAction;
     [SerializeField] ItemAction secondaryAction;
 
@@ -150,12 +147,8 @@ public class ItemBase : InteractableObject
     public override void EnableCanvas()
     {
         canvas.EnableCanvas();
-
-        if (itemNameTxt != null)
-            itemNameTxt.SetText(ItemData.itemName);
-
-        if (ItemData.isSellable && itemPriceTxt != null)
-            itemPriceTxt.SetText($"${ItemValue}");
+        canvas.SetLabel(ItemData.itemName);
+        canvas.SetDescription(ItemValue.ToString());
     }
 
     [Server]

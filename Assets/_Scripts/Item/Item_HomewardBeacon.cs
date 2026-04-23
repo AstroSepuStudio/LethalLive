@@ -49,13 +49,13 @@ public class Item_HomewardBeacon : ItemBase
     public override void SelectClosest()
     {
         canvas.SelectClosest();
-        highlightImgPlaced.sprite = canvas.highlightedSprite;
+        //highlightImgPlaced.sprite = canvas.highlightedSprite;
     }
 
     public override void DeselectClosest()
     {
         canvas.DeselectClosest();
-        highlightImgPlaced.sprite = canvas.lowlightedSprite;
+        //highlightImgPlaced.sprite = canvas.lowlightedSprite;
     }
 
     #endregion

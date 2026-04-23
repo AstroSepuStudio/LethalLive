@@ -2,6 +2,7 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using static Unity.VisualScripting.Member;
 
 public class EntityStats : NetworkBehaviour
 {
@@ -105,6 +106,12 @@ public class EntityStats : NetworkBehaviour
         this.maxHP = maxHP;
         if (restore)
             currentHP = maxHP;
+    }
+
+    [Server]
+    public virtual void RestoreHealth(float amount)
+    {
+        currentHP = Mathf.Clamp(currentHP + amount, 0f, maxHP);
     }
 
     [Server]

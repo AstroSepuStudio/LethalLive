@@ -257,14 +257,13 @@ MonoBehaviour:
   OnHoldInteractEvent:
     m_PersistentCalls:
       m_Calls: []
+  interactable: 1
   ItemData: {fileID: 11400000, guid: e876387970135904991dc64764e7c5e6, type: 2}
   identity: {fileID: 6818651458780780045}
   rb: {fileID: 2342669760519003277}
   coll: {fileID: 2545860507069542307}
   itemRenderer: {fileID: 8832228895478999914}
   animationModule: {fileID: 1636338274897175807}
-  itemNameTxt: {fileID: 9102689919361804620}
-  itemPriceTxt: {fileID: 6880008698537713054}
   primaryAction: {fileID: 4044414459592796408}
   secondaryAction: {fileID: 0}
   ItemValue: 0
@@ -295,26 +294,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8624665948880250572}
     m_Modifications:
-    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1032957421394291918, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2407890024022995578, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
       propertyPath: m_Name
       value: Interactable Canvas
@@ -403,26 +382,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7217482353382270470, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -439,33 +398,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b4d2d9f95bdb53429b19525d766a5b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractableCanvas
---- !u!114 &6880008698537713054 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 436969226428498592, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-  m_PrefabInstance: {fileID: 6443206616131854142}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &7299442600008818990 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4334162796013780496, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
   m_PrefabInstance: {fileID: 6443206616131854142}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &9102689919361804620 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2826463995276998258, guid: 964aa7db891395549b65dc3f5b6a3dc2, type: 3}
-  m_PrefabInstance: {fileID: 6443206616131854142}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &7877909293491943406
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,7 +1,7 @@
 using Mirror;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.ProBuilder;
 
 public class PlayerStats : EntityStats
 {
@@ -37,6 +37,9 @@ public class PlayerStats : EntityStats
     float LowHPFXThreshold => maxHP * (lowHPEffectsThreshold / 100f);
 
     float heartbeatTimer = 0f;
+    float tookDamageTimer = 0;
+
+    Coroutine tookDmgCor;
 
     #region Lifecycle
 
@@ -151,8 +154,19 @@ public class PlayerStats : EntityStats
         bool isLow = currentHP < lowHP;
         float normHP = isLow ? currentHP / lowHP : 1f;
 
+        if (!isLow)
+            pData.Skin_Data.CharacterAnimator.SetBool("Hurt", false);
+
         pData.Skin_Data.CharacterAnimator.SetBool("LowHP", isLow);
         RpcUpdateLowHPEffect(normHP, isLow);
+    }
+
+    public override void RestoreHealth(float amount)
+    {
+        base.RestoreHealth(amount);
+
+        if (currentHP >= LowHPThreshold)
+            pData.Skin_Data.CharacterAnimator.SetBool("Hurt", false);
     }
 
     [Server]
@@ -160,6 +174,11 @@ public class PlayerStats : EntityStats
     {
         if (!GameManager.Instance.gameStarted || !GameManager.Instance.dayMod.dayStarted)
             return;
+
+        if (tookDmgCor == null)
+            tookDmgCor = StartCoroutine(TookDamageCoroutine());
+        else
+            tookDamageTimer = 1;
 
         float normDmg = source.AttackStat_.AttackDamage / 100f;
         RpcTriggerDamageEffect(normDmg);
@@ -221,6 +240,23 @@ public class PlayerStats : EntityStats
     {
         currentHP = 0f;
         HandleDeath(default, true);
+    }
+
+    IEnumerator TookDamageCoroutine()
+    {
+        pData.Skin_Data.CharacterAnimator.SetBool("Hurt", true);
+
+        tookDamageTimer = 1;
+        while (tookDamageTimer > 0)
+        {
+            tookDamageTimer -= Time.deltaTime;
+            yield return null;
+        }
+
+        if (currentHP >= LowHPThreshold)
+            pData.Skin_Data.CharacterAnimator.SetBool("Hurt", false);
+
+        tookDmgCor = null;
     }
 
     #endregion
