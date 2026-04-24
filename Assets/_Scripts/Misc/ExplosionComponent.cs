@@ -20,11 +20,17 @@ public class ExplosionComponent : NetworkBehaviour
     }
 
     [Command]
-    public void TriggerExplosion()
-    {
-        if (_triggered || _onCooldown) return;
-        if (!_multiTrigger) _triggered = true;
+    public void CmdTriggerExplosion() => TriggerExplosion(false);
 
+    [Server]
+    public void TriggerExplosion(bool forceExplosion)
+    {
+        if (!forceExplosion)
+        {
+            if (_triggered || _onCooldown) return;
+            if (!_multiTrigger) _triggered = true;
+        }
+        
         RPC_TriggerExplosionParticles();
         StartCoroutine(Cooldown());
 

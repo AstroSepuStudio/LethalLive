@@ -11,6 +11,12 @@ public class Int_DungeonOpener : InteractableObject
     [SerializeField] Transform bottomPosition;
     [SerializeField] float animationDuration = 0.6f;
 
+    public override bool CanBeInteracted()
+    {
+        bool interactable = this.interactable && !GameManager.Instance.onDeadTime;
+        return interactable;
+    }
+
     public override void OnHoldInteract(PlayerData sourceData)
     {
         base.OnHoldInteract(sourceData);

@@ -25,6 +25,14 @@ public class GM_DayCycleModule : NetworkBehaviour
     [SerializeField] TextMeshProUGUI dayTxt;
     [SerializeField] TextMeshProUGUI dayNum;
 
+    [SerializeField] GameObject dayEndGO;
+    [SerializeField] CanvasGroup quotaStateGroup;
+    [SerializeField] CanvasGroup newQuotaGroup;
+    [SerializeField] TextMeshProUGUI quotaLabelTxt;
+    [SerializeField] TextMeshProUGUI quotaMetStateTxt;
+    [SerializeField] TextMeshProUGUI newQuotaLabelTxt;
+    [SerializeField] TextMeshProUGUI newQuotaValueTxt;
+
     [SerializeField] DayTimeEvent[] dayTimeEvents;
     [SerializeField] DayTimeEvent[] clientTimeEvents;
 
@@ -33,6 +41,10 @@ public class GM_DayCycleModule : NetworkBehaviour
     [SerializeField] AudioSFX numberSfx;
     [SerializeField] AudioSFX dewSFX;
     [SerializeField] AudioSFX intermissionSFX;
+    [SerializeField] AudioSFX boomBasic;
+    [SerializeField] AudioSFX boomDanger;
+    [SerializeField] AudioSFX boomSnare;
+
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioSource speakerSrc;
 
@@ -105,7 +117,6 @@ public class GM_DayCycleModule : NetworkBehaviour
         nextEventIndex = 0;
 
         dayStarted = true;
-        Instance.SetUpNewDay();
         OnDayStarted?.Invoke(currentDay);
 
         StartCoroutine(DayTimer());
@@ -162,27 +173,151 @@ public class GM_DayCycleModule : NetworkBehaviour
     [Server]
     public void FinishDay()
     {
-        OnDayEnded?.Invoke(currentDay);
+        bool quotaMet = Instance.ecoMod.IsQuotaMet;
+        int quotaTarget = Instance.ecoMod.targetQuota;
+        int nextQuota = Instance.ecoMod.ComputeAndStageNextQuota(currentDay + 1);
 
-        foreach (var player in Instance.playMod.playersOnDungeon)
-        {
-            player.Player_Stats.ExecutePlayer();
-        }
+        if (quotaMet) Instance.ecoMod.TakeQuotaValue();
 
-        Instance.playMod.playersOnDungeon.Clear();
+        Instance.onDeadTime = true;
 
-        dayStarted = false;
+        RpcFinishDay(quotaMet, nextQuota);
 
-        Instance.dngMod.CloseDungeon();
-        Instance.CheckQuotaCompletion();
-
-        RpcFinishDay();
+        StartCoroutine(PostAnimationSequence(quotaMet));
     }
 
     [ClientRpc]
-    void RpcFinishDay()
+    void RpcFinishDay(bool quotaMet, int nextQuota)
     {
         clientSortedEvents?.Clear();
+        StartCoroutine(FinishDayAnimation(quotaMet, nextQuota));
+    }
+
+    IEnumerator FinishDayAnimation(bool quotaMet, int nextQuota)
+    {
+        quotaLabelTxt.enabled = false;
+        quotaMetStateTxt.enabled = false;
+        newQuotaLabelTxt.enabled = false;
+        newQuotaValueTxt.enabled = false;
+        quotaStateGroup.alpha = 0f;
+        newQuotaGroup.alpha = 0f;
+
+        dayEndGO.SetActive(true);
+        dayCycleCanvas.SetActive(true);
+
+        quotaLabelTxt.enabled = true;
+        AudioManager.Instance.PlayOneShot(audioSource, boomBasic);
+
+        yield return StartCoroutine(FadeCanvasGroup(quotaStateGroup, 0f, 1f, 1f));
+        yield return new WaitForSeconds(0.5f);
+
+        quotaMetStateTxt.SetText(quotaMet ? "Met" : "Not Met");
+        quotaMetStateTxt.color = Color.white;
+        quotaMetStateTxt.enabled = true;
+
+        if (!quotaMet)
+        {
+            AudioManager.Instance.PlayOneShot(audioSource, boomDanger);
+            float colorTimer = 0f;
+            float colorDuration = 1.5f;
+            while (colorTimer < colorDuration)
+            {
+                colorTimer += Time.deltaTime;
+                quotaMetStateTxt.color = Color.Lerp(Color.white, Color.red, colorTimer / colorDuration);
+                yield return null;
+            }
+            quotaMetStateTxt.color = Color.red;
+            yield return new WaitForSeconds(0.5f);
+        }
+        else
+        {
+            AudioManager.Instance.PlayOneShot(audioSource, boomSnare);
+            quotaMetStateTxt.color = Color.green;
+            yield return new WaitForSeconds(2f);
+        }
+
+        yield return StartCoroutine(FadeCanvasGroup(quotaStateGroup, 1f, 0f, 1f));
+        quotaLabelTxt.enabled = false;
+        quotaMetStateTxt.enabled = false;
+
+        if (quotaMet)
+        {
+            yield return new WaitForSeconds(0.3f);
+
+            AudioManager.Instance.PlayOneShot(audioSource, boomBasic);
+            newQuotaLabelTxt.enabled = true;
+            yield return StartCoroutine(FadeCanvasGroup(newQuotaGroup, 0f, 1f, 1f));
+
+            newQuotaValueTxt.enabled = true;
+            yield return StartCoroutine(RollNumber(newQuotaValueTxt, 0, nextQuota, 1.5f));
+
+            yield return new WaitForSeconds(1.5f);
+
+            yield return StartCoroutine(FadeCanvasGroup(newQuotaGroup, 1f, 0f, 1f));
+            newQuotaLabelTxt.enabled = false;
+            newQuotaValueTxt.enabled = false;
+        }
+
+        dayEndGO.SetActive(false);
+    }
+
+    IEnumerator FadeCanvasGroup(CanvasGroup group, float from, float to, float duration)
+    {
+        float timer = 0f;
+        group.alpha = from;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            group.alpha = Mathf.Lerp(from, to, timer / duration);
+            yield return null;
+        }
+        group.alpha = to;
+    }
+
+    IEnumerator RollNumber(TextMeshProUGUI label, int from, int to, float duration)
+    {
+        float timer = 0f;
+        float nextSFXTime = 0f;
+        int sfxIdx = 0;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+
+            if (letterSfx.Length > 0 && timer >= nextSFXTime)
+            {
+                AudioManager.Instance.PlayOneShot(audioSource, letterSfx[sfxIdx % letterSfx.Length], gameObject, SoundLoudness.NoSound);
+                sfxIdx++;
+                nextSFXTime = timer + 0.08f;
+            }
+
+            float t = Mathf.SmoothStep(0f, 1f, timer / duration);
+            int current = Mathf.RoundToInt(Mathf.Lerp(from, to, t));
+            label.SetText($"${current}");
+            yield return null;
+        }
+        label.SetText($"${to}");
+    }
+
+    [Server]
+    IEnumerator PostAnimationSequence(bool quotaMet)
+    {
+        yield return new WaitForSeconds(2.5f);
+
+        foreach (var player in Instance.playMod.playersOnDungeon)
+            player.Player_Stats.ExecutePlayer();
+
+        Instance.playMod.playersOnDungeon.Clear();
+        
+        yield return new WaitForSeconds(3f);
+
+        Instance.CheckQuotaCompletion(quotaMet);
+        Instance.onDeadTime = false;
+
+        OnDayEnded?.Invoke(currentDay);
+        Instance.dngMod.CloseDungeon();
+
+        dayStarted = false;
     }
 
     [Server]
@@ -268,7 +403,6 @@ public class GM_DayCycleModule : NetworkBehaviour
         float inGameMinutesElapsed = currentDayTime * (TOTAL_IN_GAME_MINUTES / dayDuration);
         int totalMinutes = DAY_START_HOUR * 60 + Mathf.RoundToInt(inGameMinutesElapsed);
 
-        // Roll over midnight
         totalMinutes %= 1440;
 
         int hours = totalMinutes / 60;

@@ -49,35 +49,25 @@ public abstract class DungeonSpawner : MonoBehaviour, IDungeonSpawner
 
     protected virtual bool EvaluateChance(DungeonSpawnPoint point, DungeonGenerator generator)
     {
-        float roll = Random.Range(0f, 100f);
+        float roll = (float)(generator.RNG.NextDouble() * 100f);
+
         float effective = point.chance * generator.GetDificultyMultiplier(point.transform.position);
         return roll <= effective;
     }
 
-    /// <summary>
-    /// Returns a randomised position from the point's offset settings,
-    /// then optionally snaps it to the nearest surface hit along any of
-    /// the point's <see cref="DungeonSpawnPoint.snapDirections"/>.
-    /// </summary>
-    protected static Vector3 ResolvePosition(DungeonSpawnPoint point)
+    protected static Vector3 ResolvePosition(DungeonSpawnPoint point, System.Random rng)
     {
-        Vector3 pos = RandomisedPosition(point);
+        Vector3 pos = RandomisedPosition(point, rng);
         if (!point.snapToSurface || point.snapDirections == null || point.snapDirections.Length == 0)
             return pos;
-
         return TrySnap(pos, point, out Vector3 snapped) ? snapped : pos;
     }
 
-    /// <summary>
-    /// Returns a rotation derived from the point's maxRotation setting,
-    /// then optionally aligns it to the surface normal when
-    /// <see cref="DungeonSpawnPoint.alignToNormal"/> is true.
-    /// </summary>
-    protected static Quaternion ResolveRotation(DungeonSpawnPoint point)
+    protected static Quaternion ResolveRotation(DungeonSpawnPoint point, System.Random rng)
     {
         if (!point.snapToSurface || !point.alignToNormal ||
             point.snapDirections == null || point.snapDirections.Length == 0)
-            return RandomisedRotation(point);
+            return RandomisedRotation(point, rng);
 
         Vector3 origin = point.transform.position;
         Vector3 blendedNormal = Vector3.zero;
@@ -87,23 +77,16 @@ public abstract class DungeonSpawner : MonoBehaviour, IDungeonSpawner
             Vector3 rayDir = (Vector3)DirectionUtils.DirectionVector(dir);
             if (!Physics.Raycast(origin, rayDir, out RaycastHit hit,
                     point.snapMaxDistance, point.snapLayers)) continue;
-
             if (point.useSpecificNormalDirection && dir != point.normalAlignDirection) continue;
-
             blendedNormal += hit.normal;
         }
 
-        if (blendedNormal == Vector3.zero) return RandomisedRotation(point);
+        if (blendedNormal == Vector3.zero) return RandomisedRotation(point, rng);
 
         blendedNormal.Normalize();
-
-        // Treat whichever local axis the user nominated as the prefab's "up"
         Vector3 prefabUp = (Vector3)DirectionUtils.DirectionVector(point.prefabUpAxis);
-
-        // Align that axis to the surface normal, then layer the point's own
-        // orientation and the random Y-spin on top
         Quaternion normalRot = Quaternion.FromToRotation(prefabUp, blendedNormal);
-        float ySpin = Random.Range(-point.maxRotation, point.maxRotation);
+        float ySpin = (float)(rng.NextDouble() * 2f - 1f) * point.maxRotation;
         return normalRot * Quaternion.Euler(0f, point.transform.rotation.eulerAngles.y + ySpin, 0f);
     }
 
@@ -120,8 +103,6 @@ public abstract class DungeonSpawner : MonoBehaviour, IDungeonSpawner
             if (!Physics.Raycast(origin, rayDir, out RaycastHit hit,
                     point.snapMaxDistance, point.snapLayers)) continue;
 
-            // Project the hit point onto this direction's axis only,
-            // then apply that axis displacement to the accumulated result.
             Vector3 displacement = hit.point - origin + hit.normal * point.snapSurfaceOffset;
             Vector3 axisContribution = Vector3.Scale(displacement, Abs(rayDir));
             result += axisContribution;
@@ -134,18 +115,18 @@ public abstract class DungeonSpawner : MonoBehaviour, IDungeonSpawner
 
     static Vector3 Abs(Vector3 v) => new(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
 
-    static Vector3 RandomisedPosition(DungeonSpawnPoint point)
+    static Vector3 RandomisedPosition(DungeonSpawnPoint point, System.Random rng)
     {
         Vector3 o = point.maxOffset;
         return point.transform.position + new Vector3(
-            Random.Range(-o.x, o.x),
-            Random.Range(-o.y, o.y),
-            Random.Range(-o.z, o.z));
+            (float)(rng.NextDouble() * 2f - 1f) * o.x,
+            (float)(rng.NextDouble() * 2f - 1f) * o.y,
+            (float)(rng.NextDouble() * 2f - 1f) * o.z);
     }
 
-    static Quaternion RandomisedRotation(DungeonSpawnPoint point) =>
+    static Quaternion RandomisedRotation(DungeonSpawnPoint point, System.Random rng) =>
         point.transform.rotation * Quaternion.Euler(
-            0f, Random.Range(-point.maxRotation, point.maxRotation), 0f);
+            0f, (float)(rng.NextDouble() * 2f - 1f) * point.maxRotation, 0f);
 
     protected void DestroyChildren(Transform parent, bool hasNetID, bool isServer, bool ignoreFirst = false)
     {

@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using Mirror;
+using System.Linq;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -36,6 +38,15 @@ public class VortexAI : AIBrain, IHearingListener
     float dispatchTimer = 0f;
     bool canDispatch = false;
 
+    [Header("Skull Crusher Fear")]
+    [SerializeField] float fearDuration = 12f;
+    [SerializeField] float fearImmunityOnTheft = 8f;
+
+    bool _feared = false;
+    float _fearTimer = 0f;
+    float _fearImmunityTimer = 0f;
+    GameObject _skullCrusherSource = null;
+
 #if UNITY_EDITOR
     [Header("Gizmos")]
     [SerializeField] bool showDetectionRadius = true;
@@ -62,18 +73,20 @@ public class VortexAI : AIBrain, IHearingListener
     AIModule_Patience PatienceModule => GetModule<AIModule_Patience>();
     AIModule_ItemCarrier CarrierModule => GetModule<AIModule_ItemCarrier>();
     AIModule_Senses SensesModule => GetModule<AIModule_Senses>();
+    AIModule_Grudge GrudgeModule => GetModule<AIModule_Grudge>();
 
     VortexPack Pack => VortexPack.Instance;
 
-    public float Alpha => AlphaModule?.AlphaValue ?? 0f;
-    public bool IsAlpha => Pack?.IsAlpha(this) ?? false;
-    public ItemBase CarriedItem => CarrierModule?.CarriedItem;
-    public RoomData HomeRoom => Pack?.HomeRoom;
-    public float Patience => PatienceModule?.Patience ?? float.MaxValue;
+    public float Alpha => AlphaModule.AlphaValue;
+    public bool IsAlpha => Pack.IsAlpha(this);
+    public ItemBase CarriedItem => CarrierModule.CarriedItem;
+    public RoomData HomeRoom => Pack.HomeRoom;
+    public float Patience => PatienceModule.Patience;
 
-    public override void PlaySFX(SourceType type, SFXEvent sfxEvent, float pitch)
+    public override void PlaySFX(SourceType type, SFXEvent sfxEvent, float pitch,
+        bool overrideLoudness = false, SoundLoudness loudnessOverride = SoundLoudness.NoSound)
     {
-        pitch *= AlphaModule?.GetPitch() ?? 1f;
+        pitch *= AlphaModule.GetPitch();
         base.PlaySFX(type, sfxEvent, pitch);
     }
 
@@ -81,7 +94,7 @@ public class VortexAI : AIBrain, IHearingListener
     {
         if (!sfxMap.TryGetValue(SFXEvent.AlphaCall, out var group) || group.Clips.Length == 0) return;
         int index = Random.Range(0, group.Clips.Length);
-        RpcPlayAlphaCall(index, AlphaModule?.GetPitch() ?? 1f);
+        RpcPlayAlphaCall(index, AlphaModule.GetPitch());
     }
 
     [ClientRpc]
@@ -98,8 +111,7 @@ public class VortexAI : AIBrain, IHearingListener
         base.OnStartServer();
         lootDropper.OnLootSpawned = (item) =>
         {
-            float am = AlphaModule?.GetMultiplier() ?? 1f;
-            item.MultiplyValue(am);
+            item.MultiplyValue(AlphaModule.GetMultiplier());
             item.SetScale(Vector3.one * Mathf.Lerp(0.6f, 1.2f, Alpha / 100f));
         };
     }
@@ -111,13 +123,43 @@ public class VortexAI : AIBrain, IHearingListener
         SubscribeSensesEvents();
 
         if (!isServer) return;
-        Pack?.Register(this);
+        Pack.Register(this);
         HearingEventBroadcaster.Instance.AddListener(this);
     }
 
     public void OnSoundHeard(AudioSoundEvent soundEvent)
     {
+        if (!isServer) return;
+        if (HomeRoom == null) return;
 
+        if (soundEvent.source.CompareTag("SkullCrusher"))
+        {
+            OnSkullCrusherHeard(soundEvent);
+            return;
+        }
+
+        if (soundEvent.source.CompareTag("Player"))
+        {
+            float homeDist = Vector3.Distance(soundEvent.position, HomeRoom.transform.position);
+            float cellSize = DungeonGenerator.Instance.CellSize;
+            if (homeDist > cellSize * 2f) return;
+
+            if (!IsInAttackState())
+                TriggerReturnHome();
+        }
+    }
+
+    void OnSkullCrusherHeard(AudioSoundEvent soundEvent)
+    {
+        if (_fearImmunityTimer > 0f) return;
+
+        _skullCrusherSource = soundEvent.source;
+        _fearTimer = fearDuration;
+
+        if (!_feared)
+            EnterFear();
+        else
+            StopAgentMovement();
     }
 
     protected override void RegisterModules()
@@ -130,13 +172,33 @@ public class VortexAI : AIBrain, IHearingListener
         home.SetOverride(HomeRoom);
     }
 
+    void EnterFear()
+    {
+        _feared = true;
+        stayQuiet = true;
+        SetIdleState(false);
+        StopAgentMovement();
+
+        if (IsInAttackState())
+            SetState(states[wanderStateIndex]);
+    }
+
+    void ExitFear()
+    {
+        _feared = false;
+        stayQuiet = false;
+        _skullCrusherSource = null;
+        SetIdleState(true);
+        ResumeAgentMovement();
+    }
+
     protected override void OnDestroy()
     {
         base.OnDestroy();
         UnsubscribeSensesEvents();
         if (isServer) 
         { 
-            Pack?.Unregister(this);
+            Pack.Unregister(this);
             HearingEventBroadcaster.Instance.RemoveListener(this);
         }
     }
@@ -166,6 +228,7 @@ public class VortexAI : AIBrain, IHearingListener
         var senses = SensesModule;
         if (senses == null) return;
         senses.OnPlayerTooClose.AddListener(OnPlayerTooClose);
+        senses.OnNewPlayerSpotted.AddListener(OnNewPlayerSpotted);
         senses.OnPlayerSpotted.AddListener(OnPlayerSpotted);
     }
 
@@ -174,7 +237,8 @@ public class VortexAI : AIBrain, IHearingListener
         var senses = SensesModule;
         if (senses == null) return;
         senses.OnPlayerTooClose.RemoveListener(OnPlayerTooClose);
-        senses.OnPlayerSpotted.RemoveListener(OnPlayerSpotted);
+        senses.OnNewPlayerSpotted.RemoveListener(OnNewPlayerSpotted);
+        senses.OnPlayerSpotted.AddListener(OnPlayerSpotted);
     }
 
     void OnPlayerTooClose(PlayerData player)
@@ -183,12 +247,30 @@ public class VortexAI : AIBrain, IHearingListener
         TriggerBackAway();
     }
 
+    void OnNewPlayerSpotted(PlayerData player)
+    {
+        if (!isServer || IsInAttackState()) return;
+
+        if (GrudgeModule != null && GrudgeModule.HasGrudge(player))
+        {
+            TriggerAttackThief(player);
+            return;
+        }
+
+        if (CarriedItem != null) return;
+        if (!IsInWanderState()) return;
+        TriggerFollowPlayer();
+    }
+
     void OnPlayerSpotted(PlayerData player)
     {
-        if (!isServer || IsInAttackState() || CarriedItem != null) return;
-        if (!IsInWanderState()) return;
+        if (!isServer || IsInAttackState()) return;
 
-        TriggerFollowPlayer();
+        if (GrudgeModule != null && GrudgeModule.HasGrudge(player))
+        {
+            TriggerAttackThief(player);
+            return;
+        }
     }
 
     protected override void Update()
@@ -196,13 +278,15 @@ public class VortexAI : AIBrain, IHearingListener
         if (isDying || !isServer) return;
         base.Update();
 
+        TickFear();
+
         if (canDispatch)
         {
             dispatchTimer -= Time.deltaTime;
 
             if (dispatchTimer < 0 && IsAlpha)
             {
-                Pack?.DispatchScouts();
+                Pack.DispatchScouts();
                 dispatchTimer = Random.Range(minDispatchTime, maxDispatchTime);
             }
         }
@@ -215,8 +299,28 @@ public class VortexAI : AIBrain, IHearingListener
         ScanForItems();
     }
 
+    void TickFear()
+    {
+        if (_fearImmunityTimer > 0f)
+            _fearImmunityTimer -= Time.deltaTime;
+
+        if (!_feared) return;
+
+        _fearTimer -= Time.deltaTime;
+        if (_fearTimer <= 0f)
+        {
+            ExitFear();
+            TryResumeWander();
+            return;
+        }
+
+        StopAgentMovement();
+    }
+
     void ScanForItems()
     {
+        TryScanForStolenItems();
+
         if (CarriedItem != null)
         {
             if (Pack != null && Pack.IsVortexAtHome(this))
@@ -236,7 +340,7 @@ public class VortexAI : AIBrain, IHearingListener
 
         foreach (var hit in hits)
         {
-            if (hit.tag != "Item") continue;
+            if (!hit.CompareTag("Item")) continue;
             if (CarrierModule != null && CarrierModule.IsOnDropCooldown) continue;
 
             var item = hit.GetComponent<ItemBase>();
@@ -257,7 +361,7 @@ public class VortexAI : AIBrain, IHearingListener
         var senses = SensesModule;
         float radius = senses != null ? senses.DetectionRadius : 10f;
         if (Vector3.Distance(transform.position, HomeRoom.transform.position) > radius) return;
-        Pack?.CheckStolenItems(this);
+        Pack.CheckStolenItems(this);
     }
 
     bool IsInWanderState()
@@ -328,7 +432,7 @@ public class VortexAI : AIBrain, IHearingListener
             TryResumeWander();
             return; 
         }
-        PatienceModule?.DrainOnBackAway();
+        PatienceModule.DrainOnBackAway();
         if (PatienceModule == null || !PatienceModule.IsExhausted)
             SetState(states[backAwayStateIndex]);
     }
@@ -342,15 +446,25 @@ public class VortexAI : AIBrain, IHearingListener
 
     public void TriggerAttackPlayer()
     {
-        PatienceModule?.Restore(0f);
+        PatienceModule.Restore(0f);
 
         PlayerData target = SensesModule.GetClosestSeenPlayer(this);
         if (target == null) { TryResumeWander(); return; }
 
         ItemBase dropped = CarriedItem;
-        CarrierModule?.DropCarriedItem();
+        CarrierModule.DropCarriedItem();
         attackPlayerState.ItemToRecoverAfter = dropped;
         attackPlayerState.Target = target;
+        SetState(states[attackPlayerStateIndex]);
+    }
+
+    void TriggerAttackThief(PlayerData thief)
+    {
+        if (attackPlayerState == null) return;
+        CarrierModule.DropCarriedItem();
+        PatienceModule.Restore(0f);
+        attackPlayerState.Target = thief;
+        attackPlayerState.ItemToRecoverAfter = null;
         SetState(states[attackPlayerStateIndex]);
     }
 
@@ -365,7 +479,7 @@ public class VortexAI : AIBrain, IHearingListener
 
     public void OnAlphaRoleGranted()
     {
-        AlphaModule?.SetActingAsAlpha(true);
+        AlphaModule.SetActingAsAlpha(true);
         canDispatch = true;
         dispatchTimer = Random.Range(minDispatchTime, maxDispatchTime);
         TriggerReturnHome();
@@ -373,7 +487,7 @@ public class VortexAI : AIBrain, IHearingListener
 
     public void OnAlphaRoleRevoked()
     {
-        AlphaModule?.SetActingAsAlpha(false);
+        AlphaModule.SetActingAsAlpha(false);
         TryResumeWander();
     }
 
@@ -381,35 +495,61 @@ public class VortexAI : AIBrain, IHearingListener
     {
         if (IsAlpha) PlayAlphaCall();
         PlaySFX(SourceType.Default, SFXEvent.CallForHelp, 1f);
+
+        _fearImmunityTimer = fearImmunityOnTheft;
+        if (_feared) ExitFear();
+
+        if (source.SourceStats != null && source.SourceStats.TryGetComponent<PlayerData>(out var attacker))
+        {
+            float duration = Random.Range(10f, 30f);
+            GrudgeModule.AddTimedGrudge(attacker, duration);
+        }
+
         TriggerAttackPlayer();
 
         if (Pack == null) return;
-        float radius = SensesModule?.DetectionRadius ?? 10f;
         foreach (var other in Pack.Members)
         {
             if (other == null || other == this || other.IsInAttackState()) continue;
             float d = Vector3.Distance(transform.position, other.transform.position);
-            if (d <= radius * 2f) other.RespondToHelpCall(this);
+            if (d <= SensesModule.DetectionRadius * 2f) other.RespondToHelpCall(this);
         }
+    }
+
+    public void OnItemStolenFromHome(ItemBase item, PlayerData thief, VortexAI reporter)
+    {
+        if (!isServer) return;
+
+        GrudgeModule.AddGrudge(thief, item);
+
+        _fearImmunityTimer = fearImmunityOnTheft;
+        if (_feared) ExitFear();
+
+        bool thiefVisible = SensesModule != null && SensesModule.HasSeenPlayer(thief)
+                         || HasLineOfSight(thief.transform.position);
+
+        if (thiefVisible)
+            TriggerAttackThief(thief);
+        else
+            TriggerReturnHome();
     }
 
     public void RespondToHelpCall(VortexAI caller)
     {
         if (IsInAttackState()) return;
-        CarrierModule?.DropCarriedItem();
+        CarrierModule.DropCarriedItem();
         PlaySFX(SourceType.Default, SFXEvent.CallForHelp, 1f);
 
-        PlayerData target = caller.attackPlayerState?.Target
-                         ?? caller.SensesModule?.GetClosestSeenPlayer(caller);
+        PlayerData target = caller.attackPlayerState.Target != null ? 
+            caller.attackPlayerState.Target : caller.SensesModule.GetClosestSeenPlayer(caller);
         if (target == null) return;
 
-        SensesModule?.RegisterSeenPlayer(target);
+        SensesModule.RegisterSeenPlayer(target);
 
-        float radius = SensesModule?.DetectionRadius ?? 10f;
-        if (Vector3.Distance(transform.position, target.transform.position) <= radius)
+        if (Vector3.Distance(transform.position, target.transform.position) <= SensesModule.DetectionRadius)
         {
             if (attackPlayerState == null) return;
-            PatienceModule?.Restore(0f);
+            PatienceModule.Restore(0f);
             attackPlayerState.Target = target;
             attackPlayerState.ItemToRecoverAfter = null;
             SetState(states[attackPlayerStateIndex]);
@@ -422,7 +562,21 @@ public class VortexAI : AIBrain, IHearingListener
         renderer_.SetBlendShapeWeight(0, aggressive ? 0 : 100);
     }
 
-    public void OnItemPickedUp() => TriggerDropAtHome();
+    public void OnItemPickedUp()
+    {
+        var item = CarriedItem;
+        var grudge = GrudgeModule;
+
+        if (item != null && grudge != null && grudge.StolenItems.Contains(item))
+        {
+            grudge.RemoveGrudgeForItem(item);
+            Pack.OnItemRecovered(item);
+            Pack.ClearGrudgeForItem(item);
+        }
+
+        TriggerDropAtHome();
+    }
+
     public void OnItemLost() => TryResumeWander();
 
     public void OnItemDropped()
@@ -442,7 +596,8 @@ public class VortexAI : AIBrain, IHearingListener
 
     public void OnArrivedAtHome()
     {
-        Pack?.ScanHomeItems();
+        Pack.ScanHomeItems();
+        Pack.ShareGrudgesAtHome(this);
 
         if (IsAlpha)
         {
@@ -451,7 +606,7 @@ public class VortexAI : AIBrain, IHearingListener
             return;
         }
 
-        currentGroup?.NotifyMemberArrived(this);
+        currentGroup.NotifyMemberArrived(this);
         currentGroup = null;
     }
 
@@ -459,7 +614,7 @@ public class VortexAI : AIBrain, IHearingListener
 
     public void OnCuriosityExpired()
     {
-        SensesModule?.ClearWatched();
+        SensesModule.ClearWatched();
         TryResumeWander();
     }
 
@@ -473,7 +628,7 @@ public class VortexAI : AIBrain, IHearingListener
 
     public void OnFurnitureDestroyed()
     {
-        if (attackFurnitureState?.ItemToPickUpAfter != null)
+        if (attackFurnitureState.ItemToPickUpAfter != null)
             TriggerPickUp(attackFurnitureState.ItemToPickUpAfter);
         else
             TryResumeWander();
@@ -485,7 +640,7 @@ public class VortexAI : AIBrain, IHearingListener
 
     public void OnPlayerLeftItem()
     {
-        if (stareAtPlayerNearItemState?.WatchedItem != null)
+        if (stareAtPlayerNearItemState.WatchedItem != null)
             TriggerPickUp(stareAtPlayerNearItemState.WatchedItem);
         else
             TryResumeWander();
@@ -496,8 +651,8 @@ public class VortexAI : AIBrain, IHearingListener
 
     public void OnAttackPlayerCalmedDown()
     {
-        PatienceModule?.Restore(0.3f);
-        ItemBase itemToRecover = attackPlayerState?.ItemToRecoverAfter;
+        PatienceModule.Restore(0.3f);
+        ItemBase itemToRecover = attackPlayerState.ItemToRecoverAfter;
         if (itemToRecover != null && itemToRecover.ItemData.pickable && !itemToRecover.HasOwner)
         {
             attackPlayerState.ItemToRecoverAfter = null;
@@ -507,15 +662,18 @@ public class VortexAI : AIBrain, IHearingListener
         TryResumeWander();
     }
 
-    public void DrainPatienceOnItemStolen() => PatienceModule?.DrainOnItemStolen();
-    public void DrainPatienceOnBackAway() => PatienceModule?.DrainOnBackAway();
+    public void DrainPatienceOnItemStolen() => PatienceModule.DrainOnItemStolen();
+    public void DrainPatienceOnBackAway() => PatienceModule.DrainOnBackAway();
 
     public override void OnAgentDeath(AttackEvent source)
     {
         base.OnAgentDeath(source);
 
-        Pack?.Unregister(this);
-        CarrierModule?.DropCarriedItem();
+        if (source.SourceStats != null && source.SourceStats.TryGetComponent<PlayerData>(out var killer))
+            Pack.AddPackGrudge(killer);
+
+        Pack.Unregister(this);
+        CarrierModule.DropCarriedItem();
         
         StartCoroutine(DespawnVortex());
         RPC_PlayDeathParticles();
@@ -534,6 +692,29 @@ public class VortexAI : AIBrain, IHearingListener
         deathParticles.Play();
         yield return new WaitForSeconds(2f);
         deathParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+    }
+
+    void TryScanForStolenItems()
+    {
+        var grudge = GrudgeModule;
+        if (grudge == null || grudge.StolenItems.Count == 0) return;
+
+        var senses = SensesModule;
+
+        foreach (var item in grudge.StolenItems)
+        {
+            if (item == null || item.HasOwner) continue;
+            float dist = Vector3.Distance(transform.position, item.transform.position);
+            if (dist > senses.DetectionRadius) continue;
+            if (!HasLineOfSight(item.transform.position)) continue;
+
+            if (pickUpState != null)
+            {
+                pickUpState.TargetItem = item;
+                SetState(states[pickUpStateIndex]);
+                return;
+            }
+        }
     }
 
 #if UNITY_EDITOR
@@ -555,7 +736,7 @@ public class VortexAI : AIBrain, IHearingListener
             if (home != null)
             {
                 Vector3 homePos = home.transform.position + Vector3.up * 0.1f;
-                Color homeColor = new Color(1f, 0.5f, 0f);
+                Color homeColor = new(1f, 0.5f, 0f);
                 Handles.color = new Color(homeColor.r, homeColor.g, homeColor.b, 0.35f);
                 Handles.DrawSolidDisc(homePos, Vector3.up, 1.5f);
                 Handles.color = homeColor;
@@ -614,7 +795,7 @@ public class VortexAI : AIBrain, IHearingListener
                 style.fontSize = 10;
                 style.fontStyle = FontStyle.Normal;
                 Handles.Label(labelPos + Vector3.up * labelOffset,
-                    $"-> {followLeaderState?.AlphaTarget?.name ?? "?"}", style);
+                    $"-> {followLeaderState.AlphaTarget.name ?? "?"}", style);
                 labelOffset += 0.2f;
             }
         }

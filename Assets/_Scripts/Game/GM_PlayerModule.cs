@@ -121,6 +121,8 @@ public class GM_PlayerModule : NetworkBehaviour
 
         RefreshLobbyMemberData();
 
+        if (Instance.onDeadTime) return;
+
         if (deadPlayers.Count == players.Count)
         {
             Debug.Log("All players died");
@@ -133,7 +135,11 @@ public class GM_PlayerModule : NetworkBehaviour
     {
         foreach (var player in players)
         {
-            if (!deadPlayers.Contains(player.netId)) continue;
+            if (!deadPlayers.Contains(player.netId))
+            {
+                player.Player_Stats.RestoreHealth(20);
+                continue;
+            }
 
             Debug.Log($"[server] revives player {player.PlayerName}({player.netId})");
 

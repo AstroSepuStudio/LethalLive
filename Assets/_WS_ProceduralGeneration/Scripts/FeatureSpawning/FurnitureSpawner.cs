@@ -33,8 +33,8 @@ public class FurnitureSpawner : NetworkDungeonSpawner
         FurnitureDataSO data = generator.Theme.GetWeigthedFurniture(point.transform.position, generator.RNG);
         if (data == null) return;
 
-        Vector3 pos = ResolvePosition(point);
-        Quaternion rot = ResolveRotation(point);
+        Vector3 pos = ResolvePosition(point, generator.RNG);
+        Quaternion rot = ResolveRotation(point, generator.RNG);
 
         GameObject go = NetworkSpawn(data.Prefab, pos, rot, furnitureParent);
         if (go == null) return;

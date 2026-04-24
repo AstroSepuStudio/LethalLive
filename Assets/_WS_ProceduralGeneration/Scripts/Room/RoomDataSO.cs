@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "LethalLive/RoomData")]
 public class RoomDataSO : ScriptableObject
 {
-    public enum PortType { Doorway, Continuous }
+    public enum PortType { Doorway, Continuous3x3, Continuous3x3Edge }
 
     [Serializable]
     public struct RoomPort

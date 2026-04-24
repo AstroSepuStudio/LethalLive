@@ -43,7 +43,7 @@ public class DecorationSpawner : NetworkDungeonSpawner
 
     bool EvaluateAccumulating(DungeonSpawnPoint point, DungeonGenerator generator)
     {
-        float roll = Random.Range(0f, 100f);
+        float roll = (float)(generator.RNG.NextDouble() * 100f);
         float effective = accumulatedChance * generator.GetDificultyMultiplier(point.transform.position);
         return roll <= effective;
     }
@@ -55,13 +55,11 @@ public class DecorationSpawner : NetworkDungeonSpawner
         DecorationSpawnPoint docSpawn = point as DecorationSpawnPoint;
         if (docSpawn == null) return;
 
-        DecorationDataSO deco = generator.Theme.GetWeightedDecoration(point.transform.position, docSpawn.maxSize, generator.RNG);
+        DecorationDataSO deco = generator.Theme.GetWeightedDecoration(
+            point.transform.position, docSpawn.maxSize, generator.RNG);
         if (deco == null) return;
 
-        Vector3 pos = ResolvePosition(point);
-        Quaternion rot = ResolveRotation(point);
-
-        NetworkSpawn(deco.Prefab, pos, rot, decoParent);
+        NetworkSpawn(deco.Prefab, ResolvePosition(point, generator.RNG), ResolveRotation(point, generator.RNG), decoParent);
     }
 
     protected override void OnClear()

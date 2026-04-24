@@ -9337,6 +9337,7 @@ MonoBehaviour:
   Punch_Manager: {fileID: 3163601526697742778}
   Player_Stats: {fileID: 246280106596991086}
   PlayerInventory: {fileID: 3275595656448473840}
+  ExplodeComp: {fileID: 6569341122931758121}
   Skin_Manager: {fileID: 6672214798103852925}
   HUDManager: {fileID: 7989738253759474252}
   TabletManager: {fileID: 4557699857458474338}
@@ -9431,23 +9432,12 @@ MonoBehaviour:
   normalCamTarget: 1.1
   crouchCamTarget: 0.5
   jumpForce: 8.5
-  footsteps:
-  - {fileID: 11400000, guid: c16bedae14697854899fef2448769b7c, type: 2}
-  - {fileID: 11400000, guid: 04276bef7230b2046a0905ba9bf13fa0, type: 2}
-  - {fileID: 11400000, guid: 480c3061315b88145bded0762e018006, type: 2}
-  - {fileID: 11400000, guid: 86f77ca030b47484b8e0e237e2ca69bc, type: 2}
-  - {fileID: 11400000, guid: 8d5d8fddbe409034e807dff513248990, type: 2}
-  - {fileID: 11400000, guid: eb9f49635103a8e4db2f565f16ae0665, type: 2}
-  - {fileID: 11400000, guid: e5306292a1e8f9c48b806460b8334933, type: 2}
-  - {fileID: 11400000, guid: b18ebd2a5e61bbd44b27aaa54d95bd6a, type: 2}
-  - {fileID: 11400000, guid: fb8dcfa07cc0198409185f455b2211a2, type: 2}
-  - {fileID: 11400000, guid: 5c69883ddead8c849943c3b5058cbfd1, type: 2}
+  footstepHandler: {fileID: 4473055357471497}
   walkDelay: 0.55
   walkVolMult: 0.2
   sprintDelay: 0.3
   sprintVolMult: 0.5
   timer: 0
-  footstepIndex: 0
   groundedTime: 0
   jumpTime: 0
   _isGrounded: 0
@@ -48314,6 +48304,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8334912713274847652}
+  - component: {fileID: 4473055357471497}
   m_Layer: 6
   m_Name: --- Audio Source ---
   m_TagString: Untagged
@@ -48340,6 +48331,19 @@ Transform:
   - {fileID: 6022248011042642428}
   m_Father: {fileID: 6437031606794180585}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4473055357471497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6239482546743980804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3473ccd239640a949b85ce432898952d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerFootstepHandler
+  surfaces: {fileID: 11400000, guid: 8ead216b4a053e04da08682e7a39a3d4, type: 2}
 --- !u!1 &6250126224443738551
 GameObject:
   m_ObjectHideFlags: 0

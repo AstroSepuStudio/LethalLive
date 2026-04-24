@@ -673,7 +673,7 @@ GameObject:
   - component: {fileID: 6958413748995598732}
   - component: {fileID: 288887488455788471}
   - component: {fileID: 796840052955113194}
-  - component: {fileID: 9009602111474770571}
+  - component: {fileID: 6081388466674591470}
   m_Layer: 0
   m_Name: Ceiling
   m_TagString: Untagged
@@ -1011,8 +1011,8 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3104940204085553813}
   m_Mesh: {fileID: 0}
---- !u!64 &9009602111474770571
-MeshCollider:
+--- !u!65 &6081388466674591470
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1029,10 +1029,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  serializedVersion: 3
+  m_Size: {x: 7, y: 0, z: 10}
+  m_Center: {x: -2.5, y: 0, z: 2.5}
 --- !u!1 &5470251342697694383
 GameObject:
   m_ObjectHideFlags: 0
@@ -1422,10 +1421,10 @@ GameObject:
   - component: {fileID: 8111760105748529714}
   - component: {fileID: 4940104622688040465}
   - component: {fileID: 7095139907198213193}
-  - component: {fileID: 6500091378410370690}
+  - component: {fileID: 8800342577730747242}
   m_Layer: 0
   m_Name: Floor
-  m_TagString: Untagged
+  m_TagString: Carpet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -1838,8 +1837,8 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8955281576470855834}
   m_Mesh: {fileID: 0}
---- !u!64 &6500091378410370690
-MeshCollider:
+--- !u!65 &8800342577730747242
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1856,10 +1855,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  serializedVersion: 3
+  m_Size: {x: 7, y: 0, z: 10}
+  m_Center: {x: 2.5, y: 0, z: 2.5}
 --- !u!1001 &321405348260088798
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -32,17 +32,22 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6160654aa09949b4e8a5902e005fa43c, type: 2}
   - {fileID: 11400000, guid: 652c056b60719c542b6a73324d9e42e2, type: 2}
   entitySpawnsByTier:
-  - tier: 2
+  - tier: 0
     entities:
     - entityPrefab: {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
-      spawnWeight: 100
-      minSpawnCount: 3
-      maxSpawnCount: 5
+      spawnWeight: 80
+      minSpawnCount: 1
+      maxSpawnCount: 2
+  - tier: 2
+    entities:
+    - entityPrefab: {fileID: 3576240141579852669, guid: fef2aa84dc1821c4e95235e8db1d4cf5, type: 3}
+      spawnWeight: 20
+      minSpawnCount: 1
+      maxSpawnCount: 1
   spawnableDecoration:
   - {fileID: 11400000, guid: c0cbf184c5cf00643b6d84bbd2d16f0b, type: 2}
   - {fileID: 11400000, guid: 08f5e7c7c642d8f4d84ee1ba8fc00bbf, type: 2}
   - {fileID: 11400000, guid: 5627189a53de3b34eaa4204b3a818085, type: 2}
-  maxEntities: 5
   AmbienceClr: {r: 0.6313726, g: 0.5647059, b: 0, a: 1}
   AmbienceIntensity: 0
   loopingMusic: {fileID: 11400000, guid: 21e4fcf983c0ff04ea75d61c8c3ef203, type: 2}

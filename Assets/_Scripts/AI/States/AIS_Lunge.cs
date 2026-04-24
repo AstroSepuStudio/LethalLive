@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -14,6 +15,7 @@ public class AIS_Lunge : AIState
     [SerializeField] float windupTurnSpeed = 6f;
 
     [Header("Charge")]
+    [SerializeField] float redirectChargeCD = 3f;
     [SerializeField] float chargeSpeed = 8f;
     [SerializeField] float slideRange = 10f;
     [SerializeField] float chargeTimeToSlide = 2f;
@@ -45,6 +47,8 @@ public class AIS_Lunge : AIState
     public Vector3 TargetPosition { get; set; }
     public Transform TargetSource { get; set; }
 
+    private readonly HashSet<Transform> heardTargets = new();
+
     public UnityEvent OnLungeFinished;
 
     public enum Phase { Windup, Charge, Slide, Recovery }
@@ -67,11 +71,17 @@ public class AIS_Lunge : AIState
     float recoveryTimer;
     float rayRecTimer;
     float currentSlideSpeed;
+    float redirectChargeTimer;
     Vector3 slideDir;
 
     public void RedirectCharge(Vector3 newTarget, Transform source, AIBrain brain)
     {
+        heardTargets.Add(source);
         activeTimer = activeDuration;
+
+        if (redirectChargeTimer > 0) return;
+        redirectChargeTimer = redirectChargeCD;
+
         TargetPosition = newTarget;
         TargetSource = source;
         lastKnownLocation = newTarget;
@@ -81,6 +91,8 @@ public class AIS_Lunge : AIState
 
     public void QueueNextTarget(Vector3 target, Transform source)
     {
+        heardTargets.Add(source);
+
         queuedTarget = target;
         queuedSource = source;
         lastKnownLocation = target;
@@ -89,6 +101,7 @@ public class AIS_Lunge : AIState
     public override void OnEnterState(AIBrain brain)
     {
         activeDuration = Random.Range(minDuration, maxDuration);
+        redirectChargeTimer = 0;
         activeTimer = activeDuration;
         lastKnownLocation = TargetPosition;
         queuedTarget = null;
@@ -106,6 +119,7 @@ public class AIS_Lunge : AIState
     public override void OnUpdateState(AIBrain brain)
     {
         activeTimer -= Time.deltaTime;
+        redirectChargeTimer -= Time.deltaTime;
 
         if (TargetSource != null)
             TargetPosition = TargetSource.position;
@@ -121,6 +135,8 @@ public class AIS_Lunge : AIState
 
     public override void OnExitState(AIBrain brain)
     {
+        heardTargets.Clear();
+
         triggerCaster?.EnableTrigger(false);
 
         rb.linearVelocity = Vector3.zero;
@@ -196,7 +212,11 @@ public class AIS_Lunge : AIState
             huntRecalcTimer -= Time.deltaTime;
             if (huntRecalcTimer < 0)
             {
-                brain.MoveAgent(TargetSource.position);
+                if (TargetSource != null)
+                    brain.MoveAgent(TargetSource.position);
+                else
+                    brain.MoveAgent(lastKnownLocation);
+
                 huntRecalcTimer = huntRecalcDelay;
             }
 
@@ -299,12 +319,31 @@ public class AIS_Lunge : AIState
 
         if (Random.value < playerHuntChance)
         {
-            var senses = brain.GetModule<AIModule_Senses>();
-            PlayerData player = senses?.GetClosestSeenPlayer(brain);
-            if (player != null)
+            Transform closest = null;
+            float lowestDistance = 0;
+            foreach (var target in heardTargets)
             {
-                TargetSource = player.transform;
-                TargetPosition = player.transform.position;
+                if (target == null) continue;
+
+                if (closest == null)
+                {
+                    closest = target;
+                    lowestDistance = Vector3.Distance(transform.position, target.position);
+                    continue;
+                }
+
+                float distance = Vector3.Distance(transform.position, target.position);
+                if (distance < lowestDistance)
+                {
+                    closest = target;
+                    lowestDistance = distance;
+                }
+            }
+
+            if (closest != null)
+            {
+                TargetSource = closest;
+                TargetPosition = closest.position;
                 lastKnownLocation = TargetPosition;
                 currentSlideType = SlideType.Walk;
             }

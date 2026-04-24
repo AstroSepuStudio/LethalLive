@@ -17,6 +17,7 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
     public PunchManager Punch_Manager;
     public PlayerStats Player_Stats;
     public ItemInventory PlayerInventory;
+    public PlayerExplodeComponent ExplodeComp;
     public SkinManager Skin_Manager;
     public HUD_Manager HUDManager;
     public TabletManager TabletManager;
@@ -316,6 +317,7 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
         Player_Stats.ResetStats();
         Skin_Data.Ragdoll_Manager.DisableRagdoll();
         Teleport(position);
+        Skin_Data.CharacterAnimator.SetBool("Hurt", false);
 
         Rpc_RevivePlayer();
     }

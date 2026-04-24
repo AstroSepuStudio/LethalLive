@@ -13,14 +13,21 @@ public class EnvironmentLightManager : MonoBehaviour
         Instance = this;
     }
 
-    public void SetAmbient(Color color, float intensity)
+    public void SetAmbient(Color color, float intensity, bool enableFog = false)
     {
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
         RenderSettings.ambientLight = color;
         RenderSettings.ambientIntensity = intensity;
 
+        if (enableFog)
+        {
+            RenderSettings.fog = true;
+            RenderSettings.fogStartDistance = 20;
+            RenderSettings.fogEndDistance = 30;
+        }
+
         DynamicGI.UpdateEnvironment();
     }
 
-    public void ResetAmbient() => SetAmbient(officeAmbienceClr, officeAmbienceIntensity);
+    public void ResetAmbient() => SetAmbient(officeAmbienceClr, officeAmbienceIntensity, true);
 }

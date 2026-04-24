@@ -35,6 +35,8 @@ public class GM_EconomyModule : NetworkBehaviour
     public UnityEvent<PlayerTeam, float> OnTeamBalanceChangedEv;
     public UnityEvent<int> OnQuotaChangedEv;
 
+    int stagedNextQuota = 0;
+
     private void Start()
     {
         teamsBalance.OnChange += OnTeamBalanceChanged;
@@ -45,7 +47,24 @@ public class GM_EconomyModule : NetworkBehaviour
         base.OnStartServer();
 
         ResetEconomy();
-        SetNewQuota();
+    }
+
+    [Server]
+    public int ComputeAndStageNextQuota(int day)
+    {
+        int linear = (day - 1) * Random.Range(linearIncreaseMin, linearIncreaseMax);
+        float exponential = startingQuota * Mathf.Pow(exponentialRate, day - 1) * exponentialFactor;
+        int value = Mathf.RoundToInt(startingQuota + linear + exponential);
+        stagedNextQuota = value;
+        return value;
+    }
+
+    [Server]
+    public void ApplyStagedQuota()
+    {
+        if (stagedNextQuota > 0)
+            targetQuota = stagedNextQuota;
+        stagedNextQuota = 0;
     }
 
     [Server]
@@ -55,10 +74,12 @@ public class GM_EconomyModule : NetworkBehaviour
         {
             startingQuota = Random.Range(startingQuotaMin, startingQuotaMax);
             targetQuota = startingQuota;
+            Debug.Log("Aplying starting quota");
             return;
         }
 
-        targetQuota = GetQuota(GameManager.Instance.dayMod.currentDay);
+        Debug.Log("Aplying staged quota");
+        ApplyStagedQuota();
     }
 
     public int GetQuota(int round)
@@ -134,6 +155,7 @@ public class GM_EconomyModule : NetworkBehaviour
         }
 
         startingQuota = 0;
+        stagedNextQuota = 0;
         SetNewQuota();
     }
 

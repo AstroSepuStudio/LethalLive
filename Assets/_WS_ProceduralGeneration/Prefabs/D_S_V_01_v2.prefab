@@ -106,6 +106,17 @@ MonoBehaviour:
   maxRotation: 0
   chance: 5
   tries: 3
+  snapToSurface: 0
+  snapDirections: 05000000
+  snapMaxDistance: 2
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  snapSurfaceOffset: 0
+  alignToNormal: 0
+  useSpecificNormalDirection: 0
+  normalAlignDirection: 5
+  prefabUpAxis: 4
 --- !u!1 &4088893364708552470
 GameObject:
   m_ObjectHideFlags: 0
@@ -2694,7 +2705,6 @@ MonoBehaviour:
   Data: {fileID: 11400000, guid: 26a7471d80765c340891e29d981fc723, type: 2}
   SpawnPoints:
   - {fileID: 5903461449045224293}
-  entitySpawnerPositions: []
   roomRenderers:
   - {fileID: 1871273562808815107}
   - {fileID: 6587321883781382477}
@@ -2791,7 +2801,7 @@ GameObject:
   - component: {fileID: 6333646279300119075}
   m_Layer: 0
   m_Name: Floor
-  m_TagString: Untagged
+  m_TagString: Carpet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647

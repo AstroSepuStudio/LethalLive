@@ -56,51 +56,24 @@ public class GameManager : NetworkBehaviour
         gameStarted = true;
 
         dayMod.currentDayTime = -1;
-        //lobbyManagerScreen.RpcSwitchScreenState();
     }
 
     [Server]
-    public void CheckQuotaCompletion()
+    public void CheckQuotaCompletion(bool quotaMet)
     {
-        if (ecoMod.IsQuotaMet)
+        if (quotaMet)
         {
-            Debug.Log("Quota Met");
-            ecoMod.TakeQuotaValue();
-            StartCoroutine(QuotaCompletionSequence());
+            playMod.ReviveAllPlayers();
+            StopMusic();
+            dayMod.currentDay++;
+            ecoMod.SetNewQuota();
         }
         else
-        {
             StartCoroutine(QuotaNotMetSequence());
-        }
-    }
-
-    [Server]
-    public void ResetGame()
-    {
-        StartCoroutine(ResetGameSequence());
-    }
-
-    IEnumerator QuotaCompletionSequence()
-    {
-        onDeadTime = true;
-        Debug.Log("Quota completed");
-
-        yield return null;
-
-        dngMod.CloseDungeon();
-        playMod.ReviveAllPlayers();
-        StopMusic();
-
-        dayMod.currentDay++;
-        onDeadTime = false;
     }
 
     IEnumerator QuotaNotMetSequence()
     {
-        onDeadTime = true;
-        Debug.Log("Quota not completed");
-        yield return null;
-
         playMod.ExecuteAllPlayers();
         dayMod.ResetDays();
         ecoMod.ResetEconomy();
@@ -111,6 +84,12 @@ public class GameManager : NetworkBehaviour
         StopMusic();
         playMod.ReviveAllPlayers();
         onDeadTime = false;
+    }
+
+    [Server]
+    public void ResetGame()
+    {
+        StartCoroutine(ResetGameSequence());
     }
 
     IEnumerator ResetGameSequence()
@@ -131,10 +110,4 @@ public class GameManager : NetworkBehaviour
 
     [ClientRpc]
     private void StopMusic() => AudioManager.Instance.StopMusic();
-
-    public void SetUpNewDay()
-    {
-        ecoMod.SetNewQuota();
-        //OpenDungeon();
-    }    
 }

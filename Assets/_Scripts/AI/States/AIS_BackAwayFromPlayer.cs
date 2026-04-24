@@ -1,5 +1,5 @@
-using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine;
 
 public class AIS_BackAwayFromPlayer : AIState
 {
@@ -10,6 +10,8 @@ public class AIS_BackAwayFromPlayer : AIState
 
     float giveUpTimer;
     float recalcTimer;
+
+    public Vector3? OverrideTarget { get; set; }
 
     public UnityEvent OnSafe;
     public UnityEvent OnGaveUp;
@@ -24,13 +26,21 @@ public class AIS_BackAwayFromPlayer : AIState
 
     public override void OnUpdateState(AIBrain brain)
     {
-        if (!brain.TryGetModule<AIModule_Senses>(out var senses)) { OnSafe?.Invoke(); return; }
+        Vector3 threatPos;
 
-        PlayerData closest = senses.GetClosestSeenPlayer(brain);
+        if (OverrideTarget.HasValue)
+        {
+            threatPos = OverrideTarget.Value;
+        }
+        else
+        {
+            if (!brain.TryGetModule<AIModule_Senses>(out var senses)) { OnSafe?.Invoke(); return; }
+            PlayerData closest = senses.GetClosestSeenPlayer(brain);
+            if (closest == null) { OnSafe?.Invoke(); return; }
+            threatPos = closest.transform.position;
+        }
 
-        if (closest == null) { OnSafe?.Invoke(); return; }
-
-        float dist = Vector3.Distance(brain.transform.position, closest.transform.position);
+        float dist = Vector3.Distance(brain.transform.position, threatPos);
 
         if (dist >= safeDistance)
         {
@@ -38,7 +48,7 @@ public class AIS_BackAwayFromPlayer : AIState
             return;
         }
 
-        Vector3 lookDir = (closest.transform.position - brain.transform.position).normalized;
+        Vector3 lookDir = (threatPos - brain.transform.position).normalized;
         lookDir.y = 0f;
         if (lookDir != Vector3.zero)
             brain.transform.rotation = Quaternion.LookRotation(lookDir);
@@ -47,7 +57,7 @@ public class AIS_BackAwayFromPlayer : AIState
         if (recalcTimer <= 0f)
         {
             recalcTimer = recalculateInterval;
-            Vector3 awayDir = (brain.transform.position - closest.transform.position).normalized;
+            Vector3 awayDir = (brain.transform.position - threatPos).normalized;
             brain.MoveAgent(brain.transform.position + awayDir * backAwayDistance);
         }
 
@@ -60,6 +70,7 @@ public class AIS_BackAwayFromPlayer : AIState
 
     public override void OnExitState(AIBrain brain)
     {
+        OverrideTarget = null;
         brain.SetIdleState(true);
         brain.Animator_.SetBool("Walk", false);
     }

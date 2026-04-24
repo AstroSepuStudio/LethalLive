@@ -108,7 +108,7 @@ GameObject:
   - component: {fileID: 3440239660319707392}
   - component: {fileID: 4541846246944493149}
   - component: {fileID: 5984249877254787582}
-  - component: {fileID: 3782286261291131428}
+  - component: {fileID: 8886027450506409091}
   m_Layer: 0
   m_Name: Ceiling
   m_TagString: Untagged
@@ -598,8 +598,8 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2414394851781951946}
   m_Mesh: {fileID: 0}
---- !u!64 &3782286261291131428
-MeshCollider:
+--- !u!65 &8886027450506409091
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -616,10 +616,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  serializedVersion: 3
+  m_Size: {x: 15, y: 0, z: 15}
+  m_Center: {x: 0, y: 3, z: 0}
 --- !u!1 &3143522770402911143
 GameObject:
   m_ObjectHideFlags: 0
@@ -3944,10 +3943,10 @@ GameObject:
   - component: {fileID: 6748858454565441701}
   - component: {fileID: 7878421591523610866}
   - component: {fileID: 4225272592230811136}
-  - component: {fileID: 53964614334113698}
+  - component: {fileID: 8933780004246045514}
   m_Layer: 0
   m_Name: Floor
-  m_TagString: Untagged
+  m_TagString: Carpet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -4434,8 +4433,8 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6732148616021619663}
   m_Mesh: {fileID: 0}
---- !u!64 &53964614334113698
-MeshCollider:
+--- !u!65 &8933780004246045514
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -4452,10 +4451,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  serializedVersion: 3
+  m_Size: {x: 15, y: 0, z: 15}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6859338258297046723
 GameObject:
   m_ObjectHideFlags: 0

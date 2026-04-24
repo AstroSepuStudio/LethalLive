@@ -148,7 +148,7 @@ public class ItemBase : InteractableObject
     {
         canvas.EnableCanvas();
         canvas.SetLabel(ItemData.itemName);
-        canvas.SetDescription(ItemValue.ToString());
+        canvas.SetDescription($"${ItemValue}");
     }
 
     [Server]

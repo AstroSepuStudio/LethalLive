@@ -174,7 +174,7 @@ public class RoomDataEditor : Editor
 
             multiplier = port.type switch
             {
-                RoomDataSO.PortType.Continuous => halfCell,
+                RoomDataSO.PortType.Continuous3x3 => halfCell,
                 _ => multiplier,
             };
 

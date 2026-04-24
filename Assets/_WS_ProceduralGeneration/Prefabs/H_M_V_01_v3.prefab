@@ -800,9 +800,7 @@ MonoBehaviour:
     wall: {fileID: 6195738957751747812}
     door: {fileID: 0}
   Data: {fileID: 11400000, guid: da19610f5a325994480c008648ec7bd3, type: 2}
-  ItemSpawnPositions: []
-  FurnitureSpawnPositions: []
-  entitySpawnerPositions: []
+  SpawnPoints: []
   roomRenderers:
   - {fileID: 2097591600667780241}
   - {fileID: 3079731036795676745}
@@ -824,6 +822,7 @@ MonoBehaviour:
   showFootprintSprites: 0
   fontColor: {r: 0.5450981, g: 0, b: 0, a: 1}
   fontSize: 25
+  spriteColor: {r: 0, g: 1, b: 0, a: 1}
   spriteSize: 150
   useLayers: 1
   currentLayer: 1
@@ -843,7 +842,7 @@ GameObject:
   - component: {fileID: 6500091378410370690}
   m_Layer: 0
   m_Name: Floor
-  m_TagString: Untagged
+  m_TagString: Carpet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647

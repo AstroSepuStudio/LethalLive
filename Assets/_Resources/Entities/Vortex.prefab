@@ -1,5 +1,54 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &798750706952872437
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5606111694209260524}
+  - component: {fileID: 565941837864676915}
+  m_Layer: 11
+  m_Name: Grudge Module
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5606111694209260524
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 798750706952872437}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4395917646699880044}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &565941837864676915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 798750706952872437}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f860012cc506e44f929f084c2544947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIModule_Grudge
+  syncMethod: 0
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  debug: 0
 --- !u!1 &867018489768579456
 GameObject:
   m_ObjectHideFlags: 0
@@ -172,6 +221,9 @@ MonoBehaviour:
   detectionRadius: 10
   playerTooCloseDistance: 3
   scanInterval: 0.5
+  OnNewPlayerSpotted:
+    m_PersistentCalls:
+      m_Calls: []
   OnPlayerSpotted:
     m_PersistentCalls:
       m_Calls: []
@@ -569,6 +621,7 @@ Transform:
   - {fileID: 6039139894191827924}
   - {fileID: 656578501418958833}
   - {fileID: 5095799734098723778}
+  - {fileID: 5606111694209260524}
   m_Father: {fileID: 5360604290841652880}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2730624743165730869
@@ -6045,6 +6098,7 @@ MonoBehaviour:
   - {fileID: 8546791208055205158}
   - {fileID: 7436775296683710956}
   - {fileID: 1047743277504127468}
+  - {fileID: 565941837864676915}
   losBlockingLayers:
     serializedVersion: 2
     m_Bits: 951

@@ -632,7 +632,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIS_InvestigateSound
   arrivalThreshold: 1.5
-  roamDuration: 10
+  minRoamDuration: 5
+  maxRoamDuration: 12
   roamRadius: 5
   minRoamSleep: 1.5
   maxRoamSleep: 3.5
@@ -713,10 +714,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64553e80e32679248b863a22b8029f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIS_Lunge
-  activeDuration: 10
+  minDuration: 6
+  maxDuration: 12
   minWindup: 0.3
   maxWindup: 1
   windupTurnSpeed: 6
+  redirectChargeCD: 3
   chargeSpeed: 10
   slideRange: 6
   chargeTimeToSlide: 2
@@ -852,10 +855,13 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  debug: 0
-  detectionRadius: 5
-  playerTooCloseDistance: 1
+  debug: 1
+  detectionRadius: 1.5
+  playerTooCloseDistance: 0
   scanInterval: 0.5
+  OnNewPlayerSpotted:
+    m_PersistentCalls:
+      m_Calls: []
   OnPlayerSpotted:
     m_PersistentCalls:
       m_Calls: []
@@ -1138,7 +1144,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}

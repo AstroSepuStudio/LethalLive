@@ -2,6 +2,7 @@ using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(NetworkIdentity))]
 [RequireComponent(typeof(NavMeshAgent))]
@@ -237,7 +238,15 @@ public class AIBrain : NetworkBehaviour
 
         footstepTimer = aggressive ? footstepAggressiveDelay : footstepDelay;
         float pitch = Random.Range(footstepMinPitch, footstepMaxPitch);
-        PlaySFX(SourceType.Footstep, SFXEvent.Footstep, pitch);
+
+        if (stayQuiet)
+        {
+            int loudnessLvl = (int)sfxMap[SFXEvent.Footstep].Loudness;
+            loudnessLvl = Mathf.Clamp(loudnessLvl - 1, 0, 4);
+            PlaySFX(SourceType.Footstep, SFXEvent.Footstep, pitch, true, (SoundLoudness)loudnessLvl);
+        }
+        else
+            PlaySFX(SourceType.Footstep, SFXEvent.Footstep, pitch);
     }
 
     #endregion
@@ -264,11 +273,16 @@ public class AIBrain : NetworkBehaviour
     }
 
     [Server]
-    public virtual void PlaySFX(SourceType srcType, SFXEvent sfxEvent, float pitch)
+    public virtual void PlaySFX(SourceType srcType, SFXEvent sfxEvent, float pitch, 
+        bool overrideLoudness = false, SoundLoudness loudnessOverride = SoundLoudness.NoSound)
     {
         if (!sfxMap.TryGetValue(sfxEvent, out var group) || group.Clips.Length == 0) return;
         int clipIndex = Random.Range(0, group.Clips.Length);
-        RpcPlaySFX(srcType, sfxEvent, clipIndex, pitch);
+
+        if (overrideLoudness)
+            RpcPlaySFX(srcType, sfxEvent, clipIndex, pitch, loudnessOverride, 0.6f);
+        else
+            RpcPlaySFX(srcType, sfxEvent, clipIndex, pitch);
     }
 
     [ClientRpc]
@@ -281,6 +295,18 @@ public class AIBrain : NetworkBehaviour
         
         src.pitch = pitch;
         AudioManager.Instance.PlayOneShot(src, group.Clips[clipIndex], gameObject, group.Loudness);
+    }
+
+    [ClientRpc]
+    void RpcPlaySFX(SourceType srcType, SFXEvent sfxEvent, int clipIndex, float pitch, SoundLoudness loudness, float volumeMultiplier)
+    {
+        if (!sourceMap.TryGetValue(srcType, out var src))
+            sourceMap.TryGetValue(SourceType.Default, out src);
+        if (src == null) return;
+        if (!sfxMap.TryGetValue(sfxEvent, out var group) || clipIndex >= group.Clips.Length) return;
+
+        src.pitch = pitch;
+        AudioManager.Instance.PlayOneShot(src, group.Clips[clipIndex], volumeMultiplier, gameObject, loudness);
     }
 
     #endregion
@@ -336,8 +362,8 @@ public class AIBrain : NetworkBehaviour
 
     public void ResetSpeed() => agent.speed = entityStats.speed;
     public void MoveAgent(Vector3 position) { if (agent.enabled) agent.SetDestination(position); }
-    public void StopAgentMovement() => agent.isStopped = true;
-    public void ResumeAgentMovement() => agent.isStopped = false;
+    public void StopAgentMovement() { if (agent.enabled) agent.isStopped = true; }
+    public void ResumeAgentMovement() { if (agent.enabled) agent.isStopped = false; }
     public void DisableAgent() => agent.enabled = false;
     public void DisableCollider() => collider_.enabled = false;
     public bool IsAgentInMovement() => agent.enabled &&

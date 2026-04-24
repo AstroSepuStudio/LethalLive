@@ -16,7 +16,6 @@ public class InteractableObject : NetworkBehaviour
     protected bool _holding;
     protected float startHoldTime;
 
-    public bool IsInteractable => interactable;
     public virtual void SelectClosest() => canvas.SelectClosest();
     public virtual void DeselectClosest() => canvas.DeselectClosest();
     public virtual void EnableCanvas() => canvas.EnableCanvas();
@@ -28,6 +27,11 @@ public class InteractableObject : NetworkBehaviour
     public void SetDescription(string description) => canvas.SetLabel(description);
     public void ResetLabel() => canvas.ResetLabel();
     public void ResetDescription() => canvas.ResetDescription();
+
+    public virtual bool CanBeInteracted()
+    {
+        return interactable;
+    }
 
     private void Start()
     {

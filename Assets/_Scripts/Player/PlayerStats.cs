@@ -238,8 +238,10 @@ public class PlayerStats : EntityStats
     [Server]
     public void ExecutePlayer()
     {
-        currentHP = 0f;
-        HandleDeath(default, true);
+        //currentHP = 0f;
+        //HandleDeath(default, true);
+
+        pData.ExplodeComp.TriggerExplosion(true);
     }
 
     IEnumerator TookDamageCoroutine()

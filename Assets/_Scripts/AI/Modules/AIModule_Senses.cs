@@ -9,6 +9,7 @@ public class AIModule_Senses : AIModule
     [SerializeField] float scanInterval = 0.5f;
 
     [Header("Events")]
+    public UnityEvent<PlayerData> OnNewPlayerSpotted;
     public UnityEvent<PlayerData> OnPlayerSpotted;
     public UnityEvent<PlayerData> OnPlayerTooClose;
 
@@ -44,6 +45,8 @@ public class AIModule_Senses : AIModule
             watchedPlayers.Add(player);
 
         if (isNew)
+            OnNewPlayerSpotted?.Invoke(player);
+        else
             OnPlayerSpotted?.Invoke(player);
     }
 

@@ -62,7 +62,7 @@ public class MainMenuManager : UIManager
         if (menuScene != null) menuScene.SetActive(true);
         if (office != null) office.SetActive(false);
 
-        EnvironmentLightManager.Instance.SetAmbient(menuAmbienceClr, menuAmbienceIntensity);
+        EnvironmentLightManager.Instance.SetAmbient(menuAmbienceClr, menuAmbienceIntensity, true);
         SettingsManager.Instance.UnlockMouse();
         SwitchCameraAnimation(true);
         AudioManager.Instance.PlayMusic(mainMenuMusic);

@@ -159,6 +159,8 @@ public class SkullCrusherAI : AIBrain, IHearingListener
 
     public void OnLungeFinished() => ResumeWander();
 
+    public void OnPlayerSpotted(PlayerData data) => TriggerLunge(data.transform.position, data.transform);
+
     public void OnColliderDetected(Collider collider)
     {
         if (collider == null || collider.gameObject == gameObject) return;
@@ -169,7 +171,6 @@ public class SkullCrusherAI : AIBrain, IHearingListener
 
         AttackEvent attack = AttackEvent.From(entityStats, target, attackStat);
         target.ReceiveAttack(attack);
-        Debug.Log("Attacking");
     }
 
     public override void OnAgentHurt(AttackEvent source)

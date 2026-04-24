@@ -2,6 +2,7 @@ using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static FootstepSurfacesSO;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -46,13 +47,12 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] float jumpForce;
 
     [Header("Audio")]
-    [SerializeField] AudioSFX[] footsteps;
+    [SerializeField] PlayerFootstepHandler footstepHandler;
     [SerializeField] float walkDelay;
-    [SerializeField] float walkVolMult = 0.35f;
     [SerializeField] float sprintDelay;
-    [SerializeField] float sprintVolMult = 1f;
+    //[SerializeField] float walkVolMult = 0.35f;
+    //[SerializeField] float sprintVolMult = 1f;
     [SerializeField] float timer;
-    [SerializeField] int footstepIndex = 0;
 
     [Header("Flags")]
     [SerializeField] float groundedTime;
@@ -87,12 +87,21 @@ public class PlayerMovement : NetworkBehaviour
         res = Physics.OverlapSphere(feet.position, groundRadius);
         for (int i = 0; i < res.Length; i++)
         {
-            if (res[i] != pData.PlayerCollider) return true;
+            if (res[i] == pData.PlayerCollider) continue;
+            footstepHandler.SetSurface(res[i].tag);
+            return true;
         }
-        if (Physics.Raycast(feet.position + Vector3.down * groundRadius, Vector3.down, raycastLenght, pData.PlayerMask)) return true;
+
+        if (Physics.Raycast(feet.position + Vector3.down * groundRadius, Vector3.down,
+                out RaycastHit hit, raycastLenght, pData.PlayerMask))
+        {
+            footstepHandler.SetSurface(hit.collider.tag);
+            return true;
+        }
 
         return false;
     }
+
     bool IsSomethingAbove() => Physics.CheckSphere(pData.Head.position, groundRadius, pData.IgnorePlayer);
 
     private void Start()
@@ -372,7 +381,8 @@ public class PlayerMovement : NetworkBehaviour
                 pData.Player_Stats.ModifyStamina(-staminaConsuption_Jump);
 
                 pData.Skin_Data.CharacterAnimator.SetBool("Jump", true);
-                //pData.Skin_Data.CharacterAnimator.SetBool("Falling", true);
+
+                RPC_PlayFootstep(GetIndexOfAudioSource(pData.Modest_AS), 1, SoundLoudness.Moderate, FootstepClipType.Jump);
             }
 
             Vector3 camForward = pData.CameraPivot.forward;
@@ -422,6 +432,31 @@ public class PlayerMovement : NetworkBehaviour
 
         if (wasGroundedLastFrame && !_isGrounded)
             airborneVelocity = new Vector3(move.x + externalMomentum.x, 0f, move.z + externalMomentum.z);
+
+        if (!wasGroundedLastFrame && _isGrounded)
+        {
+            float verticalVelocity = Mathf.Abs(velocity.y);
+            SoundLoudness landLoudness;
+            if (verticalVelocity < 2)
+                landLoudness = SoundLoudness.Quiet;
+            else if (verticalVelocity < 4)
+                landLoudness = SoundLoudness.Moderate;
+            else if (verticalVelocity < 8)
+                landLoudness = SoundLoudness.Average;
+            else
+                landLoudness = SoundLoudness.Loud;
+
+            float volMult = landLoudness switch
+            {
+                SoundLoudness.Quiet => 0.2f,
+                SoundLoudness.Moderate => 0.4f,
+                SoundLoudness.Average => 0.6f,
+                SoundLoudness.Loud => 1f,
+                _ => 1f
+            };
+
+            RPC_PlayFootstep(GetIndexOfAudioSource(pData.Loud_AS), volMult, landLoudness, FootstepClipType.Land);
+        }
 
         wasGroundedLastFrame = _isGrounded;
 
@@ -531,7 +566,7 @@ public class PlayerMovement : NetworkBehaviour
 
     void FootstepUpdate()
     {
-        if (!_isGrounded || movementInput.magnitude < 0.1f || IsCrouching)
+        if (!_isGrounded || movementInput.magnitude < 0.1f)
         {
             timer = _isSprinting ? sprintDelay : walkDelay;
             return;
@@ -540,34 +575,41 @@ public class PlayerMovement : NetworkBehaviour
         timer -= Time.deltaTime;
         if (timer > 0f) return;
 
-        footstepIndex++;
-        if (footstepIndex >= footsteps.Length)
-            footstepIndex = 0;
-
-        AudioSource src = _isSprinting ? pData.Loud_AS : pData.Modest_AS;
-        RPC_PlayFootstep(GetIndexOfAudioSource(src), footstepIndex);
-
-        timer = _isSprinting ? sprintDelay : walkDelay;
-    }
-
-    [ClientRpc]
-    void RPC_PlayFootstep(int srcindex, int sfxindex)
-    {
-        float volMult;
+        FootstepClipType type;
+        AudioSource src;
         SoundLoudness loudness;
+        float multiplier = 1f;
 
-        if (srcindex == 1)
+        if (IsCrouching)
         {
-            volMult = walkVolMult;
-            loudness = SoundLoudness.Moderate;
+            type = FootstepClipType.Walk;
+            src = pData.Quiet_AS;
+            loudness = SoundLoudness.NoSound;
+            multiplier = 0.4f;
+        }
+        else if (_isSprinting)
+        {
+            type = FootstepClipType.Sprint;
+            src = pData.Loud_AS;
+            loudness = SoundLoudness.Average;
         }
         else
         {
-            volMult = sprintVolMult;
-            loudness = SoundLoudness.Average;
+            type = FootstepClipType.Walk;
+            src = pData.Modest_AS;
+            loudness = SoundLoudness.Moderate;
         }
 
-        AudioManager.Instance.PlayOneShot(GetAudioSourceByIndex(srcindex), footsteps[sfxindex], volMult, gameObject, loudness);
+        RPC_PlayFootstep(GetIndexOfAudioSource(src), multiplier, loudness, type);
+
+        timer = IsCrouching ? walkDelay * 1.5f : (_isSprinting ? sprintDelay : walkDelay);
+    }
+
+    [ClientRpc]
+    void RPC_PlayFootstep(int srcIndex, float multiplier, SoundLoudness loudness, FootstepClipType type)
+    {
+        AudioManager.Instance.PlayOneShot(GetAudioSourceByIndex(srcIndex),
+            footstepHandler.GetNextClip(type), multiplier, gameObject, loudness);
     }
 
     [Server]

@@ -28,7 +28,7 @@ public class EntitySpawner : NetworkDungeonSpawner
 
         foreach (var point in CollectedPoints)
         {
-            float roll = Random.Range(0f, 100f);
+            float roll = (float)(generator.RNG.NextDouble() * 100f);
             float effective = accumulatedChance * generator.GetDificultyMultiplier(point.transform.position);
 
             if (roll > effective)
@@ -38,7 +38,7 @@ public class EntitySpawner : NetworkDungeonSpawner
             }
 
             accumulatedChance = baseChance;
-            PlaceSpawner(ResolvePosition(point), ResolveRotation(point));
+            PlaceSpawner(ResolvePosition(point, generator.RNG), ResolveRotation(point, generator.RNG));
         }
 
         if (spawnedTransforms.Count < minimumSpawners)
@@ -51,7 +51,7 @@ public class EntitySpawner : NetworkDungeonSpawner
                     Vector3.SqrMagnitude(t.position - pt.transform.position) < 0.01f);
 
                 if (!alreadyPlaced)
-                    PlaceSpawner(ResolvePosition(pt), ResolveRotation(pt));
+                    PlaceSpawner(ResolvePosition(pt, generator.RNG), ResolveRotation(pt, generator.RNG));
 
                 if (spawnedTransforms.Count >= minimumSpawners) break;
             }
@@ -62,7 +62,7 @@ public class EntitySpawner : NetworkDungeonSpawner
 
     protected override void SpawnOne(DungeonSpawnPoint point, DungeonGenerator generator)
     {
-        PlaceSpawner(ResolvePosition(point), ResolveRotation(point));
+        PlaceSpawner(ResolvePosition(point, generator.RNG), ResolveRotation(point, generator.RNG));
     }
 
     protected override void OnSpawnComplete(int count)

@@ -17,6 +17,12 @@ public class Int_Teleport : InteractableObject
 
     static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
 
+    public override bool CanBeInteracted()
+    {
+        bool interactable = this.interactable && !GameManager.Instance.onDeadTime;
+        return interactable;
+    }
+
     public void SetTeleportPos(Vector3 pos)
     {
         targetPosition.position = pos;
@@ -62,6 +68,7 @@ public class Int_Teleport : InteractableObject
     public void Teleport(PlayerData sourceData)
     {
         if (!GameManager.Instance.dngMod.dungeonOpen) return;
+        if (GameManager.Instance.onDeadTime) return;
 
         Vector3 desiredPosition = Vector3.zero;
         bool foundValidPos = false;

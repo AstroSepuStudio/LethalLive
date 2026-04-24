@@ -7,6 +7,12 @@ public class Int_HomewardBeacon : InteractableObject, IMapFollowTarget
 
     public bool IsAvailable => true;
 
+    public override bool CanBeInteracted()
+    {
+        bool interactable = this.interactable && !GameManager.Instance.onDeadTime;
+        return interactable;
+    }
+
     public override void OnInteract(PlayerData sourceData)
     {
         base.OnInteract(sourceData);
@@ -24,6 +30,8 @@ public class Int_HomewardBeacon : InteractableObject, IMapFollowTarget
     [Server]
     public void GoBackToOffice(PlayerData sourceData)
     {
+        if (GameManager.Instance.onDeadTime) return;
+
         sourceData.RpcCompleteTeleport();
         sourceData.Character_Controller.enabled = false;
         sourceData.Character_Controller.transform.position = GameManager.Instance.Teleporter.transform.position;

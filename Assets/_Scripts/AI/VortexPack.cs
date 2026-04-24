@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Mirror;
 using UnityEngine;
 
@@ -21,6 +22,8 @@ public class VortexPack : NetworkBehaviour
     readonly List<VortexAI> members = new();
     readonly HashSet<ItemBase> homeItems = new();
     readonly List<VortexScoutGroup> activeGroups = new();
+    readonly Dictionary<ItemBase, PlayerData> stolenFromHome = new();
+    readonly HashSet<PlayerData> packGrudges = new();
 
     VortexAI currentAlpha = null;
 
@@ -94,8 +97,6 @@ public class VortexPack : NetworkBehaviour
             HomeRoom = fallback[index];
         }
         else HomeRoom = null;
-
-        //Debug.Log($"[VortexPack] Home: {(HomeRoom != null ? HomeRoom.name : "none")}");
     }
 
     public bool IsItemAtHome(ItemBase item)
@@ -133,19 +134,36 @@ public class VortexPack : NetworkBehaviour
         {
             if (!hit.CompareTag("Item")) continue;
             var item = hit.GetComponent<ItemBase>();
-            if (item != null && !item.HasOwner) homeItems.Add(item);
+            if (item != null) homeItems.Add(item);
         }
     }
 
-    public void CheckStolenItems(AIBrain brain)
+    public void CheckStolenItems(VortexAI brain)
     {
         if (homeItems.Count == 0) return;
         homeItems.RemoveWhere(item => item == null);
-        foreach (var item in homeItems)
+
+        foreach (var item in new List<ItemBase>(homeItems))
         {
-            if (!item.HasOwner) continue;
+            if (!item.HasOwner)
+            {
+                if (stolenFromHome.ContainsKey(item))
+                {
+                    stolenFromHome.Remove(item);
+                    foreach (var member in members)
+                        member?.GetModule<AIModule_Grudge>()?.RemoveGrudgeForItem(item);
+                }
+                continue;
+            }
+
             homeItems.Remove(item);
-            brain.GetModule<AIModule_Patience>()?.DrainOnItemStolen();
+            PlayerData thief = item.PData;
+
+            if (thief != null)
+                ReportItemStolen(item, thief, brain);
+            else
+                brain.GetModule<AIModule_Patience>()?.DrainOnItemStolen();
+
             break;
         }
     }
@@ -155,6 +173,9 @@ public class VortexPack : NetworkBehaviour
         if (vortex == null || members.Contains(vortex)) return;
         members.Add(vortex);
         ElectAlpha();
+
+        foreach (var player in packGrudges)
+            vortex.GetModule<AIModule_Grudge>()?.AddGrudge(player, null);
 
         if (HomeRoom != null && !IsVortexAtHome(vortex))
             vortex.TriggerReturnHome();
@@ -188,8 +209,6 @@ public class VortexPack : NetworkBehaviour
 
         previous?.OnAlphaRoleRevoked();
         currentAlpha?.OnAlphaRoleGranted();
-
-        //Debug.Log($"[VortexPack] Alpha -> {(currentAlpha != null ? currentAlpha.name : "none")} (a {bestVal:F0})");
     }
 
     [Server]
@@ -216,8 +235,6 @@ public class VortexPack : NetworkBehaviour
 
             i += size;
         }
-
-        //Debug.Log($"[VortexPack] Dispatched {activeGroups.Count} group(s) from {available.Count} scouts.");
     }
 
     public void OnGroupDisbanded(VortexScoutGroup group)
@@ -258,6 +275,70 @@ public class VortexPack : NetworkBehaviour
             int j = Random.Range(0, i + 1);
             (list[i], list[j]) = (list[j], list[i]);
         }
+    }
+
+    public void ReportItemStolen(ItemBase item, PlayerData thief, VortexAI reporter)
+    {
+        if (item == null || thief == null) return;
+        stolenFromHome[item] = thief;
+
+        float notifyRadius = reporter.GetModule<AIModule_Senses>()?.DetectionRadius * 2f ?? 20f;
+
+        foreach (var member in members)
+        {
+            if (member == null) continue;
+
+            float dist = Vector3.Distance(reporter.transform.position, member.transform.position);
+            if (dist > notifyRadius) continue;
+
+            member.OnItemStolenFromHome(item, thief, reporter);
+        }
+    }
+
+    public void ShareGrudgesAtHome(VortexAI arriving)
+    {
+        var arrivingGrudge = arriving.GetModule<AIModule_Grudge>();
+        if (arrivingGrudge == null) return;
+
+        foreach (var member in members)
+        {
+            if (member == null || member == arriving) continue;
+            if (!IsVortexAtHome(member)) continue;
+
+            var memberGrudge = member.GetModule<AIModule_Grudge>();
+            if (memberGrudge == null) continue;
+
+            arrivingGrudge.MergeFrom(memberGrudge);
+            foreach (var item in new List<ItemBase>(memberGrudge.StolenItems))
+                if (!arrivingGrudge.StolenItems.Contains(item))
+                    memberGrudge.RemoveGrudgeForItem(item);
+        }
+    }
+
+    public PlayerData GetThiefForItem(ItemBase item)
+    {
+        stolenFromHome.TryGetValue(item, out var thief);
+        return thief;
+    }
+
+    public void OnItemRecovered(ItemBase item)
+    {
+        stolenFromHome.Remove(item);
+    }
+
+    public void ClearGrudgeForItem(ItemBase item)
+    {
+        if (item == null) return;
+        foreach (var member in members)
+            member?.GetModule<AIModule_Grudge>()?.RemoveGrudgeForItem(item);
+    }
+
+    public void AddPackGrudge(PlayerData player)
+    {
+        if (player == null) return;
+        packGrudges.Add(player);
+        foreach (var member in members)
+            member?.GetModule<AIModule_Grudge>()?.AddGrudge(player, null);
     }
 }
 
