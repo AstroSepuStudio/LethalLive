@@ -109,6 +109,10 @@ public class VortexAI : AIBrain, IHearingListener
     public override void OnStartServer()
     {
         base.OnStartServer();
+
+        if (AlphaModule == null)
+            Initialize();
+
         lootDropper.OnLootSpawned = (item) =>
         {
             item.MultiplyValue(AlphaModule.GetMultiplier());
@@ -606,7 +610,7 @@ public class VortexAI : AIBrain, IHearingListener
             return;
         }
 
-        currentGroup.NotifyMemberArrived(this);
+        currentGroup?.NotifyMemberArrived(this);
         currentGroup = null;
     }
 

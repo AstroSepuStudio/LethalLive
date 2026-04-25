@@ -15,6 +15,10 @@ MonoBehaviour:
   itemPrefab: {fileID: 9084241017591515198, guid: ccddd1138090f6e4299cd606d046929c, type: 3}
   Tier: 1
   animationType: 3
+  DropSFX:
+  - {fileID: 11400000, guid: 80d01c18b510e9a44bc8189f00d82972, type: 2}
+  EquipSFX:
+  - {fileID: 11400000, guid: 44327fda4b683534c91867d1c8003c03, type: 2}
   itemName: Crowbar
   icon: {fileID: 21300000, guid: d217ef47a901f0c438d5c23f54497a5a, type: 3}
   isTwoHanded: 0
@@ -25,5 +29,6 @@ MonoBehaviour:
   hasSecondaryAction: 0
   pickable: 1
   droppable: 1
+  stackable: 0
   gOffset: {x: 0.2, y: 0.03, z: -0.01}
   gRotation: {x: -10, y: 90, z: -179}

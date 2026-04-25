@@ -1,5 +1,6 @@
 using Mirror;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AIModule_Alpha : AIModule
 {
@@ -8,11 +9,14 @@ public class AIModule_Alpha : AIModule
 
     public float AlphaValue => alphaValue;
     public bool IsActingAsAlpha => isActingAsAlpha;
+    public UnityEvent<float> OnAlphaValueChanged;
 
     bool isActingAsAlpha;
+    AIBrain brain;
 
     public override void OnModuleInit(AIBrain brain)
     {
+        this.brain = brain;
         if (!brain.isServer) return;
 
         alphaValue = Random.Range(0, 100);
@@ -37,8 +41,11 @@ public class AIModule_Alpha : AIModule
 
     void OnAlphaChanged(int _, int newVal)
     {
+        if (brain == null) { Debug.Log("[AlphaModule] Brain is null"); return; }
+
+        OnAlphaValueChanged?.Invoke(newVal);
         float scale = Mathf.Lerp(0.6f, 1.2f, newVal / 100f);
-        transform.localScale = Vector3.one * scale;
+        brain.transform.localScale = Vector3.one * scale;
     }
 
     public void SetActingAsAlpha(bool value) => isActingAsAlpha = value;

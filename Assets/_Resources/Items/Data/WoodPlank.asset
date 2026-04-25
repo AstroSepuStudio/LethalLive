@@ -15,6 +15,10 @@ MonoBehaviour:
   itemPrefab: {fileID: 3160449891824070426, guid: 3915aac7069a30d42932c55d04ae2813, type: 3}
   Tier: 0
   animationType: 1
+  DropSFX:
+  - {fileID: 11400000, guid: 6427f5f4d20026340a6bad3525365825, type: 2}
+  EquipSFX:
+  - {fileID: 11400000, guid: 6d73eb0bec5d005418f9f1c0dddef01f, type: 2}
   itemName: Wood Plank
   icon: {fileID: 21300000, guid: 9e5fd062f75eaa64189d1df2a35dbcfe, type: 3}
   isTwoHanded: 0
@@ -25,5 +29,6 @@ MonoBehaviour:
   hasSecondaryAction: 0
   pickable: 1
   droppable: 1
+  stackable: 0
   gOffset: {x: 0, y: 0, z: 0}
   gRotation: {x: 0, y: 0, z: 0}

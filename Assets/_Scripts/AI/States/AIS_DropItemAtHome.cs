@@ -15,9 +15,9 @@ public class AIS_DropItemAtHome : AIState
     bool destinationSet;
     Vector3 targetPosition;
 
-    public UnityEvent OnItemDropped;
-    public UnityEvent OnNoItemToDeliver;
-    public UnityEvent OnArrivedAtHome;
+    public UnityEvent OnItemDropped = new();
+    public UnityEvent OnNoItemToDeliver = new();
+    public UnityEvent OnArrivedAtHome = new();
 
     public override void OnEnterState(AIBrain brain)
     {
@@ -67,7 +67,7 @@ public class AIS_DropItemAtHome : AIState
         if (!hasDropped && dist <= dropRange)
         {
             hasDropped = true;
-            brain.GetModule<AIModule_ItemCarrier>()?.DropCarriedItem();
+            brain.GetModule<AIModule_ItemCarrier>().DropCarriedItem();
             OnArrivedAtHome?.Invoke();
             OnItemDropped?.Invoke();
             graceTimer = 0f;

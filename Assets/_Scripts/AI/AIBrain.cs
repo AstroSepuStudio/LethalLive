@@ -2,7 +2,6 @@ using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
 
 [RequireComponent(typeof(NetworkIdentity))]
 [RequireComponent(typeof(NavMeshAgent))]
@@ -132,6 +131,7 @@ public class AIBrain : NetworkBehaviour
     }
 
     #region Lifecycle
+    bool initialized = false;
 
     protected virtual void Awake()
     {
@@ -147,6 +147,14 @@ public class AIBrain : NetworkBehaviour
             agent.enabled = false;
             return;
         }
+
+        Initialize();
+    }
+
+    protected virtual void Initialize()
+    {
+        if (initialized) return;
+        initialized = true;
 
         RegisterModules();
 

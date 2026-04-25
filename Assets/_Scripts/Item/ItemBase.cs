@@ -1,9 +1,9 @@
 using Mirror;
-using TMPro;
 using UnityEngine;
 
 public enum ItemActionType { None, Primary, Secondary }
 
+[RequireComponent(typeof(AudioSource))]
 public class ItemBase : InteractableObject
 {
     public ItemSO ItemData;
@@ -13,6 +13,7 @@ public class ItemBase : InteractableObject
     [SerializeField] protected Collider coll;
     [SerializeField] protected Renderer itemRenderer;
     [SerializeField] protected ItemAnimationModule animationModule;
+    [SerializeField] protected AudioSource itemAudioSrc;
 
     [SerializeField] ItemAction primaryAction;
     [SerializeField] ItemAction secondaryAction;
@@ -108,6 +109,12 @@ public class ItemBase : InteractableObject
     {
         SetRender(true);
         canvas.DisableCanvas();
+
+        if (ItemData.EquipSFX.Length <= 0) return;
+        GameObject src = PData != null ? PData.gameObject : LastPlayer != null ? LastPlayer.gameObject : gameObject;
+
+        int rand = Random.Range(0, ItemData.EquipSFX.Length);
+        AudioManager.Instance.PlayOneShot(itemAudioSrc, ItemData.EquipSFX[rand], src, SoundLoudness.Quiet);
     }
 
     public virtual void OnUnequip(ItemInventory handler)
@@ -198,4 +205,13 @@ public class ItemBase : InteractableObject
     void RpcSetScale(Vector3 scale) => transform.localScale = scale;
 
     #endregion
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (ItemData.DropSFX.Length <= 0) return;
+        GameObject src = PData != null ? PData.gameObject : LastPlayer != null ? LastPlayer.gameObject : gameObject;
+
+        int rand = Random.Range(0, ItemData.DropSFX.Length);
+        AudioManager.Instance.PlayOneShot(itemAudioSrc, ItemData.DropSFX[rand], src, SoundLoudness.Moderate);
+    }
 }

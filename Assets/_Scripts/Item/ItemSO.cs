@@ -9,6 +9,8 @@ public class ItemSO : ScriptableObject, IHaveTier
     public GameObject itemPrefab;
     public Tier Tier;
     public ItemAnimationType animationType;
+    public AudioSFX[] DropSFX;
+    public AudioSFX[] EquipSFX;
 
     public Tier GetTier() => Tier;
 
