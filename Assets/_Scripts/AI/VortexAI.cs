@@ -3,7 +3,6 @@ using UnityEngine;
 using Mirror;
 using System.Linq;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -219,12 +218,6 @@ public class VortexAI : AIBrain, IHearingListener
         stareAtPlayerNearItemState = SafeGetState<AIS_StareAtPlayerNearItem>(stareAtPlayerNearItemStateIndex);
         attackPlayerState = SafeGetState<AIS_AttackPlayer>(attackPlayerStateIndex);
         followLeaderState = SafeGetState<AIS_FollowAlpha>(followLeaderStateIndex);
-    }
-
-    T SafeGetState<T>(int index) where T : AIState
-    {
-        if (index >= 0 && index < states.Length) return states[index] as T;
-        return null;
     }
 
     void SubscribeSensesEvents()

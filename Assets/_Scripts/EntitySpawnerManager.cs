@@ -92,10 +92,12 @@ public class EntitySpawnerManager : NetworkBehaviour
     [Server]
     IEnumerator EnemySpawning()
     {
+        float difMultiplier = GameManager.Instance.progressionMod.CurrentDifficultyMultiplier;
+
         float timer = 0f;
         while (timer < spawnDelay)
         {
-            timer += Time.deltaTime;
+            timer += Time.deltaTime * Mathf.Clamp(difMultiplier, 1, 3);
             yield return null;
         }
 
@@ -119,7 +121,7 @@ public class EntitySpawnerManager : NetworkBehaviour
                 rng ??= DungeonGenerator.Instance.RNG;
                 float rand = (float)(rng.NextDouble() * 100f);
 
-                if (rand <= spawnChance)
+                if (rand * difMultiplier <= spawnChance)
                 {
                     if (TrySpawnEnemy())
                         cooldownTimer = spawnCooldown;
@@ -128,7 +130,7 @@ public class EntitySpawnerManager : NetworkBehaviour
                 timer = 0f;
             }
             
-            timer += Time.deltaTime;
+            timer += Time.deltaTime * difMultiplier;
             yield return null;
         }
     }
@@ -158,8 +160,8 @@ public class EntitySpawnerManager : NetworkBehaviour
             prog.CurrentMinEntityTier,
             prog.CurrentMaxEntityTier);
 
-        GameObject entityObj = Instantiate(spawn.entityPrefab, position.position + position.forward, position.rotation, entityParent);
-        entityObj.name = $"{spawn.entityPrefab.name} (ID: {TotalQ})";
+        GameObject entityObj = Instantiate(spawn.EntityData.entityPrefab, position.position + position.forward, position.rotation, entityParent);
+        entityObj.name = $"{spawn.EntityData.entityPrefab.name} (ID: {TotalQ})";
         NetworkServer.Spawn(entityObj);
 
         EntityStats stats = entityObj.GetComponentInChildren<EntityStats>();

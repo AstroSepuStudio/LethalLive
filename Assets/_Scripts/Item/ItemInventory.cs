@@ -1,5 +1,4 @@
 using Mirror;
-using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -11,6 +10,11 @@ public class ItemInventory : NetworkBehaviour
     [SerializeField] CanvasGroup nameGroup;
     [SerializeField] TextMeshProUGUI itemName;
     [SerializeField] HotbarSlot[] hotbarSlots;
+
+    bool onDelay = false;
+    readonly WaitForSeconds actionDelay = new(0.05f);
+    IEnumerator ActionDelayCor() { onDelay = true; yield return actionDelay; onDelay = false; }
+    void ActionTriggered() => StartCoroutine(ActionDelayCor());
 
     [SyncVar(hook = nameof(OnSelectedSlotChanged))]
     public int selectedSlotIndex = 0;
@@ -95,23 +99,24 @@ public class ItemInventory : NetworkBehaviour
     public bool AddItem(ItemBase item)
     {
         if (pData._LockPlayer) return false;
-        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return false; 
+        if (onDelay) return false;
+        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return false;
         if (equippedItem != null && equippedItem.ItemData.isTwoHanded) return false;
         if (IsFull()) return false;
         if (item == null) return false;
 
-        int index = selectedSlotIndex;
-        if (inventorySlots[index] != null)
+        ActionTriggered();
+
+        int index = -1;
+        for (int i = 0; i < inventorySlots.Length; i++)
         {
-            index = -1;
-            for (int i = 0; i < inventorySlots.Length; i++)
+            if (inventorySlots[i] == null)
             {
-                if (inventorySlots[i] != null) continue;
                 index = i;
                 break;
             }
-            if (index == -1) return false;
         }
+        if (index == -1) return false;
 
         item.HasOwner = true;
         inventorySlots[index] = item;
@@ -143,7 +148,16 @@ public class ItemInventory : NetworkBehaviour
     public void RemoveCurrentItem()
     {
         if (equippedItem == null) return;
-        LocalDropItem(false);
+        if (onDelay) return;
+
+        ActionTriggered();
+
+        int slot = selectedSlotIndex;
+        uint id = equippedItem.ID;
+        equippedItem.HasOwner = false;
+        inventorySlots[slot] = null;
+        equippedItem = null;
+        RpcDropItem(slot, id);
     }
 
     [Server]
@@ -184,12 +198,31 @@ public class ItemInventory : NetworkBehaviour
     void CmdDropItem()
     {
         if (pData._LockPlayer) return;
+        if (onDelay) return;
         if (equippedItem == null || IsItemInUse || !equippedItem.ItemData.droppable) return;
 
-        equippedItem.HasOwner = false;
-        inventorySlots[selectedSlotIndex] = null;
+        ActionTriggered();
 
-        RpcDropItem();
+        int droppedSlot = selectedSlotIndex;
+        uint droppedItemId = equippedItem.ID;
+
+        equippedItem.HasOwner = false;
+        inventorySlots[droppedSlot] = null;
+        equippedItem = null;
+
+        int next = (droppedSlot + 1) % inventorySlots.Length;
+        for (int i = 0; i < inventorySlots.Length; i++)
+        {
+            int candidate = (droppedSlot + 1 + i) % inventorySlots.Length;
+            if (inventorySlots[candidate] != null)
+            {
+                next = candidate;
+                break;
+            }
+        }
+        selectedSlotIndex = next;
+
+        RpcDropItem(droppedSlot, droppedItemId);
     }
 
     [ClientRpc]
@@ -206,25 +239,46 @@ public class ItemInventory : NetworkBehaviour
         SetEquipAnimState(null);
     }
 
-    [ClientRpc] void RpcDropItem() => LocalDropItem();
+    [ClientRpc] void RpcDropItem(int slotIndex, uint itemId) => LocalDropItem(slotIndex, itemId);
     [ClientRpc] void RpcDropAllItems() => LocalDropAllItems();
 
-    void LocalDropItem(bool drop = true)
+    void LocalDropItem(int slotIndex, uint itemId, bool drop = true)
     {
-        if (equippedItem == null) return;
+        ItemBase dropping = null;
 
-        inventorySlots[selectedSlotIndex] = null;
-        hotbarSlots[selectedSlotIndex].RemoveItem();
+        if (inventorySlots[slotIndex] != null)
+        {
+            dropping = inventorySlots[slotIndex];
+        }
+        else if (NetworkClient.spawned.TryGetValue(itemId, out var ni))
+        {
+            dropping = ni.GetComponent<ItemBase>();
+            for (int i = 0; i < inventorySlots.Length; i++)
+            {
+                if (inventorySlots[i] == dropping)
+                {
+                    slotIndex = i;
+                    break;
+                }
+            }
+        }
 
-        if (equippedItem.ItemData.isTwoHanded)
+        if (dropping == null) return;
+
+        inventorySlots[slotIndex] = null;
+        hotbarSlots[slotIndex].RemoveItem();
+
+        if (dropping.ItemData.isTwoHanded)
         {
             for (int i = 0; i < hotbarSlots.Length; i++)
                 hotbarSlots[i].UnlockSlot();
         }
 
-        ItemBase dropping = equippedItem;
-        equippedItem = null;
-        SetEquipAnimState(null);
+        if (equippedItem == dropping)
+        {
+            equippedItem = null;
+            SetEquipAnimState(null);
+        }
 
         if (drop)
             dropping.OnDrop(this);
@@ -255,8 +309,11 @@ public class ItemInventory : NetworkBehaviour
     void CmdSelectNextSlot()
     {
         if (pData._LockPlayer) return;
+        if (onDelay) return;
         if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return;
         if (HasTwoHandedEquipped || IsItemInUse) return;
+
+        ActionTriggered();
 
         int startIndex = selectedSlotIndex;
         int nextIndex = (selectedSlotIndex + 1) % inventorySlots.Length;
@@ -278,9 +335,12 @@ public class ItemInventory : NetworkBehaviour
     void CmdSelectSlot(int index)
     {
         if (pData._LockPlayer) return;
+        if (onDelay) return;
         if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return;
         if (HasTwoHandedEquipped || IsItemInUse) return;
         if (index < 0 || index >= inventorySlots.Length) return;
+
+        ActionTriggered();
 
         selectedSlotIndex = index;
     }

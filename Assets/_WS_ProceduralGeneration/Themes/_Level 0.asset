@@ -77,19 +77,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9a0bf54833b150548a2459884958e88e, type: 2}
   - {fileID: 11400000, guid: 6160654aa09949b4e8a5902e005fa43c, type: 2}
   - {fileID: 11400000, guid: 652c056b60719c542b6a73324d9e42e2, type: 2}
-  entitySpawnsByTier:
-  - tier: 0
-    entities:
-    - entityPrefab: {fileID: 3576240141579852669, guid: 8bd9e294f95653b419da3aa45dd4f317, type: 3}
-      spawnWeight: 100
-      minSpawnCount: 1
-      maxSpawnCount: 2
-  - tier: 2
-    entities:
-    - entityPrefab: {fileID: 3576240141579852669, guid: fef2aa84dc1821c4e95235e8db1d4cf5, type: 3}
-      spawnWeight: 100
-      minSpawnCount: 1
-      maxSpawnCount: 1
+  EntitySpawns:
+  - EntityData: {fileID: 11400000, guid: 8ad3570e8d2d27744a9652a1778ff732, type: 2}
+    SpawnWeight: 60
+  - EntityData: {fileID: 11400000, guid: 5683510d4395c1e439e2f0e16988e173, type: 2}
+    SpawnWeight: 35
+  - EntityData: {fileID: 11400000, guid: af6902f5921797d4e850d51a561cb65b, type: 2}
+    SpawnWeight: 5
   spawnableDecoration:
   - {fileID: 11400000, guid: c0cbf184c5cf00643b6d84bbd2d16f0b, type: 2}
   - {fileID: 11400000, guid: 08f5e7c7c642d8f4d84ee1ba8fc00bbf, type: 2}

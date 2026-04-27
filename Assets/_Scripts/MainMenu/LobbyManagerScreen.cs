@@ -15,11 +15,12 @@ public class LobbyManagerScreen : UIManagerNetwork
     [Header("References")]
     [SerializeField] NetworkIdentity identity;
     [SerializeField] DNG_MapModule mapModule;
+    [SerializeField] Store store;
     [SerializeField] Canvas worldCanvas;
     [SerializeField] RectTransform refRectTransform;
     [SerializeField] Transform cameraPosition;
     [SerializeField] GameObject loadingWindow;
-    [SerializeField] GameObject interactableCanvas;
+    [SerializeField] InteractableObject interactableCanvas;
     [SerializeField] Transform loadingThing;
     [SerializeField] Transform playerTargetPos;
     public Transform rightHCIKTarget;
@@ -116,6 +117,10 @@ public class LobbyManagerScreen : UIManagerNetwork
         playerData.Player_Movement.ServerForceAimAt(playerTargetPos.position + playerTargetPos.forward);
         playerData.Skin_Data.Rigging_Manager.RpcEnableRightHandChainRig();
 
+        interactableCanvas.DisableInteractable();
+
+        store.SetCurrentPlayer(playerData);
+
         RpcOpenLMS(playerData.Index);
     }
 
@@ -132,7 +137,6 @@ public class LobbyManagerScreen : UIManagerNetwork
         if (Instance.playMod.LocalPlayer.Index != index) return;
 
         worldCanvas.worldCamera = Instance.playMod.LocalPlayer.PlayerCamera;
-        interactableCanvas.SetActive(false);
 
         Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started += OnEscapePressed;
         Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(false);
@@ -166,6 +170,10 @@ public class LobbyManagerScreen : UIManagerNetwork
         open = false;
         playerOnLMS = -1;
 
+        interactableCanvas.EnableInteractable();
+
+        store.ClearCurrentPlayer();
+
         RpcCloseLMS(index);
     }
 
@@ -177,7 +185,6 @@ public class LobbyManagerScreen : UIManagerNetwork
         Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started -= OnEscapePressed;
         Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(true);
         Instance.playMod.LocalPlayer.DropCameraControl();
-        interactableCanvas.SetActive(true);
         mapModule.CmdSnapshotMapAnchor(Instance.playMod.LocalPlayer.Index, mapModule.MapAnchorPosition);
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -247,7 +254,7 @@ public class LobbyManagerScreen : UIManagerNetwork
         if (balance > 0)
         {
             pair.teamObj.SetActive(true);
-            pair.balanceText.SetText($"${balance}");
+            pair.balanceText.SetText($"{balance}");
         }
         else pair.teamObj.SetActive(false);
     }
@@ -311,6 +318,20 @@ public class LobbyManagerScreen : UIManagerNetwork
         if (!identity.isServer) return;
 
         LobbySettings.Instance.SetUseSetSeed(useSetSeed);
+    }
+
+    public void SetOverrideMapSize(bool overrideMapSize)
+    {
+        if (!identity.isServer) return;
+
+        LobbySettings.Instance.SetOverrideMapSize(overrideMapSize);
+    }
+
+    public void SetTeamsShareBalance(bool teamsShareBalance)
+    {
+        if (!identity.isServer) return;
+
+        LobbySettings.Instance.SetTeamsShareBalance(teamsShareBalance);
     }
     #endregion
 

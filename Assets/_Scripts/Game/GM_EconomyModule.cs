@@ -24,6 +24,8 @@ public class GM_EconomyModule : NetworkBehaviour
         teamsBalance[PlayerTeam.White] + teamsBalance[PlayerTeam.Red] + teamsBalance[PlayerTeam.Blue] +
         teamsBalance[PlayerTeam.Yellow] + teamsBalance[PlayerTeam.Green] + teamsBalance[PlayerTeam.Pink];
 
+    public float GetTeamBalance(PlayerTeam team) => teamsBalance.TryGetValue(team, out float balance) ? balance : 0f;
+
     [SyncVar]
     int startingQuota = 0;
 
@@ -96,6 +98,13 @@ public class GM_EconomyModule : NetworkBehaviour
     public void TakeQuotaValue()
     {
         if (!IsQuotaMet) return;
+        TakeBalance(targetQuota);
+    }
+
+    [Server]
+    public void TakeBalance(float amount)
+    {
+        if (TotalBalance < amount) return;
 
         Dictionary<PlayerTeam, float> validBalances = new();
         int validTeams = 0;
@@ -107,11 +116,11 @@ public class GM_EconomyModule : NetworkBehaviour
                 validTeams++;
             }
 
-        float remainingQuota = targetQuota;
+        float remainingAmount = amount;
 
-        while (remainingQuota > 0 && validTeams > 0)
+        while (remainingAmount > 0 && validTeams > 0)
         {
-            float evenTake = remainingQuota / validTeams;
+            float evenTake = remainingAmount / validTeams;
 
             var keys = validBalances.Keys.ToList();
             List<PlayerTeam> toRemove = new();
@@ -124,11 +133,11 @@ public class GM_EconomyModule : NetworkBehaviour
                 {
                     validBalances[key] -= evenTake;
                     teamsBalance[key] -= evenTake;
-                    remainingQuota -= evenTake;
+                    remainingAmount -= evenTake;
                 }
                 else
                 {
-                    remainingQuota -= value;
+                    remainingAmount -= value;
                     validBalances[key] = 0;
                     teamsBalance[key] = 0;
 
@@ -169,5 +178,16 @@ public class GM_EconomyModule : NetworkBehaviour
     private void OnQuotaChanged(int newValue, int oldValue)
     {
         OnQuotaChangedEv?.Invoke(newValue);
+    }
+
+    public bool CanAfford(PlayerTeam team, int amount) =>
+        teamsBalance.TryGetValue(team, out float balance) && balance >= amount;
+
+    [Server]
+    public void Deduct(PlayerTeam team, int amount)
+    {
+        if (!teamsBalance.ContainsKey(team)) return;
+        teamsBalance[team] = Mathf.Max(0f, teamsBalance[team] - amount);
+        OnTeamBalanceChangedEv?.Invoke(team, teamsBalance[team]);
     }
 }

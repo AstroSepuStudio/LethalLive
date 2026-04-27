@@ -31,6 +31,16 @@ public class InteractonDetection : NetworkBehaviour
     void OnTick()
     {
         if (!isLocalPlayer) return;
+        if (pData._LockPlayer)
+        {
+            if (nearbyItems.Count > 0)
+            {
+                foreach (var item in nearbyItems)
+                    item.DisableCanvas();
+                nearbyItems.Clear();
+            }
+            return;
+        }
 
         if (currentInteractable != null)
         {
@@ -124,7 +134,7 @@ public class InteractonDetection : NetworkBehaviour
     void CmdRequestInteraction()
     {
         if (currentInteractable != null) return;
-        if (pData.Player_Stats.dead || pData.Player_Stats.knocked) return;
+        if (pData.Player_Stats.dead || pData.Player_Stats.knocked || pData._LockPlayer) return;
 
         Collider[] hits = Physics.OverlapSphere(pData.transform.position, detectRadius, interactLayer);
         List<InteractableObject> candidates = new();

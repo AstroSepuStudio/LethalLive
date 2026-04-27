@@ -102,7 +102,7 @@ public class DungeonGenerator : NetworkBehaviour
     {
         Instance = this;
 
-        GetComponentsInChildren(true, spawners as List<IDungeonSpawner>);
+        GetComponentsInChildren(true, spawners);
         spawners.Clear();
         foreach (var s in GetComponentsInChildren<MonoBehaviour>(true))
             if (s is IDungeonSpawner ds) spawners.Add(ds);
@@ -124,7 +124,21 @@ public class DungeonGenerator : NetworkBehaviour
         theme = GameManager.Instance.dngMod.ThemeDatas[themeIndex];
 
         int size = Mathf.Max(1, mapSizeOverride ?? LobbySettings.Instance.MapSize);
-        effectiveGridSize = new Vector3Int(gridSize.x * size, gridSize.y * size, gridSize.z * size);
+
+        Vector3Int result = gridSize;
+
+        int horizontalSteps = size - 1;
+
+        int xSteps = (horizontalSteps + 1) / 2;
+        int ySteps = size / 2;
+        int zSteps = horizontalSteps / 2;
+
+        result.x *= 1 + xSteps;
+        result.y *= 1 + ySteps;
+        result.z *= 1 + zSteps;
+
+        effectiveGridSize = result;
+        //effectiveGridSize = new Vector3Int(gridSize.x * size, gridSize.y * size, gridSize.z * size);
         voidDestroyerParent.localScale = new Vector3(size + 2, 1, size + 2);
 
         grid = new Cell[effectiveGridSize.x, effectiveGridSize.y, effectiveGridSize.z];
@@ -609,10 +623,32 @@ public class DungeonGenerator : NetworkBehaviour
 
     void OnDrawGizmosSelected()
     {
-        int size = LobbySettings.Instance != null ? LobbySettings.Instance.MapSize : simMapSize;
-        Vector3Int effective = new(gridSize.x * size, gridSize.y * size, gridSize.z * size);
-        Vector3 totalSize = new(effective.x * cellSize, effective.y * cellSize, effective.z * cellSize);
+        int size = LobbySettings.Instance != null
+            ? LobbySettings.Instance.MapSize
+            : simMapSize;
+
+        size = Mathf.Max(1, size);
+
+        Vector3Int effective = gridSize;
+
+        int horizontalSteps = size - 1;
+        int xSteps = (horizontalSteps + 1) / 2;
+        int ySteps = size / 2;
+        int zSteps = horizontalSteps / 2;
+
+        effective.x *= 1 + xSteps;
+        effective.y *= 1 + ySteps;
+        effective.z *= 1 + zSteps;
+
+        Vector3 totalSize = new(
+            effective.x * cellSize,
+            effective.y * cellSize,
+            effective.z * cellSize);
+
         Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(totalSize / 2f, totalSize);
+
+        Vector3 center = transform.position + totalSize * 0.5f;
+
+        Gizmos.DrawWireCube(center, totalSize);
     }
 }

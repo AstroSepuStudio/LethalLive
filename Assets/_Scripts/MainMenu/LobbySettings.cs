@@ -12,17 +12,18 @@ public class LobbySettings : NetworkBehaviour
     [SyncVar] private int mapSize = 10;
     [SyncVar] private bool teamDamage = false;
     [SyncVar] private bool teamKnock = true;
-    [SyncVar] private int maxDays = 3;
     [SyncVar] private bool useSetSeed = false;
+    [SyncVar] private bool overrideMapSize = false;
+    [SyncVar] private bool teamsShareBalance = true;
 
     public ELobbyType Lobby_Type => lobby_Type;
     public int MapSize => mapSize;
     public bool TeamDamage => teamDamage;
     public bool TeamKnock => teamKnock;
-
-    public int MaxDays => maxDays;
-
     public bool UseSetSeed => useSetSeed;
+    public bool OverrideMapSize => overrideMapSize;
+    public bool TeamsShareBalance => teamsShareBalance;
+
 
     public UnityEvent OnLobbySettingsChanged;
 
@@ -61,16 +62,23 @@ public class LobbySettings : NetworkBehaviour
     }
 
     [Server]
-    public void SetMaxDays(int maxDays)
+    public void SetUseSetSeed(bool useSetSeed)
     {
-        this.maxDays = maxDays;
+        this.useSetSeed = useSetSeed;
         Rpc_LobbySettingsChanged();
     }
 
     [Server]
-    public void SetUseSetSeed(bool useSetSeed)
+    public void SetOverrideMapSize(bool overrideMapSize)
     {
-        this.useSetSeed = useSetSeed;
+        this.overrideMapSize = overrideMapSize;
+        Rpc_LobbySettingsChanged();
+    }
+
+    [Server]
+    public void SetTeamsShareBalance(bool teamsShareBalance)
+    {
+        this.teamsShareBalance = teamsShareBalance;
         Rpc_LobbySettingsChanged();
     }
 

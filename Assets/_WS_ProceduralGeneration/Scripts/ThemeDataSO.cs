@@ -8,19 +8,10 @@ public class ThemeDataSO : ScriptableObject
     public enum SpawnableSize { Tiny, Small, Medium, Large, ExtraLarge, Colossal }
 
     [System.Serializable]
-    public struct TierEntityGroup
-    {
-        public Tier tier;
-        public EntitySpawn[] entities;
-    }
-
-    [System.Serializable]
     public struct EntitySpawn
     {
-        public GameObject entityPrefab;
-        public float spawnWeight;
-        [Range(1, 5)] public int minSpawnCount;
-        [Range(1, 5)] public int maxSpawnCount;
+        public EntityDataSO EntityData;
+        public float SpawnWeight;
     }
 
     public string levelName;
@@ -33,7 +24,7 @@ public class ThemeDataSO : ScriptableObject
     [Header("Features Generation")]
     public ItemSO[] spawnableItems;
     public FurnitureDataSO[] spawnableFurniture;
-    public TierEntityGroup[] entitySpawnsByTier;
+    public EntitySpawn[] EntitySpawns;
     public DecorationDataSO[] spawnableDecoration;
 
     [Header("Ambient")]
@@ -141,52 +132,56 @@ public class ThemeDataSO : ScriptableObject
     }
 
     public EntitySpawn GetWeightedEntitySpawn(
-        Vector3 position, System.Random rng,
-        Tier min = Tier.Common, Tier max = Tier.Legendary)
+    Vector3 position, System.Random rng,
+    Tier min = Tier.Common, Tier max = Tier.Legendary)
     {
-        Tier selectedTier = RollTier(position, rng, min, max);
+        List<EntitySpawn> pool = new();
 
-        EntitySpawn[] tieredCandidates = null;
-        foreach (var group in entitySpawnsByTier)
+        foreach (var entity in EntitySpawns)
         {
-            if (group.tier == selectedTier && group.tier >= min && group.tier <= max)
+            var tier = entity.EntityData.EntityTier;
+
+            if (tier < min || tier > max)
+                continue;
+
+            float difficulty = DungeonGenerator.Instance.GetDificultyMultiplier(position);
+            float adjustedWeight = entity.SpawnWeight * GetTierModifier(tier, difficulty);
+
+            pool.Add(new EntitySpawn
             {
-                tieredCandidates = group.entities;
-                break;
-            }
+                EntityData = entity.EntityData,
+                SpawnWeight = adjustedWeight
+            });
         }
 
-        if (tieredCandidates == null || tieredCandidates.Length == 0)
+        if (pool.Count == 0)
+            return EntitySpawns[rng.Next(EntitySpawns.Length)];
+
+        return RollWeighted(pool, rng);
+    }
+
+    float GetTierModifier(Tier tier, float multiplier)
+    {
+        return tier switch
         {
-            List<EntitySpawn> windowCandidates = new();
-            foreach (var group in entitySpawnsByTier)
-            {
-                if (group.tier < min || group.tier > max) continue;
-                windowCandidates.AddRange(group.entities);
-            }
-
-            if (windowCandidates.Count > 0)
-                return RollWeighted(windowCandidates, rng);
-
-            List<EntitySpawn> all = new();
-            foreach (var group in entitySpawnsByTier)
-                all.AddRange(group.entities);
-
-            return all.Count > 0 ? RollWeighted(all, rng) : default;
-        }
-
-        return RollWeighted(new List<EntitySpawn>(tieredCandidates), rng);
+            Tier.Common => 1f / multiplier,
+            Tier.Uncommon => 1f / Mathf.Sqrt(multiplier),
+            Tier.Rare => multiplier,
+            Tier.Epic => multiplier * multiplier,
+            Tier.Legendary => multiplier * multiplier * multiplier,
+            _ => 1f,
+        };
     }
 
     static EntitySpawn RollWeighted(List<EntitySpawn> pool, System.Random rng)
     {
         float total = 0f;
-        foreach (var e in pool) total += e.spawnWeight;
+        foreach (var e in pool) total += e.SpawnWeight;
 
         float roll = (float)(rng.NextDouble() * total);
         foreach (var e in pool)
         {
-            roll -= e.spawnWeight;
+            roll -= e.SpawnWeight;
             if (roll <= 0f) return e;
         }
 

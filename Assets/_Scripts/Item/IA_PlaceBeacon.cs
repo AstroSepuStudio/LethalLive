@@ -24,7 +24,7 @@ public class IA_PlaceBeacon : ItemAction
     public override void OnAnimationFinish()
     {
         item.PData.Skin_Data.CharacterAnimator.SetBool("PlaceBeacon", false);
-        item.PData.PlayerInventory.RemoveCurrentItem();
+        //item.PData.PlayerInventory.RemoveCurrentItem();
         item.PData._LockPlayer = false;
         placing = false;
 

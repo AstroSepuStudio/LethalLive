@@ -104,6 +104,12 @@ public class AIBrain : NetworkBehaviour
         return result != null;
     }
 
+    public T SafeGetState<T>(int index) where T : AIState
+    {
+        if (index >= 0 && index < states.Length) return states[index] as T;
+        return null;
+    }
+
     protected virtual void RegisterModules()
     {
         moduleMap.Clear();
@@ -372,8 +378,11 @@ public class AIBrain : NetworkBehaviour
     public void MoveAgent(Vector3 position) { if (agent.enabled) agent.SetDestination(position); }
     public void StopAgentMovement() { if (agent.enabled) agent.isStopped = true; }
     public void ResumeAgentMovement() { if (agent.enabled) agent.isStopped = false; }
+    public void EnableAgent() => agent.enabled = true;
     public void DisableAgent() => agent.enabled = false;
     public void DisableCollider() => collider_.enabled = false;
+    public void EnableCollider() => collider_.enabled = true;
+    public void EnableColliderTrigger(bool enable) => collider_.isTrigger = enable;
     public bool IsAgentInMovement() => agent.enabled &&
         !agent.isStopped && agent.hasPath &&
         agent.remainingDistance > agent.stoppingDistance &&

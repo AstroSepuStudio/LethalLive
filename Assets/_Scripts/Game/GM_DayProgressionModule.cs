@@ -33,6 +33,14 @@ public class GM_DayProgressionModule : NetworkBehaviour
     [SyncVar] public LL_Tier.Tier CurrentMinLootTier = LL_Tier.Tier.Common;
     [SyncVar] public LL_Tier.Tier CurrentMaxLootTier = LL_Tier.Tier.Common;
 
+    public int FormulaMapSize(int day) => Mathf.Clamp(day, 1, maxMapSize);
+    public float FormulaDifficulty(int day) => Mathf.Max(1f, day - difficultyOffset);
+
+    public DayProgressionOverride[] Overrides => overrides;
+    public int MaxMapSize => maxMapSize;
+    public float DifficultyOffset => difficultyOffset;
+    public int DefaultEntityCap => defaultEntityCap;
+
     [Server]
     public void ApplyForDay(int day)
     {
@@ -98,15 +106,7 @@ public class GM_DayProgressionModule : NetworkBehaviour
         return found;
     }
 
-    public int FormulaMapSize(int day) => Mathf.Clamp(day, 1, maxMapSize);
-    public float FormulaDifficulty(int day) => Mathf.Max(1f, day - difficultyOffset);
-
 #if UNITY_EDITOR
-    public DayProgressionOverride[] Overrides => overrides;
-    public int MaxMapSize => maxMapSize;
-    public float DifficultyOffset => difficultyOffset;
-    public int DefaultEntityCap => defaultEntityCap;
-
     protected override void OnValidate()
     {
         base.OnValidate();

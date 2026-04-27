@@ -28,6 +28,7 @@ public class SellPoint : NetworkBehaviour
     [SerializeField] float typingSFXInterval = 0.08f;
 
     GM_EconomyModule EcoMod => GameManager.Instance.ecoMod;
+    GM_DayCycleModule DayMod => GameManager.Instance.dayMod;
 
     private float _displayedBalance;
     private Coroutine _rollCoroutine;
@@ -51,12 +52,14 @@ public class SellPoint : NetworkBehaviour
 
         EcoMod.OnTeamBalanceChangedEv.AddListener(RefreshBalance);
         EcoMod.OnQuotaChangedEv.AddListener(OnQuotaChanged);
+        DayMod.OnDayEnded.AddListener(RefreshBalance);
     }
 
     private void OnDestroy()
     {
         EcoMod.OnTeamBalanceChangedEv.RemoveListener(RefreshBalance);
         EcoMod.OnQuotaChangedEv.RemoveListener(OnQuotaChanged);
+        DayMod.OnDayEnded.RemoveListener(RefreshBalance);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -86,7 +89,10 @@ public class SellPoint : NetworkBehaviour
         UpdateBalanceText(newValue);
     }
 
-    public void RefreshBalance(PlayerTeam t, float v)
+    public void RefreshBalance(PlayerTeam t, float v) => RefreshBalance();
+    public void RefreshBalance(int day) => RefreshBalance();
+
+    public void RefreshBalance()
     {
         float newTotal = EcoMod.TotalBalance;
         float gained = newTotal - _displayedBalance;

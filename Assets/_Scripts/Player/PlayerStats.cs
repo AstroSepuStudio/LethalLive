@@ -175,6 +175,8 @@ public class PlayerStats : EntityStats
         if (!GameManager.Instance.gameStarted || !GameManager.Instance.dayMod.dayStarted)
             return;
 
+        if (dead) return;
+
         if (tookDmgCor == null)
             tookDmgCor = StartCoroutine(TookDamageCoroutine());
         else
@@ -291,6 +293,7 @@ public class PlayerStats : EntityStats
     [Server]
     public override void AddKnock(float amount, Vector3 momentum)
     {
+        if (knocked) return;
         knockRecoveryTimer = 0f;
         currentKnock = Mathf.Clamp(currentKnock + amount, 0f, maxKnock);
 

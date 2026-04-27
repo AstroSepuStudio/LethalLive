@@ -89,8 +89,10 @@ public class LootSpawner : NetworkDungeonSpawner
 
         var prog = GameManager.Instance.progressionMod;
         int safetyLimit = 8 * prog.MaxMapSize;
+        int overcapItem = 2 + generator.RNG.Next(prog.MaxMapSize);
+        int spawnedCount = 0;
 
-        while (totalItemsValue < target && safetyLimit-- > 0)
+        while ((totalItemsValue < target || spawnedCount < overcapItem) && safetyLimit-- > 0)
         {
             int idx = generator.RNG.Next(allPoints.Count);
             var point = allPoints[idx];
@@ -119,7 +121,13 @@ public class LootSpawner : NetworkDungeonSpawner
 
             SpawnedItems.Add(itemBase);
             ItemNetIds.Add(ni.netId);
+
             totalItemsValue += itemBase.ItemValue;
+
+            if (totalItemsValue > target)
+            {
+                spawnedCount++;
+            }
         }
 
         if (safetyLimit <= 0)

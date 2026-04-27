@@ -12,7 +12,7 @@ public class InteractableObject : NetworkBehaviour
     [SerializeField] protected UnityEvent<PlayerData> OnStopInteractEvent;
     [SerializeField] protected UnityEvent<PlayerData> OnHoldInteractEvent;
 
-    [SerializeField] protected bool interactable = true;
+    [SyncVar] public bool interactable = true;
     protected bool _holding;
     protected float startHoldTime;
 
@@ -20,8 +20,8 @@ public class InteractableObject : NetworkBehaviour
     public virtual void DeselectClosest() => canvas.DeselectClosest();
     public virtual void EnableCanvas() => canvas.EnableCanvas();
     public virtual void DisableCanvas() => canvas.DisableCanvas();
-    public virtual void EnableInteractable() => interactable = true;
-    public virtual void DisableInteractable() => interactable = false;
+    [Server] public virtual void EnableInteractable() => interactable = true;
+    [Server] public virtual void DisableInteractable() => interactable = false;
 
     public void SetLabel(string label) => canvas.SetLabel(label);
     public void SetDescription(string description) => canvas.SetLabel(description);

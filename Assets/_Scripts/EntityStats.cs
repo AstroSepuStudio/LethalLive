@@ -2,7 +2,6 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
-using static Unity.VisualScripting.Member;
 
 public class EntityStats : NetworkBehaviour
 {
@@ -124,6 +123,8 @@ public class EntityStats : NetworkBehaviour
     [Server]
     public virtual void ApplyDamage(AttackEvent source)
     {
+        if (dead) return;
+
         currentHP = Mathf.Clamp(currentHP - source.AttackStat_.AttackDamage, 0f, maxHP);
         OnTakeDamage?.Invoke(source);
 
@@ -152,7 +153,7 @@ public class EntityStats : NetworkBehaviour
     {
         float srcStrength = source.SourceStats != null ? source.SourceStats.strength : 100f;
 
-        float multiplier = Random.Range(1f, 2f);
+        float multiplier = Random.Range(0.9f, 1.2f);
         float knockAmount = source.AttackStat_.AttackKnock * multiplier * (srcStrength / 100f);
         Vector3 momentum = CalculateMomentum(source.Position, source.AttackStat_.AttackForce, multiplier);
 
@@ -165,6 +166,8 @@ public class EntityStats : NetworkBehaviour
     [Server]
     public virtual void AddKnock(float amount, Vector3 momentum)
     {
+        if (knocked) return;
+
         knockRecoveryTimer = 0f;
         currentKnock = Mathf.Clamp(currentKnock + amount, 0f, maxKnock);
 
