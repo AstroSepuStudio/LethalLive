@@ -1,4 +1,6 @@
+using Mirror;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class IA_HurtboxAttack : ItemAction
 {
@@ -7,6 +9,14 @@ public class IA_HurtboxAttack : ItemAction
     [SerializeField] protected string animationTrigger = "Atk_Default";
     [SerializeField] protected bool forceAim = true;
     [SerializeField] protected AttackStat attackStat;
+
+    [SerializeField] AudioSFX onHitSFX;
+    [SerializeField] SoundLoudness onHitLoudness;
+    [SerializeField] AudioSFX OnHurtSFX;
+    [SerializeField] SoundLoudness onHurtLoudness;
+
+    public UnityEvent OnHit;
+    public UnityEvent<EntityStats> OnHurt;
 
     public AttackStat AttackStat => attackStat;
 
@@ -40,8 +50,8 @@ public class IA_HurtboxAttack : ItemAction
 
     public override void Cancel()
     {
-        if (forceAim && isServer)
-            item.PData.Player_Movement.ServerClearForcedAim();
+        //if (forceAim && isServer)
+        //    item.PData.Player_Movement.ServerClearForcedAim();
     }
 
     public override void OnAnimationTrigger()
@@ -56,5 +66,39 @@ public class IA_HurtboxAttack : ItemAction
 
         if (forceAim && isServer)
             item.PData.Player_Movement.ServerClearForcedAim();
+    }
+
+    [Server]
+    public void HurtBoxHit()
+    {
+        OnHit?.Invoke();
+
+        RpcPlayOnHit();
+    }
+
+    [Server]
+    public void HurtBoxHurt(EntityStats target)
+    {
+        OnHurt?.Invoke(target);
+
+        RpcPlayOnHurt();
+    }
+
+    [ClientRpc]
+    void RpcPlayOnHit()
+    {
+        if (audioSource == null || onHitSFX == null) return;
+        AudioManager.Instance.PlayOneShot(audioSource, onHitSFX, item.PData.gameObject, onHitLoudness);
+    }
+
+    [ClientRpc]
+    void RpcPlayOnHurt()
+    {
+        if (audioSource == null) return;
+
+        AudioSFX sfx = OnHurtSFX != null ? OnHurtSFX : onHitSFX != null ? onHitSFX : null;
+        if (sfx == null) return;
+
+        AudioManager.Instance.PlayOneShot(audioSource, sfx, item.PData.gameObject, onHurtLoudness);
     }
 }

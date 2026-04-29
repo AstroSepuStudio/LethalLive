@@ -4,6 +4,10 @@ using UnityEngine.UI;
 
 public class StoreItemUI : MonoBehaviour
 {
+    [SerializeField] GameObject onSaleGO;
+    [SerializeField] TextMeshProUGUI onSaleTxt;
+    [SerializeField] TextMeshProUGUI onSalePriceTxt;
+
     [SerializeField] TextMeshProUGUI itemNameTxt;
     [SerializeField] TextMeshProUGUI itemPriceTxt;
     [SerializeField] TextMeshProUGUI quantityTxt;
@@ -28,8 +32,21 @@ public class StoreItemUI : MonoBehaviour
         if (store == null || storeItem == null) return;
 
         int price = store.GetDailyPrice(storeItem);
+        var sale = store.GetSaleEntry(storeItem);
 
-        itemPriceTxt.SetText($"${price}");
+        if (sale.onSale)
+        {
+            itemPriceTxt.SetText($"${sale.originalPrice}");
+
+            onSaleGO.SetActive(true);
+            onSaleTxt.SetText($"-{sale.discountPercent}%");
+            onSalePriceTxt.SetText($"${price}");
+        }
+        else
+        {
+            itemPriceTxt.SetText($"${price}");
+            onSaleGO.SetActive(false);
+        }
     }
 
     public void AddOne()

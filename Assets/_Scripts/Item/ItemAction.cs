@@ -1,14 +1,19 @@
 using Mirror;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class ItemAction : NetworkBehaviour
 {
     [SerializeField] protected AudioSource audioSource;
 
-    protected enum ActionTiming { Start, Cancel, Trigger, Finish}
-    [Serializable] protected struct ActionSFX { public ActionTiming Timing; public AudioSFX SFX; public SoundLoudness Loudness; }
+    protected enum ActionTiming { Start, Cancel, Trigger, Finish, Extra1, Extra2, Extra3 }
+    [Serializable] protected struct ActionSFX 
+    { 
+        public ActionTiming Timing; 
+        public AudioSFX SFX; 
+        public SoundLoudness Loudness; 
+    }
+
     [Serializable] protected struct AnimationTrigger 
     { 
         public string Trigger; 
@@ -32,6 +37,32 @@ public abstract class ItemAction : NetworkBehaviour
 
     public virtual void OnAnimationTrigger() { }
     public virtual void OnAnimationFinish() { }
+
+    public float GetAnimationTriggerTime()
+    {
+        if (item.AnimationModule == null) return 0;
+
+        ItemActionType type = item.GetActionType(this);
+        if (type == ItemActionType.None) return 0;
+
+        if (type == ItemActionType.Primary)
+            return item.AnimationModule.PrimaryTriggerTime;
+        else
+            return item.AnimationModule.SecondaryTriggerTime;
+    }
+
+    public float GetAnimationFinishTime()
+    {
+        if (item.AnimationModule == null) return 0;
+
+        ItemActionType type = item.GetActionType(this);
+        if (type == ItemActionType.None) return 0;
+
+        if (type == ItemActionType.Primary)
+            return item.AnimationModule.PrimaryFinishTime;
+        else
+            return item.AnimationModule.SecondaryFinishTime;
+    }
 
     protected virtual void TryPlaySFX(AnimationTrigger animationTrigger, ActionTiming timing)
     {

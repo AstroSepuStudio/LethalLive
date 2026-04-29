@@ -2,6 +2,7 @@ using Mirror;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.ProBuilder;
 
 public class PlayerStats : EntityStats
 {
@@ -141,32 +142,38 @@ public class PlayerStats : EntityStats
 
     private void TickHealthRecovery()
     {
-        float lowHP = LowHPThreshold;
-
-        if (currentHP >= lowHP) return;
-
+        if (currentHP >= LowHPThreshold) return;
         healthRecoveryTimer = Mathf.Clamp(healthRecoveryTimer + Time.deltaTime, 0f, healthRecoveryDelay);
         if (!Mathf.Approximately(healthRecoveryTimer, healthRecoveryDelay)) return;
-
-        currentHP = Mathf.Clamp(currentHP + Time.deltaTime * healthRecoveryRate, 0f, lowHP);
-
-        lowHP = LowHPFXThreshold;
-        bool isLow = currentHP < lowHP;
-        float normHP = isLow ? currentHP / lowHP : 1f;
-
-        if (!isLow)
-            pData.Skin_Data.CharacterAnimator.SetBool("Hurt", false);
-
-        pData.Skin_Data.CharacterAnimator.SetBool("LowHP", isLow);
-        RpcUpdateLowHPEffect(normHP, isLow);
+        currentHP = Mathf.Clamp(currentHP + Time.deltaTime * healthRecoveryRate, 0f, LowHPThreshold);
+        UpdateLowHPState();
     }
 
     public override void RestoreHealth(float amount)
     {
         base.RestoreHealth(amount);
-
         if (currentHP >= LowHPThreshold)
             pData.Skin_Data.CharacterAnimator.SetBool("Hurt", false);
+        UpdateLowHPState();
+    }
+
+    void UpdateLowHPState()
+    {
+        float lowHPFXThreshold = LowHPFXThreshold;
+        bool isLow = currentHP < lowHPFXThreshold;
+        float normHP = isLow ? currentHP / lowHPFXThreshold : 1f;
+
+        if (!isLow)
+        {
+            pData.Skin_Data.CharacterAnimator.SetBool("Hurt", false);
+            pData.Skin_Data.CharacterAnimator.SetBool("LowHP", false);
+        }
+        else
+        {
+            pData.Skin_Data.CharacterAnimator.SetBool("LowHP", true);
+        }
+
+        RpcUpdateLowHPEffect(normHP, isLow);
     }
 
     [Server]

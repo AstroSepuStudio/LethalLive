@@ -190,10 +190,10 @@ MonoBehaviour:
   center: {x: 0, y: 0.675, z: 0}
   dropArea: {x: 0.55, y: 0.375, z: 0.55}
   lootPositions:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 6128090638207706527}
+  - {fileID: 2396127651077168914}
+  - {fileID: 5276304353603047167}
+  - {fileID: 7221491259966979345}
   gizmos: 0
 --- !u!82 &1878123820758244030
 AudioSource:
@@ -551,6 +551,17 @@ MonoBehaviour:
   maxRotation: 0
   chance: 10
   tries: 3
+  snapToSurface: 0
+  snapDirections: 05000000
+  snapMaxDistance: 2
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  snapSurfaceOffset: 0
+  alignToNormal: 0
+  useSpecificNormalDirection: 0
+  normalAlignDirection: 5
+  prefabUpAxis: 4
 --- !u!1 &7759985834895874013
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,6 +611,17 @@ MonoBehaviour:
   maxRotation: 0
   chance: 10
   tries: 3
+  snapToSurface: 0
+  snapDirections: 05000000
+  snapMaxDistance: 2
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  snapSurfaceOffset: 0
+  alignToNormal: 0
+  useSpecificNormalDirection: 0
+  normalAlignDirection: 5
+  prefabUpAxis: 4
 --- !u!1 &7773016500913629542
 GameObject:
   m_ObjectHideFlags: 0
@@ -649,6 +671,17 @@ MonoBehaviour:
   maxRotation: 0
   chance: 10
   tries: 3
+  snapToSurface: 0
+  snapDirections: 05000000
+  snapMaxDistance: 2
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  snapSurfaceOffset: 0
+  alignToNormal: 0
+  useSpecificNormalDirection: 0
+  normalAlignDirection: 5
+  prefabUpAxis: 4
 --- !u!1 &8245069488812978891
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,6 +731,17 @@ MonoBehaviour:
   maxRotation: 0
   chance: 10
   tries: 3
+  snapToSurface: 0
+  snapDirections: 05000000
+  snapMaxDistance: 2
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  snapSurfaceOffset: 0
+  alignToNormal: 0
+  useSpecificNormalDirection: 0
+  normalAlignDirection: 5
+  prefabUpAxis: 4
 --- !u!1001 &278254195012373667
 PrefabInstance:
   m_ObjectHideFlags: 0

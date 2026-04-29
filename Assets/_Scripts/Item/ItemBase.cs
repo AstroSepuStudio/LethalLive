@@ -43,7 +43,7 @@ public class ItemBase : InteractableObject
         if (ItemData.isSellable)
             ItemValue = Random.Range(ItemData.minValue, ItemData.maxValue);
 
-        if (animationModule != null) animationModule.Initialize();
+        if (animationModule != null) animationModule.Initialize(this);
         if (primaryAction != null) primaryAction.Initialize(this);
         if (secondaryAction != null) secondaryAction.Initialize(this);
     }
@@ -69,6 +69,8 @@ public class ItemBase : InteractableObject
         if (secondaryAction == ia) return ItemActionType.Secondary;
         return ItemActionType.None;
     }
+
+    public virtual bool IsUsageCriteriaMet() => true;
 
     #region Interaction
 
@@ -135,17 +137,57 @@ public class ItemBase : InteractableObject
 
     #endregion
 
-    #region Item Actions — delegate to modules
+    #region Item Actions
 
-    public void StartPrimaryAction() => primaryAction?.Execute();
-    public void CancelPrimaryAction() => primaryAction?.Cancel();
-    public void StartSecondaryAction() => secondaryAction?.Execute();
-    public void CancelSecondaryAction() => secondaryAction?.Cancel();
+    public void StartPrimaryAction()
+    {
+        if (primaryAction == null) return;
+        if (!IsUsageCriteriaMet()) return;
+        primaryAction.Execute();
+    }
 
-    public void PrimaryAnimationTrigger() => primaryAction?.OnAnimationTrigger();
-    public void PrimaryAnimationFinish() => primaryAction?.OnAnimationFinish();
-    public void SecondaryAnimationTrigger() => secondaryAction?.OnAnimationTrigger();
-    public void SecondaryAnimationFinish() => secondaryAction?.OnAnimationFinish();
+    public void CancelPrimaryAction()
+    {
+        if (primaryAction == null) return;
+        primaryAction.Cancel();
+    }
+
+    public void StartSecondaryAction()
+    {
+        if (secondaryAction == null) return;
+        if (!IsUsageCriteriaMet()) return;
+        secondaryAction.Execute();
+    }
+
+    public void CancelSecondaryAction()
+    {
+        if (secondaryAction == null) return;
+        secondaryAction.Cancel();
+    }
+
+    public void PrimaryAnimationTrigger()
+    {
+        if (primaryAction == null) return;
+        primaryAction.OnAnimationTrigger();
+    }
+
+    public void PrimaryAnimationFinish()
+    {
+        if (primaryAction == null) return;
+        primaryAction.OnAnimationFinish();
+    }
+
+    public void SecondaryAnimationTrigger()
+    {
+        if (primaryAction == null) return;
+        primaryAction.OnAnimationTrigger();
+    }
+
+    public void SecondaryAnimationFinish()
+    {
+        if (primaryAction == null) return;
+        primaryAction.OnAnimationFinish();
+    }
 
     #endregion
 

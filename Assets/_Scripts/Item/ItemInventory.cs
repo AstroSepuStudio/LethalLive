@@ -397,10 +397,12 @@ public class ItemInventory : NetworkBehaviour
         bool hasItem = item != null;
         bool twoHanded = hasItem && item.ItemData.isTwoHanded;
         bool isCrowbar = hasItem && item.ItemData.animationType == ItemSO.ItemAnimationType.Crowbar;
+        bool isSword = hasItem && item.ItemData.animationType == ItemSO.ItemAnimationType.Sword;
 
         pData.Skin_Data.CharacterAnimator.SetBool("G_TwoH", twoHanded);
+        pData.Skin_Data.CharacterAnimator.SetBool("G_Sword", !twoHanded && isSword);
         pData.Skin_Data.CharacterAnimator.SetBool("G_Crowbar", !twoHanded && isCrowbar);
-        pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", hasItem && !twoHanded && !isCrowbar);
+        pData.Skin_Data.CharacterAnimator.SetBool("G_OneH", hasItem && !twoHanded && !isCrowbar && !isSword);
     }
 
     #endregion

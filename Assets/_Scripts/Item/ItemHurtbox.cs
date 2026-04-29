@@ -7,15 +7,9 @@ public class ItemHurtbox : NetworkBehaviour
     [SerializeField] bool startEnabled = false;
     [SerializeField] Collider hitbox;
 
-    [Header("Audio")]
-    [SerializeField] AudioSource audioSource;
-    [SerializeField] AudioSFX[] hitSFX;
-    [SerializeField] SoundLoudness loudness;
-
     IA_HurtboxAttack itemAction;
 
     readonly List<GameObject> hitEntities = new();
-    float lastHitTime;
 
     private void Start()
     {
@@ -39,30 +33,21 @@ public class ItemHurtbox : NetworkBehaviour
         hitEntities.Clear();
     }
 
-    [ClientRpc]
-    void RpcPlayHitSFX(int index)
-    {
-        if (isServer) return;
-        AudioManager.Instance.PlayOneShot(audioSource, hitSFX[index], itemAction.Item.PData.gameObject, loudness);
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (!isServer) return;
+
         if (itemAction.Item == null || itemAction.Item.PData == null) return;
         if (other.gameObject == itemAction.Item.PData.gameObject) return;
         if (hitEntities.Contains(other.gameObject)) return;
 
-        if ((Time.time - lastHitTime) > 0.5f)
+        if (!other.TryGetComponent(out EntityStats target))
         {
-            lastHitTime = Time.time;
-
-            int index = Random.Range(0, hitSFX.Length);
-            AudioManager.Instance.PlayOneShot(audioSource, hitSFX[index], itemAction.Item.PData.gameObject, loudness);
-            RpcPlayHitSFX(index);
+            itemAction.HurtBoxHit();
+            return;
         }
 
-        if (!other.TryGetComponent(out EntityStats target)) return;
+        itemAction.HurtBoxHurt(target);
 
         target.ReceiveAttack(AttackEvent.From(itemAction.Item.PData, target, itemAction.AttackStat));
         hitEntities.Add(other.gameObject);

@@ -57,6 +57,21 @@ public class LL_Tier
 
         return modified;
     }
+
+    public static Tier RollRandomTier()
+    {
+        float total = 0f;
+        foreach (var kvp in BaseTierWeights) total += kvp.Value;
+
+        float roll = Random.Range(0f, total);
+        foreach (var kvp in BaseTierWeights)
+        {
+            roll -= kvp.Value;
+            if (roll <= 0f) return kvp.Key;
+        }
+
+        return Tier.Common;
+    }
 }
 
 public interface IHaveTier

@@ -31,6 +31,19 @@ public class Store : NetworkBehaviour
             unitPrice == other.unitPrice;
     }
 
+    [System.Serializable]
+    public struct SyncSaleEntry : System.IEquatable<SyncSaleEntry>
+    {
+        public bool onSale;
+        public int discountPercent;
+        public int originalPrice;
+
+        public bool Equals(SyncSaleEntry other) =>
+            onSale == other.onSale &&
+            discountPercent == other.discountPercent &&
+            originalPrice == other.originalPrice;
+    }
+
     [Header("References")]
     [SerializeField] StoreItemSO[] catalogue;
     [SerializeField] Transform storeContentParent;
@@ -51,6 +64,7 @@ public class Store : NetworkBehaviour
     [Header("Events")]
     public UnityEvent OnCartChanged;
 
+    public readonly SyncList<SyncSaleEntry> SyncedSales = new();
     public readonly SyncList<SyncCartEntry> SyncedCart = new();
     public readonly SyncList<int> SyncedPrices = new();
 
@@ -95,17 +109,28 @@ public class Store : NetworkBehaviour
         return item.minPrice;
     }
 
+    public SyncSaleEntry GetSaleEntry(StoreItemSO item)
+    {
+        if (catalogue == null) return default;
+        for (int i = 0; i < catalogue.Length; i++)
+            if (catalogue[i] == item)
+                return i < SyncedSales.Count ? SyncedSales[i] : default;
+        return default;
+    }
+
     void Start()
     {
         SyncedPrices.Callback += OnSyncedPricesChanged;
+        SyncedSales.Callback += OnSyncedSalesChanged;
         SyncedCart.Callback += OnSyncedCartChanged;
+
         PopulateCatalogue();
 
         if (!isServer) return;
 
         GameManager.Instance.ecoMod.OnTeamBalanceChangedEv.AddListener(OnBalanceUpdate);
         GameManager.Instance.dayMod.OnDayEnded.AddListener(OnDayEnded);
-        RollDailyPrices();
+        RollDailyDeals();
     }
 
     private void OnBalanceUpdate(PlayerTeam arg0, float arg1) => RpcUpdateUI();
@@ -113,6 +138,7 @@ public class Store : NetworkBehaviour
     void OnDestroy()
     {
         SyncedPrices.Callback -= OnSyncedPricesChanged;
+        SyncedSales.Callback -= OnSyncedSalesChanged;
         SyncedCart.Callback -= OnSyncedCartChanged;
 
         if (isServer)
@@ -126,25 +152,88 @@ public class Store : NetworkBehaviour
     }
 
     void OnSyncedCartChanged(SyncList<SyncCartEntry>.Operation op, int index,
-    SyncCartEntry oldItem, SyncCartEntry newItem)
+        SyncCartEntry oldItem, SyncCartEntry newItem)
     {
         OnCartChanged?.Invoke();
         RefreshAllCartUI();
         RefreshBalanceDisplay();
     }
 
-    void RollDailyPrices()
+    void OnSyncedSalesChanged(SyncList<SyncSaleEntry>.Operation op, int index,
+        SyncSaleEntry oldItem, SyncSaleEntry newItem)
+    {
+        RefreshAllPrices();
+    }
+
+    [Server]
+    void RollDailyDeals()
     {
         if (catalogue == null) return;
 
         SyncedPrices.Clear();
+        SyncedSales.Clear();
+
+        bool globalSale = Random.value <= 0.01f;
+
         foreach (var item in catalogue)
-            SyncedPrices.Add(item != null ? item.RolledPrice : 0);
+        {
+            if (item == null)
+            {
+                SyncedPrices.Add(0);
+                SyncedSales.Add(default);
+                continue;
+            }
+
+            int basePrice = item.RolledPrice;
+            bool itemOnSale = globalSale || Random.value <= 0.10f;
+
+            if (itemOnSale)
+            {
+                LL_Tier.Tier discountTier = LL_Tier.RollRandomTier();
+                int discount = RollDiscount(discountTier);
+                int salePrice = Mathf.Max(1, Mathf.RoundToInt(basePrice * (1f - discount / 100f)));
+
+                SyncedPrices.Add(salePrice);
+                SyncedSales.Add(new SyncSaleEntry
+                {
+                    onSale = true,
+                    discountPercent = discount,
+                    originalPrice = basePrice
+                });
+            }
+            else
+            {
+                SyncedPrices.Add(basePrice);
+                SyncedSales.Add(new SyncSaleEntry
+                {
+                    onSale = false,
+                    discountPercent = 0,
+                    originalPrice = basePrice
+                });
+            }
+        }
+    }
+
+    static int RollDiscount(LL_Tier.Tier tier) => tier switch
+    {
+        LL_Tier.Tier.Common => Random.Range(5, 11),
+        LL_Tier.Tier.Uncommon => Random.Range(15, 21),
+        LL_Tier.Tier.Rare => Random.Range(25, 36),
+        LL_Tier.Tier.Epic => Random.Range(40, 66),
+        LL_Tier.Tier.Legendary => Random.Range(70, 91),
+        _ => Random.Range(5, 11)
+    };
+
+    [Server]
+    public void RerollDayStore()
+    {
+        RollDailyDeals();
+        RpcClearCart();
     }
 
     void OnDayEnded(int day)
     {
-        RollDailyPrices();
+        RollDailyDeals();
         RpcClearCart();
     }
 

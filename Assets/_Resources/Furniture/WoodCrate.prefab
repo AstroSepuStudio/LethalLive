@@ -199,7 +199,7 @@ MonoBehaviour:
   center: {x: 0, y: 0.675, z: 0}
   dropArea: {x: 0.55, y: 0.375, z: 0.55}
   lootPositions:
-  - {fileID: 0}
+  - {fileID: 2432440731576350065}
   gizmos: 0
 --- !u!82 &1878123820758244030
 AudioSource:
@@ -347,6 +347,17 @@ MonoBehaviour:
   maxRotation: 0
   chance: 5
   tries: 3
+  snapToSurface: 0
+  snapDirections: 05000000
+  snapMaxDistance: 2
+  snapLayers:
+    serializedVersion: 2
+    m_Bits: 4083
+  snapSurfaceOffset: 0
+  alignToNormal: 0
+  useSpecificNormalDirection: 0
+  normalAlignDirection: 5
+  prefabUpAxis: 4
 --- !u!1001 &978180165230960273
 PrefabInstance:
   m_ObjectHideFlags: 0

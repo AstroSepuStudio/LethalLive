@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f1c388d6aa1d0c4fa854c63c56e4bf4, type: 3}
+  m_Name: Sword
+  m_EditorClassIdentifier: 
+  itemPrefab: {fileID: 9084241017591515198, guid: ab8c3bdaef207be4489f764aff3ad56f, type: 3}
+  Tier: 3
+  animationType: 3
+  DropSFX:
+  - {fileID: 11400000, guid: 4ee204ebbad12a848bf29e1b8deb9de8, type: 2}
+  EquipSFX:
+  - {fileID: 11400000, guid: ef32e6b0cb13a6c4fb5ee89fa177ba99, type: 2}
+  itemName: Sword
+  icon: {fileID: 21300000, guid: d217ef47a901f0c438d5c23f54497a5a, type: 3}
+  isTwoHanded: 0
+  isSellable: 1
+  minValue: 0
+  maxValue: 0
+  hasPrimaryAction: 1
+  hasSecondaryAction: 0
+  pickable: 1
+  droppable: 1
+  stackable: 0
+  gOffset: {x: 0, y: 0, z: 0}
+  gRotation: {x: -10, y: 90, z: 0}
