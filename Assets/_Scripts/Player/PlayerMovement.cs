@@ -2,6 +2,7 @@ using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
 using static FootstepSurfacesSO;
 
 public class PlayerMovement : NetworkBehaviour
@@ -50,8 +51,6 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] PlayerFootstepHandler footstepHandler;
     [SerializeField] float walkDelay;
     [SerializeField] float sprintDelay;
-    //[SerializeField] float walkVolMult = 0.35f;
-    //[SerializeField] float sprintVolMult = 1f;
     [SerializeField] float timer;
 
     [Header("Flags")]
@@ -286,6 +285,7 @@ public class PlayerMovement : NetworkBehaviour
     void StartCrouch()
     {
         IsCrouching = true;
+        pData.Skin_Data.CharacterAnimator.SetBool("Crouch", IsCrouching);
         pData.Character_Controller.height = crouchHeight;
         pData.Character_Controller.center = crouchCenter;
         pData.CameraTarget.localPosition = new Vector3(0, crouchCamTarget, 0);
@@ -294,6 +294,7 @@ public class PlayerMovement : NetworkBehaviour
     void StopCrouch()
     {
         IsCrouching = false;
+        pData.Skin_Data.CharacterAnimator.SetBool("Crouch", IsCrouching);
         pData.Character_Controller.height = normalHeight;
         pData.Character_Controller.center = normalCenter;
         pData.CameraTarget.localPosition = new Vector3(0, normalCamTarget - 0.1f, 0);

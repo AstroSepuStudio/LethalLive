@@ -10,6 +10,9 @@ public class IA_HurtboxAttack : ItemAction
     [SerializeField] protected bool forceAim = true;
     [SerializeField] protected AttackStat attackStat;
 
+    [SerializeField] float swingDelay = 0.1f;
+    [SerializeField] AudioSFX swingSFX;
+    [SerializeField] SoundLoudness swingLoudness;
     [SerializeField] AudioSFX onHitSFX;
     [SerializeField] SoundLoudness onHitLoudness;
     [SerializeField] AudioSFX OnHurtSFX;
@@ -46,6 +49,8 @@ public class IA_HurtboxAttack : ItemAction
             item.AnimationModule.PlayPrimary(this, item.PData, animationTrigger);
         else if (type == ItemActionType.Secondary)
             item.AnimationModule.PlaySecondary(this, item.PData, animationTrigger);
+
+        RpcPlayOnSwing();
     }
 
     public override void Cancel()
@@ -82,6 +87,13 @@ public class IA_HurtboxAttack : ItemAction
         OnHurt?.Invoke(target);
 
         RpcPlayOnHurt();
+    }
+
+    [ClientRpc]
+    void RpcPlayOnSwing()
+    {
+        if (audioSource == null || swingSFX == null) return;
+        AudioManager.Instance.PlayOneShotWithDelay(audioSource, swingSFX, swingDelay, item.PData.gameObject, swingLoudness);
     }
 
     [ClientRpc]

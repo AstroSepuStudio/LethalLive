@@ -2,7 +2,6 @@ using Mirror;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.ProBuilder;
 
 public class PlayerStats : EntityStats
 {
