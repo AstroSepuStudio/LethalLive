@@ -4,6 +4,16 @@
 
 <!-- TODO: Import banner -->
 
+<p align="center">
+  <a href="https://ko-fi.com/wordsaw/goal?g=0">
+    <img src="https://img.shields.io/badge/☕_Support_the_Project-ff0000?style=for-the-badge&logo=ko-fi&logoColor=white">
+  </a>
+</p>
+
+<p align="center">
+  <i>Help me fund the steam page.</i>
+</p>
+
 ---
 
 ## Lore
