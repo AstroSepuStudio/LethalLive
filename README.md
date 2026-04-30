@@ -61,6 +61,10 @@ Make your operative your own before heading into the dark.
 ### Board
 <img width="1006" height="657" alt="Captura de pantalla 2026-04-08 192131" src="https://github.com/user-attachments/assets/85a99d32-299c-4ada-b861-e2b290ff6dab" />
 
+### OIIA CAT
+<img width="640" height="640" alt="OIIACAT" src="https://github.com/user-attachments/assets/06a94dd6-82e1-4f73-9900-93770825a8e4" />
+
+
 ---
 
 ## ⚠️ Disclaimer
