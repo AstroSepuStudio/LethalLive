@@ -1,4 +1,4 @@
-# ⚠️ LETHAL LIVE (WIP)
+# ⚠️ Liminal Harvest (WIP)
 
 > *"Suit up. Scavenge. Survive. Don't miss quota."*
 
@@ -8,9 +8,11 @@
 
 ## Lore
 
-**NanLive Industries is bankrupt.**
+**Nan Industries is bankrupt.**
 
-To keep the lights on, the company is sending its talents into the backrooms to scavenge valuable goods and meet a strict recovery quota. Why now? The stars' international *"incidents"* left NanLive Industries holding the bag — and if the loans aren't repaid, management will inquire for an **execution**.
+Nan Industries is no longer operational.
+What remains is an automated recovery system that continues to assign quotas to its workers, sending them into the Backrooms to retrieve valuable assets.
+Each subject is fitted with a collar and given a simple directive: meet the quota or face termination.
 
 Suit up, raid the liminal hallways, and bring back enough cash to avoid being disposed.
 
@@ -18,7 +20,7 @@ Suit up, raid the liminal hallways, and bring back enough cash to avoid being di
 
 ## Description
 
-**Lethal Live** is a survival game where you explore the backrooms to scavenge goods, sell them, and complete a daily quota.
+**Liminal Harvest** is a survival game where you explore the backrooms to scavenge goods, sell them, and complete a daily quota.
 
 Careful with the unstability of the backrooms, you never know if the lights will turn off...
 
@@ -53,7 +55,7 @@ Make your operative your own before heading into the dark.
 
 ## ⚠️ Disclaimer
 
-> *NanLive Industries is not responsible for any psychological damage, liminal entrapment, or entity encounters sustained during quota collection operations. Good luck.*
+> *Nan Industries is not responsible for any psychological damage, liminal entrapment, or entity encounters sustained during quota collection operations. Good luck.*
 
 ---
 
