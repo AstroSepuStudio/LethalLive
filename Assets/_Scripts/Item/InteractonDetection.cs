@@ -59,6 +59,7 @@ public class InteractonDetection : NetworkBehaviour
         {
             if (!hit.TryGetComponent<InteractableObject>(out var item)) continue;
             if (!item.CanBeInteracted()) continue;
+            if (item is ItemBase ib && ib.HasOwner) continue;
             detectedItems.Add(item);
 
             if (!nearbyItems.Contains(item))
@@ -142,7 +143,10 @@ public class InteractonDetection : NetworkBehaviour
         foreach (var hit in hits)
         {
             if (hit.TryGetComponent<InteractableObject>(out var item))
+            {
+                if (item is ItemBase ib && ib.HasOwner) continue;
                 candidates.Add(item);
+            }
         }
 
         if (candidates.Count == 0) return;

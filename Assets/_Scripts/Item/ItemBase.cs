@@ -11,12 +11,13 @@ public class ItemBase : InteractableObject
     [SerializeField] protected NetworkIdentity identity;
     [SerializeField] protected Rigidbody rb;
     [SerializeField] protected Collider coll;
+    [SerializeField] protected Collider[] colls;
     [SerializeField] protected Renderer itemRenderer;
     [SerializeField] protected ItemAnimationModule animationModule;
     [SerializeField] protected AudioSource itemAudioSrc;
 
-    [SerializeField] ItemAction primaryAction;
-    [SerializeField] ItemAction secondaryAction;
+    [SerializeField] protected ItemAction primaryAction;
+    [SerializeField] protected ItemAction secondaryAction;
 
     public uint ID => identity.netId;
 
@@ -104,6 +105,11 @@ public class ItemBase : InteractableObject
     {
         rb.isKinematic = true;
         coll.enabled = false;
+        foreach (var col in colls)
+        {
+            col.enabled = false;
+        }
+
         canvas.DisableCanvas();
     }
 
@@ -128,6 +134,11 @@ public class ItemBase : InteractableObject
     {
         gameObject.SetActive(true);
         coll.enabled = true;
+        foreach (var col in colls)
+        {
+            col.enabled = true;
+        }
+
         transform.SetParent(null);
         rb.isKinematic = false;
 

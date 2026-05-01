@@ -39,6 +39,7 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
     public Collider PlayerCollider;
     public LayerMask IgnorePlayer;
     public LayerMask PlayerMask;
+    public LayerMask GroundMask;
 
     [Header("Visuals")]
     public Transform Model;

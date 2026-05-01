@@ -20447,6 +20447,9 @@ MonoBehaviour:
   PlayerMask:
     serializedVersion: 2
     m_Bits: 64
+  GroundMask:
+    serializedVersion: 2
+    m_Bits: 4081
   Model: {fileID: 655141142050468008}
   EmoteManager: {fileID: 7273252265069306027}
   HUDmanager: {fileID: 2241338668991894686}
@@ -20529,6 +20532,9 @@ MonoBehaviour:
   _wantsToSprint: 0
   _wantsToUncrouch: 0
   res: []
+  OnPlayerLanded:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &3243128911646036628
 MonoBehaviour:
   m_ObjectHideFlags: 0

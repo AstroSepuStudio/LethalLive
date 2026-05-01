@@ -80,6 +80,14 @@ public class GM_PlayerModule : NetworkBehaviour
         return null;
     }
 
+    public PlayerData GetPlayerGameobject(GameObject go)
+    {
+        foreach (PlayerData p in Players)
+            if (p.gameObject == go)
+                return p;
+        return null;
+    }
+
     [Server]
     public void RegisterPlayer(PlayerData player)
     {

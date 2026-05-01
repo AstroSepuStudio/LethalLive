@@ -1,8 +1,8 @@
 using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.EnhancedTouch;
 using static FootstepSurfacesSO;
 
 public class PlayerMovement : NetworkBehaviour
@@ -81,9 +81,17 @@ public class PlayerMovement : NetworkBehaviour
     Vector3 forcedAimDirection;
     readonly float forcedAimSpeed = 20f;
 
+    public UnityEvent<PlayerData> OnPlayerLanded;
+
+    public Vector3 GetVelocity() => new(
+        velocity.x,
+        velocity.y + Mathf.Max(0f, externalMomentum.y),
+        velocity.z
+    );
+
     bool IsGrounded()
     {
-        res = Physics.OverlapSphere(feet.position, groundRadius);
+        res = Physics.OverlapSphere(feet.position, groundRadius, pData.GroundMask);
         for (int i = 0; i < res.Length; i++)
         {
             if (res[i] == pData.PlayerCollider) continue;
@@ -373,6 +381,8 @@ public class PlayerMovement : NetworkBehaviour
             if (_isGrounded && _tryJump && !somethingAbove)
             {
                 jpd = true;
+                externalMomentum.y = 0f;
+
                 velocity.y = Mathf.Approximately(pData.Player_Stats.currentStamina, 0)
                     ? jumpForce * 0.75f
                     : jumpForce;
@@ -426,7 +436,7 @@ public class PlayerMovement : NetworkBehaviour
             FootstepUpdate();
         }
 
-        if (_isGrounded && velocity.y <= 0)
+        if (_isGrounded && velocity.y <= 0 && externalMomentum.y <= 0)
             velocity.y = groundedGravity;
         else
             velocity.y += gravity * Time.deltaTime;
@@ -436,6 +446,9 @@ public class PlayerMovement : NetworkBehaviour
 
         if (!wasGroundedLastFrame && _isGrounded)
         {
+            externalMomentum.y = 0f;
+            OnPlayerLanded?.Invoke(pData);
+
             float verticalVelocity = Mathf.Abs(velocity.y);
             SoundLoudness landLoudness;
             if (verticalVelocity < 2)
@@ -499,8 +512,20 @@ public class PlayerMovement : NetworkBehaviour
             velocity.z = airborneVelocity.z + externalMomentum.z;
         }
 
-        pData.Character_Controller.Move(velocity * Time.deltaTime);
-        externalMomentum = Vector3.Lerp(externalMomentum, Vector3.zero, Time.deltaTime * friction);
+        if (externalMomentum.y > 0)
+            externalMomentum.y += gravity * Time.deltaTime;
+        else
+            externalMomentum.y = 0f;
+
+        Vector3 finalVelocity = new(
+            velocity.x,
+            velocity.y + Mathf.Max(0f, externalMomentum.y),
+            velocity.z
+        );
+        pData.Character_Controller.Move(finalVelocity * Time.deltaTime);
+
+        externalMomentum.x = Mathf.Lerp(externalMomentum.x, 0f, Time.deltaTime * friction);
+        externalMomentum.z = Mathf.Lerp(externalMomentum.z, 0f, Time.deltaTime * friction);
 
         if (pData.Skin_Data.CharacterAnimator == null) return;
 
@@ -556,13 +581,36 @@ public class PlayerMovement : NetworkBehaviour
                         feet.position + Vector3.down * groundRadius + Vector3.down * raycastLenght);
     }
 
-    public void AddMomentum(Vector3 force) => externalMomentum += force;
+    public void AddMomentum(Vector3 force)
+    {
+        if (force.y > 0)
+        {
+            jumpTime = 0f;
+            _tryJump = false;
+            groundedTime = 0f;
+            _isGrounded = false;
+        }
+
+        externalMomentum += force;
+    }
 
     public Vector3 KillMomentum()
     {
         Vector3 momentum = externalMomentum;
         externalMomentum = Vector3.zero;
         return momentum;
+    }
+
+    public void ForceJump(float force)
+    {
+        groundedTime = 0f; 
+        _isGrounded = false;
+        wasGroundedLastFrame = false;
+
+        jumpTime = 0f; 
+        _tryJump = false;
+
+        velocity.y = force;
     }
 
     void FootstepUpdate()
