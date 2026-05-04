@@ -358,7 +358,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  holdTime: 2
+  holdTime: 0
   canvas: {fileID: 578609524373151835}
   OnInteractEvent:
     m_PersistentCalls:
@@ -374,6 +374,7 @@ MonoBehaviour:
   identity: {fileID: 6818651458780780045}
   rb: {fileID: 2342669760519003277}
   coll: {fileID: 2545860507069542307}
+  colls: []
   itemRenderer: {fileID: 177153261589398169}
   animationModule: {fileID: 1636338274897175807}
   itemAudioSrc: {fileID: 2481167657957782618}
@@ -551,6 +552,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 26430834ea307e24083f9e03d7fc4f0f, type: 3}
       propertyPath: m_Name
       value: Sword4_FBX
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 26430834ea307e24083f9e03d7fc4f0f, type: 3}
+      propertyPath: m_Layer
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 26430834ea307e24083f9e03d7fc4f0f, type: 3}
       propertyPath: m_IsActive

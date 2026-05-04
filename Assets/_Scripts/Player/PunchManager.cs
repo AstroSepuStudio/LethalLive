@@ -27,7 +27,7 @@ public class PunchManager : NetworkBehaviour
     void CmdRequestPunch()
     {
         if (isPunching || pData._LockPlayer) return;
-
+        if (!pData.InputHandler.IsDefaultController) return;
         if (debuffIndex != -1) RemoveDebuff();
 
         string astr = pData.Player_Movement.IsCrouching ? "AttackCrouch" : "Attack";

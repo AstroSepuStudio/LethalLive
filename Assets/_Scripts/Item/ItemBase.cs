@@ -27,6 +27,7 @@ public class ItemBase : InteractableObject
 
     public PlayerData PData { get; private set; }
     public PlayerData LastPlayer { get; private set; }
+    public Rigidbody RigidBody => rb;
     public ItemAnimationModule AnimationModule => animationModule;
     public ItemAction PrimaryAction => primaryAction;
     public ItemAction SecondaryAction => secondaryAction;

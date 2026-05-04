@@ -33,9 +33,21 @@ public class Int_HomewardBeacon : InteractableObject, IMapFollowTarget
         if (GameManager.Instance.onDeadTime) return;
 
         sourceData.RpcCompleteTeleport();
-        sourceData.Character_Controller.enabled = false;
-        sourceData.Character_Controller.transform.position = GameManager.Instance.Teleporter.transform.position;
-        sourceData.Character_Controller.enabled = true;
+
+        Vector3 destination = GameManager.Instance.Teleporter.transform.position;
+
+        var cart = sourceData.InputHandler.GetActiveCart();
+        if (cart != null)
+        {
+            cart.TeleportWithDriver(destination);
+        }
+        else
+        {
+            sourceData.Character_Controller.enabled = false;
+            sourceData.Character_Controller.transform.position = destination;
+            sourceData.Character_Controller.enabled = true;
+        }
+
         sourceData._PlayerInOffice = true;
 
         DisableCanvas();

@@ -101,8 +101,17 @@ public class Int_Teleport : InteractableObject
         if (!foundValidPos) return;
 
         sourceData.RpcCompleteTeleport();
-        sourceData.Teleport(desiredPosition);
         sourceData._PlayerInOffice = false;
+
+        var cart = sourceData.InputHandler.GetActiveCart();
+        if (cart != null)
+        {
+            cart.TeleportWithDriver(desiredPosition);
+        }
+        else
+        {
+            sourceData.Teleport(desiredPosition);
+        }
 
         canvas.DisableCanvas();
         

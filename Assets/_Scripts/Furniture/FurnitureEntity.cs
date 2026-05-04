@@ -6,15 +6,15 @@ using UnityEngine;
 public class FurnitureEntity : EntityStats
 {
     [Header("Furniture")]
-    [SerializeField] Renderer furRenderer;
-    [SerializeField] FurnitureDataSO dataSO;
-    [SerializeField] Rigidbody rb;
-    [SerializeField] Vector3 center;
-    [SerializeField] Vector3 dropArea;
+    [SerializeField] protected Renderer furRenderer;
+    [SerializeField] protected FurnitureDataSO dataSO;
+    [SerializeField] protected Rigidbody rb;
+    [SerializeField] protected Vector3 center;
+    [SerializeField] protected Vector3 dropArea;
 
     public List<DungeonSpawnPoint> lootPositions;
 
-    bool _dying;
+    protected bool _dying;
     public bool IsDying => _dying;
 
     public void SetRender(bool active)
@@ -32,6 +32,8 @@ public class FurnitureEntity : EntityStats
     [Server]
     public override void ApplyDamage(AttackEvent source)
     {
+        if (_dying) return;
+
         currentHP = Mathf.Clamp(currentHP - source.AttackStat_.AttackDamage, 0f, maxHP);
 
         if (currentHP <= 0f)
@@ -52,6 +54,8 @@ public class FurnitureEntity : EntityStats
     [Server]
     public override void AddKnock(float amount, Vector3 momentum)
     {
+        if (_dying) return;
+
         base.AddKnock(amount, momentum);
         rb.AddForce(momentum, ForceMode.Impulse);
     }
@@ -62,6 +66,8 @@ public class FurnitureEntity : EntityStats
         if (_dying) return;
         _dying = true;
 
+        OnDeath?.Invoke(source);
+
         if (!sfxMap.TryGetValue(SFXEvent.Died, out var group) || group.Clips.Length == 0) return;
         RpcFurnitureBreaks(Random.Range(0, group.Clips.Length));
         foreach (var item in dataSO.lootTable) TryDropItem(item);
@@ -69,7 +75,7 @@ public class FurnitureEntity : EntityStats
     }
 
     [ClientRpc]
-    void RpcFurnitureBreaks(int clipIndex)
+    protected virtual void RpcFurnitureBreaks(int clipIndex)
     {
         SetRender(false);
         if (!sfxMap.TryGetValue(SFXEvent.Died, out var group) || clipIndex >= group.Clips.Length) return;
@@ -82,7 +88,7 @@ public class FurnitureEntity : EntityStats
         NetworkServer.Destroy(gameObject);
     }
 
-    void CheckDropThresholds(bool playSFX)
+    protected void CheckDropThresholds(bool playSFX)
     {
         bool anyDropped = false;
 
@@ -103,7 +109,7 @@ public class FurnitureEntity : EntityStats
     }
 
     [Server]
-    bool TryDropItem(FurnitureDataSO.ItemDrop drop)
+    protected virtual bool TryDropItem(FurnitureDataSO.ItemDrop drop)
     {
         float rand = Random.Range(0f, 100f);
         if (rand > drop.dropChance) return false;
@@ -129,7 +135,7 @@ public class FurnitureEntity : EntityStats
         return true;
     }
 
-    private void OnDrawGizmosSelected()
+    protected virtual void OnDrawGizmosSelected()
     {
         if (!gizmos) return;
 

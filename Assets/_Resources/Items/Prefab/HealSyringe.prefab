@@ -384,7 +384,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  holdTime: 2
+  holdTime: 0
   canvas: {fileID: 578609524373151835}
   OnInteractEvent:
     m_PersistentCalls:
@@ -400,6 +400,7 @@ MonoBehaviour:
   identity: {fileID: 6818651458780780045}
   rb: {fileID: 2342669760519003277}
   coll: {fileID: 9167639732866871109}
+  colls: []
   itemRenderer: {fileID: 1362926814215788674}
   animationModule: {fileID: 6552288443693441050}
   itemAudioSrc: {fileID: 2481167657957782618}

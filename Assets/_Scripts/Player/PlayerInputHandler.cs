@@ -8,6 +8,25 @@ public class PlayerInputHandler : NetworkBehaviour
     [SerializeField] PlayerData pData;
     bool mWasFree;
 
+    IPlayerController activeController;
+    IPlayerController defaultController;
+
+    public bool IsDefaultController => activeController == defaultController;
+
+    public Item_Cart GetActiveCart()
+    {
+        if (activeController is CartPlayerController cartController)
+            return cartController.Cart;
+        return null;
+    }
+
+    void Start()
+    {
+        if (!isLocalPlayer) return;
+        defaultController = new DefaultPlayerController(pData.Player_Movement);
+        activeController = defaultController;
+    }
+
     public void RequestReturnMainMenu() => GameManager.Instance.playMod.RequestReturnToMainMenu();
 
     public void OnPlayerPressEscape(InputAction.CallbackContext context)
@@ -56,5 +75,89 @@ public class PlayerInputHandler : NetworkBehaviour
             pData.Skin_Data.Rigging_Manager.RpcEnableLeftHandChainRig(false);
             pData.Skin_Data.Rigging_Manager.RpcEnableLookAtTabletRig(false);
         }
+    }
+
+    [Command]
+    public void CmdOnMove(Vector2 input) => activeController?.OnMove(input);
+
+    [Command]
+    public void CmdOnJump() => activeController?.OnJump();
+
+    [Command]
+    public void CmdOnJumpCanceled() => activeController?.OnJumpCanceled();
+
+    [Command]
+    public void CmdOnSprintStart() => activeController?.OnSprintStart();
+
+    [Command]
+    public void CmdOnSprintStop() => activeController?.OnSprintStop();
+
+    [Command]
+    public void CmdOnStartCrouch() => activeController?.OnCrouchStart();
+
+    [Command]
+    public void CmdOnStopCrouch() => activeController?.OnCrouchStop();
+
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        if (!isLocalPlayer) return;
+        CmdOnMove(context.ReadValue<Vector2>());
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (!isLocalPlayer) return;
+        if (context.started) CmdOnJump();
+        else if (context.canceled) CmdOnJumpCanceled();
+    }
+
+    public void OnStartSprint(InputAction.CallbackContext context)
+    {
+        if (!isLocalPlayer) return;
+        if (context.started) CmdOnSprintStart();
+        else if (context.canceled) CmdOnSprintStop();
+    }
+
+    public void OnStartCrouch(InputAction.CallbackContext context)
+    {
+        if (!isLocalPlayer) return;
+        if (context.started) CmdOnStartCrouch();
+        else if (context.canceled) CmdOnStopCrouch();
+    }
+
+    public void SetController(IPlayerController controller)
+    {
+        if (controller == null) return;
+        if (!isServer && !isLocalPlayer) return;
+
+        activeController?.OnLoseControl(pData);
+        activeController = controller;
+        activeController.OnGainControl(pData);
+    }
+
+    public void ReleaseController(IPlayerController controller)
+    {
+        if (activeController != controller) return;
+
+        activeController.OnLoseControl(pData);
+        activeController = defaultController;
+        activeController.OnGainControl(pData);
+    }
+
+    public void ReleaseToDefault()
+    {
+        if (activeController == defaultController) return;
+        if (!isServer && !isLocalPlayer) return;
+
+        pData.Character_Controller.enabled = false;
+        Vector3 rot = pData.transform.rotation.eulerAngles;
+        rot.x = 0;
+        rot.z = 0;
+        pData.transform.rotation = Quaternion.Euler(rot);
+        pData.Character_Controller.enabled = true;
+
+        activeController?.OnLoseControl(pData);
+        activeController = defaultController;
+        activeController.OnGainControl(pData);
     }
 }

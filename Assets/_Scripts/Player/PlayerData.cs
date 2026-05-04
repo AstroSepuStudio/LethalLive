@@ -12,6 +12,8 @@ public class PlayerData : NetworkBehaviour, IMapFollowTarget
 {
     [Header("Input & Core Systems")]
     public PlayerInput Player_Input;
+    public PlayerInputHandler InputHandler;
+    public InteractonDetection InteractionDetection_;
     public PlayerMovement Player_Movement;
     public SpectatorMovement Spectator_Movement;
     public PunchManager Punch_Manager;

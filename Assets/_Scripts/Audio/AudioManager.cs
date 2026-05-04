@@ -1,9 +1,11 @@
 using UnityEngine;
 using LethalLive;
 using System.Collections;
+using System.Collections.Generic;
 
 public class AudioManager : MonoBehaviour
 {
+    public enum PlayState { Play, Stop, Pause };
     public static AudioManager Instance;
 
     [Header("Audio Sources")]
@@ -13,6 +15,9 @@ public class AudioManager : MonoBehaviour
 
     AudioSFX currentSong;
     AudioSFX currentAmbience;
+
+    readonly Dictionary<AudioSource, (float timer, AudioSFX sfx, GameObject goSrc, SoundLoudness loudness)> controlledSources = new();
+    const float hearingBroadcastInterval = 0.5f;
 
     Settings UserSettings => SettingsManager.Instance.UserSettings;
 
@@ -37,6 +42,31 @@ public class AudioManager : MonoBehaviour
     {
         if (UserSettings != null)
             UserSettings.OnSettingsChanged -= OnSettingsChanged;
+    }
+
+
+    void Update()
+    {
+        var keys = new List<AudioSource>(controlledSources.Keys);
+        foreach (var src in keys)
+        {
+            if (src == null || !src.isPlaying)
+            {
+                controlledSources.Remove(src);
+                continue;
+            }
+
+            var data = controlledSources[src];
+            data.timer -= Time.deltaTime;
+
+            if (data.timer <= 0f)
+            {
+                data.timer = hearingBroadcastInterval;
+                BroadcastToHearing(src.transform.position, data.goSrc, data.sfx, data.loudness);
+            }
+
+            controlledSources[src] = data;
+        }
     }
 
     void OnSettingsChanged()
@@ -168,5 +198,51 @@ public class AudioManager : MonoBehaviour
     public void StopAmbience()
     {
         ambienceSource.Stop();
+    }
+
+    public void PlayControllerSFX(AudioSource src, AudioSFX sfx, PlayState playState,
+        GameObject goSrc = null, SoundLoudness category = SoundLoudness.NoSound)
+    {
+        if (src == null || sfx == null) return;
+
+        switch (playState)
+        {
+            case PlayState.Play:
+                float typeVolume = GetTypeVolume(sfx.audioType);
+                float finalVolume = UserSettings.GetGlobalVolume() * typeVolume * sfx.clipVolume;
+
+                if (src.clip != sfx.clip)
+                    src.clip = sfx.clip;
+
+                src.volume = finalVolume;
+                src.loop = true;
+
+                if (!src.isPlaying) src.Play();
+
+                GameObject go = goSrc ? goSrc : src.gameObject;
+
+                if (!controlledSources.ContainsKey(src))
+                    BroadcastToHearing(src.transform.position, go, sfx, category);
+
+                controlledSources[src] = (hearingBroadcastInterval, sfx, go, category);
+                break;
+
+            case PlayState.Pause:
+                src.Pause();
+                controlledSources.Remove(src);
+                break;
+
+            case PlayState.Stop:
+                src.Stop();
+                controlledSources.Remove(src);
+                break;
+        }
+    }
+
+    public void StopControlledSFX(AudioSource src)
+    {
+        if (src == null) return;
+        src.Stop();
+        controlledSources.Remove(src);
     }
 }

@@ -60,10 +60,14 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] bool _tryJump;
     [SerializeField] bool _isSprinting = false;
     [SerializeField] bool _isFalling;
-    public bool IsCrouching { get; private set; } = false;
     [SerializeField] bool _wantsToCrouch = false;
     [SerializeField] bool _wantsToSprint = false;
     [SerializeField] bool _wantsToUncrouch = false;
+
+    [SerializeField] bool debug = false;
+
+    public bool IsCrouching { get; private set; } = false;
+    public bool IsGrounded_ => _isGrounded;
 
     [Header("Network Variables")]
     [SyncVar(hook = nameof(OnStandMovBlendChanged))]
@@ -152,57 +156,19 @@ public class PlayerMovement : NetworkBehaviour
     }
     #endregion
 
-    #region Input Methods
-    public void OnMove(InputAction.CallbackContext context)
-    {
-        if (!isLocalPlayer) return;
-
-        Vector2 input = context.ReadValue<Vector2>();
-        CmdSendMovementInput(input);
-    }
-
-    public void OnJump(InputAction.CallbackContext context)
-    {
-        if (!isLocalPlayer) return;
-        if (context.canceled) return;
-
-        CmdSendJumpInput();
-    }
-
-    public void OnStartSprint(InputAction.CallbackContext context)
-    {
-        if (!isLocalPlayer) return;
-
-        if (context.started)
-            CmdStartSprint();
-        else if (context.canceled)
-            CmdStopSprint();
-    }
-
-    public void OnStartCrouch(InputAction.CallbackContext context)
-    {
-        if (!isLocalPlayer) return;
-
-        if (context.started)
-            CmdStartCrouchAction();
-        else if (context.canceled)
-            CmdStopCrouch();
-    }
-    #endregion
-
     #region Commands
     [Command]
-    void CmdSendMovementInput(Vector2 input) => movementInput = input;
+    public void CmdSendMovementInput(Vector2 input) => movementInput = input;
 
     [Command]
-    void CmdSendJumpInput()
+    public void CmdSendJumpInput()
     {
         if (pData._LockPlayer) return;
         jumpTime = 0.2f;
     }
 
     [Command]
-    void CmdStartSprint()
+    public void CmdStartSprint()
     {
         if (pData._LockPlayer) return;
 
@@ -228,7 +194,7 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     [Command]
-    void CmdStopSprint()
+    public void CmdStopSprint()
     {
         if (IsCrouching && IsSomethingAbove())
         {
@@ -247,10 +213,10 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     [Command]
-    void CmdStartCrouchAction() => ServerStartCrouch();
+    public void CmdStartCrouchAction() => ServerStartCrouch();
 
     [Command]
-    void CmdStopCrouch() => ServerStopCrouch();
+    public void CmdStopCrouch() => ServerStopCrouch();
     #endregion
 
     #region Helpers
@@ -341,6 +307,13 @@ public class PlayerMovement : NetworkBehaviour
             pData.CameraPivot == null ||
             !pData.Character_Controller.enabled)
             return;
+
+        if (!pData.InputHandler.IsDefaultController)
+        {
+            groundedTime = IsGrounded() ? coyoteTime : groundedTime > 0 ? groundedTime - Time.deltaTime : 0;
+            _isGrounded = groundedTime > 0f;
+            return;
+        }
 
         groundedTime = IsGrounded() ? coyoteTime : groundedTime > 0 ? groundedTime - Time.deltaTime : 0;
         _isGrounded = groundedTime > 0f;
@@ -562,6 +535,33 @@ public class PlayerMovement : NetworkBehaviour
         pData.Skin_Data.CharacterAnimator.SetFloat("StandCrouch", standCrouchBlend);
     }
 
+    [Server]
+    public void ServerUpdateAnimationState(float horizontalSpeed)
+    {
+        if (pData.Skin_Data.CharacterAnimator == null) return;
+
+        pData.Skin_Data.CharacterAnimator.SetBool("Falling", !_isGrounded);
+        if (_isGrounded) pData.Skin_Data.CharacterAnimator.SetBool("Jump", false);
+        _isFalling = !_isGrounded;
+
+        float targetBlend = Mathf.Approximately(horizontalSpeed, 0f) ? 0f : horizontalSpeed;
+
+        if (IsCrouching)
+        {
+            standCrouchBlend = Mathf.MoveTowards(standCrouchBlend, 1f, Time.deltaTime * animTransitionSpeed);
+            crouchMovBlend = Mathf.MoveTowards(crouchMovBlend, targetBlend, Time.deltaTime * animTransitionSpeed);
+        }
+        else
+        {
+            standCrouchBlend = Mathf.MoveTowards(standCrouchBlend, 0f, Time.deltaTime * animTransitionSpeed);
+            standMovBlend = Mathf.MoveTowards(standMovBlend, targetBlend, Time.deltaTime * animTransitionSpeed);
+        }
+
+        pData.Skin_Data.CharacterAnimator.SetFloat("StandMov", standMovBlend);
+        pData.Skin_Data.CharacterAnimator.SetFloat("CrouchMov", crouchMovBlend);
+        pData.Skin_Data.CharacterAnimator.SetFloat("StandCrouch", standCrouchBlend);
+    }
+
     void UpdateMoveSpeed()
     {
         if (IsCrouching)
@@ -570,15 +570,6 @@ public class PlayerMovement : NetworkBehaviour
             movSpeed = sprintSpeed;
         else
             movSpeed = walkSpeed;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(feet.transform.position, groundRadius);
-        Gizmos.DrawWireSphere(pData.Head.transform.position, groundRadius);
-        Gizmos.DrawLine(feet.position + Vector3.down * groundRadius,
-                        feet.position + Vector3.down * groundRadius + Vector3.down * raycastLenght);
     }
 
     public void AddMomentum(Vector3 force)
@@ -708,5 +699,16 @@ public class PlayerMovement : NetworkBehaviour
         if (src == pData.Modest_AS) return 1;
         if (src == pData.Loud_AS) return 2;
         return 1;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!debug) return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(feet.transform.position, groundRadius);
+        Gizmos.DrawWireSphere(pData.Head.transform.position, groundRadius);
+        Gizmos.DrawLine(feet.position + Vector3.down * groundRadius,
+                        feet.position + Vector3.down * groundRadius + Vector3.down * raycastLenght);
     }
 }

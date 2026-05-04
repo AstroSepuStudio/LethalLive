@@ -269,4 +269,29 @@ public class RiggingManager : NetworkBehaviour
                 StopCameraRigs = false;
         }
     }
+
+    public void SetRightHandTarget(Transform target, bool stopCameraRig)
+    {
+        RHCRTargetTarget = target;
+        RightHandChainRig.weight = target != null ? 1f : 0f;
+
+        if (target != null)
+        {
+            FollowCameraRig.weight = 0f;
+            FollowCameraTargetRig.weight = 0f;
+            StopCameraRigs = stopCameraRig;
+        }
+        else
+        {
+            StopCameraRigs = false;
+        }
+    }
+
+    public void SetLeftHandTarget(Transform target)
+    {
+        LHCRTargetTarget = target;
+
+        if (leftHandRigTransition != null) StopCoroutine(leftHandRigTransition);
+        leftHandRigTransition = StartCoroutine(LeftHandTransition(target != null ? 1f : 0f));
+    }
 }

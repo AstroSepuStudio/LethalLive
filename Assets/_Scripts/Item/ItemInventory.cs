@@ -25,6 +25,7 @@ public class ItemInventory : NetworkBehaviour
     WaitForSeconds sleepNameDisplay = new(1f);
     Coroutine nameDisplayCoroutine;
 
+    public ItemBase EquippedItem => equippedItem;
     public bool ItemEquipped => equippedItem != null;
     public bool HasPrimaryAction => equippedItem != null && equippedItem.ItemData.hasPrimaryAction;
     public bool HasSecondaryAction => equippedItem != null && equippedItem.ItemData.hasSecondaryAction;
@@ -157,6 +158,22 @@ public class ItemInventory : NetworkBehaviour
         equippedItem.HasOwner = false;
         inventorySlots[slot] = null;
         equippedItem = null;
+        SetEquipAnimState(null);
+
+        int next = slot;
+        for (int i = 1; i < inventorySlots.Length; i++)
+        {
+            int candidate = (slot + i) % inventorySlots.Length;
+            if (inventorySlots[candidate] != null)
+            {
+                next = candidate;
+                break;
+            }
+        }
+
+        if (next != slot)
+            selectedSlotIndex = next;
+
         RpcDropItem(slot, id);
     }
 
@@ -413,6 +430,7 @@ public class ItemInventory : NetworkBehaviour
     void CmdUseAction(bool isPrimary)
     {
         if (equippedItem == null || IsItemInUse || pData._LockPlayer) return;
+        if (!pData.InputHandler.IsDefaultController) return;
 
         ItemAction action = isPrimary ? equippedItem.PrimaryAction : equippedItem.SecondaryAction;
         if (action == null) return;

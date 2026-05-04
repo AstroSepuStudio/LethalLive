@@ -13,8 +13,11 @@ public class InteractonDetection : NetworkBehaviour
     [SerializeField] LayerMask itemLayer;
     [SerializeField] LayerMask interactLayer;
 
-    List<InteractableObject> nearbyItems = new();
     InteractableObject currentInteractable;
+
+    readonly List<InteractableObject> nearbyItems = new();
+    readonly List<string> lockedTags = new();
+    uint? targetOnlyID;
 
     private void Start()
     {
@@ -57,7 +60,9 @@ public class InteractonDetection : NetworkBehaviour
 
         foreach (var hit in hits)
         {
+            if (!hit.CompareTag("KeyInteractable") && lockedTags.Contains(hit.gameObject.tag)) continue;
             if (!hit.TryGetComponent<InteractableObject>(out var item)) continue;
+            if (!hit.CompareTag("KeyInteractable") && targetOnlyID != null && item.netId != targetOnlyID) continue;
             if (!item.CanBeInteracted()) continue;
             if (item is ItemBase ib && ib.HasOwner) continue;
             detectedItems.Add(item);
@@ -142,11 +147,12 @@ public class InteractonDetection : NetworkBehaviour
 
         foreach (var hit in hits)
         {
-            if (hit.TryGetComponent<InteractableObject>(out var item))
-            {
-                if (item is ItemBase ib && ib.HasOwner) continue;
-                candidates.Add(item);
-            }
+            if (!hit.CompareTag("KeyInteractable") && lockedTags.Contains(hit.gameObject.tag)) continue;
+            if (!hit.TryGetComponent<InteractableObject>(out var item)) continue;
+            if (!hit.CompareTag("KeyInteractable") && targetOnlyID != null && item.netId != targetOnlyID) continue;
+
+            if (item is ItemBase ib && ib.HasOwner) continue;
+            candidates.Add(item);
         }
 
         if (candidates.Count == 0) return;
@@ -181,6 +187,48 @@ public class InteractonDetection : NetworkBehaviour
     void TargetClearCurrentInteractable(NetworkConnection targetConn)
     {
         currentInteractable = null;
+    }
+
+    [Server]
+    public void ServerSetTargetOnly(uint target, bool lockID)
+    {
+        if (lockID && targetOnlyID == null)
+            targetOnlyID = target;
+
+        if (!lockID && targetOnlyID == target)
+            targetOnlyID = null;
+
+        RpcSetTargetOnly(target, lockID);
+    }
+
+    [TargetRpc]
+    void RpcSetTargetOnly(uint target, bool lockID)
+    {
+        if (lockID && targetOnlyID == null)
+            targetOnlyID = target;
+
+        if (!lockID && targetOnlyID == target)
+            targetOnlyID = null;
+    }
+
+    [Server]
+    public void ServerSetLockInteractableTag(string tag, bool lockTag)
+    {
+        if (!lockTag && lockedTags.Contains(tag))
+            lockedTags.Remove(tag);
+        else if (lockTag && !lockedTags.Contains(tag))
+            lockedTags.Add(tag);
+
+        RpcSetLockInteractableTag(tag, lockTag);
+    }
+
+    [TargetRpc]
+    void RpcSetLockInteractableTag(string tag, bool lockTag)
+    {
+        if (!lockTag && lockedTags.Contains(tag))
+            lockedTags.Remove(tag);
+        else if (lockTag && !lockedTags.Contains(tag))
+            lockedTags.Add(tag);
     }
 
     private void OnDrawGizmosSelected()

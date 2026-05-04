@@ -9,7 +9,9 @@ public class LL_Tier
         Uncommon,
         Rare,
         Epic,
-        Legendary
+        Legendary,
+        Cosmic,
+        None
     }
 
     public static readonly Dictionary<Tier, float> BaseTierWeights = new()

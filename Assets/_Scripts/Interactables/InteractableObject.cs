@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public class InteractableObject : NetworkBehaviour
 {
-    [SerializeField] protected float holdTime = 2f;
+    [SerializeField] protected float holdTime = 0f;
     [SerializeField] protected InteractableCanvas canvas;
 
     [SerializeField] protected UnityEvent<PlayerData> OnInteractEvent;
@@ -41,7 +41,10 @@ public class InteractableObject : NetworkBehaviour
 
     public virtual void OnInteract(PlayerData sourceData)
     {
-        StartCoroutine(CheckForHold(sourceData));
+        if (holdTime > 0)
+            StartCoroutine(CheckForHold(sourceData));
+        else
+            OnTapInteract(sourceData);
     }
 
     public virtual void OnStopInteract(PlayerData sourceData)
@@ -56,14 +59,19 @@ public class InteractableObject : NetworkBehaviour
         OnHoldInteractEvent?.Invoke(sourceData);
     }
 
-    IEnumerator CheckForHold(PlayerData sourceData)
+    public virtual void OnTapInteract(PlayerData sourceData)
+    {
+        OnInteractEvent?.Invoke(sourceData);
+    }
+
+    protected IEnumerator CheckForHold(PlayerData sourceData)
     {
         _holding = true;
         TargetUpdateFill(sourceData.connectionToClient, 0f);
 
         float timer = 0f;
         float updateTimer = 0f;
-        while (timer < holdTime && _holding && OnHoldInteractEvent.GetPersistentEventCount() > 0)
+        while (timer < holdTime && _holding)
         {
             timer += Time.deltaTime;
             updateTimer += Time.deltaTime;
@@ -83,7 +91,7 @@ public class InteractableObject : NetworkBehaviour
         if (timer >= holdTime)
             OnHoldInteract(sourceData);
         else
-            OnInteractEvent?.Invoke(sourceData);
+            OnTapInteract(sourceData);
     }
 
     [TargetRpc]
