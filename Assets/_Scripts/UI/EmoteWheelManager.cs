@@ -1,5 +1,4 @@
 using Mirror;
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,6 +7,7 @@ public class EmoteWheelManager : NetworkBehaviour
 {
     [Header("References")]
     [SerializeField] PlayerData pData;
+    [SerializeField] NetworkAnimator networkAnimator;
     [SerializeField] GameObject wheelObj;
     [SerializeField] RectTransform wheelRect;
     [SerializeField] EmoteWheelPiece[] pieces;
@@ -18,9 +18,11 @@ public class EmoteWheelManager : NetworkBehaviour
 
     Coroutine[] activeCoroutines;
     Coroutine activeRotateCoroutine;
+
     [SerializeField] Emote[] currentEmotes;
     Emote currentLoopEmote;
     bool _playedEmote = false;
+
     [SyncVar(hook = nameof(OnPageChanged))]
     int emotePage = 0;
 
@@ -45,33 +47,23 @@ public class EmoteWheelManager : NetworkBehaviour
     {
         if (!pData.isLocalPlayer || pData._LockPlayer) return;
 
-        if (context.started)
-        {
-            OpenWheel();
-        }
-        else if (context.canceled)
-        {
-            CloseWheel();
-        }
+        if (context.started) OpenWheel();
+        else if (context.canceled) CloseWheel();
     }
 
     void OpenWheel()
     {
         if (pData.HUDManager.OpenedWindows > 0) return;
         pData.HUDManager.OpenWindow(wheelObj);
-
         pData.Camera_Movement.PauseCamera();
         wheelObj.SetActive(true);
 
-        if (activeRotateCoroutine != null)
-            StopCoroutine(activeRotateCoroutine);
+        if (activeRotateCoroutine != null) StopCoroutine(activeRotateCoroutine);
         activeRotateCoroutine = StartCoroutine(AnimateWheel(0f));
 
         for (int i = 0; i < pieces.Length; i++)
         {
-            if (activeCoroutines[i] != null)
-                StopCoroutine(activeCoroutines[i]);
-
+            if (activeCoroutines[i] != null) StopCoroutine(activeCoroutines[i]);
             activeCoroutines[i] = StartCoroutine(AnimateButton(i, Vector3.one, 1f, i * delayForEach));
         }
     }
@@ -79,18 +71,14 @@ public class EmoteWheelManager : NetworkBehaviour
     void CloseWheel()
     {
         pData.HUDManager.CloseWindow(wheelObj);
-
         pData.Camera_Movement.ResumeCamera();
 
-        if (activeRotateCoroutine != null)
-            StopCoroutine(activeRotateCoroutine);
+        if (activeRotateCoroutine != null) StopCoroutine(activeRotateCoroutine);
         activeRotateCoroutine = StartCoroutine(AnimateWheel(135f));
 
         for (int i = pieces.Length - 1; i >= 0; i--)
         {
-            if (activeCoroutines[i] != null)
-                StopCoroutine(activeCoroutines[i]);
-
+            if (activeCoroutines[i] != null) StopCoroutine(activeCoroutines[i]);
             activeCoroutines[i] = StartCoroutine(AnimateButton(i, Vector3.zero, 0f, (pieces.Length - 1 - i) * delayForEach));
         }
 
@@ -107,7 +95,8 @@ public class EmoteWheelManager : NetworkBehaviour
 
         yield return new WaitForSeconds(delay);
 
-        while (Vector3.Distance(pivot.localScale, targetScale) > 0.01f || Mathf.Abs(group.alpha - targetAlpha) > 0.01f)
+        while (Vector3.Distance(pivot.localScale, targetScale) > 0.01f ||
+               Mathf.Abs(group.alpha - targetAlpha) > 0.01f)
         {
             pivot.localScale = Vector3.MoveTowards(pivot.localScale, targetScale, Time.deltaTime * speed);
             group.alpha = Mathf.MoveTowards(group.alpha, targetAlpha, Time.deltaTime * speed);
@@ -116,26 +105,24 @@ public class EmoteWheelManager : NetworkBehaviour
 
         pivot.localScale = targetScale;
         group.alpha = targetAlpha;
-
         activeCoroutines[index] = null;
 
         bool allClosed = true;
         for (int i = 0; i < pieces.Length; i++)
         {
-            if (!Mathf.Approximately(pieces[i].canvasGroup.alpha, 0))
+            if (!Mathf.Approximately(pieces[i].canvasGroup.alpha, 0f))
             {
                 allClosed = false;
                 break;
             }
         }
 
-        if (allClosed)
-            wheelObj.SetActive(false);
+        if (allClosed) wheelObj.SetActive(false);
     }
 
     IEnumerator AnimateWheel(float targetRotation)
     {
-        while (Mathf.Abs(wheelRect.rotation.eulerAngles.z - targetRotation) > 0.01f)
+        while (Mathf.Abs(wheelRect.localRotation.eulerAngles.z - targetRotation) > 0.01f)
         {
             wheelRect.localRotation = Quaternion.Euler(0, 0,
                 Mathf.MoveTowards(wheelRect.localRotation.eulerAngles.z, targetRotation, Time.deltaTime * rotationSpeed));
@@ -148,7 +135,6 @@ public class EmoteWheelManager : NetworkBehaviour
     public void RequestChangePage(int delta)
     {
         if (!isLocalPlayer) return;
-
         CmdChangePage(delta);
     }
 
@@ -156,25 +142,17 @@ public class EmoteWheelManager : NetworkBehaviour
     void CmdChangePage(int delta)
     {
         int newPage = emotePage + delta;
-
         int startIndex = newPage * 6;
-        if (startIndex >= emotes.Length || newPage < 0)
-            return;
+
+        if (newPage < 0 || startIndex >= emotes.Length) return;
 
         bool hasEmote = false;
         for (int i = 0; i < 6; i++)
         {
-            if (startIndex + i < emotes.Length)
-            {
-                hasEmote = true;
-                break;
-            }
+            if (startIndex + i < emotes.Length) { hasEmote = true; break; }
         }
 
-        if (!hasEmote)
-            return;
-
-        emotePage = newPage;
+        if (hasEmote) emotePage = newPage;
     }
 
     void OnPageChanged(int oldPage, int newPage)
@@ -186,131 +164,96 @@ public class EmoteWheelManager : NetworkBehaviour
     void SetEmotesByPage(int page)
     {
         emotePage = page;
-
         for (int i = 0; i < 6; i++)
         {
             int index = i + 6 * page;
-
-            if (index >= emotes.Length)
-                currentEmotes[i] = null;
-            else
-                currentEmotes[i] = emotes[index];
+            currentEmotes[i] = index < emotes.Length ? emotes[index] : null;
         }
+
+        RefreshUI();
     }
 
     void RefreshUI()
     {
         for (int i = 0; i < pieces.Length; i++)
-        {
-            bool hasEmote = currentEmotes[i] != null;
-
-            if (hasEmote)
-                pieces[i].UpdatePiece(currentEmotes[i]);
-            else
-                pieces[i].UpdatePiece(null);
-        }
+            pieces[i].UpdatePiece(currentEmotes[i]);
     }
     #endregion
 
     #region Emote Logic
     public void PlayerMoves()
     {
-        RpcStopLoopEmote();
+        if (!isLocalPlayer) return;
+        CmdStopLoopEmote();
     }
 
-    [ClientRpc]
-    void RpcStopLoopEmote()
+    [Command]
+    void CmdStopLoopEmote()
     {
-        if (currentLoopEmote == null) return;
-        if (currentLoopEmote.dynamic) return;
-
-        pData.Skin_Data.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
-        currentLoopEmote = null;
+        if (currentLoopEmote == null || currentLoopEmote.dynamic) return;
+        ServerClearLoopEmote();
     }
 
     public void PlayEmote(int index)
     {
         if (!isLocalPlayer) return;
-        LocalPlayEmote(index);
+        _playedEmote = true;
         CmdPlayEmote(index);
     }
 
     [Command]
     void CmdPlayEmote(int index)
     {
-        RpcPlayEmote(index);
-    }
-
-    [ClientRpc]
-    void RpcPlayEmote(int index)
-    {
-        if (!isLocalPlayer)
-        {
-            LocalPlayEmote(index);
-        }
-    }
-
-    void LocalPlayEmote(int index)
-    {
         if (index < 0 || index >= currentEmotes.Length) return;
         if (currentEmotes[index] == null) return;
 
-        string trigger = currentEmotes[index].animatorTrigger;
+        Emote emote = currentEmotes[index];
 
         if (currentLoopEmote != null)
         {
-            pData.Skin_Data.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
+            networkAnimator.animator.SetBool(currentLoopEmote.animatorTrigger, false);
 
-            if (currentLoopEmote == currentEmotes[index])
+            if (currentLoopEmote == emote)
             {
                 currentLoopEmote = null;
+                pData.Skin_Data.Rigging_Manager.RpcSetEmoteIK(false);
                 return;
             }
 
             currentLoopEmote = null;
         }
 
-        if (currentEmotes[index].loop)
+        if (emote.loop)
         {
-            currentLoopEmote = currentEmotes[index];
-            pData.Skin_Data.CharacterAnimator.SetBool(trigger, true);
+            currentLoopEmote = emote;
+            networkAnimator.animator.SetBool(emote.animatorTrigger, true);
         }
         else
         {
-            pData.Skin_Data.CharacterAnimator.SetTrigger(trigger);
+            networkAnimator.SetTrigger(emote.animatorTrigger);
         }
 
-        _playedEmote = true;
+        pData.Skin_Data.Rigging_Manager.RpcSetEmoteIK(emote.disableIK);
     }
 
     public void CancelEmote()
     {
         if (!isLocalPlayer) return;
-
-        LocalCancelEmote();
         CmdCancelEmote();
     }
 
     [Command]
     void CmdCancelEmote()
     {
-        RpcCancelEmote();
+        ServerClearLoopEmote();
     }
 
-    [ClientRpc]
-    void RpcCancelEmote()
-    {
-        if (!isLocalPlayer)
-        {
-            LocalCancelEmote();
-        }
-    }
-
-    public void LocalCancelEmote()
+    public void ServerClearLoopEmote()
     {
         if (currentLoopEmote == null) return;
-
-        pData.Skin_Data.CharacterAnimator.SetBool(currentLoopEmote.animatorTrigger, false);
+        networkAnimator.animator.SetBool(currentLoopEmote.animatorTrigger, false);
+        currentLoopEmote = null;
+        pData.Skin_Data.Rigging_Manager.RpcSetEmoteIK(false);
     }
     #endregion
 }

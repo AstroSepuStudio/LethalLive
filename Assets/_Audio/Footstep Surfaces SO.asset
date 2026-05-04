@@ -1,0 +1,138 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb3b9e4649096d14fa125dc0ca0a0f79, type: 3}
+  m_Name: Footstep Surfaces SO
+  m_EditorClassIdentifier: Assembly-CSharp::FootstepSurfacesSO
+  surfaces:
+  - surfaceTag: Tile
+    walkSFX:
+    - {fileID: 11400000, guid: 2991219a87d3e7a40825cb4d8782bde5, type: 2}
+    - {fileID: 11400000, guid: cb4d2a3775f754343b4f0607a75fdbac, type: 2}
+    - {fileID: 11400000, guid: d4fae4dc4b34b654e8f2bcf90af3cf51, type: 2}
+    - {fileID: 11400000, guid: 55b86ce0d3c868342a32607d5ab23b38, type: 2}
+    - {fileID: 11400000, guid: 8b24ea12b13636d4b9f22279e93cabbf, type: 2}
+    - {fileID: 11400000, guid: 005afaca5c2bf39458e75f4334bd9c9f, type: 2}
+    - {fileID: 11400000, guid: eba1253d5a7368348b99a4c6cf868885, type: 2}
+    - {fileID: 11400000, guid: e08ccda4c41de9a4fb239aa9cc396d21, type: 2}
+    sprintSFX:
+    - {fileID: 11400000, guid: 690d1f1e04311064a87b82780d151c8d, type: 2}
+    - {fileID: 11400000, guid: a7fa7dbec6331a44cbae5592167ea552, type: 2}
+    - {fileID: 11400000, guid: d055dd4f5ec203241b519ee024c9db3b, type: 2}
+    - {fileID: 11400000, guid: 1c9852958527e014e8a55730e815ab3f, type: 2}
+    - {fileID: 11400000, guid: a92fcd81e0174ed43ad82e30a8a1bb36, type: 2}
+    - {fileID: 11400000, guid: 0e6103a2280d34a42b33e2ac68ee6e37, type: 2}
+    jumpSFX:
+    - {fileID: 11400000, guid: 8def62628c6c0b4489418ea59008e2fd, type: 2}
+    - {fileID: 11400000, guid: 6a678db6cdc340440b796684a6ec6b29, type: 2}
+    - {fileID: 11400000, guid: 65e54b7e8a5f4cf4cb2ff440787112cb, type: 2}
+    landSFX:
+    - {fileID: 11400000, guid: c0af38b20f228774daa63b17b03a07f4, type: 2}
+    - {fileID: 11400000, guid: c0190e8fd06b2bf42baed876289973b6, type: 2}
+    - {fileID: 11400000, guid: f6fe62f510588f643b380b30ee5d9d44, type: 2}
+  - surfaceTag: Carpet
+    walkSFX:
+    - {fileID: 11400000, guid: 2991219a87d3e7a40825cb4d8782bde5, type: 2}
+    - {fileID: 11400000, guid: cb4d2a3775f754343b4f0607a75fdbac, type: 2}
+    - {fileID: 11400000, guid: d4fae4dc4b34b654e8f2bcf90af3cf51, type: 2}
+    - {fileID: 11400000, guid: 55b86ce0d3c868342a32607d5ab23b38, type: 2}
+    - {fileID: 11400000, guid: 8b24ea12b13636d4b9f22279e93cabbf, type: 2}
+    - {fileID: 11400000, guid: 005afaca5c2bf39458e75f4334bd9c9f, type: 2}
+    - {fileID: 11400000, guid: eba1253d5a7368348b99a4c6cf868885, type: 2}
+    - {fileID: 11400000, guid: e08ccda4c41de9a4fb239aa9cc396d21, type: 2}
+    sprintSFX:
+    - {fileID: 11400000, guid: 690d1f1e04311064a87b82780d151c8d, type: 2}
+    - {fileID: 11400000, guid: a7fa7dbec6331a44cbae5592167ea552, type: 2}
+    - {fileID: 11400000, guid: d055dd4f5ec203241b519ee024c9db3b, type: 2}
+    - {fileID: 11400000, guid: 1c9852958527e014e8a55730e815ab3f, type: 2}
+    - {fileID: 11400000, guid: a92fcd81e0174ed43ad82e30a8a1bb36, type: 2}
+    - {fileID: 11400000, guid: 0e6103a2280d34a42b33e2ac68ee6e37, type: 2}
+    jumpSFX:
+    - {fileID: 11400000, guid: 8def62628c6c0b4489418ea59008e2fd, type: 2}
+    - {fileID: 11400000, guid: 6a678db6cdc340440b796684a6ec6b29, type: 2}
+    - {fileID: 11400000, guid: 65e54b7e8a5f4cf4cb2ff440787112cb, type: 2}
+    landSFX:
+    - {fileID: 11400000, guid: c0af38b20f228774daa63b17b03a07f4, type: 2}
+    - {fileID: 11400000, guid: c0190e8fd06b2bf42baed876289973b6, type: 2}
+    - {fileID: 11400000, guid: f6fe62f510588f643b380b30ee5d9d44, type: 2}
+  - surfaceTag: Metal
+    walkSFX:
+    - {fileID: 11400000, guid: 17f2a069f0c2d24468f4da6284860dd1, type: 2}
+    - {fileID: 11400000, guid: 44c3db1d282acbd439065ae2ae080970, type: 2}
+    - {fileID: 11400000, guid: 091c9fb162fe2834f8c65447140396d3, type: 2}
+    - {fileID: 11400000, guid: e63f7c8c17c4f264681a44b86302b94a, type: 2}
+    - {fileID: 11400000, guid: 9becf826a41b18a49963a95b3990f357, type: 2}
+    - {fileID: 11400000, guid: cc8cd3b4dd07ab148b107622850ed5f5, type: 2}
+    - {fileID: 11400000, guid: 08c1316db0649d24d9763353b9f049ab, type: 2}
+    - {fileID: 11400000, guid: b5911c3abbadc4247b8e8830e1ae4e02, type: 2}
+    - {fileID: 11400000, guid: 191b038aaf313ba4d806c14ddfba4121, type: 2}
+    - {fileID: 11400000, guid: 1c0f93a7bed318e44a74cb7a13c01501, type: 2}
+    - {fileID: 11400000, guid: 0fa171af371976d498b840f107bd239c, type: 2}
+    - {fileID: 11400000, guid: dc2d2ed8d697dca4b98cb18ea554ea4d, type: 2}
+    - {fileID: 11400000, guid: 614b79bea179dde4391341f3034e6310, type: 2}
+    - {fileID: 11400000, guid: 55c7ba72decc94f4580f1d0481217724, type: 2}
+    - {fileID: 11400000, guid: 0c73849355c088642ba26732f0c32976, type: 2}
+    sprintSFX:
+    - {fileID: 11400000, guid: 2270727b98c7fee45a70dbe1f520f49a, type: 2}
+    - {fileID: 11400000, guid: 21fc1ed616d4f474e94ed4efccf22380, type: 2}
+    - {fileID: 11400000, guid: 569fcff77840cd84d9f001ed3f4a32ac, type: 2}
+    - {fileID: 11400000, guid: 4d982c9038907a5489328b58662f750e, type: 2}
+    - {fileID: 11400000, guid: 13abfd5a7f4b8714799f1ceed857483a, type: 2}
+    - {fileID: 11400000, guid: c8ac10f70e11d3e46ba18adee9de572d, type: 2}
+    - {fileID: 11400000, guid: fbc75dbeff274d5418ea7199d4ee15f3, type: 2}
+    - {fileID: 11400000, guid: 0360607899fc1d14eb4a45071b269540, type: 2}
+    - {fileID: 11400000, guid: 9f401cbdda36f254cbc632673c0f549f, type: 2}
+    - {fileID: 11400000, guid: 9d4179828eb80a8468a23904b03cbd29, type: 2}
+    - {fileID: 11400000, guid: de1dca44d235ce446a1e723f16ab39ae, type: 2}
+    - {fileID: 11400000, guid: a52ef4dc7d4eebb4e8b302e2fa834d4c, type: 2}
+    - {fileID: 11400000, guid: ee003c285d016ec43a5418ef9c423a84, type: 2}
+    - {fileID: 11400000, guid: fa0f36dbfd46d24429c08f462640bbd5, type: 2}
+    - {fileID: 11400000, guid: a62928d1f83c78041bc6a3649a416243, type: 2}
+    jumpSFX:
+    - {fileID: 11400000, guid: 321cb414d03e65945954f158cef771b4, type: 2}
+    - {fileID: 11400000, guid: 23cbaf3c526762148bba33a88e4dfe53, type: 2}
+    - {fileID: 11400000, guid: 9ebdc71738e79fa40af641dee9efcc82, type: 2}
+    landSFX:
+    - {fileID: 11400000, guid: 6f2ef33867792ef4f93700189c8a9a15, type: 2}
+    - {fileID: 11400000, guid: 2d5cac3bea3e20a4185de7c7beddc261, type: 2}
+    - {fileID: 11400000, guid: 8c3de793f23a1844894985112fe0694f, type: 2}
+  fallbackSFX:
+    surfaceTag: 
+    walkSFX:
+    - {fileID: 11400000, guid: fda7e843b33731747bb4dd9c831232a1, type: 2}
+    - {fileID: 11400000, guid: cfb8e51704501f948aa5f4b5f91cb7ce, type: 2}
+    - {fileID: 11400000, guid: 030f0570ad3d6de49b72151a80abf5a8, type: 2}
+    - {fileID: 11400000, guid: 48d9e68979300664ea7d5da2565be464, type: 2}
+    - {fileID: 11400000, guid: 75f35700f22103b4fbba2c0a9f16cf47, type: 2}
+    - {fileID: 11400000, guid: 9bd2ae047bb37ff498ad4f3b58876e3a, type: 2}
+    - {fileID: 11400000, guid: 0c10931742a05f64e8cf9de031a47feb, type: 2}
+    - {fileID: 11400000, guid: 3d109f96089307a4e95d3a2b93727687, type: 2}
+    - {fileID: 11400000, guid: 178086f025b68ff4cb546ec0cba815c0, type: 2}
+    - {fileID: 11400000, guid: 673768c42b5523142b06643175206186, type: 2}
+    sprintSFX:
+    - {fileID: 11400000, guid: 489c81f2c077d1e4b83a8c73fbdbdfc7, type: 2}
+    - {fileID: 11400000, guid: 2b8ce85a1ed0b2547b87ac5436af3272, type: 2}
+    - {fileID: 11400000, guid: e65728e2c56c4bd428dfdf254bda3c63, type: 2}
+    - {fileID: 11400000, guid: 3af966c8bc312994584794e11796933d, type: 2}
+    - {fileID: 11400000, guid: f4416879a37ef7d44947e43258859776, type: 2}
+    - {fileID: 11400000, guid: 4c908d7d83c416c4e8a9e514c2903d03, type: 2}
+    - {fileID: 11400000, guid: c7724030e1f9c034190aaa964da9006f, type: 2}
+    - {fileID: 11400000, guid: 325f4f1c808e983478b49ad585a11210, type: 2}
+    - {fileID: 11400000, guid: 3f3ee8bafbc94f74fad7111e4de037b1, type: 2}
+    - {fileID: 11400000, guid: 4e259501cb56d9d4fb93df75b10eff3e, type: 2}
+    jumpSFX:
+    - {fileID: 11400000, guid: 6ea9651b8f448134086f386c1a336651, type: 2}
+    - {fileID: 11400000, guid: f596a10d94321604e8a437d103189dab, type: 2}
+    - {fileID: 11400000, guid: e31fc64292b490f4195f7aea0893b290, type: 2}
+    landSFX:
+    - {fileID: 11400000, guid: e21a6916332a8b243a91692775d00878, type: 2}
+    - {fileID: 11400000, guid: ec118728b74a5ef4ebd85763543da936, type: 2}
+    - {fileID: 11400000, guid: 39b50b81f3396274baab6c05bde52ecf, type: 2}

@@ -4,27 +4,68 @@ using UnityEngine;
 public class FPS_Displayer : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI fpsDisplay;
-    [SerializeField] bool lockFPS;
-    [SerializeField] int targetFPS;
+    [SerializeField] bool displayFPS;
+    [SerializeField] bool displayAv;
+
+    public bool DisplayFPS => displayFPS;
+    public bool DisplayAv => displayAv;
+
+    readonly float[] fpsPtick = new float[20];
+    int index = 0;
 
     private void Start()
     {
-        GameTick.OnTick += OnTick;
-
-        if (lockFPS)
-        {
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = targetFPS;
-        }
+        if (!displayFPS && !displayAv) 
+            fpsDisplay.enabled = false;
     }
 
-    private void OnDestroy()
+    float GetAverage()
     {
-        GameTick.OnTick -= OnTick;
+        float av = 0;
+        foreach (var fps in fpsPtick)
+        {
+            av += fps;
+        }
+        av /= fpsPtick.Length;
+        av = Mathf.Round(av * 100) / 100;
+
+        return av;
+    }
+
+    public void SetDisplayFPS(bool display)
+    {
+        displayFPS = display;
+        if (displayFPS) OnTick();
+        if (displayAv) return;
+
+        fpsDisplay.enabled = display;
+        if (display) GameTick.OnTick += OnTick;
+        else GameTick.OnTick -= OnTick;
+    }
+
+    public void SetDisplayAverageFPS(bool display)
+    {
+        displayAv = display;
+        if (displayAv) OnTick();
+        if (displayFPS) return;
+
+        fpsDisplay.enabled = display;
+        if (display) GameTick.OnTick += OnTick;
+        else GameTick.OnTick -= OnTick;
     }
 
     private void OnTick()
     {
-        fpsDisplay.SetText($"FPS: {Mathf.Round(1/Time.deltaTime)}");
+        float fps = 1 / Time.deltaTime;
+        fpsPtick[index] = fps;
+        index++;
+        if (index >= fpsPtick.Length) index = 0;
+
+        string display = "";
+
+        if (displayFPS) display += $"{Mathf.Round(fps)}\n";
+        if (displayAv) display += $"~{GetAverage()}";
+
+        fpsDisplay.SetText(display);
     }
 }

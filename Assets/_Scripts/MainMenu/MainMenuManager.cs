@@ -1,22 +1,107 @@
+using LethalLive;
 using Steamworks;
+using System.Collections;
+using UnityEngine;
 
 public class MainMenuManager : UIManager
 {
+    [Header("References")]
+    [SerializeField] GameObject cameraParent;
+    [SerializeField] GameObject menuScene;
+    [SerializeField] GameObject office;
+    [SerializeField] Transform menuCam;
+    [SerializeField] AudioSFX mainMenuMusic;
+
+    [Header("Animation")]
+    [SerializeField] Transform initialPosition;
+    [SerializeField] Transform resetPosition;
+    [SerializeField] float menuCamSpd = 4f;
+
+    [Header("Visual")]
+    [SerializeField] Color menuAmbienceClr;
+    [SerializeField] float menuAmbienceIntensity;
+
+    Coroutine menuCamCor;
+
     protected override void Start()
     {
         base.Start();
 
-        LobbyManager.Instace.OnLobbyCreatedEvent.AddListener(HideMainMenu);
-        LobbyManager.Instace.OnLobbyJoinedEvent.AddListener(HideMainMenu);
+        LobbyManager.Instance.OnLobbyCreatedEvent.AddListener(HideMainMenu);
+        LobbyManager.Instance.OnLobbyJoinedEvent.AddListener(HideMainMenu);
+
+        LobbyManager.Instance.OnLobbyLeaveEvent.AddListener(DisplayMainMenu);
+        LobbyManager.Instance.OnLobbyKickedEvent.AddListener(DisplayMainMenu);
+
+        DisplayMainMenu();
     }
 
-    private void HideMainMenu(LobbyEnter_t arg0)
+    private void HideMainMenu(LobbyCreated_t arg0) => HideMainMenu();
+    private void HideMainMenu(LobbyEnter_t arg0) => HideMainMenu();
+
+    private void HideMainMenu()
     {
         gameObject.SetActive(false);
+        cameraParent.SetActive(false);
+
+        if (menuScene != null) menuScene.SetActive(false);
+        if (office != null) office.SetActive(true);
+
+        EnvironmentLightManager.Instance.ResetAmbient();
+        SwitchCameraAnimation(false);
+        AudioManager.Instance.StopMusic();
     }
 
-    private void HideMainMenu(LobbyCreated_t arg0)
+    private void DisplayMainMenu(LobbyKicked_t arg0) => DisplayMainMenu();
+
+    private void DisplayMainMenu()
     {
-        gameObject.SetActive(false);
+        gameObject.SetActive(true);
+        cameraParent.SetActive(true);
+
+        if (menuScene != null) menuScene.SetActive(true);
+        if (office != null) office.SetActive(false);
+
+        EnvironmentLightManager.Instance.SetAmbient(menuAmbienceClr, menuAmbienceIntensity, true);
+        SettingsManager.Instance.UnlockMouse();
+        SwitchCameraAnimation(true);
+        AudioManager.Instance.PlayMusic(mainMenuMusic);
+    }
+
+    public void QuitApplication()
+    {
+        Application.Quit();
+    }
+
+    private void SwitchCameraAnimation(bool start)
+    {
+        if (menuCamCor != null)
+        {
+            StopCoroutine(menuCamCor);
+            if (!start) return;
+        }
+
+        menuCamCor = StartCoroutine(MenuCamAnimation());
+    }
+
+    IEnumerator MenuCamAnimation()
+    {
+        menuCam.position = initialPosition.position;
+        Vector3 movDir = (resetPosition.position - initialPosition.position).normalized;
+        float cycleLength = Vector3.Distance(initialPosition.position, resetPosition.position);
+        float travelled = 0f;
+        WaitForEndOfFrame frame = new();
+
+        while (true)
+        {
+            yield return frame;
+            float step = menuCamSpd * Time.deltaTime;
+            travelled += step;
+
+            if (travelled >= cycleLength)
+                travelled -= cycleLength;
+
+            menuCam.position = initialPosition.position + movDir * travelled;
+        }
     }
 }

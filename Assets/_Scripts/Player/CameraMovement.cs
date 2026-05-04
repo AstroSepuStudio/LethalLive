@@ -1,3 +1,5 @@
+using LethalLive;
+using Steamworks;
 using System.Collections;
 using UnityEngine;
 
@@ -9,7 +11,6 @@ public class CameraMovement : MonoBehaviour
     [SerializeField] Camera pCamera;
     [SerializeField] AudioListener audioListener;
     [SerializeField] GameObject crosshair;
-    [SerializeField] bool _ignoreCrosshair = false;
 
     [Header("Settings")]
     [SerializeField] float minVertical = -80f;
@@ -18,38 +19,72 @@ public class CameraMovement : MonoBehaviour
     [SerializeField] float minZoom = 1f;
     [SerializeField] float maxZoom = 6f;
     [SerializeField] float smoothTime = 0.2f;
+    [SerializeField] float offsetSpeed = 5f;
 
     Vector3 velocity = Vector3.zero;
     float distanceToTarget = 4f;
     float horizontal;
     float vertical;
     bool _stop;
+    bool _cameraInputLocked;
 
     private void Start()
     {
         pData.CameraPivot.SetParent(null);
         crosshair.SetActive(false);
+
+        LobbyManager.Instance.OnLobbyLeaveEvent.AddListener(DestroyGameobject);
+        LobbyManager.Instance.OnLobbyKickedEvent.AddListener(DestroyGameobject);
     }
+
+    private void OnDestroy()
+    {
+        LobbyManager.Instance.OnLobbyLeaveEvent.AddListener(DestroyGameobject);
+        LobbyManager.Instance.OnLobbyKickedEvent.RemoveListener(DestroyGameobject);
+    }
+
+    private void OnEnable()
+    {
+        Vector3 back = -pData.CameraPivot.forward;
+        pData.PlayerCamera.transform.position = pData.CameraPivot.position + back * distanceToTarget;
+
+        if (Physics.Linecast(pData.CameraPivot.position, pData.PlayerCamera.transform.position + back * 0.12f, out RaycastHit hit, pData.IgnorePlayer))
+        {
+            Vector3 safePos = pData.CameraPivot.position + back * (hit.distance - 0.12f);
+            pData.PlayerCamera.transform.position = safePos;
+        }
+    }
+
+    void DestroyGameobject() => Destroy(gameObject);
+    void DestroyGameobject(LobbyKicked_t arg0) => Destroy(gameObject);
 
     private void LateUpdate()
     {
         if (pData == null) return;
-        if (pData._LockPlayer) return;
 
         pData.CameraPivot.position = Vector3.SmoothDamp(
             pData.CameraPivot.position,
             pData.CameraTarget.position,
             ref velocity,
             smoothTime);
+        
+        pCamera.transform.localRotation = Quaternion.identity;
 
+        if (pData._LockPlayer || Cursor.lockState == CursorLockMode.None) return;
         if (!pData.isLocalPlayer || _stop || pData.HUDManager.OpenedWindow) return;
+        if (_cameraInputLocked) return;
+
+        Vector2 camOffset = pData.Player_Input.actions["AdjustCam"].ReadValue<Vector2>();
+        float xOffset = Mathf.Clamp(pData.CameraTarget.localPosition.x + camOffset.x * Time.deltaTime * offsetSpeed, -0.6f, 0.6f);
+        float yOffset = Mathf.Clamp(pData.CameraTarget.localPosition.y + camOffset.y * Time.deltaTime * offsetSpeed, 0.8f, 1.6f);
+        pData.CameraTarget.localPosition = new(xOffset, yOffset, 0f);
 
         float scrollInput = pData.Player_Input.actions["Zoom"].ReadValue<float>();
         distanceToTarget = Mathf.Clamp(distanceToTarget - scrollInput * zoomSensitivity * Time.deltaTime, minZoom, maxZoom);
 
         Vector2 mouseDelta = pData.Player_Input.actions["Look"].ReadValue<Vector2>();
-        float mouseX = mouseDelta.x * SettingsManager.Instance.UserSettings.Sensitivity * Time.deltaTime;
-        float mouseY = mouseDelta.y * SettingsManager.Instance.UserSettings.Sensitivity * Time.deltaTime;
+        float mouseX = mouseDelta.x * SettingsManager.Instance.UserSettings.GetSensitivity() * Time.deltaTime;
+        float mouseY = mouseDelta.y * SettingsManager.Instance.UserSettings.GetSensitivity() * Time.deltaTime;
 
         horizontal += mouseX;
         vertical -= mouseY;
@@ -58,70 +93,39 @@ public class CameraMovement : MonoBehaviour
         Quaternion targetRotation = Quaternion.Euler(vertical, horizontal, 0f);
         pData.CameraPivot.rotation = targetRotation;
 
-        //Vector3 dir = (pData.PlayerCamera.transform.position - pData.CameraPivot.position).normalized;
         Vector3 back = -pData.CameraPivot.forward;
         pData.PlayerCamera.transform.position = pData.CameraPivot.position + back * distanceToTarget;
-        
+
         if (Physics.Linecast(pData.CameraPivot.position, pData.PlayerCamera.transform.position + back * 0.12f, out RaycastHit hit, pData.IgnorePlayer))
         {
             Vector3 safePos = pData.CameraPivot.position + back * (hit.distance - 0.12f);
             pData.PlayerCamera.transform.position = safePos;
         }
 
-        if (Vector3.Distance(pData.PlayerCamera.transform.position, pData.CameraPivot.position) <= 0.5f ||
-            Vector3.Distance(pData.PlayerCamera.transform.position, pData.Head.position) <= 0.5f ||
-            Vector3.Distance(pData.PlayerCamera.transform.position, pData.transform.position) <= 0.5f)
-        {
-            float blend = Mathf.MoveTowards(pData.Skin_Data.SkinMaterial.GetFloat("_Tweak_transparency"), -1, Time.deltaTime * 6f);
-            pData.Skin_Data.SkinMaterial.SetFloat("_Tweak_transparency", blend);
-
-            if (Mathf.Approximately(blend, -1))
-            {
-                pData.Skin_Data.SkinRenderer.enabled = false;
-                if (!_ignoreCrosshair)
-                    crosshair.SetActive(true);
-            }
-        }
-        else
-        {
-            if (pData.Skin_Data.SkinMaterial != null)
-            {
-                float blend = Mathf.MoveTowards(pData.Skin_Data.SkinMaterial.GetFloat("_Tweak_transparency"), 0, Time.deltaTime * 6f);
-                pData.Skin_Data.SkinMaterial.SetFloat("_Tweak_transparency", blend);
-                pData.Skin_Data.SkinRenderer.enabled = true;
-                crosshair.SetActive(false);
-            }
-        }
-
-        pData.CmdSetCameraData(horizontal, vertical, distanceToTarget);
+        pData.CmdSetCameraData(horizontal, vertical, distanceToTarget, pData.CameraTarget.localPosition.x, pData.CameraTarget.localPosition.y);
     }
 
-    public void PauseCamera()
+    public void PauseCamera() => _stop = true;
+    public void ResumeCamera() => _stop = false;
+
+    public void LockCameraInput() => _cameraInputLocked = true;
+    public void UnlockCameraInput() => _cameraInputLocked = false;
+
+    public void ForcePlayerToAimDirection(Vector3 worldDirection)
     {
-        _stop = true;
+        Vector3 dir = worldDirection;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.001f) return;
+        StopAllCoroutines();
+        StartCoroutine(SmoothAimRotation(dir.normalized));
     }
 
-    public void ResumeCamera()
+    public void ServerClearForcedAim() => StopAllCoroutines();
+
+    private IEnumerator SmoothAimRotation(Vector3 targetForward)
     {
-        _stop = false;
-    }
-
-    public void ForcePlayerToAim()
-    {
-        StartCoroutine(SmoothAimRotation());
-    }
-
-    private IEnumerator SmoothAimRotation()
-    {
-        Vector3 camForward = pData.CameraPivot.forward;
-        camForward.y = 0f;
-        camForward.Normalize();
-
-        Vector3 startForward = pData.transform.forward;
-        Quaternion startRotation = Quaternion.LookRotation(startForward);
-        Quaternion targetRotation = Quaternion.LookRotation(camForward);
-
-        pData._IsPlayerAimLocked = true;
+        Quaternion startRotation = Quaternion.LookRotation(pData.transform.forward);
+        Quaternion targetRotation = Quaternion.LookRotation(targetForward);
 
         float duration = 0.1f;
         float elapsed = 0f;
@@ -129,16 +133,23 @@ public class CameraMovement : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            pData.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            pData.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsed / duration);
             yield return null;
         }
 
         pData.transform.rotation = targetRotation;
     }
 
-    public void StopForcePlayerToAim()
+    public void StartTeleport()
     {
-        pData._IsPlayerAimLocked = false;
+        pCamera.enabled = false;
+        StartCoroutine(TeleportCoroutine());
+    }
+    
+    IEnumerator TeleportCoroutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+        pCamera.enabled = true;
+        velocity = Vector3.zero;
     }
 }

@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfc1a20dbf057d446b521b1ee14a4709, type: 3}
+  m_Name: WoodenShelf
+  m_EditorClassIdentifier: Assembly-CSharp::FurnitureDataSO
+  Prefab: {fileID: 1515907428897238213, guid: 08943fc102486784288cfd9100784825, type: 3}
+  Tier: 2
+  dropThresholds:
+  - Item_Drop:
+      Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+      dropChance: 50
+      minQuantity: 1
+      maxQuantity: 1
+    dropThreshold: 20
+    triggered: 0
+  - Item_Drop:
+      Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+      dropChance: 50
+      minQuantity: 1
+      maxQuantity: 1
+    dropThreshold: 40
+    triggered: 0
+  - Item_Drop:
+      Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+      dropChance: 100
+      minQuantity: 1
+      maxQuantity: 1
+    dropThreshold: 60
+    triggered: 0
+  - Item_Drop:
+      Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+      dropChance: 50
+      minQuantity: 1
+      maxQuantity: 1
+    dropThreshold: 80
+    triggered: 0
+  lootTable:
+  - Item: {fileID: 11400000, guid: fa0ac3fbbce4a7d47b1441de5152c8b5, type: 2}
+    dropChance: 100
+    minQuantity: 1
+    maxQuantity: 3

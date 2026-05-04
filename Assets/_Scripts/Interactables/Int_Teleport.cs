@@ -1,0 +1,144 @@
+using UnityEngine;
+using UnityEngine.Events;
+
+public class Int_Teleport : InteractableObject
+{
+    [SerializeField] Transform targetPosition;
+    [SerializeField] float minDistance = 1f;
+    [SerializeField] float maxDistance = 4f;
+    [SerializeField] AudioSFX musicSFX;
+    [SerializeField] ParticleSystem[] teleportParticles;
+    [SerializeField] Material teleportEMMat;
+
+    public readonly UnityEvent<PlayerData> OnPlayerTeleports;
+
+    [Header("Debug")]
+    [SerializeField] bool _displayRing;
+
+    static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+
+    public override bool CanBeInteracted()
+    {
+        bool interactable = this.interactable && !GameManager.Instance.onDeadTime;
+        return interactable;
+    }
+
+    public void SetTeleportPos(Vector3 pos)
+    {
+        targetPosition.position = pos;
+    }
+
+    public void SetParent(Transform parent)
+    {
+        targetPosition.parent = parent;
+        targetPosition.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+    }
+
+    public override void EnableInteractable()
+    {
+        base.EnableInteractable();
+        foreach (var tps in teleportParticles)
+            tps.Play();
+
+        teleportEMMat.SetColor(EmissionColor, teleportEMMat.color * 10);
+    }
+
+    public override void DisableInteractable()
+    {
+        base.DisableInteractable();
+
+        foreach (var tps in teleportParticles)
+            tps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+        teleportEMMat.SetColor(EmissionColor, teleportEMMat.color * -10);
+    }
+
+    public override void OnInteract(PlayerData sourceData)
+    {
+        base.OnInteract(sourceData);
+        sourceData.RpcStartTeleport();
+    }
+
+    public override void OnStopInteract(PlayerData sourceData)
+    {
+        base.OnStopInteract(sourceData);
+        sourceData.RpcCancelTeleport();
+    }
+
+    public void Teleport(PlayerData sourceData)
+    {
+        if (!GameManager.Instance.dngMod.dungeonOpen) return;
+        if (GameManager.Instance.onDeadTime) return;
+
+        Vector3 desiredPosition = Vector3.zero;
+        bool foundValidPos = false;
+        int tries = 0;
+
+        while (!foundValidPos && tries < 5)
+        {
+            Vector2 randomCircle = Random.insideUnitCircle.normalized;
+            float distance = Random.Range(minDistance, maxDistance);
+            Vector3 offset = new Vector3(randomCircle.x, 0f, randomCircle.y) * distance;
+
+            desiredPosition = targetPosition.position + offset;
+            Vector3 rayDir = (desiredPosition - targetPosition.position).normalized;
+
+            if (Physics.Raycast(targetPosition.position, rayDir, out RaycastHit hit, Vector3.Distance(targetPosition.position, desiredPosition)))
+            {
+                if (hit.distance >= minDistance + 0.5f)
+                {
+                    desiredPosition = targetPosition.position + rayDir * (hit.distance - 0.5f);
+
+                    foundValidPos = true;
+                    break;
+                }
+                tries++;
+            }
+
+            foundValidPos = true;
+        }
+
+        if (!foundValidPos) return;
+
+        sourceData.RpcCompleteTeleport();
+        sourceData._PlayerInOffice = false;
+
+        var cart = sourceData.InputHandler.GetActiveCart();
+        if (cart != null)
+        {
+            cart.TeleportWithDriver(desiredPosition);
+        }
+        else
+        {
+            sourceData.Teleport(desiredPosition);
+        }
+
+        canvas.DisableCanvas();
+        
+        GameManager.Instance.dngMod.OnEnterDungeon(sourceData);
+        OnInteractEvent?.Invoke(sourceData);
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (targetPosition == null || !_displayRing) return;
+
+        Gizmos.color = Color.green;
+        DrawCircle(targetPosition.position, maxDistance);
+
+        Gizmos.color = Color.red;
+        DrawCircle(targetPosition.position, minDistance);
+    }
+
+    private void DrawCircle(Vector3 center, float radius, int segments = 64)
+    {
+        Vector3 prevPoint = center + new Vector3(radius, 0f, 0f);
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = (i / (float)segments) * Mathf.PI * 2f;
+            Vector3 newPoint = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
+            Gizmos.DrawLine(prevPoint, newPoint);
+            prevPoint = newPoint;
+        }
+    }
+}

@@ -1,41 +1,87 @@
 using Mirror;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class LobbySettings : NetworkBehaviour
 {
+    public static LobbySettings Instance;
+
     [Header("Lobby Settings")]
-    [SyncVar] private ELobbyType lobby_Type;
-    [SyncVar] private int mapSize;
-    [SyncVar] private bool teamDamage;
-    [SyncVar] private bool teamKnock;
+    [SyncVar] private ELobbyType lobby_Type = ELobbyType.k_ELobbyTypeFriendsOnly;
+    [SyncVar] private int mapSize = 10;
+    [SyncVar] private bool teamDamage = false;
+    [SyncVar] private bool teamKnock = true;
+    [SyncVar] private bool useSetSeed = false;
+    [SyncVar] private bool overrideMapSize = false;
+    [SyncVar] private bool teamsShareBalance = true;
 
     public ELobbyType Lobby_Type => lobby_Type;
     public int MapSize => mapSize;
     public bool TeamDamage => teamDamage;
     public bool TeamKnock => teamKnock;
+    public bool UseSetSeed => useSetSeed;
+    public bool OverrideMapSize => overrideMapSize;
+    public bool TeamsShareBalance => teamsShareBalance;
+
+
+    public UnityEvent OnLobbySettingsChanged;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     [Server]
     public void SetLobbyType(ELobbyType lobbyType)
     {
         lobby_Type = lobbyType;
+        SteamMatchmaking.SetLobbyType(LobbyManager.Instance.CurrentLobbyID, lobbyType);
+        Rpc_LobbySettingsChanged();
     }
 
     [Server]
     public void SetMapSize(int mapSize)
     {
-        this.mapSize = mapSize;
+        this.mapSize = Mathf.Max(1, mapSize);
+        Rpc_LobbySettingsChanged();
     }
 
     [Server]
     public void SetTeamDamage(bool teamDamage)
     {
         this.teamDamage = teamDamage;
+        Rpc_LobbySettingsChanged();
     }
 
     [Server]
     public void SetTeamKnock(bool teamKnock)
     {
         this.teamKnock = teamKnock;
+        Rpc_LobbySettingsChanged();
     }
+
+    [Server]
+    public void SetUseSetSeed(bool useSetSeed)
+    {
+        this.useSetSeed = useSetSeed;
+        Rpc_LobbySettingsChanged();
+    }
+
+    [Server]
+    public void SetOverrideMapSize(bool overrideMapSize)
+    {
+        this.overrideMapSize = overrideMapSize;
+        Rpc_LobbySettingsChanged();
+    }
+
+    [Server]
+    public void SetTeamsShareBalance(bool teamsShareBalance)
+    {
+        this.teamsShareBalance = teamsShareBalance;
+        Rpc_LobbySettingsChanged();
+    }
+
+    [ClientRpc]
+    private void Rpc_LobbySettingsChanged() => OnLobbySettingsChanged?.Invoke();
 }

@@ -5,32 +5,33 @@ using UnityEngine.Events;
 
 public class LobbyManager : MonoBehaviour
 {
-    public static LobbyManager Instace;
+    public static LobbyManager Instance;
 
     public CSteamID CurrentLobbyID { get; private set; }
-    public LobbySettings LobbySettings => lobbySettings;
 
     [SerializeField] NetworkManager networkManager;
     [SerializeField] string lobbyName = "New Lobby";
-    [SerializeField] LobbySettings lobbySettings;
 
     #region Callbacks
-    [HideInInspector] public UnityEvent<LobbyCreated_t> OnLobbyCreatedEvent;
-    [HideInInspector] public UnityEvent<LobbyEnter_t> OnLobbyJoinedEvent;
-    [HideInInspector] public UnityEvent<LobbyChatUpdate_t> OnLobbyChatUpdateEvent;
+    public UnityEvent<LobbyCreated_t> OnLobbyCreatedEvent;
+    public UnityEvent<LobbyEnter_t> OnLobbyJoinedEvent;
+    public UnityEvent<LobbyChatUpdate_t> OnLobbyChatUpdateEvent;
+    public UnityEvent<LobbyKicked_t> OnLobbyKickedEvent;
+    public UnityEvent OnLobbyLeaveEvent;
 
     protected Callback<LobbyCreated_t> lobbyCreatedCallback;
     protected Callback<GameLobbyJoinRequested_t> lobbyJoinRequestCallback;
     protected Callback<LobbyEnter_t> lobbyEnterCallback;
     protected Callback<LobbyChatUpdate_t> lobbyChatUpdateCallback;
+    protected Callback<LobbyKicked_t> lobbyKickedCallback;
     #endregion
 
     private void Awake()
     {
-        if (Instace != null)
-            Destroy(Instace);
+        if (Instance != null)
+            Destroy(Instance);
 
-        Instace = this;
+        Instance = this;
     }
 
     private void Start()
@@ -48,6 +49,7 @@ public class LobbyManager : MonoBehaviour
         lobbyJoinRequestCallback = Callback<GameLobbyJoinRequested_t>.Create(OnLobbyJoinRequested);
         lobbyEnterCallback = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
         lobbyChatUpdateCallback = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
+        lobbyKickedCallback = Callback<LobbyKicked_t>.Create(OnLobbyKicked);
     }
 
     void OnLobbyChatUpdate(LobbyChatUpdate_t callback)
@@ -79,7 +81,7 @@ public class LobbyManager : MonoBehaviour
             return;
         }
 
-        CurrentLobbyID = new (callback.m_ulSteamIDLobby);
+        CurrentLobbyID = new(callback.m_ulSteamIDLobby);
         BuildConsole.Instance.SendConsoleMessage($"Lobby created successfully! Lobby ID: {CurrentLobbyID}");
 
         networkManager.StartHost();
@@ -117,7 +119,7 @@ public class LobbyManager : MonoBehaviour
             BuildConsole.Instance.SendConsoleMessage("Host address is missing in lobby data.");
             return;
         }
-        
+
         networkManager.networkAddress = hostAddress;
         networkManager.StartClient();
 
@@ -125,14 +127,61 @@ public class LobbyManager : MonoBehaviour
     }
     #endregion
 
-    public void StartGame()
+    #region Lobby Leave
+    public void ClearLobby()
     {
-        if (!NetworkServer.active)
-        {
-            Debug.LogWarning("Only the host can start the game!");
-            return;
-        }
-
-        networkManager.ServerChangeScene("TestScene");
+        CurrentLobbyID = default;
     }
+
+    public void LeaveLobby()
+    {
+        if (CurrentLobbyID.m_SteamID == 0)
+            return;
+
+        if (NetworkServer.active)
+            HostLeave();
+        else
+            ClientLeave();
+    }
+
+    private void HostLeave()
+    {
+        BuildConsole.Instance.SendConsoleMessage("Host leaving lobby...");
+
+        networkManager.StopHost();               // stop server + client
+        SteamMatchmaking.LeaveLobby(CurrentLobbyID);
+
+        CurrentLobbyID = default;
+
+        OnLobbyLeaveEvent?.Invoke();
+    }
+
+    private void ClientLeave()
+    {
+        BuildConsole.Instance.SendConsoleMessage("Client leaving lobby...");
+
+        networkManager.StopClient();
+        SteamMatchmaking.LeaveLobby(CurrentLobbyID);
+
+        CurrentLobbyID = default;
+
+        OnLobbyLeaveEvent?.Invoke();
+    }
+
+    private void OnLobbyKicked(LobbyKicked_t callback)
+    {
+        if (callback.m_ulSteamIDLobby != CurrentLobbyID.m_SteamID)
+            return;
+
+        BuildConsole.Instance.SendConsoleMessage("Kicked or lobby closed.");
+
+        if (NetworkClient.isConnected)
+            networkManager.StopClient();
+
+        CurrentLobbyID = default;
+
+        OnLobbyKickedEvent?.Invoke(callback);
+        OnLobbyLeaveEvent?.Invoke();
+    }
+    #endregion
 }

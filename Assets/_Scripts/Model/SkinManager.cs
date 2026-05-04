@@ -7,16 +7,26 @@ public class SkinManager : NetworkBehaviour
     [SerializeField] PlayerData pData;
     [SerializeField] SkinData[] skinsData;
     [SerializeField] GameObject skinSelectionWindow;
+    [SerializeField] bool work = false;
 
-    [SyncVar(hook = nameof(OnSkinIndexChanged))]
     int skinIndex = 0;
     bool _opened = false;
 
-    //[SerializeField] SkinSO[] skins;
-    //GameObject currentModel;
+    // Rig State
+    [SyncVar] bool RHCR = false;
+
+    private void Start()
+    {
+        for (int i = 0; i < skinsData.Length; i++)
+        {
+            if (i != 0)
+                skinsData[i].gameObject.SetActive(false);
+        }
+    }
 
     public void SkinInput(InputAction.CallbackContext context)
     {
+        if (!work) return;
         if (!pData.isLocalPlayer) return;
 
         if (_opened)
@@ -51,15 +61,25 @@ public class SkinManager : NetworkBehaviour
     [Command]
     void CmdRequestSkinChange(int index)
     {
+        if (index >= skinsData.Length || index < 0)
+        {
+            Debug.LogWarning("Given skin index is invalid");
+            return;
+        }
+
         skinIndex = index;
+        RHCR = pData.Skin_Data.Rigging_Manager.StopCameraRigs;
+
+        RpcApplySkin(index, RHCR);
     }
 
-    void OnSkinIndexChanged(int oldIndex, int newIndex)
+    [ClientRpc]
+    void RpcApplySkin(int index, bool rhcr)
     {
-        ApplySkin(newIndex);
+        ApplySkin(index, rhcr);
     }
 
-    void ApplySkin(int index)
+    void ApplySkin(int index, bool rhcr)
     {
         index = Mathf.Clamp(index, 0, skinsData.Length - 1);
 
@@ -67,28 +87,14 @@ public class SkinManager : NetworkBehaviour
         if (skin == null) return;
 
         pData.Skin_Data.gameObject.SetActive(false);
+        skin.Rigging_Manager.SetUp(rhcr);
         skin.gameObject.SetActive(true);
         pData.Skin_Data = skin;
-
-        //var skin = skins[index];
-        //if (skin == null) return;
-
-        //if (currentModel != null)
-        //{
-        //    if (pData.Skin_Data != null)
-        //        Destroy(pData.CameraPivot.gameObject);
-        //    Destroy(currentModel);
-        //}
-
-        //currentModel = Instantiate(skin.modelPrefab, pData.Model);
-        //pData.Skin_Data = currentModel.GetComponent<SkinData>();
-        //pData.Skin_Data.pData = pData;
-        //Debug.Log($"{netId} changed its skin to {skin.skinName} (index: {index})");
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-        ApplySkin(skinIndex);
+        ApplySkin(skinIndex, false);
     }
 }

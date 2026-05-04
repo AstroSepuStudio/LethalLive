@@ -7,10 +7,15 @@ public class UIManager : MonoBehaviour
     [SerializeField] WindowUI defaultWindow;
     private Stack<WindowUI> openWindows = new();
 
+    [SerializeField] UIButton currentBtn;
+
     protected virtual void Start()
     {
         if (defaultWindow != null)
             OpenWindow(defaultWindow);
+
+        if (currentBtn != null)
+            currentBtn.OnButtonSelected();
     }
 
     public virtual void OnCancelInput(InputAction.CallbackContext context)
@@ -29,6 +34,15 @@ public class UIManager : MonoBehaviour
 
         window.OpenWindow();
         openWindows.Push(window);
+    }
+
+    public virtual void SelectButton(UIButton btn)
+    {
+        if (currentBtn != null)
+            currentBtn.OnButtonDeselected();
+
+        btn.OnButtonSelected();
+        currentBtn = btn;
     }
 
     public virtual void CloseTopWindow()

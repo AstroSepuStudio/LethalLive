@@ -1,20 +1,163 @@
 using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using LethalLive;
 
 public class PlayerInputHandler : NetworkBehaviour
 {
-    // Class to handle conflicting inputs
-
     [SerializeField] PlayerData pData;
+    bool mWasFree;
 
-    public void OnPlayerInteract(InputAction.CallbackContext context)
+    IPlayerController activeController;
+    IPlayerController defaultController;
+
+    public bool IsDefaultController => activeController == defaultController;
+
+    public Item_Cart GetActiveCart()
     {
-        if (!context.started || !isLocalPlayer) return;
+        if (activeController is CartPlayerController cartController)
+            return cartController.Cart;
+        return null;
     }
 
-    public void OnPlayerAttack(InputAction.CallbackContext context)
+    void Start()
     {
-        if (!context.started || !isLocalPlayer) return;
+        if (!isLocalPlayer) return;
+        defaultController = new DefaultPlayerController(pData.Player_Movement);
+        activeController = defaultController;
+    }
+
+    public void RequestReturnMainMenu() => GameManager.Instance.playMod.RequestReturnToMainMenu();
+
+    public void OnPlayerPressEscape(InputAction.CallbackContext context)
+    {
+        if (!context.started) return;
+        if (!isLocalPlayer || GameManager.Instance.lobbyManagerScreen.playerOnLMS == pData.Index) return;
+
+        if (pData.TabletManager.TrySwitchState())
+        {
+            Cmd_SwitchTabletState(pData.TabletManager.IsActive);
+        }
+    }
+
+    public void OnForceMouseFreeState(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            if (Cursor.lockState == CursorLockMode.None)
+            {
+                mWasFree = true;
+                return;
+            }
+            SettingsManager.Instance.SetMouseLockState(false);
+        }
+
+        if (context.canceled)
+        {
+            if (mWasFree) return;
+            SettingsManager.Instance.SetMouseLockState(true);
+        }
+    }
+
+    [Command(requiresAuthority = false)]
+    private void Cmd_SwitchTabletState(bool open)
+    {
+        pData.SetLockPlayer(open);
+        pData.Skin_Data.CharacterAnimator.SetBool("Tablet", open);
+
+        if (open)
+        {
+            pData.Skin_Data.Rigging_Manager.RpcEnableLeftHandChainRig(true);
+            pData.Skin_Data.Rigging_Manager.RpcEnableLookAtTabletRig(true);
+        }
+        else
+        {
+            pData.Skin_Data.Rigging_Manager.RpcEnableLeftHandChainRig(false);
+            pData.Skin_Data.Rigging_Manager.RpcEnableLookAtTabletRig(false);
+        }
+    }
+
+    [Command]
+    public void CmdOnMove(Vector2 input) => activeController?.OnMove(input);
+
+    [Command]
+    public void CmdOnJump() => activeController?.OnJump();
+
+    [Command]
+    public void CmdOnJumpCanceled() => activeController?.OnJumpCanceled();
+
+    [Command]
+    public void CmdOnSprintStart() => activeController?.OnSprintStart();
+
+    [Command]
+    public void CmdOnSprintStop() => activeController?.OnSprintStop();
+
+    [Command]
+    public void CmdOnStartCrouch() => activeController?.OnCrouchStart();
+
+    [Command]
+    public void CmdOnStopCrouch() => activeController?.OnCrouchStop();
+
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        if (!isLocalPlayer) return;
+        CmdOnMove(context.ReadValue<Vector2>());
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (!isLocalPlayer) return;
+        if (context.started) CmdOnJump();
+        else if (context.canceled) CmdOnJumpCanceled();
+    }
+
+    public void OnStartSprint(InputAction.CallbackContext context)
+    {
+        if (!isLocalPlayer) return;
+        if (context.started) CmdOnSprintStart();
+        else if (context.canceled) CmdOnSprintStop();
+    }
+
+    public void OnStartCrouch(InputAction.CallbackContext context)
+    {
+        if (!isLocalPlayer) return;
+        if (context.started) CmdOnStartCrouch();
+        else if (context.canceled) CmdOnStopCrouch();
+    }
+
+    public void SetController(IPlayerController controller)
+    {
+        if (controller == null) return;
+        if (!isServer && !isLocalPlayer) return;
+
+        activeController?.OnLoseControl(pData);
+        activeController = controller;
+        activeController.OnGainControl(pData);
+    }
+
+    public void ReleaseController(IPlayerController controller)
+    {
+        if (activeController != controller) return;
+
+        activeController.OnLoseControl(pData);
+        activeController = defaultController;
+        activeController.OnGainControl(pData);
+    }
+
+    public void ReleaseToDefault()
+    {
+        if (activeController == defaultController) return;
+        if (!isServer && !isLocalPlayer) return;
+
+        pData.Character_Controller.enabled = false;
+        Vector3 rot = pData.transform.rotation.eulerAngles;
+        rot.x = 0;
+        rot.z = 0;
+        pData.transform.rotation = Quaternion.Euler(rot);
+        pData.Character_Controller.enabled = true;
+
+        activeController?.OnLoseControl(pData);
+        activeController = defaultController;
+        activeController.OnGainControl(pData);
     }
 }

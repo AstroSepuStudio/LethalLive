@@ -6,100 +6,93 @@ public class PunchManager : NetworkBehaviour
 {
     [SerializeField] PlayerData pData;
     [SerializeField] AttackStat punchStats;
+    [SerializeField] LayerMask entityLayer;
 
-    private bool isPunching = false;
-    WaitForSeconds punchCooldown;
+    const float DETECTION_TIME = 0.2f;
+    const float FINISH_TIME = 0.35f;
 
-    private void Start()
-    {
-        punchCooldown = new (punchStats.AttackCooldown);
-    }
+    bool isPunching = false;
+    int debuffIndex = -1;
+
+    readonly WaitForSeconds waitDetect = new(DETECTION_TIME);
+    readonly WaitForSeconds finishDelay = new(FINISH_TIME - DETECTION_TIME);
 
     public void OnPunchInput()
     {
         if (isPunching || pData._LockPlayer) return;
-
         CmdRequestPunch();
     }
 
     [Command]
     void CmdRequestPunch()
     {
-        RpcPlayAttackAnimation();
+        if (isPunching || pData._LockPlayer) return;
+        if (!pData.InputHandler.IsDefaultController) return;
+        if (debuffIndex != -1) RemoveDebuff();
+
+        string astr = pData.Player_Movement.IsCrouching ? "AttackCrouch" : "Attack";
+        pData.Skin_Data.CharacterAnimator.SetTrigger(astr);
+        debuffIndex = pData.Player_Movement.AddSpeedModifier(0.5f);
+
+        pData.Player_Movement.ServerForceAimAt(
+            transform.position + pData.CameraPivot.forward * 10f);
+
+        StartCoroutine(ServerPunchSequence());
+        pData.EmoteManager.ServerClearLoopEmote();
+
+        RpcStartPunchClient();
+    }
+
+    [Server]
+    IEnumerator ServerPunchSequence()
+    {
+        yield return waitDetect;
+        CheckForHit();
+
+        yield return finishDelay;
+        RemoveDebuff();
+        pData.Player_Movement.ServerClearForcedAim();
     }
 
     [ClientRpc]
-    void RpcPlayAttackAnimation()
+    void RpcStartPunchClient()
     {
-        if (pData.Skin_Data.CharacterAnimator != null)
-        {
-            pData.EmoteManager.LocalCancelEmote();
-            if (pData.Player_Movement.IsCrouching)
-                pData.Skin_Data.CharacterAnimator.SetTrigger("AttackCrouch");
-            else
-                pData.Skin_Data.CharacterAnimator.SetTrigger("Attack");
-
-            StartCoroutine(PunchCooldown());
-        }
+        StartCoroutine(ClientPunchCooldown());
     }
 
-    IEnumerator PunchCooldown()
+    IEnumerator ClientPunchCooldown()
     {
         isPunching = true;
-        pData.Camera_Movement.ForcePlayerToAim();
-
-        yield return punchCooldown;
-
+        yield return new WaitForSeconds(punchStats.AttackCooldown);
         isPunching = false;
-        pData.Camera_Movement.StopForcePlayerToAim();
     }
 
-    public void PunchDetection()
+    [Server]
+    void CheckForHit()
     {
-        if (!isLocalPlayer) return;
+        Collider[] hits = Physics.OverlapSphere(
+            pData.Skin_Data.RightHand.position, punchStats.AttackRadius, entityLayer);
 
-        CmdTryHit();
-    }
-
-    [Command]
-    void CmdTryHit()
-    {
-        Debug.Log("Checking for punch");
-        Collider[] hitPlayers = Physics.OverlapSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius, pData.PlayerMask);
-        foreach (Collider col in hitPlayers)
+        foreach (Collider col in hits)
         {
-            for (int i = 0; i < GameManager.Instance.Players.Count; i++)
-            {
-                // Valid target
-                if (GameManager.Instance.Players[i].gameObject == pData.gameObject ||
-                    GameManager.Instance.Players[i].gameObject != col.gameObject) continue;
-
-                // Team check
-                if (GameManager.Instance.Players[i].Team == pData.Team)
-                {
-                    if (!LobbyManager.Instace.LobbySettings.TeamKnock)
-                    {
-                        return;
-                    }
-                }
-
-                float multiplier = Random.Range(1f, 2f);
-                Vector3 dir = GameManager.Instance.Players[i].transform.position - pData.transform.position;
-
-                float knockAmount = punchStats.AttackKnock * multiplier * (pData.Player_Stats.strenght / 100f);
-                Vector3 momentum = multiplier * punchStats.AttackForce * dir.normalized;
-
-                GameManager.Instance.Players[i].Player_Stats.ModifyKnock(knockAmount, momentum);
-            }
+            if (!col.TryGetComponent(out EntityStats target)) continue;
+            if (target == pData.Player_Stats) continue;
+            target.ReceiveAttack(AttackEvent.From(pData, target, punchStats));
         }
+    }
+
+    [Server]
+    void RemoveDebuff()
+    {
+        if (debuffIndex == -1) return;
+        pData.Player_Movement.RemoveSpeedModifier(debuffIndex);
+        debuffIndex = -1;
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (pData.Skin_Data != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius);
-        }
+        if (pData?.Skin_Data == null) return;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(pData.Skin_Data.RightHand.position, punchStats.AttackRadius);
     }
 }

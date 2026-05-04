@@ -1,0 +1,665 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66beebe3dc201c44f900ba7f95618595, type: 3}
+  m_Name: MapSpritesDB
+  m_EditorClassIdentifier: Assembly-CSharp::MapSpriteDBSO
+  mapParts:
+  - partSprite: {fileID: -2125549831, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0000000002000000
+    layerDir: 2
+  - partSprite: {fileID: 2094049956, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0000000002000000
+    layerDir: 1
+  - partSprite: {fileID: -1515259748, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0000000003000000
+    layerDir: 2
+  - partSprite: {fileID: -409499136, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0000000003000000
+    layerDir: 1
+  - partSprite: {fileID: 1461891817, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0100000002000000
+    layerDir: 2
+  - partSprite: {fileID: 656441576, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0200000001000000
+    layerDir: 1
+  - partSprite: {fileID: 486411642, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0100000003000000
+    layerDir: 2
+  - partSprite: {fileID: 844996304, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0100000003000000
+    layerDir: 1
+  - partSprite: {fileID: -264325538, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 3
+    openSides: 
+    connectedSides: 000000000200000003000000
+    layerDir: 0
+  - partSprite: {fileID: 1333453035, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 3
+    openSides: 
+    connectedSides: 000000000100000002000000
+    layerDir: 0
+  - partSprite: {fileID: -1809075703, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 3
+    openSides: 
+    connectedSides: 010000000300000000000000
+    layerDir: 0
+  - partSprite: {fileID: -344194611, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 3
+    openSides: 
+    connectedSides: 010000000300000002000000
+    layerDir: 0
+  - partSprite: {fileID: -1133385223, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0000000002000000
+    layerDir: 0
+  - partSprite: {fileID: -1856504453, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0000000003000000
+    layerDir: 0
+  - partSprite: {fileID: -2061652589, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0200000001000000
+    layerDir: 0
+  - partSprite: {fileID: -1806681383, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 
+    connectedSides: 0100000003000000
+    layerDir: 0
+  - partSprite: {fileID: 864331204, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 17374669, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1268831020, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1139024844, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -117894831, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000002000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 104207178, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000002000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -1418314742, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000002000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: 1156076035, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000002000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: -1126160298, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000002000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 604337067, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 400306450, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000003000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -629494188, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000003000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -1479516048, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000003000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 2085494307, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000003000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 1972439932, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000001000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1889671834, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000001000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -1575566030, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000001000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -543737693, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000001000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: -1619750353, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000001000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: -234670152, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0100000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 2006739550, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0100000003000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -637396849, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0100000003000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -403165562, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0100000003000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 242289044, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0300000001000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 1891866720, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0100000000000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: 533125077, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -805266454, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 2102985003, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -953399853, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -648454056, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1825996772, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1077967388, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1331503234, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 206770564, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 544177411, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1667312687, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -2072216057, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -605677177, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -360461450, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1678321905, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1862247724, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 659186191, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000003000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -1736685526, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000003000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: 301505804, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000001000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: 1528159830, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 217004623, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -409260375, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 623050878, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -682113137, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1867776138, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1142231361, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1644302066, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1330652357, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -90181392, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1677245118, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000001000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 1228853096, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000003000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 511428829, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0200000003000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 1740181151, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 2
+    openSides: 0000000001000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: -1550860317, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 970608345, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 762596567, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1141696618, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1530382647, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1985269112, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 513160302, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 153659356, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 6
+    openSides: 
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1827674867, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 01000000
+    connectedSides: 0000000002000000
+    layerDir: 0
+  - partSprite: {fileID: -12555032, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 0100000003000000
+    connectedSides: 0000000002000000
+    layerDir: 0
+  - partSprite: {fileID: 417004117, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 03000000
+    connectedSides: 0000000002000000
+    layerDir: 0
+  - partSprite: {fileID: -1149581774, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 01000000
+    connectedSides: 0000000003000000
+    layerDir: 0
+  - partSprite: {fileID: -661447748, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 0200000001000000
+    connectedSides: 0000000003000000
+    layerDir: 0
+  - partSprite: {fileID: 879511598, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 02000000
+    connectedSides: 0000000003000000
+    layerDir: 0
+  - partSprite: {fileID: -1058339685, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 03000000
+    connectedSides: 0100000002000000
+    layerDir: 0
+  - partSprite: {fileID: -1931307335, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 00000000
+    connectedSides: 0100000002000000
+    layerDir: 0
+  - partSprite: {fileID: -377420611, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 0000000003000000
+    connectedSides: 0100000002000000
+    layerDir: 0
+  - partSprite: {fileID: -1009969480, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 02000000
+    connectedSides: 0100000003000000
+    layerDir: 0
+  - partSprite: {fileID: 1263844057, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 00000000
+    connectedSides: 0100000003000000
+    layerDir: 0
+  - partSprite: {fileID: 1502117893, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 1
+    openSides: 0000000002000000
+    connectedSides: 0100000003000000
+    layerDir: 0
+  - partSprite: {fileID: -239220962, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 3
+    openSides: 01000000
+    connectedSides: 000000000200000003000000
+    layerDir: 0
+  - partSprite: {fileID: 174850734, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 3
+    openSides: 03000000
+    connectedSides: 000000000200000001000000
+    layerDir: 0
+  - partSprite: {fileID: 1595320869, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 3
+    openSides: 02000000
+    connectedSides: 000000000100000003000000
+    layerDir: 0
+  - partSprite: {fileID: -591375828, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 3
+    openSides: 00000000
+    connectedSides: 020000000100000003000000
+    layerDir: 0
+  - partSprite: {fileID: -985992991, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 01000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 636887215, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0100000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1288139581, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0100000002000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 491470917, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 020000000100000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -398954894, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0200000003000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -398532977, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0100000000000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -2010003735, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 03000000010000000200000000000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: 878356257, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 
+    connectedSides: 00000000020000000100000003000000
+    layerDir: 0
+  - partSprite: {fileID: -635506341, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 
+    connectedSides: 00000000020000000100000003000000
+    layerDir: 1
+  - partSprite: {fileID: 828154702, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 03000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1069055295, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 02000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1852062809, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0200000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1279359751, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 00000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1138158827, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0000000001000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1832981452, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 000000000100000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1276485978, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 000000000200000001000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 769299247, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 00000000020000000100000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 120431981, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0000000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: 1350161912, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0000000002000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -223114672, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 000000000200000003000000
+    connectedSides: 
+    layerDir: 0
+  - partSprite: {fileID: -1686184845, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0200000003000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: -623848835, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 0000000001000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 231496477, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 00000000020000000100000003000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 1481959831, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 
+    connectedSides: 00000000020000000100000003000000
+    layerDir: 2
+  - partSprite: {fileID: -1754543233, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 01000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: 85555753, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 00000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: -1438697761, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 02000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: -1377172489, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 03000000
+    connectedSides: 
+    layerDir: 1
+  - partSprite: {fileID: -300952211, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 02000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -919088262, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 03000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: -1705381967, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 01000000
+    connectedSides: 
+    layerDir: 2
+  - partSprite: {fileID: 1254898618, guid: 10b8b0c4399330147a279fb084632b16, type: 3}
+    partType: 0
+    openSides: 00000000
+    connectedSides: 
+    layerDir: 2

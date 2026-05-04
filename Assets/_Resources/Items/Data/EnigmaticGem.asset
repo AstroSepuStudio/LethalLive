@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f1c388d6aa1d0c4fa854c63c56e4bf4, type: 3}
+  m_Name: EnigmaticGem
+  m_EditorClassIdentifier: 
+  itemPrefab: {fileID: 9084241017591515198, guid: 3cb58240750ed7c4ab94cf993bf0f4cf, type: 3}
+  Tier: 1
+  animationType: 1
+  itemName: Enigmatic Gem
+  icon: {fileID: 21300000, guid: 3775f48b934e3544a96b2033a80e521e, type: 3}
+  isTwoHanded: 0
+  isSellable: 1
+  minValue: 50
+  maxValue: 100
+  hasPrimaryAction: 0
+  hasSecondaryAction: 0
+  pickable: 1
+  droppable: 1
+  stackable: 0
+  gOffset: {x: 0, y: 0, z: 0}
+  gRotation: {x: 0, y: 0, z: 0}

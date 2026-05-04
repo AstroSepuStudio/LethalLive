@@ -10,7 +10,11 @@ public class BuildConsole : MonoBehaviour
     [SerializeField] ScrollRect scrollRect;
     [SerializeField] GameObject messagePrefab;
     [SerializeField] Transform content;
+    [SerializeField] bool debug = false;
+
     public bool autoScroll = true;
+
+    bool sus = false;
 
     private void Awake()
     {
@@ -22,12 +26,36 @@ public class BuildConsole : MonoBehaviour
             Destroy(gameObject);
     }
 
+    private void Start()
+    {
+        if (debug)
+        {
+            GameTick.OnTick += OnTick;
+            sus = true;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (sus)
+        {
+            GameTick.OnTick -= OnTick;
+        }
+    }
+
     public void EnableConsole() => canvas.SetActive(true);
 
     public void DisableConsole() => canvas.SetActive(false);
 
-    private void Update()
+    private void OnTick()
     {
+        if (!debug && sus)
+        {
+            GameTick.OnTick -= OnTick;
+            sus = false;
+            return;
+        }
+
         if (autoScroll)
         {
             scrollRect.verticalNormalizedPosition = 0f;
@@ -36,6 +64,8 @@ public class BuildConsole : MonoBehaviour
 
     public void SendConsoleMessage(string message)
     {
+        if (!debug) return;
+
         GameObject instance = Instantiate(messagePrefab, content);
         instance.GetComponentInChildren<TextMeshProUGUI>().SetText(message);
     }

@@ -1,81 +1,217 @@
 using Mirror;
 using Steamworks;
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static GameManager;
 
-public class LobbyManagerScreen : UIManager
+public class LobbyManagerScreen : UIManagerNetwork
 {
     public Sprite defaultIcon;
 
+    [Header("References")]
     [SerializeField] NetworkIdentity identity;
-    [SerializeField] TextMeshProUGUI lobbyNameTxt;
-    [SerializeField] Camera povCamera;
-    [SerializeField] LobbyMemberUI[] lobbyMemberUIs;
+    [SerializeField] DNG_MapModule mapModule;
+    [SerializeField] Store store;
+    [SerializeField] Canvas worldCanvas;
+    [SerializeField] RectTransform refRectTransform;
+    [SerializeField] Transform cameraPosition;
+    [SerializeField] GameObject loadingWindow;
+    [SerializeField] InteractableObject interactableCanvas;
+    [SerializeField] Transform loadingThing;
+    [SerializeField] Transform playerTargetPos;
+    public Transform rightHCIKTarget;
+
+    [SerializeField] TextMeshProUGUI dayText;
+    [SerializeField] TextMeshProUGUI timeText;
+    [SerializeField] TextMeshProUGUI levelText;
+    [SerializeField] TeamBalancePair teamWhiteBalance;
+    [SerializeField] TeamBalancePair teamRedBalance;
+    [SerializeField] TeamBalancePair teamBlueBalance;
+    [SerializeField] TeamBalancePair teamYellowBalance;
+    [SerializeField] TeamBalancePair teamGreenBalance;
+    [SerializeField] TeamBalancePair teamPinkBalance;
+    [SerializeField] TextMeshProUGUI totalBalanceText;
+
+    [Header("Settings")]
+    [SerializeField] Vector2 rhcikTargetLimit;
+    [SerializeField] float loadThingRotSpd;
 
     [SerializeField] TMP_Dropdown lobbyType_DP;
     [SerializeField] TMP_InputField mapSize_IP;
     [SerializeField] Toggle teamDamage_Toggle;
     [SerializeField] Toggle teamKnock_Toggle;
+    [SerializeField] Toggle setSeed_Toggle;
 
-    [Header("Colors")]
-    public Color hololiveTeamColor = Color.cyan;
-    public Color gamersTeamColor = Color.yellow;
-    public Color holoXTeamColor = Color.magenta;
-    public Color hololiveEnglishTeamColor = Color.blue;
+    [SyncVar] public int playerOnLMS = -1;
+    [SyncVar] bool open = false;
+
+    PlayerData currentPlayer;
+
+    [Serializable]
+    struct TeamBalancePair
+    {
+        public GameObject teamObj;
+        public TextMeshProUGUI balanceText;
+    }
 
     protected override void Start()
     {
         base.Start();
 
+        LobbySettings.Instance.OnLobbySettingsChanged.AddListener(RefreshLobbySettings);
         GameTick.OnSecond += OnSecond;
+
+        mapSize_IP.SetTextWithoutNotify(LobbySettings.Instance.MapSize.ToString());
+        setSeed_Toggle.SetIsOnWithoutNotify(LobbySettings.Instance.UseSetSeed);
+
+        Instance.dngMod.OnThemeChangedEv.AddListener(RefreshLevelName);
+        Instance.dayMod.OnDayStarted.AddListener(RefreshDay);
+        Instance.dayMod.OnDayEnded.AddListener(RefreshDay);
+        Instance.ecoMod.OnTeamBalanceChangedEv.AddListener(RefreshTeamBalances);
+
+        InitialRefresh();
     }
 
     private void OnDestroy()
     {
+        LobbySettings.Instance.OnLobbySettingsChanged.RemoveListener(RefreshLobbySettings);
         GameTick.OnSecond -= OnSecond;
+
+        Instance.dngMod.OnThemeChangedEv.RemoveListener(RefreshLevelName);
+        Instance.dayMod.OnDayStarted.RemoveListener(RefreshDay);
+        Instance.dayMod.OnDayEnded.RemoveListener(RefreshDay);
+        Instance.ecoMod.OnTeamBalanceChangedEv.RemoveListener(RefreshTeamBalances);
     }
 
-    public void OnInteract(PlayerData playerData) => GameManager.Instance.CmdRequestOpenLMS(playerData.Index);
-
-    public void OpenLobbyManagerScreen(int index)
+    #region State Change
+    public void OnEscapePressed(InputAction.CallbackContext context)
     {
-        if (GameManager.Instance.LocalPlayer.Index != index) return;
+        if (!context.started) return;
 
-        povCamera.gameObject.SetActive(true);
-        GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(false);
-        GameManager.Instance.LocalPlayer._LockPlayer = true;
+        CloseLMS();
+    }
+
+    public void CloseLMS()
+    {
+        if (isLocalPlayer && !open) return;
+
+        CmdCloseLMS(Instance.playMod.LocalPlayer.Index);
+    }
+
+    public void OnInteract(PlayerData playerData)
+    {
+        if (open) return;
+
+        playerData.Player_Stats.OnPlayerKnocked.AddListener(OnPlayerKnocked);
+
+        open = true;
+        playerOnLMS = playerData.Index;
+        playerData._LockPlayer = true;
+        currentPlayer = playerData;
+
+        playerData.Teleport(playerTargetPos.position);
+        playerData.Player_Movement.ServerForceAimAt(playerTargetPos.position + playerTargetPos.forward);
+        playerData.Skin_Data.Rigging_Manager.RpcEnableRightHandChainRig();
+
+        interactableCanvas.DisableInteractable();
+
+        store.SetCurrentPlayer(playerData);
+
+        RpcOpenLMS(playerData.Index);
+    }
+
+    [Server]
+    private void OnPlayerKnocked()
+    {
+        Debug.Log("[LMScreen] Player knocked");
+        CmdCloseLMS(currentPlayer.Index);
+    }
+
+    [ClientRpc]
+    void RpcOpenLMS(int index)
+    {
+        if (Instance.playMod.LocalPlayer.Index != index) return;
+
+        worldCanvas.worldCamera = Instance.playMod.LocalPlayer.PlayerCamera;
+
+        Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started += OnEscapePressed;
+        Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(false);
+        Instance.playMod.LocalPlayer.TakeCameraControl(cameraPosition);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        RefreshLevelName(Instance.dngMod.selectedTheme);
+        RefreshDay(Instance.dayMod.currentDay);
+        RefreshDayTime();
+        RefreshLobbySettings();
+        RefreshTeamBalances();
+
+        StartCoroutine(RHCIKTPosHandler());
     }
 
-    public void CloseLobbyManagerScreen()
+    [Command(requiresAuthority = false)]
+    void CmdCloseLMS(int index)
     {
-        GameManager.Instance.LocalPlayer.PlayerCamera.gameObject.SetActive(true);
-        povCamera.gameObject.SetActive(false);
-        GameManager.Instance.LocalPlayer._LockPlayer = false;
+        if (!open || index != playerOnLMS) return;
+
+        currentPlayer.Player_Stats.OnPlayerKnocked.RemoveListener(OnPlayerKnocked);
+
+        currentPlayer.Skin_Data.Rigging_Manager.RpcDisableRightHandChainRig();
+        currentPlayer.Player_Movement.ServerClearForcedAim();
+
+        currentPlayer._LockPlayer = false;
+        currentPlayer = null;
+
+        open = false;
+        playerOnLMS = -1;
+
+        interactableCanvas.EnableInteractable();
+
+        store.ClearCurrentPlayer();
+
+        RpcCloseLMS(index);
+    }
+
+    [ClientRpc]
+    public void RpcCloseLMS(int index)
+    {
+        if (Instance.playMod.LocalPlayer.Index != index) return;
+
+        Instance.playMod.LocalPlayer.Player_Input.actions["Esc"].started -= OnEscapePressed;
+        Instance.playMod.LocalPlayer.PlayerCanvas.SetActive(true);
+        Instance.playMod.LocalPlayer.DropCameraControl();
+        mapModule.CmdSnapshotMapAnchor(Instance.playMod.LocalPlayer.Index, mapModule.MapAnchorPosition);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+    #endregion
 
-    void OnSecond()
+    #region Screen Refresh
+    private void InitialRefresh()
     {
-        if (!NetworkClient.isConnected) return;
-
-        if (identity.isLocalPlayer)
-            GameManager.Instance.CmdSetPlayerPing(GameManager.Instance.LocalPlayer.Index, (int)(NetworkTime.rtt * 1000));
-
-        if (!identity.isServer) return;
-
-        GameManager.Instance.RequestScreenRefresh();
+        RefreshLevelName(Instance.dngMod.selectedTheme);
+        RefreshDay(Instance.dayMod.currentDay);
+        RefreshLobbySettings();
+        RefreshTeamBalances(PlayerTeam.White, 0);
     }
 
-    public void RefreshScreen(GameManager.LobbyMemberData[] members)
+    private void OnSecond() => RefreshDayTime();
+
+    public void RefreshLevelName(int index) => levelText.SetText(Instance.dngMod.ThemeDatas[index].levelName);
+
+    public void RefreshDay(int day) => dayText.SetText($"Day {day}");
+
+    public void RefreshDayTime() => timeText.SetText(Instance.dayMod.GetFormatedTime());
+
+    public void RefreshLobbySettings()
     {
-        int lobbyIndex = LobbyManager.Instace.LobbySettings.Lobby_Type switch
+        int lobbyIndex = LobbySettings.Instance.Lobby_Type switch
         {
             ELobbyType.k_ELobbyTypeFriendsOnly => 0,
             ELobbyType.k_ELobbyTypePublic => 1,
@@ -84,28 +220,52 @@ public class LobbyManagerScreen : UIManager
         };
 
         lobbyType_DP.SetValueWithoutNotify(lobbyIndex);
-        mapSize_IP.SetTextWithoutNotify(LobbyManager.Instace.LobbySettings.MapSize.ToString());
-        teamDamage_Toggle.SetIsOnWithoutNotify(LobbyManager.Instace.LobbySettings.TeamDamage);
-        teamKnock_Toggle.SetIsOnWithoutNotify(LobbyManager.Instace.LobbySettings.TeamKnock);
-
-        for (int i = 0; i < lobbyMemberUIs.Length; i++)
-        {
-            if (i >= members.Length)
-            {
-                lobbyMemberUIs[i].gameObject.SetActive(false);
-                continue;
-            }
-
-            lobbyMemberUIs[i].gameObject.SetActive(true);
-            lobbyMemberUIs[i].AssignPlayer(members[i]);
-        }
+        mapSize_IP.SetTextWithoutNotify(LobbySettings.Instance.MapSize.ToString());
+        teamDamage_Toggle.SetIsOnWithoutNotify(LobbySettings.Instance.TeamDamage);
+        teamKnock_Toggle.SetIsOnWithoutNotify(LobbySettings.Instance.TeamKnock);
     }
 
+    public void RefreshTeamBalances(PlayerTeam t, float v)
+    {
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.White], teamWhiteBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Red], teamRedBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Blue], teamBlueBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Yellow], teamYellowBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Green], teamGreenBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Pink], teamPinkBalance);
+
+        totalBalanceText.SetText($"{Instance.ecoMod.TotalBalance}");
+    }
+
+    public void RefreshTeamBalances()
+    {
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.White], teamWhiteBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Red], teamRedBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Blue], teamBlueBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Yellow], teamYellowBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Green], teamGreenBalance);
+        SetTeamBalance(Instance.ecoMod.teamsBalance[PlayerTeam.Pink], teamPinkBalance);
+
+        totalBalanceText.SetText($"{Instance.ecoMod.TotalBalance}");
+    }
+
+    void SetTeamBalance(float balance, TeamBalancePair pair)
+    {
+        if (balance > 0)
+        {
+            pair.teamObj.SetActive(true);
+            pair.balanceText.SetText($"{balance}");
+        }
+        else pair.teamObj.SetActive(false);
+    }
+    #endregion
+
+    #region Settings
     public void RequestTeamSwap(int index)
     {
         PlayerTeam team = (PlayerTeam)index;
 
-        GameManager.Instance.CmdRequestTeamChange(GameManager.Instance.LocalPlayer.Index, team);
+        Instance.playMod.CmdRequestTeamChange(Instance.playMod.LocalPlayer.Index, team);
     }
 
     public void SetLobbyType(int index)
@@ -120,7 +280,7 @@ public class LobbyManagerScreen : UIManager
             _ => ELobbyType.k_ELobbyTypeFriendsOnly,
         };
 
-        LobbyManager.Instace.LobbySettings.SetLobbyType(type);
+        LobbySettings.Instance.SetLobbyType(type);
     }
 
     public void SetMapSize(string value)
@@ -128,22 +288,115 @@ public class LobbyManagerScreen : UIManager
         if (!identity.isServer) return;
 
         if (int.TryParse(value, out int size))
-        {
-            LobbyManager.Instace.LobbySettings.SetMapSize(size);
-        }
+            LobbySettings.Instance.SetMapSize(Mathf.Max(1, size));
     }
 
     public void TeamDamage(bool value)
     {
         if (!identity.isServer) return;
 
-        LobbyManager.Instace.LobbySettings.SetTeamDamage(value);
+        LobbySettings.Instance.SetTeamDamage(value);
     }
 
     public void TeamKnock(bool value)
     {
         if (!identity.isServer) return;
 
-        LobbyManager.Instace.LobbySettings.SetTeamKnock(value);
+        LobbySettings.Instance.SetTeamKnock(value);
     }
+
+    public void SetSeed(string value)
+    {
+        if (!identity.isServer) return;
+
+        if (int.TryParse(value, out int seed))
+            Instance.SetSeed(seed);
+    }
+
+    public void SetUseSetSeed(bool useSetSeed)
+    {
+        if (!identity.isServer) return;
+
+        LobbySettings.Instance.SetUseSetSeed(useSetSeed);
+    }
+
+    public void SetOverrideMapSize(bool overrideMapSize)
+    {
+        if (!identity.isServer) return;
+
+        LobbySettings.Instance.SetOverrideMapSize(overrideMapSize);
+    }
+
+    public void SetTeamsShareBalance(bool teamsShareBalance)
+    {
+        if (!identity.isServer) return;
+
+        LobbySettings.Instance.SetTeamsShareBalance(teamsShareBalance);
+    }
+    #endregion
+
+    #region Logic
+    public void StartGame()
+    {
+        if (!identity.isServer) return;
+
+        Instance.StartGame();
+    }
+
+    public void StartDay()
+    {
+        Instance.dayMod.StartDay();
+    }
+
+    public void RequestThemeSelection(int index)
+    {
+        Instance.dngMod.RequestTheme(index);
+    }
+    #endregion
+
+    #region IK
+    IEnumerator RHCIKTPosHandler()
+    {
+        float w8timer = 0;
+        float timer = 0;
+        float syncDelay = 0.01f;
+        while (open || w8timer < 0.1f)
+        {
+            while (timer < syncDelay)
+            {
+                w8timer += Time.deltaTime;
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            timer = 0;
+
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle (
+                refRectTransform, mousePos, worldCanvas.worldCamera, out Vector2 localPoint))
+            {
+                CmdRequestRHCIKTPosChange(localPoint);
+            }
+            else
+                CmdRequestRHCIKTPosChange(Vector2.zero);
+
+            yield return null;
+        }
+    }
+
+    [Command(requiresAuthority = false)]
+    public void CmdRequestRHCIKTPosChange(Vector2 pos)
+    {
+        RpcSetRHCIKTPos(pos);
+    }
+
+    [ClientRpc]
+    void RpcSetRHCIKTPos(Vector2 pos)
+    {
+        pos.x = Mathf.Clamp(pos.x, -rhcikTargetLimit.x, rhcikTargetLimit.x);
+        pos.y = Mathf.Clamp(pos.y, -rhcikTargetLimit.y, rhcikTargetLimit.y);
+
+        rightHCIKTarget.localPosition = pos;
+    }
+    #endregion
 }

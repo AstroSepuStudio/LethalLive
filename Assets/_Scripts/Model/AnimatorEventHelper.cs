@@ -3,43 +3,40 @@ using UnityEngine;
 public class AnimatorEventHelper : MonoBehaviour
 {
     [SerializeField] SkinData skinData;
-    //[SerializeField] AudioSFX[] footsteps;
-    //int fs_index = 0;
 
-    public void PunchDetectionEvent()
-    {
-        Debug.Log("Animation punch event triggered");
-        skinData.pData.Punch_Manager.PunchDetection();
-    }
-
-    //public void PlayQuietAudio(AudioSFX audio)
+    //public void PunchDetectionEvent()
     //{
-    //    AudioManager.Instance.PlayOneShot(skinData.pData.Quiet_AS, audio);
+    //    if (!skinData.pData.isServer) return;
+    //    skinData.pData.Punch_Manager.PunchDetection();
     //}
 
-    //public void PlayModestAudio(AudioSFX audio)
+    //public void PunchAnimationFinished()
     //{
-    //    AudioManager.Instance.PlayOneShot(skinData.pData.Modest_AS, audio);
+    //    if (!skinData.pData.isServer) return;
+    //    skinData.pData.Punch_Manager.PunchFinished();
     //}
 
-    //public void PlayLoudAudio(AudioSFX audio)
+    //public void PrimaryItemAnimationTrigger()
     //{
-    //    AudioManager.Instance.PlayOneShot(skinData.pData.Loud_AS, audio);
+    //    if (!skinData.pData.isServer) return;
+    //    skinData.pData.PlayerInventory.PrimaryItemAnimationTrigger();
     //}
 
-    //public void PlayFootstep()
+    //public void PrimaryItemAnimationFinishes()
     //{
-    //    AudioManager.Instance.PlayOneShot(skinData.pData.Modest_AS, footsteps[fs_index], 0.35f);
-    //    fs_index++;
-    //    if (fs_index >= footsteps.Length)
-    //        fs_index = 0;
+    //    if (!skinData.pData.isServer) return;
+    //    skinData.pData.PlayerInventory.PrimaryItemAnimationFinishes();
     //}
 
-    //public void PlayFootstepSprint()
+    //public void SecondaryItemAnimationTrigger()
     //{
-    //    AudioManager.Instance.PlayOneShot(skinData.pData.Loud_AS, footsteps[fs_index]);
-    //    fs_index++;
-    //    if (fs_index >= footsteps.Length)
-    //        fs_index = 0;
+    //    if (!skinData.pData.isServer) return;
+    //    skinData.pData.PlayerInventory.SecondaryItemAnimationTrigger();
+    //}
+
+    //public void SecondaryItemAnimationFinishes()
+    //{
+    //    if (!skinData.pData.isServer) return;
+    //    skinData.pData.PlayerInventory.SecondaryItemAnimationFinishes();
     //}
 }

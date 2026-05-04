@@ -1,36 +1,77 @@
+using Mirror;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public class RiggingManager : MonoBehaviour
+public class RiggingManager : NetworkBehaviour
 {
     [SerializeField] SkinData skinData;
+    [SerializeField] TabletManager tabletManager;
+
     [SerializeField] float maxAngle = 80;
     [SerializeField] float transitionSpeed = 5f;
     [SerializeField] RigBuilder rigBuilder;
     [SerializeField] Rig FollowCameraTargetRig;
     [SerializeField] Rig FollowCameraRig;
-    [SerializeField] Rig TwoHandedItemRig;
+    [SerializeField] Rig RightHandChainRig;
+    [SerializeField] Rig LeftHandChainRig;
+    [SerializeField] Rig LookAtTabletChainRig;
+    [SerializeField] Transform RHCRTarget;
+    [SerializeField] Transform LHCRTarget;
+    [SerializeField] Transform customTarget;
 
     Coroutine camRigTransition;
     Coroutine camTargetRigTransition;
-    Coroutine twoHandedRigTransition;
-    float twoHandedBlend;
+    Coroutine leftHandRigTransition;
+    Coroutine lookAtTabletRigTransition;
 
-    private void Start()
-    {
-        GameTick.OnTick += OnTick;
-        //rigBuilder.Build();
-    }
+    Transform RHCRTargetTarget;
+    Transform LHCRTargetTarget;
+
+    public bool StopCameraRigs { get; private set; }
 
     private void OnDestroy()
     {
         GameTick.OnTick -= OnTick;
     }
 
+    private void OnDisable()
+    {
+        StopCameraRigs = false;
+        RHCRTargetTarget = null;
+        LHCRTargetTarget = null;
+        RightHandChainRig.weight = 0f;
+        LeftHandChainRig.weight = 0f;
+        LookAtTabletChainRig.weight = 0f;
+        leftHandRigTransition = null;
+        lookAtTabletRigTransition = null;
+        GameTick.OnTick -= OnTick;
+    }
+
+    public void SetUp(bool RHCR)
+    {
+        GameTick.OnTick += OnTick;
+
+        if (RHCR)
+        {
+            StopCameraRigs = true;
+            RHCRTargetTarget = GameManager.Instance.lobbyManagerScreen.rightHCIKTarget;
+            RightHandChainRig.weight = 1f;
+        }
+    }
+
+    private void Update()
+    {
+        if (RHCRTargetTarget != null)
+            RHCRTarget.position = RHCRTargetTarget.position;
+
+        if (LHCRTargetTarget != null)
+            LHCRTarget.position = LHCRTargetTarget.position;
+    }
+
     void OnTick()
     {
-        if (skinData.pData.Skin_Data != skinData) return;
+        if (skinData.pData.Skin_Data != skinData || StopCameraRigs) return;
 
         bool isCameraInFront = IsInFront(skinData.pData.PlayerCamera.transform);
         bool isCameraTargetInFront = IsInFront(skinData.pData.LookCameraTarget);
@@ -94,34 +135,163 @@ public class RiggingManager : MonoBehaviour
         camTargetRigTransition = null;
     }
 
-    public void EnableTwoHandedRig()
+    [ClientRpc]
+    public void RpcEnableRightHandChainRig()
     {
-        if (twoHandedRigTransition != null)
-            StopCoroutine(twoHandedRigTransition);
+        RightHandChainRig.weight = 1f;
+        RHCRTargetTarget = GameManager.Instance.lobbyManagerScreen.rightHCIKTarget;
 
-        twoHandedRigTransition = StartCoroutine(SmoothBlendTwoHandedRig(1));
+        FollowCameraRig.weight = 0;
+        FollowCameraTargetRig.weight = 0;
+        StopCameraRigs = true;
     }
 
-    public void DisableTwoHandedRig()
+    [ClientRpc]
+    public void RpcAnimateRightHandChainRig(Vector3 initialPos, Vector3 finalPos, float duration)
     {
-        if (twoHandedRigTransition != null)
-            StopCoroutine(twoHandedRigTransition);
-
-        twoHandedRigTransition = StartCoroutine(SmoothBlendTwoHandedRig(0));
+        StartCoroutine(AnimateRightHandChainRigCor(initialPos, finalPos, duration));
     }
 
-    IEnumerator SmoothBlendTwoHandedRig(float target)
+    public void AnimateRightHandChainRig(Vector3 initialPos, Vector3 finalPos, float duration)
     {
-        target = Mathf.Clamp01(target);
+        StartCoroutine(AnimateRightHandChainRigCor(initialPos, finalPos, duration));
+    }
 
-        while (!Mathf.Approximately(twoHandedBlend, target))
+    IEnumerator AnimateRightHandChainRigCor(Vector3 initialPos, Vector3 finalPos, float duration)
+    {
+        RightHandChainRig.weight = 1f;
+        customTarget.position = initialPos;
+        RHCRTargetTarget = customTarget;
+
+        FollowCameraRig.weight = 0;
+        FollowCameraTargetRig.weight = 0;
+        StopCameraRigs = true;
+
+        float timer = 0;
+        while (timer < duration)
         {
-            twoHandedBlend = Mathf.MoveTowards(twoHandedBlend, target, Time.deltaTime * transitionSpeed);
-            TwoHandedItemRig.weight = twoHandedBlend;
+            timer += Time.deltaTime;
+            customTarget.position = Vector3.Lerp(initialPos, finalPos, timer / duration);
             yield return null;
         }
 
-        twoHandedBlend = target;
-        TwoHandedItemRig.weight = twoHandedBlend;
+        customTarget.position = finalPos;
+
+        RHCRTargetTarget = null;
+        RightHandChainRig.weight = 0f;
+        StopCameraRigs = false;
+    }
+
+    [ClientRpc]
+    public void RpcDisableRightHandChainRig()
+    {
+        RHCRTargetTarget = null;
+        RightHandChainRig.weight = 0f;
+        StopCameraRigs = false;
+    }
+
+    public void EnableLeftHandChainRig(bool enable)
+    {
+        if (enable && LeftHandChainRig.weight > 0.5f ||
+            !enable && LeftHandChainRig.weight < 0.5f) return;
+        CmdEnableLeftHandChainRig(enable);
+    }
+
+    [Command]
+    void CmdEnableLeftHandChainRig(bool enable) => RpcEnableLeftHandChainRig(enable);
+
+    [ClientRpc]
+    public void RpcEnableLeftHandChainRig(bool enable)
+    {
+        if (enable)
+            LHCRTargetTarget = tabletManager.leftHandIKTarget;
+        else
+            LHCRTargetTarget = null;
+
+        if (leftHandRigTransition != null) StopCoroutine(leftHandRigTransition);
+        leftHandRigTransition = StartCoroutine(LeftHandTransition(enable ? 1f : 0f));
+    }
+
+    public void EnableLookAtTabletRig(bool enable)
+    {
+        if (enable && LookAtTabletChainRig.weight > 0.5f ||
+            !enable && LookAtTabletChainRig.weight < 0.5f) return;
+        CmdEnableLookAtTabletRig(enable);
+    }
+
+    [Command] void CmdEnableLookAtTabletRig(bool enable) => RpcEnableLookAtTabletRig(enable);
+
+    [ClientRpc] public void RpcEnableLookAtTabletRig(bool enable)
+    {
+        if (lookAtTabletRigTransition != null) StopCoroutine(lookAtTabletRigTransition);
+        lookAtTabletRigTransition = StartCoroutine(LookAtTabletTransition(enable ? 1f : 0f));
+    }
+
+    IEnumerator LeftHandTransition(float targetWeight)
+    {
+        while (!Mathf.Approximately(LeftHandChainRig.weight, targetWeight))
+        {
+            LeftHandChainRig.weight = Mathf.MoveTowards(LeftHandChainRig.weight, targetWeight, Time.deltaTime * transitionSpeed);
+            yield return null;
+        }
+
+        LeftHandChainRig.weight = targetWeight;
+        leftHandRigTransition = null;
+    }
+
+    IEnumerator LookAtTabletTransition(float targetWeight)
+    {
+        while (!Mathf.Approximately(LookAtTabletChainRig.weight, targetWeight))
+        {
+            LookAtTabletChainRig.weight = Mathf.MoveTowards(LookAtTabletChainRig.weight, targetWeight, Time.deltaTime * transitionSpeed);
+            yield return null;
+        }
+
+        LookAtTabletChainRig.weight = targetWeight;
+        lookAtTabletRigTransition = null;
+    }
+
+    [ClientRpc]
+    public void RpcSetEmoteIK(bool disabled)
+    {
+        if (disabled)
+        {
+            if (camRigTransition != null) StopCoroutine(camRigTransition);
+            if (camTargetRigTransition != null) StopCoroutine(camTargetRigTransition);
+
+            camRigTransition = StartCoroutine(CamTransition(0f));
+            camTargetRigTransition = StartCoroutine(CamTargetTransition(0f));
+            StopCameraRigs = true;
+        }
+        else
+        {
+            if (!RightHandChainRig.weight.Equals(1f))
+                StopCameraRigs = false;
+        }
+    }
+
+    public void SetRightHandTarget(Transform target, bool stopCameraRig)
+    {
+        RHCRTargetTarget = target;
+        RightHandChainRig.weight = target != null ? 1f : 0f;
+
+        if (target != null)
+        {
+            FollowCameraRig.weight = 0f;
+            FollowCameraTargetRig.weight = 0f;
+            StopCameraRigs = stopCameraRig;
+        }
+        else
+        {
+            StopCameraRigs = false;
+        }
+    }
+
+    public void SetLeftHandTarget(Transform target)
+    {
+        LHCRTargetTarget = target;
+
+        if (leftHandRigTransition != null) StopCoroutine(leftHandRigTransition);
+        leftHandRigTransition = StartCoroutine(LeftHandTransition(target != null ? 1f : 0f));
     }
 }
