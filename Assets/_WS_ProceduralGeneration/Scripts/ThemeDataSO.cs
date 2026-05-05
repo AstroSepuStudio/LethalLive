@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static LL_Tier;
 
-[CreateAssetMenu(menuName = "LethalLive/ThemeData")]
+[CreateAssetMenu(menuName = "DungeonGen/ThemeData")]
 public class ThemeDataSO : ScriptableObject
 {
     public enum SpawnableSize { Tiny, Small, Medium, Large, ExtraLarge, Colossal }
@@ -20,6 +20,11 @@ public class ThemeDataSO : ScriptableObject
     public RoomDataSO startingRoom;
     public RoomDataSO[] spawnableRooms;
     public RoomDataSO[] deadEndRooms;
+
+    [Header("Visuals")]
+    public Material floorMaterial;
+    public Material ceilingMaterial;
+    public Material wallMaterial;
 
     [Header("Features Generation")]
     public ItemSO[] spawnableItems;

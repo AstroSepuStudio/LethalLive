@@ -11,31 +11,14 @@ public class DungeonGenerator : NetworkBehaviour
     public static DungeonGenerator Instance;
 
     [Header("Content")]
+    [SerializeField] DungeonSettingsSO settings;
     [SerializeField] ThemeDataSO theme;
     [SerializeField] Transform roomsParent;
     [SerializeField] Transform voidDestroyerParent;
     [SerializeField] NavMeshSurface surface;
-    [SerializeField] AnimationCurve difficultyCurve = AnimationCurve.EaseInOut(0, 1, 20, 3);
-
-    [Header("Audio")]
     [SerializeField] AudioReverbZone reverbZone;
-    [SerializeField] float reverbMinDistanceMultiplier = 0.5f;
-    [SerializeField] float reverbMaxDistanceMultiplier = 1.5f;
-
-    [Header("Seed")]
-    [SerializeField] string gameSeed = "Default";
-    [SerializeField] int seed;
-
-    [Header("Grid")]
-    [SerializeField] Vector3Int gridSize = new(24, 6, 24);
-    [SerializeField] int cellSize = 6;
-
-    [Header("Limits")]
-    [SerializeField] int maxRooms = 30;
-    [SerializeField] int maxDepth = 30;
 
     [Header("Debug")]
-    [SerializeField] bool generateOnStart = false;
     [SerializeField] int simMapSize = 10;
     [SerializeField] GameObject seedDisplayCanvas;
     [SerializeField] RectTransform seedDisplayTransform;
@@ -46,29 +29,29 @@ public class DungeonGenerator : NetworkBehaviour
     public readonly SyncList<uint> EntityNetIds = new();
 
     Cell[,,] grid;
-    readonly List<PlacedRoom> placed = new();
-    readonly Dictionary<int, RoomData> spawned = new();
     int nextRoomId = 1;
-    bool _generated;
-
-    readonly List<IDungeonSpawner> spawners = new();
-
-    public IReadOnlyDictionary<int, RoomData> SpawnedRooms => spawned;
-    public IReadOnlyList<PlacedRoom> PlacedRooms => placed;
-
-    public ThemeDataSO Theme => theme;
-    public Cell[,,] Grid => grid;
+    float maxDistance = 0;
+    bool _generated = false;
     Vector3Int effectiveGridSize;
+    readonly List<PlacedRoom> placed = new();
+    readonly List<IDungeonSpawner> spawners = new();
+    readonly Dictionary<int, RoomData> spawned = new();
 
-    public int CellSize => cellSize;
-    public Vector3Int GridSize => effectiveGridSize;
     public UnityEvent OnDungeonGenerated;
     public UnityEvent OnDungeonClear;
+
+
+    public Vector3Int GridSize => effectiveGridSize;
     public Dictionary<int, HashSet<int>> RoomAdjacency = new();
     public Vector3Int StartRoomPos;
 
-    [SerializeField] float maxDistance = 0;
+    public Cell[,,] Grid => grid;
+    public ThemeDataSO Theme => theme;
     public float MaxDistance => maxDistance;
+    public int CellSize => settings.cellSize;
+    public DungeonSettingsSO Settings => settings;
+    public IReadOnlyList<PlacedRoom> PlacedRooms => placed;
+    public IReadOnlyDictionary<int, RoomData> SpawnedRooms => spawned;
 
     struct OpenPort
     {
@@ -110,12 +93,6 @@ public class DungeonGenerator : NetworkBehaviour
         Debug.Log($"[Generator] spawners count: {spawners.Count}");
     }
 
-    void Start()
-    {
-        if (generateOnStart)
-            StartGeneration(StableHash(gameSeed), 0);
-    }
-
     public void StartGeneration(int setSeed, int themeIndex, int? mapSizeOverride = null)
     {
         if (_generated) return;
@@ -124,21 +101,8 @@ public class DungeonGenerator : NetworkBehaviour
         theme = GameManager.Instance.dngMod.ThemeDatas[themeIndex];
 
         int size = Mathf.Max(1, mapSizeOverride ?? LobbySettings.Instance.MapSize);
+        effectiveGridSize = CalculateEffectiveGrid(size);
 
-        Vector3Int result = gridSize;
-
-        int horizontalSteps = size - 1;
-
-        int xSteps = (horizontalSteps + 1) / 2;
-        int ySteps = size / 2;
-        int zSteps = horizontalSteps / 2;
-
-        result.x *= 1 + xSteps;
-        result.y *= 1 + ySteps;
-        result.z *= 1 + zSteps;
-
-        effectiveGridSize = result;
-        //effectiveGridSize = new Vector3Int(gridSize.x * size, gridSize.y * size, gridSize.z * size);
         voidDestroyerParent.localScale = new Vector3(size + 2, 1, size + 2);
 
         grid = new Cell[effectiveGridSize.x, effectiveGridSize.y, effectiveGridSize.z];
@@ -147,10 +111,19 @@ public class DungeonGenerator : NetworkBehaviour
                 for (int z = 0; z < effectiveGridSize.z; z++)
                     grid[x, y, z] = new Cell();
 
-        seed = setSeed;
-        RNG = new System.Random(seed);
+        RNG = new System.Random(setSeed);
 
         StartCoroutine(GenerationCoroutine(setSeed, 5f));
+    }
+
+    private Vector3Int CalculateEffectiveGrid(int size)
+    {
+        Vector3Int res = settings.baseGridSize;
+        int horizontalSteps = size - 1;
+        res.x *= 1 + ((horizontalSteps + 1) / 2);
+        res.y *= 1 + (size / 2);
+        res.z *= 1 + (horizontalSteps / 2);
+        return res;
     }
 
     void Generate()
@@ -170,17 +143,17 @@ public class DungeonGenerator : NetworkBehaviour
         }
         if (start == null) { Debug.LogError("Failed to place starting room."); return; }
 
-        StartRoomPos = center * cellSize;
+        StartRoomPos = center * CellSize;
         if (GameManager.Instance.isServer)
             GameManager.Instance.dngMod.startRoomPos = StartRoomPos;
 
         var frontier = BuildOpenPorts(start);
-        while (frontier.Count > 0 && placed.Count < maxRooms * LobbySettings.Instance.MapSize)
+        while (frontier.Count > 0 && placed.Count < settings.maxRoomsBase * LobbySettings.Instance.MapSize)
         {
             int idx = RNG.Next(frontier.Count);
             var open = frontier[idx]; frontier.RemoveAt(idx);
 
-            if (open.depth >= maxDepth * LobbySettings.Instance.MapSize) continue;
+            if (open.depth >= settings.maxDepthBase * LobbySettings.Instance.MapSize) continue;
 
             var neighborRoom = placed.Find(r => r.id == open.roomId);
             var candidates = GetWeightedCandidates(theme.spawnableRooms, neighborRoom.biome);
@@ -362,9 +335,9 @@ public class DungeonGenerator : NetworkBehaviour
     public int GetRoomIdAtPosition(Vector3 worldPos)
     {
         Vector3Int cellPos = new(
-            Mathf.FloorToInt(worldPos.x / cellSize),
-            Mathf.FloorToInt(worldPos.y / cellSize),
-            Mathf.FloorToInt(worldPos.z / cellSize));
+            Mathf.FloorToInt(worldPos.x / CellSize),
+            Mathf.FloorToInt(worldPos.y / CellSize),
+            Mathf.FloorToInt(worldPos.z / CellSize));
 
         if (!InBounds(cellPos)) return -1;
         var cell = grid[cellPos.x, cellPos.y, cellPos.z];
@@ -394,7 +367,7 @@ public class DungeonGenerator : NetworkBehaviour
 
         foreach (var pr in placed)
         {
-            var world = Vector3.Scale((Vector3)pr.anchor, new Vector3(cellSize, cellSize, cellSize));
+            var world = Vector3.Scale((Vector3)pr.anchor, new Vector3(CellSize, CellSize, CellSize));
             var go = Instantiate(pr.data.Prefab, world, Quaternion.identity, roomsParent);
             go.name = $"Room {pr.id} (depth {pr.depth})";
 
@@ -421,8 +394,8 @@ public class DungeonGenerator : NetworkBehaviour
         if (reverbZone != null)
         {
             reverbZone.transform.position = spawned[placed[0].id].transform.position;
-            reverbZone.minDistance = maxDistance * reverbMinDistanceMultiplier;
-            reverbZone.maxDistance = maxDistance * reverbMaxDistanceMultiplier;
+            reverbZone.minDistance = maxDistance * settings.reverbMinDistanceMultiplier;
+            reverbZone.maxDistance = maxDistance * settings.reverbMaxDistanceMultiplier;
             reverbZone.reverbPreset = theme.reverbPreset;
         }
 
@@ -556,7 +529,7 @@ public class DungeonGenerator : NetworkBehaviour
     public Vector3 GetRandomPosition(float maxOffset = 4f)
     {
         int index = UnityEngine.Random.Range(0, spawned.Count);
-        var world = Vector3.Scale((Vector3)placed[index].anchor, new Vector3(cellSize, cellSize, cellSize));
+        var world = Vector3.Scale((Vector3)placed[index].anchor, new Vector3(CellSize, CellSize, CellSize));
         world.x += UnityEngine.Random.Range(-maxOffset, maxOffset);
         world.z += UnityEngine.Random.Range(-maxOffset, maxOffset);
         return world;
@@ -612,7 +585,7 @@ public class DungeonGenerator : NetworkBehaviour
     {
         Vector3 initialRoomPos = spawned[placed[0].id].transform.position;
         float gridDistance = Vector3.Distance(initialRoomPos, targetPos) / 5f;
-        return difficultyCurve.Evaluate(gridDistance);
+        return settings.difficultyCurve.Evaluate(gridDistance);
     }
 
     bool EvaluateSpawn(float chance, Vector3 position)
@@ -629,7 +602,7 @@ public class DungeonGenerator : NetworkBehaviour
 
         size = Mathf.Max(1, size);
 
-        Vector3Int effective = gridSize;
+        Vector3Int effective = CalculateEffectiveGrid(size);
 
         int horizontalSteps = size - 1;
         int xSteps = (horizontalSteps + 1) / 2;
@@ -641,9 +614,9 @@ public class DungeonGenerator : NetworkBehaviour
         effective.z *= 1 + zSteps;
 
         Vector3 totalSize = new(
-            effective.x * cellSize,
-            effective.y * cellSize,
-            effective.z * cellSize);
+            effective.x * CellSize,
+            effective.y * CellSize,
+            effective.z * CellSize);
 
         Gizmos.color = Color.red;
 

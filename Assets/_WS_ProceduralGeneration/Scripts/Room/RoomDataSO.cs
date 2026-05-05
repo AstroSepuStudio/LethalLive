@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "LethalLive/RoomData")]
+[CreateAssetMenu(menuName = "DungeonGen/RoomData")]
 public class RoomDataSO : ScriptableObject
 {
     public enum PortType { Doorway, Continuous3x3, Continuous3x3Edge }
